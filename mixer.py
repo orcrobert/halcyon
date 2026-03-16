@@ -47,3 +47,13 @@ def mix(elements: list[dict], output_path: str = "output/mixed.wav") -> str:
 
     sf.write(output_path, mixed.T, target_sr)
     return output_path
+
+
+if __name__ == "__main__":
+    import json
+
+    with open("output/session.json") as f:
+        session = json.load(f)
+
+    output = mix(session["elements"])
+    print(f"Mixed: {output}")

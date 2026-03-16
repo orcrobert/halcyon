@@ -42,7 +42,12 @@ def decompose(prompt: str) -> dict:
     if not match:
         raise ValueError(f"No JSON found in model response:\n{raw}")
 
-    return json.loads(match.group())
+    result = json.loads(match.group())
+
+    for element in result.get("elements", []):
+        element.setdefault("volume", 0.5)
+
+    return result
 
 
 if __name__ == "__main__":

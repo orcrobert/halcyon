@@ -30,6 +30,7 @@ def generate(decomposed: dict) -> list[dict]:
     sound_elements = [e for e in elements if e["type"] == "sound"]
     music_elements = [e for e in elements if e["type"] == "music"]
 
+    session_path = os.path.join(OUTPUT_DIR, "session.json")
     results = []
 
     if sound_elements:
@@ -61,6 +62,10 @@ def generate(decomposed: dict) -> list[dict]:
         del model
         if device == "mps":
             torch.mps.empty_cache()
+
+    import json
+    with open(session_path, "w") as f:
+        json.dump({"atmosphere": decomposed["atmosphere"], "elements": results}, f, indent=2)
 
     return results
 
