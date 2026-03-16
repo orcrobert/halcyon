@@ -1,0 +1,53 @@
+import json
+import re
+import requests
+
+OLLAMA_URL = "http://localhost:11434/api/generate"
+MODEL = "mistral"
+
+SYSTEM_PROMPT = """You are an audio atmosphere designer. Given a scene or mood description, decompose it into individual audio elements that together build that atmosphere.
+
+Rules:
+- Each element is either type "sound" (real-world sound effect) or "music" (musical/tonal background)
+- Maximum 5 elements total, minimum 2
+- Each element must cover a unique sonic layer — no two elements should overlap or describe the same sound space
+- Never use generic filler elements like "ambient background noise" — every element must be a concrete, specific sound or piece of music
+- "prompt" must be short and specific, suitable as input to an audio generation model
+- "volume" is a float 0.0–1.0 reflecting how prominent that element should be in the mix
+- Use your knowledge of films, games, and pop culture to enrich prompts when relevant
+- Respond ONLY with valid JSON, no explanation
+
+Output format:
+{
+  "atmosphere": "<short label for the scene>",
+  "elements": [
+    {"label": "<name>", "type": "sound|music", "prompt": "<generation prompt>", "volume": 0.0}
+  ]
+}"""
+
+
+def decompose(prompt: str) -> dict:
+    payload = {
+        "model": MODEL,
+        "prompt": f"{SYSTEM_PROMPT}\n\nScene: {prompt}",
+        "stream": False,
+    }
+
+    response = requests.post(OLLAMA_URL, json=payload, timeout=60)
+    response.raise_for_status()
+
+    raw = response.json()["response"].strip()
+
+    match = re.search(r"\{.*\}", raw, re.DOTALL)
+    if not match:
+        raise ValueError(f"No JSON found in model response:\n{raw}")
+
+    return json.loads(match.group())
+
+
+if __name__ == "__main__":
+    import sys
+
+    prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "a rainy night in a cyberpunk city"
+    result = decompose(prompt)
+    print(json.dumps(result, indent=2))

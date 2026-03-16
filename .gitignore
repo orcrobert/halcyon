@@ -1,0 +1,25 @@
+# Dependencies
+audiocraft/
+
+# Generated audio
+output/
+*.wav
+
+# Research / personal docs
+*.pdf
+CLAUDE.md
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/

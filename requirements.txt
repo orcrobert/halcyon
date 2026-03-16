@@ -1,0 +1,6 @@
+audiocraft
+numpy
+soundfile
+requests
+torch
+torchaudio
