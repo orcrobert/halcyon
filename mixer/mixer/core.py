@@ -13,6 +13,19 @@ def _resample(wav: np.ndarray, sr: int, target_sr: int) -> np.ndarray:
     )
 
 
+def _loop_to_length(track: np.ndarray, target_len: int) -> np.ndarray:
+    if track.shape[-1] >= target_len:
+        return track[..., :target_len]
+    repeats = (target_len // track.shape[-1]) + 1
+    return np.tile(track, (1, repeats))[..., :target_len]
+
+
+def _to_stereo(track: np.ndarray) -> np.ndarray:
+    if track.shape[0] == 1:
+        return np.repeat(track, 2, axis=0)
+    return track
+
+
 def mix(elements: list[dict], output_path: str = "output/mixed.wav") -> str:
     tracks = []
     target_sr = None
@@ -29,17 +42,9 @@ def mix(elements: list[dict], output_path: str = "output/mixed.wav") -> str:
         tracks.append(wav * element["volume"])
 
     max_len = max(t.shape[-1] for t in tracks)
+    tracks = [_to_stereo(_loop_to_length(t, max_len)) for t in tracks]
 
-    padded = []
-    for t in tracks:
-        if t.shape[-1] < max_len:
-            repeats = (max_len // t.shape[-1]) + 1
-            t = np.tile(t, (1, repeats))[..., :max_len]
-        if t.shape[0] == 1:
-            t = np.repeat(t, 2, axis=0)
-        padded.append(t)
-
-    mixed = np.stack(padded).sum(axis=0)
+    mixed = np.stack(tracks).sum(axis=0)
 
     peak = np.abs(mixed).max()
     if peak > 1.0:
@@ -47,13 +52,3 @@ def mix(elements: list[dict], output_path: str = "output/mixed.wav") -> str:
 
     sf.write(output_path, mixed.T, target_sr)
     return output_path
-
-
-if __name__ == "__main__":
-    import json
-
-    with open("output/session.json") as f:
-        session = json.load(f)
-
-    output = mix(session["elements"])
-    print(f"Mixed: {output}")

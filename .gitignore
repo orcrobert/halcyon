@@ -1,5 +1,11 @@
+# Environment
+.env
+
 # Dependencies
 audiocraft/
+.venv/
+venv/
+node_modules/
 
 # Generated audio
 output/
@@ -12,10 +18,9 @@ CLAUDE.md
 # Python
 __pycache__/
 *.py[cod]
-*.pyo
-.venv/
-venv/
-env/
+*.egg-info/
+dist/
+build/
 
 # macOS
 .DS_Store
@@ -23,3 +28,6 @@ env/
 # IDE
 .vscode/
 .idea/
+
+# Frontend build
+frontend/dist/

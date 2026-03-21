@@ -1,9 +1,7 @@
 import json
 import re
 import requests
-
-OLLAMA_URL = "http://localhost:11434/api/generate"
-MODEL = "mistral"
+from ai.app.config import settings
 
 SYSTEM_PROMPT = """You are an audio atmosphere designer. Given a scene or mood description, decompose it into individual audio elements that together build that atmosphere.
 
@@ -28,12 +26,12 @@ Output format:
 
 def decompose(prompt: str) -> dict:
     payload = {
-        "model": MODEL,
+        "model": settings.ollama_model,
         "prompt": f"{SYSTEM_PROMPT}\n\nScene: {prompt}",
         "stream": False,
     }
 
-    response = requests.post(OLLAMA_URL, json=payload, timeout=60)
+    response = requests.post(settings.ollama_url, json=payload, timeout=60)
     response.raise_for_status()
 
     raw = response.json()["response"].strip()
@@ -48,11 +46,3 @@ def decompose(prompt: str) -> dict:
         element.setdefault("volume", 0.5)
 
     return result
-
-
-if __name__ == "__main__":
-    import sys
-
-    prompt = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "a rainy night in a cyberpunk city"
-    result = decompose(prompt)
-    print(json.dumps(result, indent=2))
