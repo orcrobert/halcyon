@@ -1,33 +1,22 @@
 import json
 import re
+from pathlib import Path
 import requests
 from ai.app.config import settings
 
-SYSTEM_PROMPT = """You are an audio atmosphere designer. Given a scene or mood description, decompose it into individual audio elements that together build that atmosphere.
+PROMPTS_DIR = Path(__file__).resolve().parents[2] / "prompts"
 
-Rules:
-- Each element is either type "sound" (real-world sound effect) or "music" (musical/tonal background)
-- Maximum 5 elements total, minimum 2
-- Each element must cover a unique sonic layer — no two elements should overlap or describe the same sound space
-- Never use generic filler elements like "ambient background noise" — every element must be a concrete, specific sound or piece of music
-- "prompt" must be short and specific, suitable as input to an audio generation model
-- "volume" is a float 0.0–1.0 reflecting how prominent that element should be in the mix
-- Use your knowledge of films, games, and pop culture to enrich prompts when relevant
-- Respond ONLY with valid JSON, no explanation
 
-Output format:
-{
-  "atmosphere": "<short label for the scene>",
-  "elements": [
-    {"label": "<name>", "type": "sound|music", "prompt": "<generation prompt>", "volume": 0.0}
-  ]
-}"""
+def _load_prompt(name: str) -> str:
+    return (PROMPTS_DIR / f"{name}.txt").read_text()
 
 
 def decompose(prompt: str) -> dict:
+    system_prompt = _load_prompt("decomposer")
+
     payload = {
         "model": settings.ollama_model,
-        "prompt": f"{SYSTEM_PROMPT}\n\nScene: {prompt}",
+        "prompt": f"{system_prompt}\n\nScene: {prompt}",
         "stream": False,
     }
 
