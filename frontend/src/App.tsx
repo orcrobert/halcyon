@@ -24,7 +24,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [playing, setPlaying] = useState(!stored)
 
-  const { load, preload, start, pause, unpause, setVolume, stop } = useAudioEngine()
+  const { load, preload, start, pause, unpause, setVolume, stop, exportMix, getAnalyser } = useAudioEngine()
 
   useEffect(() => {
     if (stored) {
@@ -81,8 +81,10 @@ export default function App() {
         <DashboardView
           session={session}
           playing={playing}
+          getAnalyser={getAnalyser}
           onPlayPause={handlePlayPause}
           onVolumeChange={setVolume}
+          onExport={() => exportMix(session.atmosphere)}
           onReset={handleReset}
         />
       )}

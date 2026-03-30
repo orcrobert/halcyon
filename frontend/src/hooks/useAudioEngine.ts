@@ -3,6 +3,43 @@ import type { Element } from '../types'
 
 const CROSSFADE = 1.5
 
+function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
+  const numChannels = buffer.numberOfChannels
+  const sampleRate = buffer.sampleRate
+  const numSamples = buffer.length
+  const dataSize = numSamples * numChannels * 2
+  const arrayBuffer = new ArrayBuffer(44 + dataSize)
+  const view = new DataView(arrayBuffer)
+
+  const write = (offset: number, str: string) => {
+    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i))
+  }
+  write(0, 'RIFF')
+  view.setUint32(4, 36 + dataSize, true)
+  write(8, 'WAVE')
+  write(12, 'fmt ')
+  view.setUint32(16, 16, true)
+  view.setUint16(20, 1, true)
+  view.setUint16(22, numChannels, true)
+  view.setUint32(24, sampleRate, true)
+  view.setUint32(28, sampleRate * numChannels * 2, true)
+  view.setUint16(32, numChannels * 2, true)
+  view.setUint16(34, 16, true)
+  write(36, 'data')
+  view.setUint32(40, dataSize, true)
+
+  const channels = Array.from({ length: numChannels }, (_, i) => buffer.getChannelData(i))
+  let offset = 44
+  for (let i = 0; i < numSamples; i++) {
+    for (let c = 0; c < numChannels; c++) {
+      const s = Math.max(-1, Math.min(1, channels[c][i]))
+      view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true)
+      offset += 2
+    }
+  }
+  return arrayBuffer
+}
+
 interface TrackNode {
   masterGain: GainNode
   sources: AudioBufferSourceNode[]
@@ -18,9 +55,16 @@ export function useAudioEngine() {
   const ctxRef = useRef<AudioContext | null>(null)
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
+  const analyserRef = useRef<AnalyserNode | null>(null)
 
   const getContext = useCallback(() => {
-    if (!ctxRef.current) ctxRef.current = new AudioContext()
+    if (!ctxRef.current) {
+      ctxRef.current = new AudioContext()
+      analyserRef.current = ctxRef.current.createAnalyser()
+      analyserRef.current.fftSize = 256
+      analyserRef.current.smoothingTimeConstant = 0.8
+      analyserRef.current.connect(ctxRef.current.destination)
+    }
     return ctxRef.current
   }, [])
 
@@ -61,7 +105,7 @@ export function useAudioEngine() {
     for (const { el, buffer } of decoded) {
       const masterGain = ctx.createGain()
       masterGain.gain.value = el.volume
-      masterGain.connect(ctx.destination)
+      masterGain.connect(analyserRef.current ?? ctx.destination)
 
       const trackNode: TrackNode = { masterGain, sources: [], loopTimer: null }
       tracksRef.current.set(el.label, trackNode)
@@ -133,7 +177,40 @@ export function useAudioEngine() {
     decodedRef.current = []
     ctxRef.current?.close()
     ctxRef.current = null
+    analyserRef.current = null
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, stop }
+  const getAnalyser = useCallback(() => analyserRef.current, [])
+
+  const exportMix = useCallback(async (filename: string) => {
+    if (decodedRef.current.length === 0) return
+    const duration = 20
+    const sampleRate = 44100
+    const offline = new OfflineAudioContext(2, sampleRate * duration, sampleRate)
+
+    for (const { el, buffer } of decodedRef.current) {
+      const gain = offline.createGain()
+      const liveTrack = tracksRef.current.get(el.label)
+      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : el.volume
+      gain.connect(offline.destination)
+
+      const src = offline.createBufferSource()
+      src.buffer = buffer
+      src.loop = true
+      src.connect(gain)
+      src.start()
+    }
+
+    const rendered = await offline.startRendering()
+    const wav = audioBufferToWav(rendered)
+    const blob = new Blob([wav], { type: 'audio/wav' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${filename}.wav`
+    a.click()
+    URL.revokeObjectURL(url)
+  }, [])
+
+  return { load, preload, start, pause, unpause, setVolume, stop, exportMix, getAnalyser }
 }

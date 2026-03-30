@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { Element } from '../types'
+import { Fader } from './Fader'
 
 interface Props {
   element: Element
@@ -87,15 +88,9 @@ export function TrackStrip({ element, onVolumeChange }: Props) {
           {muted ? '—' : `${Math.round(volume * 100)}`}
         </span>
 
-        {/* Fader */}
-        <input
-          type="range"
-          className="fader"
-          min={0}
-          max={1}
-          step={0.01}
+        <Fader
           value={volume}
-          onChange={(e) => handleVolumeChange(Number(e.target.value))}
+          onChange={handleVolumeChange}
           disabled={muted && volume > 0}
         />
 
