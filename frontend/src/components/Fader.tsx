@@ -9,7 +9,7 @@ interface Props {
 
 const TRACK_HEIGHT = 180
 const THUMB_R = 10
-const CANVAS_SIZE = 60
+const CANVAS_SIZE = 40
 const JELLY_MAX_DIST = 50
 const JELLY_PULL_STRENGTH = 0.5
 const JELLY_SMOOTHNESS = 1.5
@@ -145,7 +145,7 @@ export function Fader({ value, onChange, disabled }: Props) {
   return (
     <div
       ref={trackRef}
-      style={{ width: '24px', height: `${TRACK_HEIGHT}px`, position: 'relative', cursor: disabled ? 'not-allowed' : 'pointer', flexShrink: 0 }}
+      style={{ width: `${CANVAS_SIZE}px`, height: `${TRACK_HEIGHT}px`, position: 'relative', cursor: disabled ? 'not-allowed' : 'pointer', flexShrink: 0 }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
       onPointerUp={handlePointerUp}
@@ -184,6 +184,7 @@ export function Fader({ value, onChange, disabled }: Props) {
           top: thumbY + THUMB_R - CANVAS_SIZE / 2,
           transform: 'translateX(-50%)',
           pointerEvents: 'none',
+          background: 'transparent',
         }}
       />
     </div>

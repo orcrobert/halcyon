@@ -78,13 +78,13 @@ export function TrackStrip({ element, onVolumeChange }: Props) {
         onMouseLeave={() => setHovered(false)}
         className={`flex flex-col items-center rounded-2xl border transition-all duration-200 ${
           muted
-            ? 'bg-[#0d0e14] border-[#16171f] opacity-40'
+            ? 'bg-[#0d0e14] border-[#0f1018]'
             : 'bg-[#111218] border-[#1d1e2e] hover:border-[#2a2b40]'
         }`}
         style={{ width: '100px', padding: '24px 16px', gap: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
       >
         {/* Volume % */}
-        <span className="text-[11px] font-mono text-slate-700 tabular-nums">
+        <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-slate-800' : 'text-slate-700'}`}>
           {muted ? '—' : `${Math.round(volume * 100)}`}
         </span>
 
@@ -95,12 +95,12 @@ export function TrackStrip({ element, onVolumeChange }: Props) {
         />
 
         {/* Divider */}
-        <div className="w-full h-px bg-[#1d1e2e]" />
+        <div className={`w-full h-px ${muted ? 'bg-[#111318]' : 'bg-[#1d1e2e]'}`} />
 
         {/* Type badge */}
         <span
           className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
-            isMusic ? 'bg-violet-500/10 text-violet-500' : 'bg-sky-500/10 text-sky-500'
+            muted ? 'bg-slate-900 text-slate-800' : isMusic ? 'bg-violet-500/10 text-violet-500' : 'bg-sky-500/10 text-sky-500'
           }`}
           style={{ padding: '4px 10px' }}
         >
