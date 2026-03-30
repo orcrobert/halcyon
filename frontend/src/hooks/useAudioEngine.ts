@@ -154,12 +154,18 @@ export function useAudioEngine() {
   }, [getContext])
 
   const pause = useCallback(async () => {
-    if (ctxRef.current?.state === 'running') await ctxRef.current.suspend()
+    if (ctxRef.current?.state !== 'running') return
+    tracksRef.current.forEach(({ loopTimer }) => {
+      if (loopTimer) clearTimeout(loopTimer)
+    })
+    await ctxRef.current.suspend()
   }, [])
 
   const unpause = useCallback(async () => {
-    if (ctxRef.current?.state === 'suspended') await ctxRef.current.resume()
-  }, [])
+    const ctx = getContext()
+    if (ctx.state === 'suspended') await ctx.resume()
+    startFromDecoded(ctx, decodedRef.current)
+  }, [getContext])
 
   const setVolume = useCallback((label: string, volume: number) => {
     const track = tracksRef.current.get(label)
