@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: #09090f;
+  color: #e2e8f0;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+input[type="range"].fader {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  cursor: pointer;
+  background: transparent;
+  width: 24px;
+  height: 180px;
+}
+
+input[type="range"].fader::-webkit-slider-runnable-track {
+  width: 4px;
+  background: #1e2035;
+  border-radius: 2px;
+}
+
+input[type="range"].fader::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #08090e;
+  cursor: grab;
+  margin-left: -8px;
+}
+
+input[type="range"].fader:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  background: #818cf8;
+}
