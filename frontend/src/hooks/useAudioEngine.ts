@@ -1,5 +1,5 @@
 import { useRef, useCallback } from 'react'
-import type { Element } from '../types'
+import type { Element, EQBand } from '../types'
 
 function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   const numChannels = buffer.numberOfChannels
@@ -38,14 +38,55 @@ function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   return arrayBuffer
 }
 
+export interface EQState {
+  low: number   // dB, low shelf at 200Hz
+  mid: number   // dB, peak at 1000Hz
+  high: number  // dB, high shelf at 8000Hz
+}
+
 interface TrackNode {
   masterGain: GainNode
   source: AudioBufferSourceNode
+  filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
 }
 
 interface DecodedElement {
   el: Element
   buffer: AudioBuffer
+}
+
+function buildEQState(bands: EQBand[] | undefined): EQState {
+  const state: EQState = { low: 0, mid: 0, high: 0 }
+  if (!bands) return state
+  for (const band of bands) {
+    if (band.type === 'low_shelf') state.low = band.gain_db
+    else if (band.type === 'high_shelf') state.high = band.gain_db
+    else if (band.type === 'peak') state.mid = band.gain_db
+  }
+  return state
+}
+
+function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode] {
+  const low = ctx.createBiquadFilter()
+  low.type = 'lowshelf'
+  low.frequency.value = 200
+  low.gain.value = eq.low
+
+  const mid = ctx.createBiquadFilter()
+  mid.type = 'peaking'
+  mid.frequency.value = 1000
+  mid.Q.value = 1.4
+  mid.gain.value = eq.mid
+
+  const high = ctx.createBiquadFilter()
+  high.type = 'highshelf'
+  high.frequency.value = 8000
+  high.gain.value = eq.high
+
+  low.connect(mid)
+  mid.connect(high)
+
+  return [low, mid, high]
 }
 
 export function useAudioEngine() {
@@ -72,17 +113,22 @@ export function useAudioEngine() {
     tracksRef.current.clear()
 
     for (const { el, buffer } of decoded) {
+      const eq = buildEQState(el.eq)
+      const filters = createFilters(ctx, eq)
+      const [lowFilter,, highFilter] = filters
+
       const masterGain = ctx.createGain()
       masterGain.gain.value = el.volume
+      highFilter.connect(masterGain)
       masterGain.connect(analyserRef.current ?? ctx.destination)
 
       const src = ctx.createBufferSource()
       src.buffer = buffer
       src.loop = true
-      src.connect(masterGain)
+      src.connect(lowFilter)
       src.start()
 
-      tracksRef.current.set(el.label, { masterGain, source: src })
+      tracksRef.current.set(el.label, { masterGain, source: src, filters })
     }
   }
 
@@ -134,6 +180,16 @@ export function useAudioEngine() {
     }
   }, [getContext])
 
+  const setEQ = useCallback((label: string, eq: EQState) => {
+    const track = tracksRef.current.get(label)
+    if (!track) return
+    const [low, mid, high] = track.filters
+    const t = getContext().currentTime
+    low.gain.setTargetAtTime(eq.low, t, 0.02)
+    mid.gain.setTargetAtTime(eq.mid, t, 0.02)
+    high.gain.setTargetAtTime(eq.high, t, 0.02)
+  }, [getContext])
+
   const stop = useCallback(() => {
     tracksRef.current.forEach(({ source }) => {
       try { source.stop() } catch {}
@@ -154,15 +210,25 @@ export function useAudioEngine() {
     const offline = new OfflineAudioContext(2, sampleRate * duration, sampleRate)
 
     for (const { el, buffer } of decodedRef.current) {
-      const gain = offline.createGain()
       const liveTrack = tracksRef.current.get(el.label)
+      const eqState: EQState = liveTrack ? {
+        low: liveTrack.filters[0].gain.value,
+        mid: liveTrack.filters[1].gain.value,
+        high: liveTrack.filters[2].gain.value,
+      } : buildEQState(el.eq)
+
+      const offlineFilters = createFilters(offline, eqState)
+      const [lowFilter,, highFilter] = offlineFilters
+
+      const gain = offline.createGain()
       gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : el.volume
+      highFilter.connect(gain)
       gain.connect(offline.destination)
 
       const src = offline.createBufferSource()
       src.buffer = buffer
       src.loop = true
-      src.connect(gain)
+      src.connect(lowFilter)
       src.start()
     }
 
@@ -177,5 +243,5 @@ export function useAudioEngine() {
     URL.revokeObjectURL(url)
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, stop, exportMix, getAnalyser }
+  return { load, preload, start, pause, unpause, setVolume, setEQ, stop, exportMix, getAnalyser }
 }

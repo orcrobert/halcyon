@@ -1,3 +1,10 @@
+export interface EQBand {
+  type: 'low_shelf' | 'high_shelf' | 'peak'
+  freq: number
+  gain_db: number
+  q?: number
+}
+
 export interface Element {
   label: string
   type: 'sound' | 'music'
@@ -5,6 +12,7 @@ export interface Element {
   volume: number
   file: string
   audio_b64: string
+  eq?: EQBand[]
 }
 
 export interface Session {

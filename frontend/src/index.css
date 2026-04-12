@@ -48,3 +48,47 @@ input[type="range"].fader:active::-webkit-slider-thumb {
   cursor: grabbing;
   background: #818cf8;
 }
+
+/* EQ band sliders (rotated horizontal range) */
+input[type="range"].eq-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"].eq-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  background: transparent;
+  border-radius: 2px;
+}
+
+input[type="range"].eq-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #0d0e18;
+  cursor: grab;
+  margin-top: -6px;
+}
+
+input[type="range"].eq-slider:active::-webkit-slider-thumb {
+  cursor: grabbing;
+  background: #818cf8;
+}
+
+input[type="range"].eq-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #6366f1;
+  border: 2px solid #0d0e18;
+  cursor: grab;
+}
+
+input[type="range"].eq-slider::-moz-range-track {
+  height: 2px;
+  background: transparent;
+}

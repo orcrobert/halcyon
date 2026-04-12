@@ -1,6 +1,7 @@
 import numpy as np
 import soundfile as sf
 from mixer.effects.looping import make_loopable
+from mixer.effects.eq import apply_eq
 
 
 def _resample(wav: np.ndarray, sr: int, target_sr: int) -> np.ndarray:
@@ -40,6 +41,7 @@ def mix(elements: list[dict], output_path: str = "output/mixed.wav") -> str:
         elif sr != target_sr:
             wav = np.stack([_resample(ch, sr, target_sr) for ch in wav])
 
+        wav = apply_eq(wav, target_sr, element.get("eq", []))
         wav = make_loopable(wav, target_sr)
         tracks.append(wav * element["volume"])
 

@@ -31,7 +31,12 @@ def decompose(prompt: str) -> dict:
 
     result = json.loads(match.group())
 
+    type_map = {
+        "audiogen": "sound", "AudioGen": "sound",
+        "musicgen": "music", "MusicGen": "music",
+    }
     for element in result.get("elements", []):
         element.setdefault("volume", 0.5)
+        element["type"] = type_map.get(element.get("type", ""), element.get("type", "sound"))
 
     return result

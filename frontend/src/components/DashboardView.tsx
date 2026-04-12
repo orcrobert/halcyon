@@ -1,4 +1,5 @@
 import type { Session } from '../types'
+import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
 import { Visualizer } from './Visualizer'
 
@@ -8,11 +9,12 @@ interface Props {
   getAnalyser: () => AnalyserNode | null
   onPlayPause: () => Promise<void>
   onVolumeChange: (label: string, volume: number) => void
+  onEQChange: (label: string, eq: EQState) => void
   onExport: () => Promise<void>
   onReset: () => void
 }
 
-export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVolumeChange, onExport, onReset }: Props) {
+export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVolumeChange, onEQChange, onExport, onReset }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-[#08090e]">
 
@@ -82,12 +84,20 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
         </div>
 
         {/* Mixer */}
-        <div className="flex items-end justify-center gap-4 flex-wrap">
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(auto-fit, minmax(100px, 100px))`,
+          gap: '16px',
+          justifyContent: 'center',
+          width: '100%',
+          maxWidth: '900px',
+        }}>
           {session.elements.map((el) => (
             <TrackStrip
               key={el.label}
               element={el}
               onVolumeChange={onVolumeChange}
+              onEQChange={onEQChange}
             />
           ))}
         </div>

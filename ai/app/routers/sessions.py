@@ -14,6 +14,7 @@ _mixer_path = str(Path(__file__).resolve().parents[3] / "mixer")
 if _mixer_path not in sys.path:
     sys.path.insert(0, _mixer_path)
 from mixer.effects.looping import make_loopable
+from mixer.effects.eq import apply_eq
 
 router = APIRouter()
 
@@ -39,9 +40,10 @@ def generate_atmosphere(req: GenerateRequest):
         if path and os.path.exists(path):
             wav, sr = sf.read(path, always_2d=True)
             wav = wav.T
-            looped = make_loopable(wav, sr)
+            wav = apply_eq(wav, sr, element.get("eq", []))
+            wav = make_loopable(wav, sr)
             buf = io.BytesIO()
-            sf.write(buf, looped.T, sr, format="WAV")
+            sf.write(buf, wav.T, sr, format="WAV")
             element["audio_b64"] = base64.b64encode(buf.getvalue()).decode()
 
     return {"atmosphere": decomposed["atmosphere"], "elements": elements}

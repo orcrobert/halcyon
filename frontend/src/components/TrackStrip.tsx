@@ -1,16 +1,21 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import type { Element } from '../types'
+import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
+import { EQPanel } from './EQPanel'
 
 interface Props {
   element: Element
   onVolumeChange: (label: string, volume: number) => void
+  onEQChange: (label: string, eq: EQState) => void
 }
 
-export function TrackStrip({ element, onVolumeChange }: Props) {
+export function TrackStrip({ element, onVolumeChange, onEQChange }: Props) {
   const [volume, setVolume] = useState(element.volume)
   const [muted, setMuted] = useState(false)
   const [hovered, setHovered] = useState(false)
+  const [eqOpen, setEqOpen] = useState(false)
+  const eqBtnRef = useRef<HTMLButtonElement>(null)
 
   function handleVolumeChange(val: number) {
     setVolume(val)
@@ -58,7 +63,6 @@ export function TrackStrip({ element, onVolumeChange }: Props) {
         <p style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.6', margin: 0, fontFamily: 'inherit' }}>
           {element.prompt}
         </p>
-        {/* Arrow */}
         <div style={{
           position: 'absolute',
           bottom: '-5px',
@@ -107,20 +111,48 @@ export function TrackStrip({ element, onVolumeChange }: Props) {
           {isMusic ? 'music' : 'sound'}
         </span>
 
-        {/* Mute */}
-        <button
-          onClick={handleMute}
-          title="Mute"
-          className={`w-8 h-8 rounded-full text-xs font-bold transition-all duration-150 border ${
-            muted
-              ? 'bg-red-500/20 text-red-400 border-red-500/40'
-              : 'bg-transparent text-slate-600 hover:text-slate-300 border-[#1d1e2e] hover:border-[#2a2b40]'
-          }`}
-          style={{ fontFamily: 'inherit' }}
-        >
-          M
-        </button>
+        {/* Bottom buttons row */}
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          {/* Mute */}
+          <button
+            onClick={handleMute}
+            title="Mute"
+            className={`w-8 h-8 rounded-full text-xs font-bold transition-all duration-150 border ${
+              muted
+                ? 'bg-red-500/20 text-red-400 border-red-500/40'
+                : 'bg-transparent text-slate-600 hover:text-slate-300 border-[#1d1e2e] hover:border-[#2a2b40]'
+            }`}
+            style={{ fontFamily: 'inherit' }}
+          >
+            M
+          </button>
+
+          {/* EQ toggle */}
+          <button
+            ref={eqBtnRef}
+            onClick={() => setEqOpen(v => !v)}
+            title="EQ"
+            className={`w-8 h-8 rounded-full text-[9px] font-bold transition-all duration-150 border ${
+              eqOpen
+                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40'
+                : 'bg-transparent text-slate-600 hover:text-slate-300 border-[#1d1e2e] hover:border-[#2a2b40]'
+            }`}
+            style={{ fontFamily: 'inherit', letterSpacing: '0.04em' }}
+          >
+            EQ
+          </button>
+        </div>
       </div>
+
+      {/* EQ Modal — portalled to body */}
+      <EQPanel
+        label={element.label}
+        initialBands={element.eq}
+        open={eqOpen}
+        anchorRef={eqBtnRef}
+        onEQChange={onEQChange}
+        onClose={() => setEqOpen(false)}
+      />
     </div>
   )
 }
