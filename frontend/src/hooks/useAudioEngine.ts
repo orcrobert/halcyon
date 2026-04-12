@@ -1,8 +1,6 @@
 import { useRef, useCallback } from 'react'
 import type { Element } from '../types'
 
-const CROSSFADE = 1.5
-
 function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   const numChannels = buffer.numberOfChannels
   const sampleRate = buffer.sampleRate
@@ -42,8 +40,7 @@ function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
 
 interface TrackNode {
   masterGain: GainNode
-  sources: AudioBufferSourceNode[]
-  loopTimer: ReturnType<typeof setTimeout> | null
+  source: AudioBufferSourceNode
 }
 
 interface DecodedElement {
@@ -68,37 +65,9 @@ export function useAudioEngine() {
     return ctxRef.current
   }, [])
 
-  function scheduleLoop(
-    ctx: AudioContext,
-    buffer: AudioBuffer,
-    masterGain: GainNode,
-    trackNode: TrackNode,
-    startAt: number
-  ) {
-    const envelope = ctx.createGain()
-    envelope.gain.setValueAtTime(0, startAt)
-    envelope.gain.linearRampToValueAtTime(1, startAt + CROSSFADE)
-    envelope.connect(masterGain)
-
-    const src = ctx.createBufferSource()
-    src.buffer = buffer
-    src.connect(envelope)
-    src.start(startAt)
-    trackNode.sources.push(src)
-
-    const fadeOutAt = startAt + buffer.duration - CROSSFADE
-    const msUntilFade = (fadeOutAt - ctx.currentTime) * 1000
-
-    trackNode.loopTimer = setTimeout(() => {
-      envelope.gain.setTargetAtTime(0, ctx.currentTime, CROSSFADE / 3)
-      scheduleLoop(ctx, buffer, masterGain, trackNode, ctx.currentTime)
-    }, Math.max(0, msUntilFade))
-  }
-
   function startFromDecoded(ctx: AudioContext, decoded: DecodedElement[]) {
-    tracksRef.current.forEach(({ sources, loopTimer }) => {
-      if (loopTimer) clearTimeout(loopTimer)
-      sources.forEach(s => { try { s.stop() } catch {} })
+    tracksRef.current.forEach(({ source }) => {
+      try { source.stop() } catch {}
     })
     tracksRef.current.clear()
 
@@ -107,19 +76,13 @@ export function useAudioEngine() {
       masterGain.gain.value = el.volume
       masterGain.connect(analyserRef.current ?? ctx.destination)
 
-      const trackNode: TrackNode = { masterGain, sources: [], loopTimer: null }
-      tracksRef.current.set(el.label, trackNode)
+      const src = ctx.createBufferSource()
+      src.buffer = buffer
+      src.loop = true
+      src.connect(masterGain)
+      src.start()
 
-      if (buffer.duration <= CROSSFADE * 2) {
-        const src = ctx.createBufferSource()
-        src.buffer = buffer
-        src.loop = true
-        src.connect(masterGain)
-        src.start()
-        trackNode.sources.push(src)
-      } else {
-        scheduleLoop(ctx, buffer, masterGain, trackNode, ctx.currentTime)
-      }
+      tracksRef.current.set(el.label, { masterGain, source: src })
     }
   }
 
@@ -155,9 +118,6 @@ export function useAudioEngine() {
 
   const pause = useCallback(async () => {
     if (ctxRef.current?.state !== 'running') return
-    tracksRef.current.forEach(({ loopTimer }) => {
-      if (loopTimer) clearTimeout(loopTimer)
-    })
     await ctxRef.current.suspend()
   }, [])
 
@@ -175,9 +135,8 @@ export function useAudioEngine() {
   }, [getContext])
 
   const stop = useCallback(() => {
-    tracksRef.current.forEach(({ sources, loopTimer }) => {
-      if (loopTimer) clearTimeout(loopTimer)
-      sources.forEach(s => { try { s.stop() } catch {} })
+    tracksRef.current.forEach(({ source }) => {
+      try { source.stop() } catch {}
     })
     tracksRef.current.clear()
     decodedRef.current = []

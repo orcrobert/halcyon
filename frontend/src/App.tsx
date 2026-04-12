@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { PromptView } from './components/PromptView'
 import { DashboardView } from './components/DashboardView'
+import { DevUpload } from './components/DevUpload'
 import { generateAtmosphere } from './api/client'
 import { useAudioEngine } from './hooks/useAudioEngine'
 import type { Session } from './types'
@@ -19,18 +20,32 @@ function loadStoredSession(): Session | null {
 export default function App() {
   const stored = loadStoredSession()
   const [session, setSession] = useState<Session | null>(stored)
-  const [view, setView] = useState<'prompt' | 'dashboard'>(stored ? 'dashboard' : 'prompt')
+  const isDev = new URLSearchParams(window.location.search).has('dev')
+  const [view, setView] = useState<'prompt' | 'dashboard' | 'dev'>(stored ? 'dashboard' : isDev ? 'dev' : 'prompt')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [playing, setPlaying] = useState(!stored)
 
   const { load, preload, start, pause, unpause, setVolume, stop, exportMix, getAnalyser } = useAudioEngine()
-
   useEffect(() => {
     if (stored) {
       preload(stored.elements)
     }
   }, [])
+
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (view !== 'dashboard' || !session) return
+      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return
+
+      if (e.code === 'Space') {
+        e.preventDefault()
+        handlePlayPause()
+      }
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [view, playing, session])
 
   async function handleGenerate(prompt: string) {
     setLoading(true)
@@ -60,6 +75,10 @@ export default function App() {
     }
   }
 
+  function handleVolumeChange(label: string, volume: number) {
+    setVolume(label, volume)
+  }
+
   function handleReset() {
     stop()
     setPlaying(false)
@@ -69,7 +88,16 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#08090e]">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(#08090e, #08090e)' }}>
+      {view === 'dev' && (
+        <DevUpload onReady={async (data) => {
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
+          setSession(data)
+          await load(data.elements)
+          setPlaying(true)
+          setView('dashboard')
+        }} />
+      )}
       {view === 'prompt' && (
         <PromptView
           onSubmit={handleGenerate}
@@ -83,7 +111,7 @@ export default function App() {
           playing={playing}
           getAnalyser={getAnalyser}
           onPlayPause={handlePlayPause}
-          onVolumeChange={setVolume}
+          onVolumeChange={handleVolumeChange}
           onExport={() => exportMix(session.atmosphere)}
           onReset={handleReset}
         />
