@@ -94,6 +94,7 @@ export function useAudioEngine() {
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
   const analyserRef = useRef<AnalyserNode | null>(null)
+  const volumeStateRef = useRef<Map<string, number>>(new Map())
 
   const getContext = useCallback(() => {
     if (!ctxRef.current) {
@@ -118,7 +119,9 @@ export function useAudioEngine() {
       const [lowFilter,, highFilter] = filters
 
       const masterGain = ctx.createGain()
-      masterGain.gain.value = el.volume
+      masterGain.gain.value = volumeStateRef.current.has(el.label)
+        ? volumeStateRef.current.get(el.label)!
+        : el.volume
       highFilter.connect(masterGain)
       masterGain.connect(analyserRef.current ?? ctx.destination)
 
@@ -174,6 +177,7 @@ export function useAudioEngine() {
   }, [getContext])
 
   const setVolume = useCallback((label: string, volume: number) => {
+    volumeStateRef.current.set(label, volume)
     const track = tracksRef.current.get(label)
     if (track) {
       track.masterGain.gain.setTargetAtTime(volume, getContext().currentTime, 0.05)
@@ -196,6 +200,7 @@ export function useAudioEngine() {
     })
     tracksRef.current.clear()
     decodedRef.current = []
+    volumeStateRef.current.clear()
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
