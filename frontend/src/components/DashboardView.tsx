@@ -2,6 +2,7 @@ import type { Session } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
 import { Visualizer } from './Visualizer'
+import { TuningControl } from './TuningControl'
 
 interface Props {
   session: Session
@@ -10,13 +11,16 @@ interface Props {
   onPlayPause: () => Promise<void>
   onVolumeChange: (label: string, volume: number) => void
   onEQChange: (label: string, eq: EQState) => void
+  onTuningChange: (freqHz: number) => void
   onExport: () => Promise<void>
   onReset: () => void
 }
 
-export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVolumeChange, onEQChange, onExport, onReset }: Props) {
+export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVolumeChange, onEQChange, onTuningChange, onExport, onReset }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-[#08090e]">
+
+      <TuningControl onTuningChange={onTuningChange} />
 
       {/* Top bar */}
       <header className="flex items-center justify-between px-10 py-6 border-b border-[#13141f]">

@@ -95,6 +95,8 @@ export function useAudioEngine() {
   const decodedRef = useRef<DecodedElement[]>([])
   const analyserRef = useRef<AnalyserNode | null>(null)
   const volumeStateRef = useRef<Map<string, number>>(new Map())
+  const eqStateRef = useRef<Map<string, EQState>>(new Map())
+  const tuningRateRef = useRef(1)
 
   const getContext = useCallback(() => {
     if (!ctxRef.current) {
@@ -114,7 +116,7 @@ export function useAudioEngine() {
     tracksRef.current.clear()
 
     for (const { el, buffer } of decoded) {
-      const eq = buildEQState(el.eq)
+      const eq = eqStateRef.current.get(el.label) ?? buildEQState(el.eq)
       const filters = createFilters(ctx, eq)
       const [lowFilter,, highFilter] = filters
 
@@ -128,6 +130,7 @@ export function useAudioEngine() {
       const src = ctx.createBufferSource()
       src.buffer = buffer
       src.loop = true
+      src.playbackRate.value = tuningRateRef.current
       src.connect(lowFilter)
       src.start()
 
@@ -184,7 +187,16 @@ export function useAudioEngine() {
     }
   }, [getContext])
 
+  const setTuning = useCallback((freqHz: number) => {
+    const rate = freqHz / 440
+    tuningRateRef.current = rate
+    tracksRef.current.forEach(({ source }) => {
+      source.playbackRate.value = rate
+    })
+  }, [])
+
   const setEQ = useCallback((label: string, eq: EQState) => {
+    eqStateRef.current.set(label, eq)
     const track = tracksRef.current.get(label)
     if (!track) return
     const [low, mid, high] = track.filters
@@ -201,6 +213,7 @@ export function useAudioEngine() {
     tracksRef.current.clear()
     decodedRef.current = []
     volumeStateRef.current.clear()
+    eqStateRef.current.clear()
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
@@ -248,5 +261,5 @@ export function useAudioEngine() {
     URL.revokeObjectURL(url)
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, setEQ, stop, exportMix, getAnalyser }
+  return { load, preload, start, pause, unpause, setVolume, setEQ, setTuning, stop, exportMix, getAnalyser }
 }
