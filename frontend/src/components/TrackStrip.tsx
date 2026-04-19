@@ -3,19 +3,36 @@ import type { Element } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
 import { EQPanel } from './EQPanel'
+import { SpatialModal } from './SpatialModal'
 
 interface Props {
   element: Element
   onVolumeChange: (label: string, volume: number) => void
   onEQChange: (label: string, eq: EQState) => void
+  onPanChange: (label: string, pan: number) => void
+  onDepthChange: (label: string, depth: number) => void
 }
 
-export function TrackStrip({ element, onVolumeChange, onEQChange }: Props) {
+export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, onDepthChange }: Props) {
   const [volume, setVolume] = useState(element.volume)
+  const [pan, setPan] = useState(element.pan ?? 0)
+  const [depth, setDepth] = useState(0)
   const [muted, setMuted] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
+  const [spatialOpen, setSpatialOpen] = useState(false)
   const eqBtnRef = useRef<HTMLButtonElement>(null)
+  const spatialBtnRef = useRef<HTMLButtonElement>(null)
+
+  function handlePanChange(val: number) {
+    setPan(val)
+    onPanChange(element.label, val)
+  }
+
+  function handleDepthChange(val: number) {
+    setDepth(val)
+    onDepthChange(element.label, val)
+  }
 
   function handleVolumeChange(val: number) {
     setVolume(val)
@@ -98,6 +115,43 @@ export function TrackStrip({ element, onVolumeChange, onEQChange }: Props) {
           disabled={muted && volume > 0}
         />
 
+        {/* Spatial indicator button */}
+        <button
+          ref={spatialBtnRef}
+          onClick={() => setSpatialOpen(v => !v)}
+          title="Spatial placement"
+          style={{
+            width: '36px',
+            height: '36px',
+            borderRadius: '50%',
+            border: `1px solid ${spatialOpen ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.07)'}`,
+            background: spatialOpen ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            transition: 'border-color 0.15s, background 0.15s',
+            flexShrink: 0,
+            padding: 0,
+          }}
+        >
+          {/* Mini 2D indicator: outer ring + movable dot */}
+          <svg width="20" height="20" viewBox="0 0 20 20">
+            {/* Outer ring */}
+            <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            {/* Crosshair */}
+            <line x1="10" y1="3" x2="10" y2="17" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
+            <line x1="3" y1="10" x2="17" y2="10" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
+            {/* Position dot — clamped inside the ring */}
+            <circle
+              cx={10 + pan * 6}
+              cy={10 + depth * 6}
+              r="2.5"
+              fill={Math.abs(pan) > 0.03 || depth > 0.03 ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.35)'}
+            />
+          </svg>
+        </button>
+
         {/* Divider */}
         <div className={`w-full h-px ${muted ? 'bg-[#111318]' : 'bg-[#1d1e2e]'}`} />
 
@@ -152,6 +206,20 @@ export function TrackStrip({ element, onVolumeChange, onEQChange }: Props) {
         anchorRef={eqBtnRef}
         onEQChange={onEQChange}
         onClose={() => setEqOpen(false)}
+      />
+
+      {/* Spatial Modal — portalled to body */}
+      <SpatialModal
+        pan={pan}
+        depth={depth}
+        defaultPan={element.pan ?? 0}
+        defaultDepth={0}
+        label={element.label}
+        open={spatialOpen}
+        anchorRef={spatialBtnRef}
+        onPanChange={handlePanChange}
+        onDepthChange={handleDepthChange}
+        onClose={() => setSpatialOpen(false)}
       />
     </div>
   )
