@@ -23,32 +23,43 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
       <TuningControl onTuningChange={onTuningChange} />
 
       {/* Top bar */}
-      <header className="flex items-center justify-between px-10 py-6 border-b border-[#13141f]">
-        <div className="flex items-center gap-3">
-          <span className={`w-2 h-2 rounded-full ${playing ? 'bg-indigo-500 animate-pulse' : 'bg-slate-700'}`} />
-          <span className="text-[11px] uppercase tracking-[0.12em] text-slate-600">
+      <header className="flex items-center justify-between border-b border-[#13141f]" style={{ padding: '18px 32px' }}>
+        {/* Live indicator */}
+        <div className={`flex items-center gap-2 border rounded-xl px-4 py-2 transition-all duration-150 ${
+          playing
+            ? 'border-indigo-500/30 bg-indigo-500/5'
+            : 'border-[#1d1e2e]'
+        }`}>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${playing ? 'bg-indigo-500 animate-pulse' : 'bg-slate-700'}`} />
+          <span className={`text-[12px] font-medium uppercase tracking-[0.12em] hidden sm:block ${playing ? 'text-indigo-400' : 'text-slate-600'}`}>
             {playing ? 'Live' : 'Paused'}
           </span>
         </div>
-        <div className="flex items-center gap-4">
+
+        {/* Actions */}
+        <div className="flex items-center gap-2">
           <button
             onClick={onExport}
-            className="flex items-center gap-2 text-sm text-slate-600 hover:text-slate-300 transition-colors"
+            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150"
             style={{ fontFamily: 'inherit' }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
               <polyline points="7 10 12 15 17 10" />
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
-            Export
+            <span className="hidden sm:block">Export</span>
           </button>
+
           <button
             onClick={onReset}
-            className="text-sm text-slate-600 hover:text-slate-300 transition-colors"
+            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150"
             style={{ fontFamily: 'inherit' }}
           >
-            ← New atmosphere
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+            <span className="hidden sm:block">New atmosphere</span>
           </button>
         </div>
       </header>

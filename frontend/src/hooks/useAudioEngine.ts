@@ -246,6 +246,7 @@ export function useAudioEngine() {
       const src = offline.createBufferSource()
       src.buffer = buffer
       src.loop = true
+      src.playbackRate.value = tuningRateRef.current
       src.connect(lowFilter)
       src.start()
     }
