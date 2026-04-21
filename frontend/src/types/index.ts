@@ -13,6 +13,7 @@ export interface Element {
   file: string
   audio_b64: string
   eq?: EQBand[]
+  pan?: number
 }
 
 export interface Session {

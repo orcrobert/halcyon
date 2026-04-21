@@ -11,12 +11,14 @@ interface Props {
   onPlayPause: () => Promise<void>
   onVolumeChange: (label: string, volume: number) => void
   onEQChange: (label: string, eq: EQState) => void
+  onPanChange: (label: string, pan: number) => void
+  onDepthChange: (label: string, depth: number) => void
   onTuningChange: (freqHz: number) => void
   onExport: () => Promise<void>
   onReset: () => void
 }
 
-export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVolumeChange, onEQChange, onTuningChange, onExport, onReset }: Props) {
+export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVolumeChange, onEQChange, onPanChange, onDepthChange, onTuningChange, onExport, onReset }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-[#08090e]">
 
@@ -113,6 +115,8 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
               element={el}
               onVolumeChange={onVolumeChange}
               onEQChange={onEQChange}
+              onPanChange={onPanChange}
+              onDepthChange={onDepthChange}
             />
           ))}
         </div>

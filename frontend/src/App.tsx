@@ -26,7 +26,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
   const [playing, setPlaying] = useState(!stored)
 
-  const { load, preload, start, pause, unpause, setVolume, setEQ, setTuning, stop, exportMix, getAnalyser } = useAudioEngine()
+  const { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser } = useAudioEngine()
   useEffect(() => {
     if (stored) {
       preload(stored.elements)
@@ -113,6 +113,8 @@ export default function App() {
           onPlayPause={handlePlayPause}
           onVolumeChange={handleVolumeChange}
           onEQChange={setEQ}
+          onPanChange={setPan}
+          onDepthChange={setDepth}
           onTuningChange={setTuning}
           onExport={() => exportMix(session.atmosphere)}
           onReset={handleReset}
