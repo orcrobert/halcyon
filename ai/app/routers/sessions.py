@@ -16,6 +16,7 @@ if _mixer_path not in sys.path:
 from mixer.effects.looping import make_loopable
 from mixer.effects.eq import apply_eq
 from mixer.effects.volume import assign_volumes
+from mixer.effects.spatial import predict_and_apply
 
 router = APIRouter()
 
@@ -54,6 +55,8 @@ def generate_atmosphere(req: GenerateRequest):
 
     for element, wav, sr, vol in zip(valid, wavs, srs, volumes):
         element["volume"] = vol
+        wav, pan = predict_and_apply(wav, sr)
+        element["pan"] = round(pan, 4)
         buf = io.BytesIO()
         sf.write(buf, wav.T, sr, format="WAV")
         element["audio_b64"] = base64.b64encode(buf.getvalue()).decode()

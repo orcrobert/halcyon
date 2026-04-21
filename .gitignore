@@ -11,13 +11,6 @@ node_modules/
 output/
 *.wav
 
-# ML artifacts — regenerate with scripts/train_spatial_model.py
-data/
-mixer/models/
-
-# LLM eval
-experiments/
-
 # Research / personal docs
 *.pdf
 CLAUDE.md
