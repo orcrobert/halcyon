@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import { SoundTouchNode } from '@soundtouchjs/audio-worklet'
 import type { Element, EQBand } from '../types'
 
 function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
@@ -51,6 +52,7 @@ interface TrackNode {
   dryGain: GainNode
   wetGain: GainNode
   source: AudioBufferSourceNode
+  pitchNode: SoundTouchNode
   filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
 }
 
@@ -125,7 +127,8 @@ export function useAudioEngine() {
   const eqStateRef = useRef<Map<string, EQState>>(new Map())
   const panStateRef = useRef<Map<string, number>>(new Map())
   const depthStateRef = useRef<Map<string, number>>(new Map())
-  const tuningRateRef = useRef(1)
+  const pitchRef = useRef(1.0)
+  const workletReadyRef = useRef(false)
 
   const getContext = useCallback(() => {
     if (!ctxRef.current) {
@@ -137,6 +140,13 @@ export function useAudioEngine() {
     }
     return ctxRef.current
   }, [])
+
+  async function ensureWorklet(ctx: AudioContext) {
+    if (!workletReadyRef.current) {
+      await SoundTouchNode.register(ctx, '/soundtouch-processor.js')
+      workletReadyRef.current = true
+    }
+  }
 
   function startFromDecoded(ctx: AudioContext, decoded: DecodedElement[]) {
     tracksRef.current.forEach(({ source }) => {
@@ -170,14 +180,17 @@ export function useAudioEngine() {
       wetGain.connect(panner)
       panner.connect(analyserRef.current ?? ctx.destination)
 
+      const pitchNode = new SoundTouchNode(ctx)
+      pitchNode.pitch!.value = pitchRef.current
+      pitchNode.connect(lowFilter)
+
       const src = ctx.createBufferSource()
       src.buffer = buffer
       src.loop = true
-      src.playbackRate.value = tuningRateRef.current
-      src.connect(lowFilter)
+      src.connect(pitchNode)
       src.start()
 
-      tracksRef.current.set(el.label, { masterGain, panner, convolver, dryGain, wetGain, source: src, filters })
+      tracksRef.current.set(el.label, { masterGain, panner, convolver, dryGain, wetGain, source: src, pitchNode, filters })
     }
   }
 
@@ -195,6 +208,7 @@ export function useAudioEngine() {
   const load = useCallback(async (elements: Element[]) => {
     const ctx = getContext()
     if (ctx.state === 'suspended') await ctx.resume()
+    await ensureWorklet(ctx)
     decodedRef.current = await decodeElements(elements)
     startFromDecoded(ctx, decodedRef.current)
   }, [getContext])
@@ -207,6 +221,7 @@ export function useAudioEngine() {
     const ctx = getContext()
     if (ctx.state === 'suspended') await ctx.resume()
     if (tracksRef.current.size === 0 && decodedRef.current.length > 0) {
+      await ensureWorklet(ctx)
       startFromDecoded(ctx, decodedRef.current)
     }
   }, [getContext])
@@ -231,10 +246,10 @@ export function useAudioEngine() {
   }, [getContext])
 
   const setTuning = useCallback((freqHz: number) => {
-    const rate = freqHz / 440
-    tuningRateRef.current = rate
-    tracksRef.current.forEach(({ source }) => {
-      source.playbackRate.value = rate
+    const pitch = freqHz / 440
+    pitchRef.current = pitch
+    tracksRef.current.forEach(({ pitchNode }) => {
+      pitchNode.pitch!.value = pitch
     })
   }, [])
 
@@ -276,6 +291,7 @@ export function useAudioEngine() {
     eqStateRef.current.clear()
     panStateRef.current.clear()
     depthStateRef.current.clear()
+    workletReadyRef.current = false
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
@@ -288,6 +304,8 @@ export function useAudioEngine() {
     const duration = 20
     const sampleRate = 44100
     const offline = new OfflineAudioContext(2, sampleRate * duration, sampleRate)
+
+    await SoundTouchNode.register(offline, '/soundtouch-processor.js')
 
     for (const { el, buffer } of decodedRef.current) {
       const liveTrack = tracksRef.current.get(el.label)
@@ -317,11 +335,14 @@ export function useAudioEngine() {
       wetGain.connect(panner)
       panner.connect(offline.destination)
 
+      const offlinePitchNode = new SoundTouchNode(offline)
+      offlinePitchNode.pitch!.value = pitchRef.current
+      offlinePitchNode.connect(lowFilter)
+
       const src = offline.createBufferSource()
       src.buffer = buffer
       src.loop = true
-      src.playbackRate.value = tuningRateRef.current
-      src.connect(lowFilter)
+      src.connect(offlinePitchNode)
       src.start()
     }
 
