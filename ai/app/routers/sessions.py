@@ -15,6 +15,7 @@ if _mixer_path not in sys.path:
     sys.path.insert(0, _mixer_path)
 from mixer.effects.looping import make_loopable
 from mixer.effects.eq import apply_eq
+from mixer.effects.volume import assign_volumes
 
 router = APIRouter()
 
@@ -35,6 +36,9 @@ def generate_atmosphere(req: GenerateRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Generation failed: {e}")
 
+    wavs = []
+    srs = []
+    valid = []
     for element in elements:
         path = element.get("file", "")
         if path and os.path.exists(path):
@@ -42,8 +46,16 @@ def generate_atmosphere(req: GenerateRequest):
             wav = wav.T
             wav = apply_eq(wav, sr, element.get("eq", []))
             wav = make_loopable(wav, sr)
-            buf = io.BytesIO()
-            sf.write(buf, wav.T, sr, format="WAV")
-            element["audio_b64"] = base64.b64encode(buf.getvalue()).decode()
+            wavs.append(wav)
+            srs.append(sr)
+            valid.append(element)
+
+    volumes = assign_volumes(valid, wavs, srs)
+
+    for element, wav, sr, vol in zip(valid, wavs, srs, volumes):
+        element["volume"] = vol
+        buf = io.BytesIO()
+        sf.write(buf, wav.T, sr, format="WAV")
+        element["audio_b64"] = base64.b64encode(buf.getvalue()).decode()
 
     return {"atmosphere": decomposed["atmosphere"], "elements": elements}
