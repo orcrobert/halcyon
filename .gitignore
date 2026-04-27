@@ -11,9 +11,14 @@ node_modules/
 output/
 *.wav
 
+# ML artifacts — regenerate with scripts/train_spatial_model.py
+data/
+mixer/models/
+
 # Research / personal docs
 *.pdf
 CLAUDE.md
+.claude/
 thesis/
 
 # Python

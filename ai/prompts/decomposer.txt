@@ -17,6 +17,7 @@ The model matches words to sounds. It does not understand:
 - Scene descriptions ("ancient port atmosphere")
 - Emotional language ("mysterious", "ominous", "wistful")
 - Genre tags without instruments ("Middle Eastern music", "oriental feel")
+- Would appreciate if you could keep music sounds between 1-3. Because if too many music sounds, would sound dissonant as model has no recollection of what was previously generated.
 
 Every word in the prompt must name a sound, instrument, or physical audio property you can literally hear.
 
@@ -72,15 +73,6 @@ For pads: sustained harmonic texture, describe character (bright, dark, suspende
 
 ---
 
-# RULE 6 — VOLUMES
-
-- Music: 0.35–0.65
-- Background sounds: 0.3–0.5
-- Sparse accent sounds: 0.15–0.3
-- Not all the same. Form a real mix.
-
----
-
 # RULE 7 — EQ (optional)
 
 Each element may have an "eq" array. Use it to help elements sit together.
@@ -103,7 +95,6 @@ Output ONLY valid JSON, no comments, no trailing commas:
       "label": "<name>",
       "type": "sound|music",
       "prompt": "<single sound source described literally>",
-      "volume": 0.0,
       "eq": [
         {"type": "high_shelf", "freq": 10000, "gain_db": -3.0}
       ]
