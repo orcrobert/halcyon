@@ -201,7 +201,7 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
       {/* EQ Modal — portalled to body */}
       <EQPanel
         label={element.label}
-        initialBands={element.eq}
+        initialBands={element.eq_json ?? undefined}
         open={eqOpen}
         anchorRef={eqBtnRef}
         onEQChange={onEQChange}

@@ -1,124 +1,37 @@
-import { useState, useEffect } from 'react'
-import { PromptView } from './components/PromptView'
-import { DashboardView } from './components/DashboardView'
-import { DevUpload } from './components/DevUpload'
-import { generateAtmosphere } from './api/client'
-import { useAudioEngine } from './hooks/useAudioEngine'
-import type { Session } from './types'
-
-const SESSION_KEY = 'soundscape_session'
-
-function loadStoredSession(): Session | null {
-  try {
-    const raw = sessionStorage.getItem(SESSION_KEY)
-    return raw ? JSON.parse(raw) : null
-  } catch {
-    return null
-  }
-}
+import { useAuth } from './auth/AuthContext'
+import { AuthView } from './components/AuthView'
 
 export default function App() {
-  const stored = loadStoredSession()
-  const [session, setSession] = useState<Session | null>(stored)
-  const isDev = new URLSearchParams(window.location.search).has('dev')
-  const [view, setView] = useState<'prompt' | 'dashboard' | 'dev'>(stored ? 'dashboard' : isDev ? 'dev' : 'prompt')
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [playing, setPlaying] = useState(!stored)
+  const { state, logout } = useAuth()
 
-  const { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser } = useAudioEngine()
-  useEffect(() => {
-    if (stored) {
-      preload(stored.elements)
-    }
-  }, [])
-
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (view !== 'dashboard' || !session) return
-      if (e.target instanceof HTMLTextAreaElement || e.target instanceof HTMLInputElement) return
-
-      if (e.code === 'Space') {
-        e.preventDefault()
-        handlePlayPause()
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [view, playing, session])
-
-  async function handleGenerate(prompt: string) {
-    setLoading(true)
-    setError(null)
-    try {
-      const data = await generateAtmosphere(prompt)
-      sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
-      setSession(data)
-      await load(data.elements)
-      setPlaying(true)
-      setView('dashboard')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handlePlayPause() {
-    if (playing) {
-      await pause()
-      setPlaying(false)
-    } else {
-      if (session) await start()
-      await unpause()
-      setPlaying(true)
-    }
-  }
-
-  function handleVolumeChange(label: string, volume: number) {
-    setVolume(label, volume)
-  }
-
-  function handleReset() {
-    stop()
-    setPlaying(false)
-    sessionStorage.removeItem(SESSION_KEY)
-    setSession(null)
-    setView('prompt')
+  if (state.status === 'loading') {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#08090e' }}>
+        <div className="text-white/30 text-sm">Loading…</div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(#08090e, #08090e)' }}>
-      {view === 'dev' && (
-        <DevUpload onReady={async (data) => {
-          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data))
-          setSession(data)
-          await load(data.elements)
-          setPlaying(true)
-          setView('dashboard')
-        }} />
-      )}
-      {view === 'prompt' && (
-        <PromptView
-          onSubmit={handleGenerate}
-          loading={loading}
-          error={error}
-        />
-      )}
-      {view === 'dashboard' && session && (
-        <DashboardView
-          session={session}
-          playing={playing}
-          getAnalyser={getAnalyser}
-          onPlayPause={handlePlayPause}
-          onVolumeChange={handleVolumeChange}
-          onEQChange={setEQ}
-          onPanChange={setPan}
-          onDepthChange={setDepth}
-          onTuningChange={setTuning}
-          onExport={() => exportMix(session.atmosphere)}
-          onReset={handleReset}
-        />
+    <div className="min-h-screen" style={{ background: '#08090e' }}>
+      {state.status === 'guest' ? (
+        <AuthView />
+      ) : (
+        <div className="min-h-screen flex items-center justify-center px-6">
+          <div className="text-center">
+            <p className="text-white/60 text-sm mb-2">Signed in as</p>
+            <p className="text-white/90 font-medium mb-6">{state.user.email}</p>
+            <p className="text-white/40 text-xs mb-6">
+              Generation flow rewires next commit.
+            </p>
+            <button
+              onClick={() => logout()}
+              className="rounded-md bg-white/5 hover:bg-white/10 border border-white/10 px-4 py-2 text-sm text-white/80 transition"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

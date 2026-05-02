@@ -1,11 +1,11 @@
-import type { Session } from '../types'
+import type { Atmosphere } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
 import { Visualizer } from './Visualizer'
 import { TuningControl } from './TuningControl'
 
 interface Props {
-  session: Session
+  session: Atmosphere
   playing: boolean
   getAnalyser: () => AnalyserNode | null
   onPlayPause: () => Promise<void>
@@ -78,7 +78,7 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-slate-700 mb-3">Now playing</p>
             <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.02em' }}>
-              {session.atmosphere}
+              {session.title ?? session.prompt}
             </h1>
           </div>
 
@@ -109,7 +109,7 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
           width: '100%',
           maxWidth: '900px',
         }}>
-          {session.elements.map((el) => (
+          {(session.elements ?? []).map((el) => (
             <TrackStrip
               key={el.label}
               element={el}
