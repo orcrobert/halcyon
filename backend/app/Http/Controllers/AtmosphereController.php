@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Resources\AtmosphereResource;
+use App\Jobs\GenerateAtmosphereJob;
 use App\Models\Atmosphere;
 use App\Models\GenerationJob;
 use Illuminate\Http\JsonResponse;
@@ -47,7 +48,7 @@ class AtmosphereController extends Controller
             'status' => 'queued',
         ]);
 
-        // TODO: dispatch(new GenerateAtmosphereJob($atmosphere));
+        GenerateAtmosphereJob::dispatch($atmosphere);
 
         return (new AtmosphereResource($atmosphere->load('generationJob')))
             ->response()
