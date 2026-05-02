@@ -1,20 +1,30 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAuth } from './auth/AuthContext'
 import { AuthView } from './components/AuthView'
 import { PromptView } from './components/PromptView'
 import { GeneratingView } from './components/GeneratingView'
 import { DashboardView } from './components/DashboardView'
-import { useAudioEngine } from './hooks/useAudioEngine'
+import { HistoryPanel } from './components/HistoryPanel'
+import { useAudioEngine, type EQState } from './hooks/useAudioEngine'
+import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
 import {
   createAtmosphere,
   getAtmosphere,
   pollAtmosphere,
 } from './api/atmospheres'
-import type { Atmosphere } from './types'
+import type { Atmosphere, EQBand } from './types'
 
 const PENDING_KEY = 'soundscape_pending_atmosphere_id'
 
 type View = 'prompt' | 'generating' | 'dashboard'
+
+function eqStateToBands(eq: EQState): EQBand[] {
+  return [
+    { type: 'lowshelf', freq: 200, q: 0.7, gain: eq.low },
+    { type: 'peaking', freq: 1000, q: 1.4, gain: eq.mid },
+    { type: 'highshelf', freq: 8000, q: 0.7, gain: eq.high },
+  ]
+}
 
 export default function App() {
   const { state, logout } = useAuth()
@@ -40,6 +50,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [playing, setPlaying] = useState(false)
+  const [historyOpen, setHistoryOpen] = useState(false)
 
   const pollAbortRef = useRef<AbortController | null>(null)
 
@@ -47,6 +58,31 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
     load, start, pause, unpause, setVolume, setEQ, setPan, setDepth,
     setTuning, stop, exportMix, getAnalyser,
   } = useAudioEngine()
+
+  const { enqueue, flushAll } = useDebouncedPatcher()
+
+  const labelToId = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const el of atmosphere?.elements ?? []) {
+      map.set(el.label, el.id)
+    }
+    return map
+  }, [atmosphere])
+
+  const elementIds = useMemo(
+    () => (atmosphere?.elements ?? []).map((e) => e.id),
+    [atmosphere],
+  )
+
+  const loadAtmosphereIntoEngine = useCallback(async (a: Atmosphere) => {
+    if (!a.elements) return
+    await load(a.elements)
+    for (const el of a.elements) {
+      setVolume(el.label, el.volume)
+      setPan(el.label, el.pan)
+      setDepth(el.label, el.depth)
+    }
+  }, [load, setVolume, setPan, setDepth])
 
   const activatePollFor = useCallback(async (id: number) => {
     pollAbortRef.current?.abort()
@@ -59,7 +95,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
 
       if (initial.status === 'ready' && initial.elements) {
         localStorage.removeItem(PENDING_KEY)
-        await load(initial.elements)
+        await loadAtmosphereIntoEngine(initial)
         setPlaying(true)
         setView('dashboard')
         return
@@ -86,7 +122,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
       }
 
       if (final.elements) {
-        await load(final.elements)
+        await loadAtmosphereIntoEngine(final)
         setPlaying(true)
         setView('dashboard')
       }
@@ -95,7 +131,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
       setError(err instanceof Error ? err.message : 'Polling failed.')
       setView('prompt')
     }
-  }, [load])
+  }, [loadAtmosphereIntoEngine])
 
   useEffect(() => {
     const stored = localStorage.getItem(PENDING_KEY)
@@ -115,7 +151,6 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
   const handleGenerate = useCallback(async (prompt: string) => {
     setSubmitting(true)
     setError(null)
-
     try {
       const created = await createAtmosphere({ prompt })
       localStorage.setItem(PENDING_KEY, String(created.id))
@@ -145,13 +180,61 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
     }
   }, [playing, pause, start, unpause])
 
-  const handleNewAtmosphere = useCallback(() => {
+  const handleNewAtmosphere = useCallback(async () => {
     pollAbortRef.current?.abort()
+    await flushAll()
     stop()
     setPlaying(false)
     setAtmosphere(null)
     setView('prompt')
-  }, [stop])
+  }, [stop, flushAll])
+
+  const handleOpenFromHistory = useCallback(async (id: number) => {
+    await flushAll()
+    stop()
+    setPlaying(false)
+    setHistoryOpen(false)
+    setView('generating')
+    activatePollFor(id)
+  }, [stop, flushAll, activatePollFor])
+
+  const handleVolumeChange = useCallback((label: string, volume: number) => {
+    setVolume(label, volume)
+    const id = labelToId.get(label)
+    if (id !== undefined) enqueue(id, { volume })
+  }, [setVolume, enqueue, labelToId])
+
+  const handleEQChange = useCallback((label: string, eq: EQState) => {
+    setEQ(label, eq)
+    const id = labelToId.get(label)
+    if (id !== undefined) enqueue(id, { eq_json: eqStateToBands(eq) })
+  }, [setEQ, enqueue, labelToId])
+
+  const handlePanChange = useCallback((label: string, pan: number) => {
+    setPan(label, pan)
+    const id = labelToId.get(label)
+    if (id !== undefined) enqueue(id, { pan })
+  }, [setPan, enqueue, labelToId])
+
+  const handleDepthChange = useCallback((label: string, depth: number) => {
+    setDepth(label, depth)
+    const id = labelToId.get(label)
+    if (id !== undefined) enqueue(id, { depth })
+  }, [setDepth, enqueue, labelToId])
+
+  const handleTuningChange = useCallback((freqHz: number) => {
+    setTuning(freqHz)
+    const tuning_hz = Math.round(freqHz)
+    for (const id of elementIds) {
+      enqueue(id, { tuning_hz })
+    }
+  }, [setTuning, enqueue, elementIds])
+
+  useEffect(() => {
+    function onUnload() { void flushAll() }
+    window.addEventListener('beforeunload', onUnload)
+    return () => window.removeEventListener('beforeunload', onUnload)
+  }, [flushAll])
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -174,6 +257,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
           loading={submitting}
           error={error}
           onLogout={onLogout}
+          onOpenHistory={() => setHistoryOpen(true)}
         />
       )}
       {view === 'generating' && atmosphere && (
@@ -185,15 +269,20 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
           playing={playing}
           getAnalyser={getAnalyser}
           onPlayPause={handlePlayPause}
-          onVolumeChange={setVolume}
-          onEQChange={setEQ}
-          onPanChange={setPan}
-          onDepthChange={setDepth}
-          onTuningChange={setTuning}
+          onVolumeChange={handleVolumeChange}
+          onEQChange={handleEQChange}
+          onPanChange={handlePanChange}
+          onDepthChange={handleDepthChange}
+          onTuningChange={handleTuningChange}
           onExport={() => exportMix(atmosphere.title ?? `atmosphere-${atmosphere.id}`)}
           onReset={handleNewAtmosphere}
         />
       )}
+      <HistoryPanel
+        open={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        onOpenAtmosphere={handleOpenFromHistory}
+      />
     </div>
   )
 }
