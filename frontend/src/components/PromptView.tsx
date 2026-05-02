@@ -4,6 +4,7 @@ interface Props {
   onSubmit: (prompt: string) => void
   loading: boolean
   error: string | null
+  onLogout?: () => void
 }
 
 const EXAMPLES = [
@@ -13,7 +14,7 @@ const EXAMPLES = [
   'Romanian mountain village',
 ]
 
-export function PromptView({ onSubmit, loading, error }: Props) {
+export function PromptView({ onSubmit, loading, error, onLogout }: Props) {
   const [prompt, setPrompt] = useState('')
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -24,7 +25,16 @@ export function PromptView({ onSubmit, loading, error }: Props) {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
+    <div className="relative flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
+
+      {onLogout && (
+        <button
+          onClick={onLogout}
+          className="absolute top-6 right-6 text-xs text-white/40 hover:text-white/70 transition"
+        >
+          Sign out
+        </button>
+      )}
 
       <div className="flex flex-col gap-12 w-full" style={{ maxWidth: '640px' }}>
 
