@@ -28,24 +28,28 @@ export function PromptView({ onSubmit, loading, error, onLogout, onOpenHistory }
   return (
     <div className="relative flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
 
-      <div className="absolute top-6 right-6 flex items-center gap-5">
-        {onOpenHistory && (
-          <button
-            onClick={onOpenHistory}
-            className="text-xs text-white/40 hover:text-white/70 transition"
-          >
-            History
-          </button>
-        )}
-        {onLogout && (
-          <button
-            onClick={onLogout}
-            className="text-xs text-white/40 hover:text-white/70 transition"
-          >
-            Sign out
-          </button>
-        )}
-      </div>
+      {onOpenHistory && (
+        <button
+          onClick={onOpenHistory}
+          className="absolute top-6 left-6 w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-200 hover:bg-white/[0.04] transition"
+          aria-label="Open history"
+          title="History"
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+          </svg>
+        </button>
+      )}
+
+      {onLogout && (
+        <button
+          onClick={onLogout}
+          className="absolute top-6 right-6 text-xs text-white/40 hover:text-white/70 transition"
+        >
+          Sign out
+        </button>
+      )}
 
       <div className="flex flex-col gap-12 w-full" style={{ maxWidth: '640px' }}>
 

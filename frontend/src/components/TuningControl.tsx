@@ -17,6 +17,7 @@ const FRICTION = 0.4
 
 interface Props {
   onTuningChange: (freq: number) => void
+  initialFreq?: number
 }
 
 function freqToY(freq: number, trackH: number) {
@@ -106,8 +107,9 @@ function DiamondMarker({ x, y, glowColor, filterId }: { x: number; y: number; gl
   )
 }
 
-export function TuningControl({ onTuningChange }: Props) {
-  const [displayFreq, setDisplayFreq] = useState(440)
+export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
+  const clamped = Math.max(MIN, Math.min(MAX, initialFreq))
+  const [displayFreq, setDisplayFreq] = useState(clamped)
   const [open, setOpen] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [trackH, setTrackH] = useState(400)
@@ -116,15 +118,15 @@ export function TuningControl({ onTuningChange }: Props) {
   const [phase, setPhase] = useState(0)
   const [seed] = useState(() => Math.random() * 100)
 
-  const freqRef = useRef(440)
-  const displayFreqRef = useRef(440)
-  const targetFreqRef = useRef(440)
+  const freqRef = useRef(clamped)
+  const displayFreqRef = useRef(clamped)
+  const targetFreqRef = useRef(clamped)
   const velocityRef = useRef(0)
   const animatingRef = useRef(false)
   const onTuningChangeRef = useRef(onTuningChange)
   useEffect(() => { onTuningChangeRef.current = onTuningChange }, [onTuningChange])
 
-  const rawPosRef = useRef(freqToY(440, 400))
+  const rawPosRef = useRef(freqToY(clamped, 400))
   const draggingRef = useRef(false)
   const lastPosRef = useRef(0)
   const rafRef = useRef<number | null>(null)

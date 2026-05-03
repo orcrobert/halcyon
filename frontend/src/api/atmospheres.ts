@@ -35,13 +35,16 @@ export async function pollAtmosphere(
   options: {
     intervalMs?: number
     timeoutMs?: number
+    stuckPendingMs?: number
     onTick?: (a: Atmosphere) => void
     signal?: AbortSignal
   } = {},
 ): Promise<Atmosphere> {
   const interval = options.intervalMs ?? 1500
   const timeout = options.timeoutMs ?? 10 * 60_000
+  const stuckPendingMs = options.stuckPendingMs ?? 20_000
   const start = Date.now()
+  let leftPendingAt: number | null = null
 
   for (;;) {
     if (options.signal?.aborted) throw new DOMException('Aborted', 'AbortError')
@@ -49,6 +52,16 @@ export async function pollAtmosphere(
     const atmosphere = await getAtmosphere(id)
     options.onTick?.(atmosphere)
     if (TERMINAL.includes(atmosphere.status)) return atmosphere
+
+    if (atmosphere.status !== 'pending') {
+      leftPendingAt = Date.now()
+    }
+    const stuckSince = leftPendingAt ?? start
+    if (atmosphere.status === 'pending' && Date.now() - stuckSince > stuckPendingMs) {
+      throw new Error(
+        'Job queued but never picked up.' 
+      )
+    }
 
     if (Date.now() - start > timeout) {
       throw new Error(`Polling timed out after ${timeout}ms`)

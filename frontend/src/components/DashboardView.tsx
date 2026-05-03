@@ -22,7 +22,10 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
   return (
     <div className="min-h-screen flex flex-col bg-[#08090e]">
 
-      <TuningControl onTuningChange={onTuningChange} />
+      <TuningControl
+        onTuningChange={onTuningChange}
+        initialFreq={session.elements?.[0]?.tuning_hz ?? 440}
+      />
 
       {/* Top bar */}
       <header className="flex items-center justify-between border-b border-[#13141f]" style={{ padding: '18px 32px' }}>

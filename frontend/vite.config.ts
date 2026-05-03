@@ -5,12 +5,14 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8000',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-      },
+    host: 'localhost',
+    port: 5173,
+    strictPort: true,
+    allowedHosts: ['app.soundscape.test'],
+    hmr: {
+      host: 'app.soundscape.test',
+      protocol: 'wss',
+      clientPort: 443,
     },
   },
 })
