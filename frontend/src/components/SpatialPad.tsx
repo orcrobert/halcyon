@@ -1,4 +1,4 @@
-import { useRef, useCallback, useState, useEffect } from 'react'
+import { useRef, useCallback, useState } from 'react'
 
 interface Props {
   pan: number          // -1.0 to +1.0  (X axis, left/right)

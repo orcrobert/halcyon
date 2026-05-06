@@ -1,4 +1,4 @@
-import { useRef, useEffect, useCallback, useState } from 'react'
+import { useRef, useCallback, useState } from 'react'
 
 interface Props {
   value: number        // -1.0 to +1.0

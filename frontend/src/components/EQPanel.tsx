@@ -16,9 +16,9 @@ function buildInitialState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
   for (const band of bands) {
-    if (band.type === 'low_shelf') state.low = band.gain_db
-    else if (band.type === 'high_shelf') state.high = band.gain_db
-    else if (band.type === 'peak') state.mid = band.gain_db
+    if (band.type === 'lowshelf') state.low = band.gain
+    else if (band.type === 'highshelf') state.high = band.gain
+    else if (band.type === 'peaking') state.mid = band.gain
   }
   return state
 }

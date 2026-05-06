@@ -8,6 +8,9 @@ class Settings(BaseSettings):
     colab_url: str = "https://xxxx.ngrok-free.app"
     output_dir: str = "output"
 
+    ai_service_secret: str | None = None
+    backend_origin: str = "http://localhost"
+
     model_config = {"env_file": str(Path(__file__).resolve().parents[2] / ".env")}
 
 

@@ -16,7 +16,7 @@ interface Props {
 export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, onDepthChange }: Props) {
   const [volume, setVolume] = useState(element.volume)
   const [pan, setPan] = useState(element.pan ?? 0)
-  const [depth, setDepth] = useState(0)
+  const [depth, setDepth] = useState(element.depth ?? 0)
   const [muted, setMuted] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
@@ -201,7 +201,7 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
       {/* EQ Modal — portalled to body */}
       <EQPanel
         label={element.label}
-        initialBands={element.eq}
+        initialBands={element.eq_json ?? undefined}
         open={eqOpen}
         anchorRef={eqBtnRef}
         onEQChange={onEQChange}

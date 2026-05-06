@@ -65,9 +65,9 @@ function buildEQState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
   for (const band of bands) {
-    if (band.type === 'low_shelf') state.low = band.gain_db
-    else if (band.type === 'high_shelf') state.high = band.gain_db
-    else if (band.type === 'peak') state.mid = band.gain_db
+    if (band.type === 'lowshelf') state.low = band.gain
+    else if (band.type === 'highshelf') state.high = band.gain
+    else if (band.type === 'peaking') state.mid = band.gain
   }
   return state
 }
@@ -155,7 +155,7 @@ export function useAudioEngine() {
     tracksRef.current.clear()
 
     for (const { el, buffer } of decoded) {
-      const eq = eqStateRef.current.get(el.label) ?? buildEQState(el.eq)
+      const eq = eqStateRef.current.get(el.label) ?? buildEQState(el.eq_json ?? undefined)
       const filters = createFilters(ctx, eq)
       const [lowFilter,, highFilter] = filters
 
@@ -198,8 +198,15 @@ export function useAudioEngine() {
     const ctx = getContext()
     return Promise.all(
       elements.map(async (el) => {
-        const bytes = Uint8Array.from(atob(el.audio_b64), c => c.charCodeAt(0))
-        const buffer = await ctx.decodeAudioData(bytes.buffer)
+        if (!el.audio_url) {
+          throw new Error(`Element ${el.label} has no audio_url`)
+        }
+        const res = await fetch(el.audio_url, { credentials: 'include' })
+        if (!res.ok) {
+          throw new Error(`Failed to load audio for ${el.label}: ${res.status}`)
+        }
+        const arrayBuffer = await res.arrayBuffer()
+        const buffer = await ctx.decodeAudioData(arrayBuffer)
         return { el, buffer }
       })
     )
@@ -313,7 +320,7 @@ export function useAudioEngine() {
         low: liveTrack.filters[0].gain.value,
         mid: liveTrack.filters[1].gain.value,
         high: liveTrack.filters[2].gain.value,
-      } : buildEQState(el.eq)
+      } : buildEQState(el.eq_json ?? undefined)
 
       const offlineFilters = createFilters(offline, eqState)
       const [lowFilter,, highFilter] = offlineFilters
