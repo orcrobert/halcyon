@@ -11,26 +11,11 @@ def _load_prompt(name: str) -> str:
     return (PROMPTS_DIR / f"{name}.txt").read_text()
 
 
-def decompose(prompt: str) -> dict:
-    system_prompt = _load_prompt("decomposer")
-
-    payload = {
-        "model": settings.ollama_model,
-        "prompt": f"{system_prompt}\n\nScene: {prompt}",
-        "stream": False,
-    }
-
-    response = requests.post(settings.ollama_url, json=payload, timeout=60)
-    response.raise_for_status()
-
-    raw = response.json()["response"].strip()
-
+def _parse_result(raw: str) -> dict:
     match = re.search(r"\{.*\}", raw, re.DOTALL)
     if not match:
         raise ValueError(f"No JSON found in model response:\n{raw}")
-
     result = json.loads(match.group())
-
     type_map = {
         "audiogen": "sound", "AudioGen": "sound",
         "musicgen": "music", "MusicGen": "music",
@@ -38,5 +23,45 @@ def decompose(prompt: str) -> dict:
     for element in result.get("elements", []):
         element.setdefault("volume", 0.5)
         element["type"] = type_map.get(element.get("type", ""), element.get("type", "sound"))
-
     return result
+
+
+def _decompose_ollama(system_prompt: str, prompt: str, model_tag: str) -> dict:
+    payload = {
+        "model": model_tag,
+        "prompt": f"{system_prompt}\n\nScene: {prompt}",
+        "stream": False,
+        "format": "json",
+    }
+    response = requests.post(settings.ollama_url, json=payload, timeout=120)
+    response.raise_for_status()
+    return _parse_result(response.json()["response"].strip())
+
+
+def _decompose_gemini(system_prompt: str, prompt: str) -> dict:
+    from google import genai
+    from google.genai import types
+
+    client = genai.Client(api_key=settings.gemini_api_key)
+    response = client.models.generate_content(
+        model="gemini-2.5-flash-lite",
+        contents=f"Scene: {prompt}",
+        config=types.GenerateContentConfig(
+            system_instruction=system_prompt,
+            response_mime_type="application/json",
+            temperature=0.7,
+        ),
+    )
+    return _parse_result(response.text.strip())
+
+
+def decompose(prompt: str) -> dict:
+    system_prompt = _load_prompt("decomposer")
+    model = settings.decomposer_model.lower()
+
+    if model == "gemini":
+        return _decompose_gemini(system_prompt, prompt)
+    elif model == "llama":
+        return _decompose_ollama(system_prompt, prompt, settings.llama_model)
+    else:
+        return _decompose_ollama(system_prompt, prompt, settings.ollama_model)

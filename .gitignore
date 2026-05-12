@@ -15,6 +15,9 @@ output/
 data/
 mixer/models/
 
+# LLM eval
+experiments/
+
 # Research / personal docs
 *.pdf
 CLAUDE.md
