@@ -15,6 +15,7 @@ if _mixer_path not in sys.path:
     sys.path.insert(0, _mixer_path)
 from mixer.effects.looping import make_loopable
 from mixer.effects.eq import apply_eq
+from mixer.effects.auto_eq import auto_eq
 from mixer.effects.volume import assign_volumes
 from mixer.effects.spatial import predict_and_apply
 
@@ -45,11 +46,15 @@ def generate_atmosphere(req: GenerateRequest):
         if path and os.path.exists(path):
             wav, sr = sf.read(path, always_2d=True)
             wav = wav.T
-            wav = apply_eq(wav, sr, element.get("eq", []))
             wav = make_loopable(wav, sr)
             wavs.append(wav)
             srs.append(sr)
             valid.append(element)
+
+    eq_bands_per_element = auto_eq(wavs, srs, valid)
+    for i, (element, eq_bands) in enumerate(zip(valid, eq_bands_per_element)):
+        element["eq"] = eq_bands
+        wavs[i] = apply_eq(wavs[i], srs[i], eq_bands)
 
     volumes = assign_volumes(valid, wavs, srs)
 
