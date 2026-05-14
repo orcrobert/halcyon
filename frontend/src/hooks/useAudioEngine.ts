@@ -170,9 +170,10 @@ export function useAudioEngine() {
       const [lowFilter,, highFilter] = filters
 
       const masterGain = ctx.createGain()
-      masterGain.gain.value = volumeStateRef.current.has(el.label)
+      const vol = volumeStateRef.current.has(el.label)
         ? volumeStateRef.current.get(el.label)!
         : el.volume
+      masterGain.gain.value = vol * 0.5
 
       const panner = ctx.createStereoPanner()
       panner.pan.value = panStateRef.current.has(el.label)
@@ -258,7 +259,7 @@ export function useAudioEngine() {
     volumeStateRef.current.set(label, volume)
     const track = tracksRef.current.get(label)
     if (track) {
-      track.masterGain.gain.setTargetAtTime(volume, getContext().currentTime, 0.05)
+      track.masterGain.gain.setTargetAtTime(volume * 0.5, getContext().currentTime, 0.05)
     }
   }, [getContext])
 
@@ -296,21 +297,6 @@ export function useAudioEngine() {
     const t = getContext().currentTime
     track.dryGain.gain.setTargetAtTime(1 - depth * 0.7, t, 0.05)
     track.wetGain.gain.setTargetAtTime(depth * 0.6, t, 0.05)
-  }, [getContext])
-
-  const muteAll = useCallback(() => {
-    const ctx = getContext()
-    tracksRef.current.forEach(({ masterGain }) => {
-      masterGain.gain.setTargetAtTime(0, ctx.currentTime, 0.05)
-    })
-  }, [getContext])
-
-  const unmuteAll = useCallback(() => {
-    const ctx = getContext()
-    tracksRef.current.forEach((track, label) => {
-      const vol = volumeStateRef.current.get(label) ?? 1
-      track.masterGain.gain.setTargetAtTime(vol, ctx.currentTime, 0.05)
-    })
   }, [getContext])
 
   const startBinaural = useCallback(() => {
@@ -397,7 +383,7 @@ export function useAudioEngine() {
       const [lowFilter,, highFilter] = offlineFilters
 
       const gain = offline.createGain()
-      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : el.volume
+      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : el.volume * 0.5
 
       const depth = depthStateRef.current.get(el.label) ?? 0
       const { convolver, dryGain, wetGain } = createReverb(offline, depth)
@@ -435,5 +421,5 @@ export function useAudioEngine() {
     URL.revokeObjectURL(url)
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, muteAll, unmuteAll, startBinaural, stopBinaural, setBinauralFreqs }
+  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startBinaural, stopBinaural, setBinauralFreqs }
 }

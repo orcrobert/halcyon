@@ -143,10 +143,10 @@ export function TrackStrip({ element, muted, onVolumeChange, onMuteChange, onEQC
             {/* Crosshair */}
             <line x1="10" y1="3" x2="10" y2="17" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
             <line x1="3" y1="10" x2="17" y2="10" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
-            {/* Position dot — clamped inside the ring */}
+            {/* Position dot */}
             <circle
-              cx={10 + pan * 6}
-              cy={10 + depth * 6}
+              cx={10 + pan * 7}
+              cy={3 + depth * 14}
               r="2.5"
               fill={Math.abs(pan) > 0.03 || depth > 0.03 ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.35)'}
             />
