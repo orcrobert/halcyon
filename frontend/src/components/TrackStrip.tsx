@@ -7,17 +7,18 @@ import { SpatialModal } from './SpatialModal'
 
 interface Props {
   element: Element
+  muted: boolean
   onVolumeChange: (label: string, volume: number) => void
+  onMuteChange: (label: string, muted: boolean) => void
   onEQChange: (label: string, eq: EQState) => void
   onPanChange: (label: string, pan: number) => void
   onDepthChange: (label: string, depth: number) => void
 }
 
-export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, onDepthChange }: Props) {
+export function TrackStrip({ element, muted, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange }: Props) {
   const [volume, setVolume] = useState(element.volume)
   const [pan, setPan] = useState(element.pan ?? 0)
   const [depth, setDepth] = useState(element.depth ?? 0)
-  const [muted, setMuted] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [spatialOpen, setSpatialOpen] = useState(false)
@@ -37,17 +38,17 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
   function handleVolumeChange(val: number) {
     setVolume(val)
     if (val === 0) {
-      setMuted(true)
+      onMuteChange(element.label, true)
       onVolumeChange(element.label, 0)
     } else {
-      setMuted(false)
+      onMuteChange(element.label, false)
       onVolumeChange(element.label, val)
     }
   }
 
   function handleMute() {
     const next = !muted
-    setMuted(next)
+    onMuteChange(element.label, next)
     onVolumeChange(element.label, next ? 0 : volume)
   }
 

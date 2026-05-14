@@ -51,13 +51,19 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
   const [submitting, setSubmitting] = useState(false)
   const [playing, setPlaying] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [binauralActive, setBinauralActive] = useState(false)
+  const [binauralBeatHz, setBinauralBeatHz] = useState(8)
+  const [binauralLeftHz, setBinauralLeftHz] = useState(200)
+  const [binauralRightHz, setBinauralRightHz] = useState(208)
 
   const pollAbortRef = useRef<AbortController | null>(null)
 
   const {
     load, start, pause, unpause, setVolume, setEQ, setPan, setDepth,
     setTuning, stop, exportMix, getAnalyser,
+    startBinaural, stopBinaural, setBinauralFreqs,
   } = useAudioEngine()
+
 
   const { enqueue, flushAll } = useDebouncedPatcher()
 
@@ -230,6 +236,35 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
     }
   }, [setTuning, enqueue, elementIds])
 
+  const handleBinauralToggle = useCallback(() => {
+    if (binauralActive) {
+      stopBinaural()
+      setBinauralActive(false)
+    } else {
+      startBinaural()
+      setBinauralActive(true)
+    }
+  }, [binauralActive, startBinaural, stopBinaural])
+
+  const handleBinauralPreset = useCallback((beatHz: number) => {
+    setBinauralBeatHz(beatHz)
+    const newRight = binauralLeftHz + beatHz
+    setBinauralRightHz(newRight)
+    setBinauralFreqs(binauralLeftHz, newRight)
+  }, [binauralLeftHz, setBinauralFreqs])
+
+  const handleBinauralLeftHz = useCallback((hz: number) => {
+    setBinauralLeftHz(hz)
+    const newRight = hz + binauralBeatHz
+    setBinauralRightHz(newRight)
+    setBinauralFreqs(hz, newRight)
+  }, [binauralBeatHz, setBinauralFreqs])
+
+  const handleBinauralRightHz = useCallback((hz: number) => {
+    setBinauralRightHz(hz)
+    setBinauralFreqs(binauralLeftHz, hz)
+  }, [binauralLeftHz, setBinauralFreqs])
+
   useEffect(() => {
     function onUnload() { void flushAll() }
     window.addEventListener('beforeunload', onUnload)
@@ -276,6 +311,14 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
           onTuningChange={handleTuningChange}
           onExport={() => exportMix(atmosphere.title ?? `atmosphere-${atmosphere.id}`)}
           onReset={handleNewAtmosphere}
+          binauralActive={binauralActive}
+          binauralBeatHz={binauralBeatHz}
+          binauralLeftHz={binauralLeftHz}
+          binauralRightHz={binauralRightHz}
+          onBinauralToggle={handleBinauralToggle}
+          onBinauralPreset={handleBinauralPreset}
+          onBinauralLeftHz={handleBinauralLeftHz}
+          onBinauralRightHz={handleBinauralRightHz}
         />
       )}
       <HistoryPanel

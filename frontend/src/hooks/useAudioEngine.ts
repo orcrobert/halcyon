@@ -61,6 +61,13 @@ interface DecodedElement {
   buffer: AudioBuffer
 }
 
+interface BinauralNodes {
+  leftOsc: OscillatorNode
+  rightOsc: OscillatorNode
+  merger: ChannelMergerNode
+  gain: GainNode
+}
+
 function buildEQState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
@@ -129,6 +136,9 @@ export function useAudioEngine() {
   const depthStateRef = useRef<Map<string, number>>(new Map())
   const pitchRef = useRef(1.0)
   const workletReadyRef = useRef(false)
+  const binauralRef = useRef<BinauralNodes | null>(null)
+  const binauralLeftHzRef = useRef(200)
+  const binauralRightHzRef = useRef(208)
 
   const getContext = useCallback(() => {
     if (!ctxRef.current) {
@@ -288,7 +298,68 @@ export function useAudioEngine() {
     track.wetGain.gain.setTargetAtTime(depth * 0.6, t, 0.05)
   }, [getContext])
 
+  const muteAll = useCallback(() => {
+    const ctx = getContext()
+    tracksRef.current.forEach(({ masterGain }) => {
+      masterGain.gain.setTargetAtTime(0, ctx.currentTime, 0.05)
+    })
+  }, [getContext])
+
+  const unmuteAll = useCallback(() => {
+    const ctx = getContext()
+    tracksRef.current.forEach((track, label) => {
+      const vol = volumeStateRef.current.get(label) ?? 1
+      track.masterGain.gain.setTargetAtTime(vol, ctx.currentTime, 0.05)
+    })
+  }, [getContext])
+
+  const startBinaural = useCallback(() => {
+    const ctx = getContext()
+    if (binauralRef.current) return
+    const leftOsc = ctx.createOscillator()
+    const rightOsc = ctx.createOscillator()
+    leftOsc.type = 'sine'
+    rightOsc.type = 'sine'
+    leftOsc.frequency.value = binauralLeftHzRef.current
+    rightOsc.frequency.value = binauralRightHzRef.current
+
+    const merger = ctx.createChannelMerger(2)
+    const gain = ctx.createGain()
+    gain.gain.value = 0.15
+
+    const leftSplitter = ctx.createGain()
+    const rightSplitter = ctx.createGain()
+    leftOsc.connect(leftSplitter)
+    rightOsc.connect(rightSplitter)
+    leftSplitter.connect(merger, 0, 0)
+    rightSplitter.connect(merger, 0, 1)
+    merger.connect(gain)
+    gain.connect(ctx.destination)
+
+    leftOsc.start()
+    rightOsc.start()
+    binauralRef.current = { leftOsc, rightOsc, merger, gain }
+  }, [getContext])
+
+  const stopBinaural = useCallback(() => {
+    if (!binauralRef.current) return
+    const { leftOsc, rightOsc } = binauralRef.current
+    try { leftOsc.stop() } catch {}
+    try { rightOsc.stop() } catch {}
+    binauralRef.current = null
+  }, [])
+
+  const setBinauralFreqs = useCallback((leftHz: number, rightHz: number) => {
+    binauralLeftHzRef.current = leftHz
+    binauralRightHzRef.current = rightHz
+    if (!binauralRef.current) return
+    const ctx = getContext()
+    binauralRef.current.leftOsc.frequency.setTargetAtTime(leftHz, ctx.currentTime, 0.05)
+    binauralRef.current.rightOsc.frequency.setTargetAtTime(rightHz, ctx.currentTime, 0.05)
+  }, [getContext])
+
   const stop = useCallback(() => {
+    stopBinaural()
     tracksRef.current.forEach(({ source }) => {
       try { source.stop() } catch {}
     })
@@ -302,7 +373,7 @@ export function useAudioEngine() {
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
-  }, [])
+  }, [stopBinaural])
 
   const getAnalyser = useCallback(() => analyserRef.current, [])
 
@@ -364,5 +435,5 @@ export function useAudioEngine() {
     URL.revokeObjectURL(url)
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser }
+  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, muteAll, unmuteAll, startBinaural, stopBinaural, setBinauralFreqs }
 }
