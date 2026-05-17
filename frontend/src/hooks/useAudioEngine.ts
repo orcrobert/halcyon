@@ -142,7 +142,7 @@ export function useAudioEngine() {
 
   const animateRafRef = useRef(0)
   const animateSnapshotRef = useRef<Map<string, { vol: number; pan: number; depth: number }>>(new Map())
-  const animateStateRef = useRef<Map<string, { baseVol: number; basePan: number; baseDepth: number; speedVol: number; speedPan: number; speedDepth: number; phaseVol: number; phasePan: number; phaseDepth: number }>>(new Map())
+  const animateStateRef = useRef<Map<string, { vol: number; pan: number; depth: number; velVol: number; velPan: number; velDepth: number }>>(new Map())
   const animateCallbackRef = useRef<((values: Map<string, { vol: number; pan: number; depth: number }>) => void) | null>(null)
   const animateMutedRef = useRef<Set<string>>(new Set())
 
@@ -358,53 +358,54 @@ export function useAudioEngine() {
 
     const snapshot = new Map<string, { vol: number; pan: number; depth: number }>()
     const state = new Map<string, {
-      baseVol: number; basePan: number; baseDepth: number
-      speedVol: number; speedPan: number; speedDepth: number
-      phaseVol: number; phasePan: number; phaseDepth: number
+      vol: number; pan: number; depth: number
+      velVol: number; velPan: number; velDepth: number
     }>()
 
-    const t0 = performance.now()
     for (const label of tracksRef.current.keys()) {
       const vol   = volumeStateRef.current.get(label) ?? 1
       const pan   = panStateRef.current.get(label)   ?? 0
       const depth = depthStateRef.current.get(label) ?? 0
       snapshot.set(label, { vol, pan, depth })
-      const speedVol   = 0.00008 + Math.random() * 0.00012
-      const speedPan   = 0.00005 + Math.random() * 0.00010
-      const speedDepth = 0.00006 + Math.random() * 0.00009
-      state.set(label, {
-        baseVol: vol, basePan: pan, baseDepth: depth,
-        speedVol, speedPan, speedDepth,
-        phaseVol:   -t0 * speedVol,
-        phasePan:   -t0 * speedPan,
-        phaseDepth: -t0 * speedDepth,
-      })
+      state.set(label, { vol, pan, depth, velVol: 0, velPan: 0, velDepth: 0 })
     }
 
     animateSnapshotRef.current = snapshot
     animateStateRef.current = state
 
+    const DRAG      = 0.992
+    const NUDGE_VOL = 0.0002
+
+    for (const [, s] of animateStateRef.current) {
+      s.velPan   = 0.07 + Math.random() * 0.06
+      s.velDepth = s.velPan * (1.0 + Math.random() * 0.8)
+    }
+
     function tick() {
       animateRafRef.current = requestAnimationFrame(tick)
-      const now = performance.now()
+      const now = performance.now() * 0.001
       const ctx = ctxRef.current
       const out = new Map<string, { vol: number; pan: number; depth: number }>()
 
       for (const [label, s] of animateStateRef.current) {
-        const vol   = Math.max(0.05, Math.min(1,  s.baseVol   + 0.30 * Math.sin(now * s.speedVol   + s.phaseVol)))
-        const pan   = Math.max(-1,   Math.min(1,  s.basePan   + Math.sin(now * s.speedPan   + s.phasePan)))
-        const depth = Math.max(0,    Math.min(1,  s.baseDepth + Math.sin(now * s.speedDepth + s.phaseDepth)))
+        s.velVol = s.velVol * DRAG + (Math.random() - 0.5) * NUDGE_VOL
+        s.vol = Math.max(0.05, Math.min(1, s.vol + s.velVol))
+        if (s.vol < 0.15) s.velVol += 0.0004
+        if (s.vol > 0.90) s.velVol -= 0.0004
+
+        s.pan   = Math.sin(now * s.velPan)
+        s.depth = 0.5 + 0.5 * Math.sin(now * s.velDepth)
 
         const track = tracksRef.current.get(label)
         if (track && ctx && !animateMutedRef.current.has(label)) {
           const t = ctx.currentTime
-          track.masterGain.gain.setTargetAtTime(vol * 0.5, t, 1.2)
-          track.panner.pan.setTargetAtTime(pan, t, 1.2)
-          track.dryGain.gain.setTargetAtTime(1 - depth * 0.7, t, 1.2)
-          track.wetGain.gain.setTargetAtTime(depth * 0.6, t, 1.2)
+          track.masterGain.gain.setTargetAtTime(s.vol * 0.5, t, 1.5)
+          track.panner.pan.setTargetAtTime(s.pan, t, 1.5)
+          track.dryGain.gain.setTargetAtTime(1 - s.depth * 0.7, t, 1.5)
+          track.wetGain.gain.setTargetAtTime(s.depth * 0.6, t, 1.5)
         }
 
-        out.set(label, { vol, pan, depth })
+        out.set(label, { vol: s.vol, pan: s.pan, depth: s.depth })
       }
 
       animateCallbackRef.current?.(out)
