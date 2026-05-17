@@ -53,7 +53,7 @@ def generate_atmosphere(req: GenerateRequest):
 
     eq_bands_per_element = auto_eq(wavs, srs, valid)
     for i, (element, eq_bands) in enumerate(zip(valid, eq_bands_per_element)):
-        element["eq"] = eq_bands
+        element["eq_json"] = eq_bands
         wavs[i] = apply_eq(wavs[i], srs[i], eq_bands)
 
     volumes = assign_volumes(valid, wavs, srs)

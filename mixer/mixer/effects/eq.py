@@ -70,18 +70,18 @@ def apply_eq(wav: np.ndarray, sr: int, bands: list[dict]) -> np.ndarray:
 
     sos_sections = []
     for band in bands:
-        gain_db = band.get("gain_db", 0.0)
+        gain_db = band.get("gain", band.get("gain_db", 0.0))
         if abs(gain_db) < 0.1:
             continue
 
         btype = band["type"]
         freq = float(band["freq"])
 
-        if btype == "low_shelf":
+        if btype in ("lowshelf", "low_shelf"):
             sos_sections.append(_shelf(freq, gain_db, "low", sr))
-        elif btype == "high_shelf":
+        elif btype in ("highshelf", "high_shelf"):
             sos_sections.append(_shelf(freq, gain_db, "high", sr))
-        elif btype == "peak":
+        elif btype in ("peaking", "peak"):
             q = float(band.get("q", 1.4))
             sos_sections.append(_peak(freq, gain_db, q, sr))
 

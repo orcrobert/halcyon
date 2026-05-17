@@ -153,19 +153,19 @@ def _tonal_shape(S: np.ndarray, freqs: np.ndarray, element_type: str) -> list[di
 
     if sub_e > sub_thresh:
         db = -min(6.0, (sub_e - sub_thresh) * 30.0)
-        bands.append({"type": "low_shelf", "freq": 80, "gain_db": round(db, 1)})
+        bands.append({"type": "lowshelf", "freq": 80, "gain": round(db, 1)})
 
     if air_e > air_thresh:
         db = -min(6.0, (air_e - air_thresh) * 25.0)
-        bands.append({"type": "high_shelf", "freq": 10000, "gain_db": round(db, 1)})
+        bands.append({"type": "highshelf", "freq": 10000, "gain": round(db, 1)})
 
     if low_e > _LOW_THRESH and centroid > _LOW_CENTROID_MIN:
         db = -min(4.0, (low_e - _LOW_THRESH) * 15.0)
-        bands.append({"type": "low_shelf", "freq": 200, "gain_db": round(db, 1)})
+        bands.append({"type": "lowshelf", "freq": 200, "gain": round(db, 1)})
 
     if hi_mid_e > _HI_MID_THRESH and centroid > _HI_MID_CENTROID_MIN:
         db = -min(4.0, (hi_mid_e - _HI_MID_THRESH) * 12.0)
-        bands.append({"type": "peak", "freq": 5000, "gain_db": round(db, 1), "q": 0.8})
+        bands.append({"type": "peaking", "freq": 5000, "gain": round(db, 1), "q": 0.8})
 
     return bands
 
@@ -181,15 +181,16 @@ def _masking_cuts(
         for j in range(i + 1, n):
             noise_floor_i = band_frames[i].max() * _NOISE_FLOOR_RATIO
             noise_floor_j = band_frames[j].max() * _NOISE_FLOOR_RATIO
-            active_i  = band_frames[i].max(axis=0) > noise_floor_i
-            active_j  = band_frames[j].max(axis=0) > noise_floor_j
+            n_frames = min(band_frames[i].shape[1], band_frames[j].shape[1])
+            active_i  = band_frames[i][:, :n_frames].max(axis=0) > noise_floor_i
+            active_j  = band_frames[j][:, :n_frames].max(axis=0) > noise_floor_j
             co_active = active_i & active_j
 
             if co_active.sum() < _MIN_COACTIVE_FRAMES:
                 continue
 
-            fi_co = band_frames[i][:, co_active]
-            fj_co = band_frames[j][:, co_active]
+            fi_co = band_frames[i][:, :n_frames][:, co_active]
+            fj_co = band_frames[j][:, :n_frames][:, co_active]
             pi = np.percentile(fi_co, 75, axis=1)
             pj = np.percentile(fj_co, 75, axis=1)
 
@@ -224,11 +225,11 @@ def _masking_cuts(
                 continue
             fc = float(fc_key)
             if fc < 300:
-                bands.append({"type": "low_shelf", "freq": fc_key, "gain_db": round(db, 1)})
+                bands.append({"type": "lowshelf", "freq": fc_key, "gain": round(db, 1)})
             elif fc > 6000:
-                bands.append({"type": "high_shelf", "freq": fc_key, "gain_db": round(db, 1)})
+                bands.append({"type": "highshelf", "freq": fc_key, "gain": round(db, 1)})
             else:
-                bands.append({"type": "peak", "freq": fc_key, "gain_db": round(db, 1), "q": 1.2})
+                bands.append({"type": "peaking", "freq": fc_key, "gain": round(db, 1), "q": 1.2})
         result.append(bands)
 
     return result
@@ -245,8 +246,8 @@ def _merge_bands(tonal: list[dict], masking: list[dict]) -> list[dict]:
         matched = False
         for existing in merged:
             if _nearby(float(existing["freq"]), float(b["freq"])):
-                combined = existing["gain_db"] + b["gain_db"]
-                existing["gain_db"] = round(max(combined, _MERGE_FLOOR_DB), 1)
+                combined = existing["gain"] + b["gain"]
+                existing["gain"] = round(max(combined, _MERGE_FLOOR_DB), 1)
                 matched = True
                 break
         if not matched:

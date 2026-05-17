@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, useCallback } from 'react'
 import type { Atmosphere } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
@@ -6,6 +6,7 @@ import { Visualizer } from './Visualizer'
 import { TuningControl } from './TuningControl'
 import { BinauralModal } from './BinauralModal'
 
+export interface AnimatedValues { vol: number; pan: number; depth: number }
 
 interface Props {
   session: Atmosphere
@@ -19,6 +20,9 @@ interface Props {
   onTuningChange: (freqHz: number) => void
   onExport: () => Promise<void>
   onReset: () => void
+  onStartAnimate: (cb: (values: Map<string, AnimatedValues>) => void) => void
+  onStopAnimate: () => void
+  onSetAnimateMuted: (muted: Set<string>) => void
   onBinauralToggle: () => void
   onBinauralPreset: (beatHz: number) => void
   onBinauralLeftHz: (hz: number) => void
@@ -32,13 +36,15 @@ interface Props {
 export function DashboardView({
   session, playing, getAnalyser, onPlayPause,
   onVolumeChange, onEQChange, onPanChange, onDepthChange, onTuningChange,
-  onExport, onReset,
+  onExport, onReset, onStartAnimate, onStopAnimate, onSetAnimateMuted,
   onBinauralToggle, onBinauralPreset, onBinauralLeftHz, onBinauralRightHz,
   binauralActive, binauralBeatHz, binauralLeftHz, binauralRightHz,
 }: Props) {
   const [binauralOpen, setBinauralOpen] = useState(false)
   const binauralBtnRef = useRef<HTMLButtonElement>(null)
   const [mutedTracks, setMutedTracks] = useState<Set<string>>(new Set())
+  const [animating, setAnimating] = useState(false)
+  const [animatedValues, setAnimatedValues] = useState<Map<string, AnimatedValues>>(new Map())
   const volumeMap = useRef<Map<string, number>>(
     new Map((session.elements ?? []).map(e => [e.label, e.volume]))
   )
@@ -55,22 +61,40 @@ export function DashboardView({
     setMutedTracks(prev => {
       const next = new Set(prev)
       if (m) next.add(label); else next.delete(label)
+      onSetAnimateMuted(next)
       return next
     })
   }
 
   function handleMuteAll() {
     if (allMutedLocal) {
-      setMutedTracks(new Set())
+      const next = new Set<string>()
+      setMutedTracks(next)
+      onSetAnimateMuted(next)
       for (const label of labels) {
         const vol = volumeMap.current.get(label) ?? 1
         onVolumeChange(label, vol)
       }
     } else {
-      setMutedTracks(new Set(labels))
+      const next = new Set(labels)
+      setMutedTracks(next)
+      onSetAnimateMuted(next)
       for (const label of labels) onVolumeChange(label, 0)
     }
   }
+
+  const handleToggleAnimate = useCallback(() => {
+    if (animating) {
+      onStopAnimate()
+      setAnimating(false)
+      setAnimatedValues(new Map())
+    } else {
+      onStartAnimate((values) => {
+        setAnimatedValues(new Map(values))
+      })
+      setAnimating(true)
+    }
+  }, [animating, onStartAnimate, onStopAnimate])
 
   return (
     <div className="min-h-screen flex flex-col bg-[#08090e]">
@@ -173,20 +197,37 @@ export function DashboardView({
             )}
           </button>
 
-          {/* Mute all */}
-          <button
-            onClick={handleMuteAll}
-            style={{
-              fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em',
-              padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
-              border: allMutedLocal ? '1px solid rgba(239,68,68,0.35)' : '1px solid rgba(255,255,255,0.07)',
-              background: allMutedLocal ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.02)',
-              color: allMutedLocal ? '#f87171' : '#334155',
-              transition: 'all 0.2s',
-            }}
-          >
-            {allMutedLocal ? 'unmute all' : 'mute all'}
-          </button>
+          {/* Mute all + Animate */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={handleMuteAll}
+              style={{
+                fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em',
+                padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
+                border: allMutedLocal ? '1px solid rgba(239,68,68,0.35)' : '1px solid rgba(255,255,255,0.07)',
+                background: allMutedLocal ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.02)',
+                color: allMutedLocal ? '#f87171' : '#334155',
+                transition: 'all 0.2s',
+              }}
+            >
+              {allMutedLocal ? 'unmute all' : 'mute all'}
+            </button>
+
+            <button
+              onClick={handleToggleAnimate}
+              style={{
+                fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em',
+                padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
+                border: animating ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(255,255,255,0.07)',
+                background: animating ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)',
+                color: animating ? '#818cf8' : '#334155',
+                boxShadow: animating ? '0 0 12px rgba(99,102,241,0.15)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              {animating ? 'animating' : 'animate'}
+            </button>
+          </div>
         </div>
 
         {/* Mixer */}
@@ -198,18 +239,24 @@ export function DashboardView({
           width: '100%',
           maxWidth: '900px',
         }}>
-          {(session.elements ?? []).map((el) => (
-            <TrackStrip
-              key={el.label}
-              element={el}
-              muted={mutedTracks.has(el.label)}
-              onMuteChange={handleMuteChange}
-              onVolumeChange={handleVolumeChange}
-              onEQChange={onEQChange}
-              onPanChange={onPanChange}
-              onDepthChange={onDepthChange}
-            />
-          ))}
+          {(session.elements ?? []).map((el) => {
+            const anim = animatedValues.get(el.label)
+            return (
+              <TrackStrip
+                key={el.label}
+                element={el}
+                muted={mutedTracks.has(el.label)}
+                animatedVolume={anim?.vol}
+                animatedPan={anim?.pan}
+                animatedDepth={anim?.depth}
+                onMuteChange={handleMuteChange}
+                onVolumeChange={handleVolumeChange}
+                onEQChange={onEQChange}
+                onPanChange={onPanChange}
+                onDepthChange={onDepthChange}
+              />
+            )
+          })}
         </div>
 
       </main>

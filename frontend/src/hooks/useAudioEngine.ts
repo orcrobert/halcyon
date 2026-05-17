@@ -140,6 +140,12 @@ export function useAudioEngine() {
   const binauralLeftHzRef = useRef(200)
   const binauralRightHzRef = useRef(208)
 
+  const animateRafRef = useRef(0)
+  const animateSnapshotRef = useRef<Map<string, { vol: number; pan: number; depth: number }>>(new Map())
+  const animateStateRef = useRef<Map<string, { baseVol: number; basePan: number; baseDepth: number; speedVol: number; speedPan: number; speedDepth: number; phaseVol: number; phasePan: number; phaseDepth: number }>>(new Map())
+  const animateCallbackRef = useRef<((values: Map<string, { vol: number; pan: number; depth: number }>) => void) | null>(null)
+  const animateMutedRef = useRef<Set<string>>(new Set())
+
   const getContext = useCallback(() => {
     if (!ctxRef.current) {
       ctxRef.current = new AudioContext()
@@ -344,7 +350,94 @@ export function useAudioEngine() {
     binauralRef.current.rightOsc.frequency.setTargetAtTime(rightHz, ctx.currentTime, 0.05)
   }, [getContext])
 
+  const startAnimate = useCallback((
+    onFrame: (values: Map<string, { vol: number; pan: number; depth: number }>) => void
+  ) => {
+    cancelAnimationFrame(animateRafRef.current)
+    animateCallbackRef.current = onFrame
+
+    const snapshot = new Map<string, { vol: number; pan: number; depth: number }>()
+    const state = new Map<string, {
+      baseVol: number; basePan: number; baseDepth: number
+      speedVol: number; speedPan: number; speedDepth: number
+      phaseVol: number; phasePan: number; phaseDepth: number
+    }>()
+
+    const t0 = performance.now()
+    for (const label of tracksRef.current.keys()) {
+      const vol   = volumeStateRef.current.get(label) ?? 1
+      const pan   = panStateRef.current.get(label)   ?? 0
+      const depth = depthStateRef.current.get(label) ?? 0
+      snapshot.set(label, { vol, pan, depth })
+      const speedVol   = 0.00008 + Math.random() * 0.00012
+      const speedPan   = 0.00005 + Math.random() * 0.00010
+      const speedDepth = 0.00006 + Math.random() * 0.00009
+      state.set(label, {
+        baseVol: vol, basePan: pan, baseDepth: depth,
+        speedVol, speedPan, speedDepth,
+        phaseVol:   -t0 * speedVol,
+        phasePan:   -t0 * speedPan,
+        phaseDepth: -t0 * speedDepth,
+      })
+    }
+
+    animateSnapshotRef.current = snapshot
+    animateStateRef.current = state
+
+    function tick() {
+      animateRafRef.current = requestAnimationFrame(tick)
+      const now = performance.now()
+      const ctx = ctxRef.current
+      const out = new Map<string, { vol: number; pan: number; depth: number }>()
+
+      for (const [label, s] of animateStateRef.current) {
+        const vol   = Math.max(0.05, Math.min(1,  s.baseVol   + 0.30 * Math.sin(now * s.speedVol   + s.phaseVol)))
+        const pan   = Math.max(-1,   Math.min(1,  s.basePan   + Math.sin(now * s.speedPan   + s.phasePan)))
+        const depth = Math.max(0,    Math.min(1,  s.baseDepth + Math.sin(now * s.speedDepth + s.phaseDepth)))
+
+        const track = tracksRef.current.get(label)
+        if (track && ctx && !animateMutedRef.current.has(label)) {
+          const t = ctx.currentTime
+          track.masterGain.gain.setTargetAtTime(vol * 0.5, t, 1.2)
+          track.panner.pan.setTargetAtTime(pan, t, 1.2)
+          track.dryGain.gain.setTargetAtTime(1 - depth * 0.7, t, 1.2)
+          track.wetGain.gain.setTargetAtTime(depth * 0.6, t, 1.2)
+        }
+
+        out.set(label, { vol, pan, depth })
+      }
+
+      animateCallbackRef.current?.(out)
+    }
+
+    tick()
+  }, [])
+
+  const stopAnimate = useCallback(() => {
+    cancelAnimationFrame(animateRafRef.current)
+    animateCallbackRef.current = null
+
+    const ctx = ctxRef.current
+    for (const [label, snap] of animateSnapshotRef.current) {
+      const track = tracksRef.current.get(label)
+      if (track && ctx) {
+        const t = ctx.currentTime
+        track.masterGain.gain.setTargetAtTime(snap.vol * 0.5, t, 0.08)
+        track.panner.pan.setTargetAtTime(snap.pan, t, 0.08)
+        track.dryGain.gain.setTargetAtTime(1 - snap.depth * 0.7, t, 0.08)
+        track.wetGain.gain.setTargetAtTime(snap.depth * 0.6, t, 0.08)
+      }
+    }
+
+    animateSnapshotRef.current.clear()
+    animateStateRef.current.clear()
+  }, [])
+
   const stop = useCallback(() => {
+    cancelAnimationFrame(animateRafRef.current)
+    animateCallbackRef.current = null
+    animateSnapshotRef.current.clear()
+    animateStateRef.current.clear()
     stopBinaural()
     tracksRef.current.forEach(({ source }) => {
       try { source.stop() } catch {}
@@ -421,5 +514,9 @@ export function useAudioEngine() {
     URL.revokeObjectURL(url)
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startBinaural, stopBinaural, setBinauralFreqs }
+  const setAnimateMuted = useCallback((muted: Set<string>) => {
+    animateMutedRef.current = muted
+  }, [])
+
+  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
 }

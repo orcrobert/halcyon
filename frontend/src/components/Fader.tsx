@@ -5,6 +5,7 @@ interface Props {
   value: number
   onChange: (val: number) => void
   disabled?: boolean
+  displayValue?: number
 }
 
 const TRACK_HEIGHT = 180
@@ -20,7 +21,7 @@ const SCALE_HOVER = 1.4
 const SCALE_STIFFNESS = 400
 const SCALE_DAMPING = 25
 
-export function Fader({ value, onChange, disabled }: Props) {
+export function Fader({ value, onChange, disabled, displayValue }: Props) {
   const trackRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
@@ -31,7 +32,8 @@ export function Fader({ value, onChange, disabled }: Props) {
   const pullY = useMotionValue(0)
   const pullStrength = useMotionValue(0)
 
-  const thumbY = (1 - value) * (TRACK_HEIGHT - THUMB_R * 2)
+  const display = displayValue ?? value
+  const thumbY = (1 - display) * (TRACK_HEIGHT - THUMB_R * 2)
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -169,7 +171,7 @@ export function Fader({ value, onChange, disabled }: Props) {
         bottom: 0,
         transform: 'translateX(-50%)',
         width: '4px',
-        height: `${value * TRACK_HEIGHT}px`,
+        height: `${display * TRACK_HEIGHT}px`,
         background: disabled ? '#2a2b40' : 'rgba(99,102,241,0.4)',
         borderRadius: '2px',
       }} />

@@ -65,7 +65,7 @@ class GenerateAtmosphereJob implements ShouldQueue
             foreach ($elements as $i => $el) {
                 $audioPath = $this->persistAudio($el, $i);
 
-                $eq = $el['eq'] ?? [];
+                $eq = $el['eq_json'] ?? $el['eq'] ?? [];
                 $volume = (float) ($el['volume'] ?? 0.8);
                 $pan = (float) ($el['pan'] ?? 0.0);
                 $depth = (float) ($el['depth'] ?? 0.0);

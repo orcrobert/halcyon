@@ -61,6 +61,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
   const {
     load, start, pause, unpause, setVolume, setEQ, setPan, setDepth,
     setTuning, stop, exportMix, getAnalyser,
+    startAnimate, stopAnimate, setAnimateMuted,
     startBinaural, stopBinaural, setBinauralFreqs,
   } = useAudioEngine()
 
@@ -311,6 +312,9 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
           onTuningChange={handleTuningChange}
           onExport={() => exportMix(atmosphere.title ?? `atmosphere-${atmosphere.id}`)}
           onReset={handleNewAtmosphere}
+          onStartAnimate={startAnimate}
+          onStopAnimate={stopAnimate}
+          onSetAnimateMuted={setAnimateMuted}
           binauralActive={binauralActive}
           binauralBeatHz={binauralBeatHz}
           binauralLeftHz={binauralLeftHz}
