@@ -12,13 +12,18 @@ interface Props {
   onClose: () => void
 }
 
+const EQ_MIN = -8
+const EQ_MAX = 8
+
+function clampEQ(v: number) { return Math.max(EQ_MIN, Math.min(EQ_MAX, v)) }
+
 function buildInitialState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
   for (const band of bands) {
-    if (band.type === 'lowshelf') state.low = band.gain
-    else if (band.type === 'highshelf') state.high = band.gain
-    else if (band.type === 'peaking') state.mid = band.gain
+    if (band.type === 'lowshelf') state.low = clampEQ(band.gain)
+    else if (band.type === 'highshelf') state.high = clampEQ(band.gain)
+    else if (band.type === 'peaking') state.mid = clampEQ(band.gain)
   }
   return state
 }
@@ -31,12 +36,11 @@ interface BandSliderProps {
 }
 
 function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
-  const MIN = -12
-  const MAX = 12
+  const MIN = -8
+  const MAX = 8
   const isActive = Math.abs(value) > 0.4
   const trackHeight = 180
 
-  // Fraction 0→1 from bottom
   const frac = (value - MIN) / (MAX - MIN)
   const centerFrac = 0.5
 
@@ -284,9 +288,9 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
 
         {/* dB scale hint */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-          <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>−12 dB</span>
+          <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>−8 dB</span>
           <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>0</span>
-          <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>+12 dB</span>
+          <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>+8 dB</span>
         </div>
       </div>
 

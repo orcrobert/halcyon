@@ -1,8 +1,12 @@
+import { useRef, useState, useCallback } from 'react'
 import type { Atmosphere } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
 import { Visualizer } from './Visualizer'
 import { TuningControl } from './TuningControl'
+import { BinauralModal } from './BinauralModal'
+
+export interface AnimatedValues { vol: number; pan: number; depth: number }
 
 interface Props {
   session: Atmosphere
@@ -16,12 +20,84 @@ interface Props {
   onTuningChange: (freqHz: number) => void
   onExport: () => Promise<void>
   onReset: () => void
+  onStartAnimate: (cb: (values: Map<string, AnimatedValues>) => void) => void
+  onStopAnimate: () => void
+  onSetAnimateMuted: (muted: Set<string>) => void
+  onBinauralToggle: () => void
+  onBinauralPreset: (beatHz: number) => void
+  onBinauralLeftHz: (hz: number) => void
+  onBinauralRightHz: (hz: number) => void
+  binauralActive: boolean
+  binauralBeatHz: number
+  binauralLeftHz: number
+  binauralRightHz: number
 }
 
-export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVolumeChange, onEQChange, onPanChange, onDepthChange, onTuningChange, onExport, onReset }: Props) {
+export function DashboardView({
+  session, playing, getAnalyser, onPlayPause,
+  onVolumeChange, onEQChange, onPanChange, onDepthChange, onTuningChange,
+  onExport, onReset, onStartAnimate, onStopAnimate, onSetAnimateMuted,
+  onBinauralToggle, onBinauralPreset, onBinauralLeftHz, onBinauralRightHz,
+  binauralActive, binauralBeatHz, binauralLeftHz, binauralRightHz,
+}: Props) {
+  const [binauralOpen, setBinauralOpen] = useState(false)
+  const binauralBtnRef = useRef<HTMLButtonElement>(null)
+  const [mutedTracks, setMutedTracks] = useState<Set<string>>(new Set())
+  const [animating, setAnimating] = useState(false)
+  const [animatedValues, setAnimatedValues] = useState<Map<string, AnimatedValues>>(new Map())
+  const volumeMap = useRef<Map<string, number>>(
+    new Map((session.elements ?? []).map(e => [e.label, e.volume]))
+  )
+
+  const labels = (session.elements ?? []).map(e => e.label)
+  const allMutedLocal = labels.length > 0 && labels.every(l => mutedTracks.has(l))
+
+  function handleVolumeChange(label: string, volume: number) {
+    if (volume > 0) volumeMap.current.set(label, volume)
+    onVolumeChange(label, volume)
+  }
+
+  function handleMuteChange(label: string, m: boolean) {
+    setMutedTracks(prev => {
+      const next = new Set(prev)
+      if (m) next.add(label); else next.delete(label)
+      onSetAnimateMuted(next)
+      return next
+    })
+  }
+
+  function handleMuteAll() {
+    if (allMutedLocal) {
+      const next = new Set<string>()
+      setMutedTracks(next)
+      onSetAnimateMuted(next)
+      for (const label of labels) {
+        const vol = volumeMap.current.get(label) ?? 1
+        onVolumeChange(label, vol)
+      }
+    } else {
+      const next = new Set(labels)
+      setMutedTracks(next)
+      onSetAnimateMuted(next)
+      for (const label of labels) onVolumeChange(label, 0)
+    }
+  }
+
+  const handleToggleAnimate = useCallback(() => {
+    if (animating) {
+      onStopAnimate()
+      setAnimating(false)
+      setAnimatedValues(new Map())
+    } else {
+      onStartAnimate((values) => {
+        setAnimatedValues(new Map(values))
+      })
+      setAnimating(true)
+    }
+  }, [animating, onStartAnimate, onStopAnimate])
+
   return (
     <div className="min-h-screen flex flex-col bg-[#08090e]">
-
       <TuningControl
         onTuningChange={onTuningChange}
         initialFreq={session.elements?.[0]?.tuning_hz ?? 440}
@@ -43,6 +119,25 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
 
         {/* Actions */}
         <div className="flex items-center gap-2">
+
+          {/* Binaural beats button */}
+          <button
+            ref={binauralBtnRef}
+            onClick={() => setBinauralOpen(o => !o)}
+            style={{
+              width: 36, height: 36, borderRadius: '50%', cursor: 'pointer',
+              border: binauralActive ? '1px solid rgba(99,102,241,0.5)' : '1px solid rgba(99,102,241,0.2)',
+              background: binauralActive ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.04)',
+              color: binauralActive ? '#818cf8' : 'rgba(99,102,241,0.4)',
+              fontSize: 13, fontFamily: 'inherit', fontStyle: 'italic', fontWeight: 600,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: binauralActive ? '0 0 16px rgba(99,102,241,0.25), 0 0 4px rgba(99,102,241,0.15)' : 'none',
+              transition: 'all 0.2s',
+            }}
+          >
+            β
+          </button>
+
           <button
             onClick={onExport}
             className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150"
@@ -101,6 +196,38 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
               </svg>
             )}
           </button>
+
+          {/* Mute all + Animate */}
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={handleMuteAll}
+              style={{
+                fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em',
+                padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
+                border: allMutedLocal ? '1px solid rgba(239,68,68,0.35)' : '1px solid rgba(255,255,255,0.07)',
+                background: allMutedLocal ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.02)',
+                color: allMutedLocal ? '#f87171' : '#334155',
+                transition: 'all 0.2s',
+              }}
+            >
+              {allMutedLocal ? 'unmute all' : 'mute all'}
+            </button>
+
+            <button
+              onClick={handleToggleAnimate}
+              style={{
+                fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em',
+                padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
+                border: animating ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(255,255,255,0.07)',
+                background: animating ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)',
+                color: animating ? '#818cf8' : '#334155',
+                boxShadow: animating ? '0 0 12px rgba(99,102,241,0.15)' : 'none',
+                transition: 'all 0.2s',
+              }}
+            >
+              {animating ? 'animating' : 'animate'}
+            </button>
+          </div>
         </div>
 
         {/* Mixer */}
@@ -112,16 +239,24 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
           width: '100%',
           maxWidth: '900px',
         }}>
-          {(session.elements ?? []).map((el) => (
-            <TrackStrip
-              key={el.label}
-              element={el}
-              onVolumeChange={onVolumeChange}
-              onEQChange={onEQChange}
-              onPanChange={onPanChange}
-              onDepthChange={onDepthChange}
-            />
-          ))}
+          {(session.elements ?? []).map((el) => {
+            const anim = animatedValues.get(el.label)
+            return (
+              <TrackStrip
+                key={el.label}
+                element={el}
+                muted={mutedTracks.has(el.label)}
+                animatedVolume={anim?.vol}
+                animatedPan={anim?.pan}
+                animatedDepth={anim?.depth}
+                onMuteChange={handleMuteChange}
+                onVolumeChange={handleVolumeChange}
+                onEQChange={onEQChange}
+                onPanChange={onPanChange}
+                onDepthChange={onDepthChange}
+              />
+            )
+          })}
         </div>
 
       </main>
@@ -132,6 +267,20 @@ export function DashboardView({ session, playing, getAnalyser, onPlayPause, onVo
           Drag faders · M to mute
         </p>
       </footer>
+
+      <BinauralModal
+        open={binauralOpen}
+        anchorRef={binauralBtnRef}
+        active={binauralActive}
+        beatHz={binauralBeatHz}
+        leftHz={binauralLeftHz}
+        rightHz={binauralRightHz}
+        onToggle={onBinauralToggle}
+        onPreset={onBinauralPreset}
+        onLeftHz={onBinauralLeftHz}
+        onRightHz={onBinauralRightHz}
+        onClose={() => setBinauralOpen(false)}
+      />
 
     </div>
   )

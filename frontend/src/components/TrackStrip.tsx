@@ -7,22 +7,30 @@ import { SpatialModal } from './SpatialModal'
 
 interface Props {
   element: Element
+  muted: boolean
+  animatedVolume?: number
+  animatedPan?: number
+  animatedDepth?: number
   onVolumeChange: (label: string, volume: number) => void
+  onMuteChange: (label: string, muted: boolean) => void
   onEQChange: (label: string, eq: EQState) => void
   onPanChange: (label: string, pan: number) => void
   onDepthChange: (label: string, depth: number) => void
 }
 
-export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, onDepthChange }: Props) {
+export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange }: Props) {
   const [volume, setVolume] = useState(element.volume)
   const [pan, setPan] = useState(element.pan ?? 0)
   const [depth, setDepth] = useState(element.depth ?? 0)
-  const [muted, setMuted] = useState(false)
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [spatialOpen, setSpatialOpen] = useState(false)
   const eqBtnRef = useRef<HTMLButtonElement>(null)
   const spatialBtnRef = useRef<HTMLButtonElement>(null)
+
+  const dispVolume = animatedVolume ?? volume
+  const dispPan    = animatedPan    ?? pan
+  const dispDepth  = animatedDepth  ?? depth
 
   function handlePanChange(val: number) {
     setPan(val)
@@ -37,17 +45,17 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
   function handleVolumeChange(val: number) {
     setVolume(val)
     if (val === 0) {
-      setMuted(true)
+      onMuteChange(element.label, true)
       onVolumeChange(element.label, 0)
     } else {
-      setMuted(false)
+      onMuteChange(element.label, false)
       onVolumeChange(element.label, val)
     }
   }
 
   function handleMute() {
     const next = !muted
-    setMuted(next)
+    onMuteChange(element.label, next)
     onVolumeChange(element.label, next ? 0 : volume)
   }
 
@@ -106,11 +114,12 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
       >
         {/* Volume % */}
         <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-slate-800' : 'text-slate-700'}`}>
-          {muted ? '—' : `${Math.round(volume * 100)}`}
+          {muted ? '—' : `${Math.round(dispVolume * 100)}`}
         </span>
 
         <Fader
           value={volume}
+          displayValue={dispVolume}
           onChange={handleVolumeChange}
           disabled={muted && volume > 0}
         />
@@ -135,19 +144,15 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
             padding: 0,
           }}
         >
-          {/* Mini 2D indicator: outer ring + movable dot */}
           <svg width="20" height="20" viewBox="0 0 20 20">
-            {/* Outer ring */}
             <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
-            {/* Crosshair */}
             <line x1="10" y1="3" x2="10" y2="17" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
             <line x1="3" y1="10" x2="17" y2="10" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
-            {/* Position dot — clamped inside the ring */}
             <circle
-              cx={10 + pan * 6}
-              cy={10 + depth * 6}
+              cx={10 + dispPan * 7}
+              cy={3 + dispDepth * 14}
               r="2.5"
-              fill={Math.abs(pan) > 0.03 || depth > 0.03 ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.35)'}
+              fill={Math.abs(dispPan) > 0.03 || dispDepth > 0.03 ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.35)'}
             />
           </svg>
         </button>
@@ -167,7 +172,6 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
 
         {/* Bottom buttons row */}
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-          {/* Mute */}
           <button
             onClick={handleMute}
             title="Mute"
@@ -181,7 +185,6 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
             M
           </button>
 
-          {/* EQ toggle */}
           <button
             ref={eqBtnRef}
             onClick={() => setEqOpen(v => !v)}
@@ -198,7 +201,6 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
         </div>
       </div>
 
-      {/* EQ Modal — portalled to body */}
       <EQPanel
         label={element.label}
         initialBands={element.eq_json ?? undefined}
@@ -208,10 +210,9 @@ export function TrackStrip({ element, onVolumeChange, onEQChange, onPanChange, o
         onClose={() => setEqOpen(false)}
       />
 
-      {/* Spatial Modal — portalled to body */}
       <SpatialModal
-        pan={pan}
-        depth={depth}
+        pan={dispPan}
+        depth={dispDepth}
         defaultPan={element.pan ?? 0}
         defaultDepth={0}
         label={element.label}

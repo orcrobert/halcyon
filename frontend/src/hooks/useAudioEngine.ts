@@ -61,6 +61,13 @@ interface DecodedElement {
   buffer: AudioBuffer
 }
 
+interface BinauralNodes {
+  leftOsc: OscillatorNode
+  rightOsc: OscillatorNode
+  merger: ChannelMergerNode
+  gain: GainNode
+}
+
 function buildEQState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
@@ -129,6 +136,15 @@ export function useAudioEngine() {
   const depthStateRef = useRef<Map<string, number>>(new Map())
   const pitchRef = useRef(1.0)
   const workletReadyRef = useRef(false)
+  const binauralRef = useRef<BinauralNodes | null>(null)
+  const binauralLeftHzRef = useRef(200)
+  const binauralRightHzRef = useRef(208)
+
+  const animateRafRef = useRef(0)
+  const animateSnapshotRef = useRef<Map<string, { vol: number; pan: number; depth: number }>>(new Map())
+  const animateStateRef = useRef<Map<string, { vol: number; pan: number; depth: number; velVol: number; velPan: number; velDepth: number }>>(new Map())
+  const animateCallbackRef = useRef<((values: Map<string, { vol: number; pan: number; depth: number }>) => void) | null>(null)
+  const animateMutedRef = useRef<Set<string>>(new Set())
 
   const getContext = useCallback(() => {
     if (!ctxRef.current) {
@@ -160,9 +176,10 @@ export function useAudioEngine() {
       const [lowFilter,, highFilter] = filters
 
       const masterGain = ctx.createGain()
-      masterGain.gain.value = volumeStateRef.current.has(el.label)
+      const vol = volumeStateRef.current.has(el.label)
         ? volumeStateRef.current.get(el.label)!
         : el.volume
+      masterGain.gain.value = vol * 0.5
 
       const panner = ctx.createStereoPanner()
       panner.pan.value = panStateRef.current.has(el.label)
@@ -248,7 +265,7 @@ export function useAudioEngine() {
     volumeStateRef.current.set(label, volume)
     const track = tracksRef.current.get(label)
     if (track) {
-      track.masterGain.gain.setTargetAtTime(volume, getContext().currentTime, 0.05)
+      track.masterGain.gain.setTargetAtTime(volume * 0.5, getContext().currentTime, 0.05)
     }
   }, [getContext])
 
@@ -288,7 +305,141 @@ export function useAudioEngine() {
     track.wetGain.gain.setTargetAtTime(depth * 0.6, t, 0.05)
   }, [getContext])
 
+  const startBinaural = useCallback(() => {
+    const ctx = getContext()
+    if (binauralRef.current) return
+    const leftOsc = ctx.createOscillator()
+    const rightOsc = ctx.createOscillator()
+    leftOsc.type = 'sine'
+    rightOsc.type = 'sine'
+    leftOsc.frequency.value = binauralLeftHzRef.current
+    rightOsc.frequency.value = binauralRightHzRef.current
+
+    const merger = ctx.createChannelMerger(2)
+    const gain = ctx.createGain()
+    gain.gain.value = 0.15
+
+    const leftSplitter = ctx.createGain()
+    const rightSplitter = ctx.createGain()
+    leftOsc.connect(leftSplitter)
+    rightOsc.connect(rightSplitter)
+    leftSplitter.connect(merger, 0, 0)
+    rightSplitter.connect(merger, 0, 1)
+    merger.connect(gain)
+    gain.connect(ctx.destination)
+
+    leftOsc.start()
+    rightOsc.start()
+    binauralRef.current = { leftOsc, rightOsc, merger, gain }
+  }, [getContext])
+
+  const stopBinaural = useCallback(() => {
+    if (!binauralRef.current) return
+    const { leftOsc, rightOsc } = binauralRef.current
+    try { leftOsc.stop() } catch {}
+    try { rightOsc.stop() } catch {}
+    binauralRef.current = null
+  }, [])
+
+  const setBinauralFreqs = useCallback((leftHz: number, rightHz: number) => {
+    binauralLeftHzRef.current = leftHz
+    binauralRightHzRef.current = rightHz
+    if (!binauralRef.current) return
+    const ctx = getContext()
+    binauralRef.current.leftOsc.frequency.setTargetAtTime(leftHz, ctx.currentTime, 0.05)
+    binauralRef.current.rightOsc.frequency.setTargetAtTime(rightHz, ctx.currentTime, 0.05)
+  }, [getContext])
+
+  const startAnimate = useCallback((
+    onFrame: (values: Map<string, { vol: number; pan: number; depth: number }>) => void
+  ) => {
+    cancelAnimationFrame(animateRafRef.current)
+    animateCallbackRef.current = onFrame
+
+    const snapshot = new Map<string, { vol: number; pan: number; depth: number }>()
+    const state = new Map<string, {
+      vol: number; pan: number; depth: number
+      velVol: number; velPan: number; velDepth: number
+    }>()
+
+    for (const label of tracksRef.current.keys()) {
+      const vol   = volumeStateRef.current.get(label) ?? 1
+      const pan   = panStateRef.current.get(label)   ?? 0
+      const depth = depthStateRef.current.get(label) ?? 0
+      snapshot.set(label, { vol, pan, depth })
+      state.set(label, { vol, pan, depth, velVol: 0, velPan: 0, velDepth: 0 })
+    }
+
+    animateSnapshotRef.current = snapshot
+    animateStateRef.current = state
+
+    const DRAG      = 0.992
+    const NUDGE_VOL = 0.0002
+
+    for (const [, s] of animateStateRef.current) {
+      s.velPan   = 0.07 + Math.random() * 0.06
+      s.velDepth = s.velPan * (1.0 + Math.random() * 0.8)
+    }
+
+    function tick() {
+      animateRafRef.current = requestAnimationFrame(tick)
+      const now = performance.now() * 0.001
+      const ctx = ctxRef.current
+      const out = new Map<string, { vol: number; pan: number; depth: number }>()
+
+      for (const [label, s] of animateStateRef.current) {
+        s.velVol = s.velVol * DRAG + (Math.random() - 0.5) * NUDGE_VOL
+        s.vol = Math.max(0.05, Math.min(1, s.vol + s.velVol))
+        if (s.vol < 0.15) s.velVol += 0.0004
+        if (s.vol > 0.90) s.velVol -= 0.0004
+
+        s.pan   = Math.sin(now * s.velPan)
+        s.depth = 0.5 + 0.5 * Math.sin(now * s.velDepth)
+
+        const track = tracksRef.current.get(label)
+        if (track && ctx && !animateMutedRef.current.has(label)) {
+          const t = ctx.currentTime
+          track.masterGain.gain.setTargetAtTime(s.vol * 0.5, t, 1.5)
+          track.panner.pan.setTargetAtTime(s.pan, t, 1.5)
+          track.dryGain.gain.setTargetAtTime(1 - s.depth * 0.7, t, 1.5)
+          track.wetGain.gain.setTargetAtTime(s.depth * 0.6, t, 1.5)
+        }
+
+        out.set(label, { vol: s.vol, pan: s.pan, depth: s.depth })
+      }
+
+      animateCallbackRef.current?.(out)
+    }
+
+    tick()
+  }, [])
+
+  const stopAnimate = useCallback(() => {
+    cancelAnimationFrame(animateRafRef.current)
+    animateCallbackRef.current = null
+
+    const ctx = ctxRef.current
+    for (const [label, snap] of animateSnapshotRef.current) {
+      const track = tracksRef.current.get(label)
+      if (track && ctx) {
+        const t = ctx.currentTime
+        track.masterGain.gain.setTargetAtTime(snap.vol * 0.5, t, 0.08)
+        track.panner.pan.setTargetAtTime(snap.pan, t, 0.08)
+        track.dryGain.gain.setTargetAtTime(1 - snap.depth * 0.7, t, 0.08)
+        track.wetGain.gain.setTargetAtTime(snap.depth * 0.6, t, 0.08)
+      }
+    }
+
+    animateSnapshotRef.current.clear()
+    animateStateRef.current.clear()
+  }, [])
+
   const stop = useCallback(() => {
+    cancelAnimationFrame(animateRafRef.current)
+    animateCallbackRef.current = null
+    animateSnapshotRef.current.clear()
+    animateStateRef.current.clear()
+    stopBinaural()
     tracksRef.current.forEach(({ source }) => {
       try { source.stop() } catch {}
     })
@@ -302,7 +453,7 @@ export function useAudioEngine() {
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
-  }, [])
+  }, [stopBinaural])
 
   const getAnalyser = useCallback(() => analyserRef.current, [])
 
@@ -326,7 +477,7 @@ export function useAudioEngine() {
       const [lowFilter,, highFilter] = offlineFilters
 
       const gain = offline.createGain()
-      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : el.volume
+      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : el.volume * 0.5
 
       const depth = depthStateRef.current.get(el.label) ?? 0
       const { convolver, dryGain, wetGain } = createReverb(offline, depth)
@@ -364,5 +515,9 @@ export function useAudioEngine() {
     URL.revokeObjectURL(url)
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser }
+  const setAnimateMuted = useCallback((muted: Set<string>) => {
+    animateMutedRef.current = muted
+  }, [])
+
+  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
 }
