@@ -17,7 +17,7 @@ from mixer.effects.looping import make_loopable
 from mixer.effects.eq import apply_eq
 from mixer.effects.auto_eq import auto_eq
 from mixer.effects.volume import assign_volumes
-from mixer.effects.spatial import predict_and_apply
+from mixer.effects.spatial import apply_pan, assign_spatial
 
 router = APIRouter()
 
@@ -58,10 +58,13 @@ def generate_atmosphere(req: GenerateRequest):
 
     volumes = assign_volumes(valid, wavs, srs)
 
-    for element, wav, sr, vol in zip(valid, wavs, srs, volumes):
+    spatial = assign_spatial(list(zip(wavs, srs)))
+
+    for element, wav, sr, vol, (pan, depth) in zip(valid, wavs, srs, volumes, spatial):
         element["volume"] = vol
-        wav, pan = predict_and_apply(wav, sr)
         element["pan"] = round(pan, 4)
+        element["depth"] = round(depth, 4)
+        wav = apply_pan(wav, pan)
         buf = io.BytesIO()
         sf.write(buf, wav.T, sr, format="WAV")
         element["audio_b64"] = base64.b64encode(buf.getvalue()).decode()

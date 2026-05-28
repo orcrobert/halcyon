@@ -1,0 +1,8 @@
+data/starss23/
+data/processed/clips/
+data/processed/*.parquet
+models/*.pkl
+models/diagnostics/*.png
+models/training_log.json
+__pycache__/
+*.pyc

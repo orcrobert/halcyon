@@ -4,7 +4,7 @@ Sound elements follow this template:
 [Sound event], [object/material], [action], [environment], [distance/mic perspective], [acoustic qualities]
 
 Music elements follow this template:
-[Genre/subgenre], [mood], [lead instruments], [supporting instruments], [tempo/BPM], [arrangement], [production style], [vocals or no vocals]
+[Genre/subgenre], [mood], [lead instruments], [supporting instruments], [tempo/BPM], [arrangement], [production style], [vocals descriptor]
 
 The title should be suggestive for the user, format it properly.
 
@@ -30,9 +30,13 @@ The rules below explain how to use these templates and what to avoid.
 
 ---
 
-# RULE 0 — PLAN BEFORE WRITING
+# RULE 0 — MATCH COMPLEXITY TO THE REQUEST
 
 Before writing JSON, list the distinct sonic layers in the scene as plain English. Then convert each layer to exactly one element. Do not merge layers.
+
+Equally important: **do not invent layers the user did not ask for**. If the request is a single sound or a single piece of music, return a single element with a minimal, direct prompt. Templates are a maximum, not a minimum — every slot is optional. A simple request gets a simple prompt with only the slots that actually carry information. A complex scene gets richer prompts. Read the user's intent and calibrate.
+
+When in doubt, prefer fewer words. A prompt with three relevant slots will almost always sound better than the same prompt padded with vague filler to fill all six.
 
 ---
 
@@ -52,7 +56,6 @@ The model matches words to sounds. It is literal, not interpretive. Every word i
 - Vague emotional language without sonic grounding ("mysterious", "ominous", "wistful")
 - Genre tags without instruments ("Middle Eastern music", "oriental feel")
 - Placeholder words like "none", "n/a", "any", "various", "standard", "etc" — the model will try to render these as sound. NEVER write them. If a slot does not apply, OMIT IT ENTIRELY.
-- Default to 1–2 music elements. Only go up to 3 if the scene is genuinely complex and clearly needs more layered musical texture. More than 2 risks dissonance because the model has no recollection of what it previously generated, so each music element is composed blind to the others.
 
 Note: the music template includes a [mood] slot — this is the one place mood words belong, and they should be simple and sonically grounded (calm, warm, melancholic, meditative). Everywhere else, every word must name a sound, instrument, or physical audio property you can literally hear.
 
@@ -60,17 +63,19 @@ Note: the music template includes a [mood] slot — this is the one place mood w
 
 # RULE 3 — ELEMENT COUNT
 
-- 5–10 elements, scaled to scene density. Sparse scenes (quiet room, empty field): 5. Dense scenes (market, battle): up to 10.
-- If it has musical pitch — a drone, a pad, a sustained note, an instrument — it is type "music". If it has no musical pitch — wind, water, crowd, footsteps, animal sounds — it is type "sound". When in doubt: does it have a musical tone? Yes → music. No → sound.
-- No two elements overlap sonically
-- If the user explicitly mentions a specific sound or element (drone, rain, flute, crowd, etc.), it MUST appear as its own element in the output. Never drop something the user asked for.
+- Scale to the request. A single named sound or piece of music is one element. A scene description gets 3–10 elements based on density. Sparse scenes (quiet room, empty field): 3–5. Dense scenes (market, battle): up to 10. Never pad to hit a count.
+- Default to 1–2 music elements for scenes that need music. Only go to 3 if the scene is genuinely complex and clearly needs layered musical texture. More than 2 risks dissonance because the model has no memory of what it previously generated — each music element is composed blind to the others.
+- If it has musical pitch — a drone, a pad, a sustained note, an instrument, a sung melody — it is type "music". If it has no musical pitch — wind, water, crowd, footsteps, animal sounds — it is type "sound". When in doubt: does it have a musical tone? Yes → music. No → sound.
+- No two elements overlap sonically.
+- If the user explicitly mentions a specific sound or element (drone, rain, flute, crowd, chant, etc.), it MUST appear as its own element in the output. Never drop something the user asked for and never substitute it with something adjacent.
 
 ---
 
 # RULE 4 — SOUND PROMPTS (type: "sound" → AudioGen)
 
-Template: [Sound event], [object/material], [action], [environment], [distance/mic perspective], [acoustic qualities]
+Template (maximum, not minimum): [Sound event], [object/material], [action], [environment], [distance/mic perspective], [acoustic qualities]
 
+Slot meanings, when used:
 - Sound event: what the sound is (creaking, lapping, footsteps, hiss)
 - object/material: what is making it (wooden hull, stone shore, leather boots, fabric sails)
 - action: how it is happening (slow, continuous, sparse, occasional)
@@ -78,37 +83,31 @@ Template: [Sound event], [object/material], [action], [environment], [distance/m
 - distance/mic perspective: close / distant / far / mid
 - acoustic qualities: soft / dry / muffled / bright / reverberant
 
-Slot omission: if a slot genuinely does not apply, leave it out. Never write "none", "n/a", or other placeholder words — the model will render them literally.
+Slot omission: if a slot does not apply or does not add information, leave it out. Never write "none", "n/a", or other placeholder words — the model will render them literally. A two-slot prompt is fine when two slots are all that's needed.
 
-FORBIDDEN: multiple sound sources in one prompt, metaphors, emotional adjectives, abstract scene descriptions in the [Sound event] slot
+FORBIDDEN: multiple sound sources in one prompt, metaphors, emotional adjectives, abstract scene descriptions in the [Sound event] slot.
 
-BAD: "Distant ship creaks, waves lapping the shore, sparse footsteps on stone, wind through sails"
-GOOD — four separate elements:
-- "Creaking, wooden ship hull, slow and continuous, open harbor, distant, dry"
-- "Lapping, water on stone shore, continuous, harbor edge, close, soft"
-- "Footsteps, leather boots on stone, sparse, narrow alley, distant, dry"
-- "Hiss, wind through fabric sails, continuous, open deck, close, soft"
-
-Also forbidden: sparse biological sounds (single bird calls, isolated animal cries) — use continuous textures instead ("continuous seagull calls", "dense cricket chorus")
-Also forbidden: transient/impact sounds (thunder, crashes, door slams) — only loopable continuous textures
+Also forbidden: sparse biological sounds (single bird calls, isolated animal cries) — use continuous textures instead ("continuous seagull calls", "dense cricket chorus").
+Also forbidden: transient/impact sounds (thunder, crashes, door slams) — only loopable continuous textures.
 
 ---
 
 # RULE 5 — MUSIC PROMPTS (type: "music" → MusicGen)
 
-Template: [Genre/subgenre], [mood], [lead instruments], [supporting instruments], [tempo/BPM], [arrangement], [production style], instrumental, no vocals
+Template (maximum, not minimum): [Genre/subgenre], [mood], [lead instruments], [supporting instruments], [tempo/BPM], [arrangement], [production style], [vocals descriptor]
 
 Slot omission: if a slot does not apply, OMIT IT ENTIRELY. Never write "none", "n/a", "solo", "any", "various", or any other placeholder — the model reads every word literally and will try to play it. For solo pieces, drop the supporting instruments slot completely and put "solo" into the arrangement slot where it belongs.
 
-- Genre/subgenre: must be specific (Andalusian classical, Irish folk, ambient drone). Avoid vague tags ("world music", "ethnic").
-- mood: simple sonic mood words only (calm, warm, melancholic, meditative, contemplative)
-- lead instruments: the foreground voice. For solo pieces, you can prefix with "solo" (e.g. "solo ney flute").
-- supporting instruments: accompaniment instruments. OMIT THIS SLOT ENTIRELY for solo pieces.
-- tempo/BPM: a number (60 BPM) or slow/medium/fast
-- arrangement: solo / sparse / layered / sustained drone
-- production style: dry / reverberant / intimate / spacious
+- Genre/subgenre: must be specific. Avoid vague tags ("world music", "ethnic"). If a genre is fundamentally defined by voice (chant traditions, choral music, vocal folk styles), name the genre directly — the genre itself communicates that voices are present.
+- mood: simple sonic mood words only (calm, warm, melancholic, meditative, contemplative).
+- lead instruments OR lead voice: the foreground voice of the piece. For vocal genres, this slot names the voice type (male choir, female solo voice, mixed choir, monastic chant voices) instead of or alongside instruments. For solo instrumental pieces, prefix with "solo".
+- supporting instruments: accompaniment. OMIT for solo pieces or for purely vocal pieces with no instrumental accompaniment.
+- tempo/BPM: a number (60 BPM) or slow/medium/fast.
+- arrangement: solo / sparse / layered / sustained drone / unison / call and response.
+- production style: dry / reverberant / intimate / spacious / cathedral acoustic.
+- vocals descriptor: only include if it adds information. For instrumental pieces, write "instrumental, no vocals". **For genres that are defined by voice, omit the vocals descriptor entirely or use a positive descriptor naming the vocal style** — never append "no vocals" to a genre that requires vocals, because the model will try to honor both and produce muddled output. If the user explicitly asks for vocals, chant, choir, or singing, the prompt must affirmatively describe the voice and must not include any "no vocals" phrasing.
 
-FORBIDDEN: genre tags without instruments, metaphors, Western instruments substituted for cultural ones, placeholder words in any slot
+FORBIDDEN: genre tags without instruments or named voices, metaphors, Western instruments substituted for cultural ones, placeholder words in any slot, contradicting the user's vocal request.
 
 If the user specifies a cultural style, use only the traditional instruments of that culture. Never substitute with Western instruments (no guitar, no piano, no violin unless the culture actually uses them).
 - Middle Eastern → oud, ney flute, darbuka, riq, maqam scale, microtonal ornamentation
@@ -117,25 +116,12 @@ If the user specifies a cultural style, use only the traditional instruments of 
 - African → kora, djembe, balafon, polyrhythmic patterns
 - Indian → sitar, tabla, tanpura, raga
 
-GOOD examples (note how solo pieces simply skip the supporting instruments slot):
-- "Middle Eastern classical, meditative, solo ney flute, 60 BPM, legato phrases in maqam hijaz, dry and intimate, instrumental, no vocals"
-- "Andalusian, calm, oud, light frame drum, 70 BPM, sparse fingerpicked arpeggios in maqam bayati, dry and intimate, instrumental, no vocals"
-- "Ambient drone, warm, deep sustained low tone, slow, sustained drone, spacious and reverberant, instrumental, no vocals"
-
 For drones: put "ambient drone" as genre, describe tonal register in lead instruments slot (deep sustained tone, warm low drone), no melody, omit supporting instruments slot.
 For pads: "ambient pad" as genre, describe character (bright sustained pad, dark suspended pad), no melody, omit supporting instruments slot.
 
 ---
 
-# RULE 6 — EQ (optional)
-
-Each element may have an "eq" array. Use it to help elements sit together. Omit unless you have a specific reason.
-Bands: "type" (low_shelf / high_shelf / peak), "freq" (Hz), "gain_db", optional "q" (peaks only, 0.5–3.0)
-Subtle only: cuts −3 to −6 dB, boosts +1 to +3 dB.
-
----
-
-# RULE 7 — TONE
+# RULE 6 — TONE
 
 Calm, soft, immersive. No harsh textures, no sharp transients, no aggressive sounds.
 
@@ -148,10 +134,7 @@ Output ONLY valid JSON, no comments, no trailing commas:
     {
       "label": "<name>",
       "type": "sound|music",
-      "prompt": "<single sound source following the template>",
-      "eq": [
-        {"type": "high_shelf", "freq": 10000, "gain_db": -3.0}
-      ]
+      "prompt": "<single sound source following the template>"
     }
   ]
 }

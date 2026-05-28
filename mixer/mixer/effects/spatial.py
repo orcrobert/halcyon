@@ -1,13 +1,9 @@
-from pathlib import Path
-from typing import Optional
+from __future__ import annotations
+
+from dataclasses import dataclass
+from typing import Sequence
 
 import numpy as np
-
-try:
-    import joblib
-    _JOBLIB_AVAILABLE = True
-except ImportError:
-    _JOBLIB_AVAILABLE = False
 
 try:
     import librosa
@@ -15,71 +11,171 @@ try:
 except ImportError:
     _LIBROSA_AVAILABLE = False
 
-_MODEL_DIR = Path(__file__).parent.parent.parent / "models"
-_model = None
-_scaler = None
+
+LF_CENTRE_CUTOFF_HZ = 250.0
+LF_FULL_CENTRE_HZ = 120.0
+CENTROID_REF_HZ = 500.0
+CENTROID_SPAN_HZ = 4500.0
+HF_BAND_LOW_HZ = 3000.0
+MAX_PAN_MAGNITUDE = 0.85
+MIN_PAN_SEPARATION = 0.25
+LOUDNESS_DAMPING = 0.25
+
+MAX_DEPTH = 0.8
+DEPTH_LOUDNESS_WEIGHT = 0.7
+DEPTH_HF_WEIGHT = 0.3
+DEPTH_ONSET_PULL = 0.25
 
 
-def _load_model():
-    global _model, _scaler
-    if _model is not None:
-        return True
-    if not _JOBLIB_AVAILABLE:
-        return False
-    model_path = _MODEL_DIR / "spatial_model.pkl"
-    scaler_path = _MODEL_DIR / "spatial_scaler.pkl"
-    if not model_path.exists() or not scaler_path.exists():
-        return False
-    _model = joblib.load(model_path)
-    _scaler = joblib.load(scaler_path)
-    return True
+@dataclass
+class _ElementFeatures:
+    index: int
+    centroid: float
+    low_band_ratio: float
+    high_band_ratio: float
+    bandwidth: float
+    loudness_rms: float
+    onset_density: float
+    reach: float
 
 
-def extract_features(wav: np.ndarray, sr: int) -> Optional[np.ndarray]:
-    if not _LIBROSA_AVAILABLE:
-        return None
+def _mono(wav: np.ndarray) -> np.ndarray:
+    if wav.ndim == 2:
+        return wav.mean(axis=0)
+    return wav
 
-    mono = wav.mean(axis=0) if wav.ndim == 2 else wav
 
+def _band_ratios(mono: np.ndarray, sr: int) -> tuple[float, float]:
+    if len(mono) < 64:
+        return 0.0, 0.0
+    n_fft = 2048 if len(mono) >= 2048 else int(2 ** np.floor(np.log2(len(mono))))
+    spec = np.abs(librosa.stft(mono, n_fft=n_fft, hop_length=n_fft // 4)) ** 2
+    power = spec.mean(axis=1)
+    freqs = librosa.fft_frequencies(sr=sr, n_fft=n_fft)
+    total = float(power.sum()) + 1e-12
+    low = float(power[freqs < LF_CENTRE_CUTOFF_HZ].sum()) / total
+    high = float(power[freqs >= HF_BAND_LOW_HZ].sum()) / total
+    return low, high
+
+
+def _extract(wav: np.ndarray, sr: int, index: int) -> _ElementFeatures:
+    mono = _mono(wav)
     centroid = float(np.mean(librosa.feature.spectral_centroid(y=mono, sr=sr)))
     bandwidth = float(np.mean(librosa.feature.spectral_bandwidth(y=mono, sr=sr)))
-    rolloff = float(np.mean(librosa.feature.spectral_rolloff(y=mono, sr=sr)))
-    rms = float(np.mean(librosa.feature.rms(y=mono)))
-    zcr = float(np.mean(librosa.feature.zero_crossing_rate(y=mono)))
+    loudness = float(np.sqrt(np.mean(mono ** 2)) + 1e-12)
+    low_ratio, high_ratio = _band_ratios(mono, sr)
 
+    duration_s = max(len(mono) / sr, 1e-6)
     onset_frames = librosa.onset.onset_detect(y=mono, sr=sr)
-    duration_s = len(mono) / sr
-    onset_rate = float(len(onset_frames) / duration_s) if duration_s > 0 else 0.0
+    onset_density = float(len(onset_frames) / duration_s)
 
-    mfccs = librosa.feature.mfcc(y=mono, sr=sr, n_mfcc=13)
-    mfcc_means = mfccs.mean(axis=1).tolist()
+    centre_pull = float(np.clip(
+        (LF_CENTRE_CUTOFF_HZ - max(centroid, LF_FULL_CENTRE_HZ))
+        / (LF_CENTRE_CUTOFF_HZ - LF_FULL_CENTRE_HZ),
+        0.0, 1.0,
+    ))
+    centroid_term = float(np.clip((centroid - CENTROID_REF_HZ) / CENTROID_SPAN_HZ, 0.0, 1.0))
+    bandwidth_term = float(np.clip(bandwidth / 4000.0, 0.0, 1.0))
+    loudness_norm = float(np.clip(loudness / 0.15, 0.0, 1.0))
 
-    return np.array([centroid, bandwidth, rolloff, rms, zcr, onset_rate, *mfcc_means], dtype=np.float32)
+    reach = (0.35 + 0.40 * centroid_term + 0.15 * bandwidth_term) * (1.0 - LOUDNESS_DAMPING * loudness_norm)
+    reach = max(0.0, reach * (1.0 - centre_pull) - 0.5 * low_ratio)
+    reach = float(np.clip(reach, 0.0, MAX_PAN_MAGNITUDE))
+
+    return _ElementFeatures(
+        index=index,
+        centroid=centroid,
+        low_band_ratio=low_ratio,
+        high_band_ratio=high_ratio,
+        bandwidth=bandwidth,
+        loudness_rms=loudness,
+        onset_density=onset_density,
+        reach=reach,
+    )
 
 
-def _rule_based_pan(wav: np.ndarray, sr: int) -> float:
-    mono = wav.mean(axis=0) if wav.ndim == 2 else wav
-    if not _LIBROSA_AVAILABLE:
-        return 0.0
-    centroid = float(np.mean(librosa.feature.spectral_centroid(y=mono, sr=sr)))
-    rms = float(np.mean(librosa.feature.rms(y=mono)))
-    if centroid < 600:
-        return 0.0
-    centroid_norm = np.clip((centroid - 500) / 7500, 0.0, 1.0)
-    rms_norm = np.clip(rms / 0.15, 0.0, 1.0)
-    reach = 0.35 + centroid_norm * 0.4 + (1 - rms_norm) * 0.2
-    side = 1 if np.mean(mono[:100]) >= 0 else -1
-    return float(np.clip(side * reach, -0.85, 0.85))
+def _compute_depths(feats: list[_ElementFeatures]) -> list[float]:
+    if not feats:
+        return []
+    loudness_vals = np.array([f.loudness_rms for f in feats])
+    hf_vals = np.array([f.high_band_ratio for f in feats])
+    onset_vals = np.array([f.onset_density for f in feats])
+
+    lo, hi = float(loudness_vals.min()), float(loudness_vals.max())
+    loudness_score = (hi - loudness_vals) / (hi - lo + 1e-12)
+
+    hf_lo, hf_hi = float(hf_vals.min()), float(hf_vals.max())
+    hf_score = (hf_hi - hf_vals) / (hf_hi - hf_lo + 1e-12)
+
+    onset_lo, onset_hi = float(onset_vals.min()), float(onset_vals.max())
+    onset_score = (onset_vals - onset_lo) / (onset_hi - onset_lo + 1e-12)
+
+    raw = DEPTH_LOUDNESS_WEIGHT * loudness_score + DEPTH_HF_WEIGHT * hf_score
+    raw = raw - DEPTH_ONSET_PULL * onset_score
+    raw = np.clip(raw, 0.0, 1.0) * MAX_DEPTH
+
+    depths = [0.0] * len(feats)
+    for f, d in zip(feats, raw):
+        depths[f.index] = float(d)
+    return depths
+
+
+def _spectral_similarity(a: _ElementFeatures, b: _ElementFeatures) -> float:
+    centroid_dist = abs(a.centroid - b.centroid) / (CENTROID_SPAN_HZ + 1e-6)
+    bandwidth_dist = abs(a.bandwidth - b.bandwidth) / 4000.0
+    raw = 1.0 - np.clip(0.7 * centroid_dist + 0.3 * bandwidth_dist, 0.0, 1.0)
+    return float(raw)
+
+
+def _assign_pans_from_features(feats: list[_ElementFeatures]) -> list[float]:
+    order = sorted(feats, key=lambda f: f.reach)
+    pans = [0.0] * len(feats)
+
+    side = 1
+    placed: list[_ElementFeatures] = []
+    for f in order:
+        if f.reach < 0.05:
+            pans[f.index] = 0.0
+            placed.append(f)
+            continue
+
+        best_side = side
+        if placed:
+            score_pos = sum(_spectral_similarity(f, p) * (pans[p.index] > 0) for p in placed)
+            score_neg = sum(_spectral_similarity(f, p) * (pans[p.index] < 0) for p in placed)
+            best_side = -1 if score_pos > score_neg else 1 if score_neg > score_pos else side
+
+        candidate = best_side * f.reach
+        for p in placed:
+            if pans[p.index] == 0.0:
+                continue
+            if abs(candidate - pans[p.index]) < MIN_PAN_SEPARATION:
+                if abs(candidate) < MAX_PAN_MAGNITUDE - MIN_PAN_SEPARATION:
+                    candidate = pans[p.index] + np.sign(candidate - pans[p.index]) * MIN_PAN_SEPARATION
+                candidate = float(np.clip(candidate, -MAX_PAN_MAGNITUDE, MAX_PAN_MAGNITUDE))
+
+        pans[f.index] = float(candidate)
+        placed.append(f)
+        side = -side
+
+    return pans
+
+
+def assign_spatial(elements: Sequence[tuple[np.ndarray, int]]) -> list[tuple[float, float]]:
+    if not _LIBROSA_AVAILABLE or len(elements) == 0:
+        return [(0.0, 0.0)] * len(elements)
+    feats = [_extract(wav, sr, i) for i, (wav, sr) in enumerate(elements)]
+    pans = _assign_pans_from_features(feats)
+    depths = _compute_depths(feats)
+    return list(zip(pans, depths))
+
+
+def assign_pans(elements: Sequence[tuple[np.ndarray, int]]) -> list[float]:
+    return [pan for pan, _ in assign_spatial(elements)]
 
 
 def predict_pan(wav: np.ndarray, sr: int) -> float:
-    if _load_model():
-        features = extract_features(wav, sr)
-        if features is not None:
-            scaled = _scaler.transform(features.reshape(1, -1))
-            pan = float(_model.predict(scaled)[0])
-            return float(np.clip(pan, -1.0, 1.0))
-    return _rule_based_pan(wav, sr)
+    return 0.0
 
 
 def apply_pan(wav: np.ndarray, pan: float) -> np.ndarray:
