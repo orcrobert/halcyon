@@ -5,6 +5,7 @@ import { TrackStrip } from './TrackStrip'
 import { Visualizer } from './Visualizer'
 import { TuningControl } from './TuningControl'
 import { BinauralModal } from './BinauralModal'
+import { PromptModal } from './PromptModal'
 
 export interface AnimatedValues { vol: number; pan: number; depth: number }
 
@@ -42,6 +43,7 @@ export function DashboardView({
 }: Props) {
   const [binauralOpen, setBinauralOpen] = useState(false)
   const binauralBtnRef = useRef<HTMLButtonElement>(null)
+  const [promptOpen, setPromptOpen] = useState(false)
   const [mutedTracks, setMutedTracks] = useState<Set<string>>(new Set())
   const [animating, setAnimating] = useState(false)
   const [animatedValues, setAnimatedValues] = useState<Map<string, AnimatedValues>>(new Map())
@@ -175,9 +177,43 @@ export function DashboardView({
           {/* Title */}
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-slate-700 mb-3">Now playing</p>
-            <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.02em' }}>
-              {session.title ?? session.prompt}
-            </h1>
+            <div className="flex items-center justify-center gap-3">
+              <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.02em' }}>
+                {session.title ?? session.prompt}
+              </h1>
+              <button
+                onClick={() => setPromptOpen(true)}
+                title="Show original prompt"
+                aria-label="Show original prompt"
+                className="shrink-0 flex items-center justify-center rounded-full transition-all duration-200"
+                style={{
+                  width: 22, height: 22,
+                  fontSize: 10, fontFamily: 'inherit',
+                  fontWeight: 700, letterSpacing: '0.04em',
+                  color: 'rgba(165,180,252,0.85)',
+                  border: '1px solid rgba(99,102,241,0.3)',
+                  background: 'rgba(99,102,241,0.06)',
+                  cursor: 'pointer',
+                  lineHeight: 1,
+                  paddingTop: 1,
+                  boxShadow: '0 0 0 0 rgba(99,102,241,0)',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'rgba(99,102,241,0.16)'
+                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.55)'
+                  e.currentTarget.style.boxShadow = '0 0 14px rgba(99,102,241,0.25)'
+                  e.currentTarget.style.color = '#c7d2fe'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'rgba(99,102,241,0.06)'
+                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'
+                  e.currentTarget.style.boxShadow = '0 0 0 0 rgba(99,102,241,0)'
+                  e.currentTarget.style.color = 'rgba(165,180,252,0.85)'
+                }}
+              >
+                P
+              </button>
+            </div>
           </div>
 
           {/* Play/Pause */}
@@ -280,6 +316,12 @@ export function DashboardView({
         onLeftHz={onBinauralLeftHz}
         onRightHz={onBinauralRightHz}
         onClose={() => setBinauralOpen(false)}
+      />
+
+      <PromptModal
+        open={promptOpen}
+        prompt={session.prompt}
+        onClose={() => setPromptOpen(false)}
       />
 
     </div>

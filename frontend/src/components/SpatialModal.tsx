@@ -1,4 +1,4 @@
-import { useRef, useCallback, useEffect, useState } from 'react'
+import { useRef, useCallback, useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 interface Props {
@@ -189,10 +189,11 @@ export function SpatialModal({
     )
   }
 
-  if (!open && !visible) return null
+  const uid = useId().replace(/:/g, '')
+  const gradId = `sg-${uid}`
+  const glowId = `glow-${uid}`
 
-  const gradId = `sg-${label.replace(/\s+/g, '-')}`
-  const glowId = `glow-${label.replace(/\s+/g, '-')}`
+  if (!open && !visible) return null
 
   return createPortal(
     <div style={{

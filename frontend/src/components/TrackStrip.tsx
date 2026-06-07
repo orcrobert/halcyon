@@ -18,7 +18,24 @@ interface Props {
   onDepthChange: (label: string, depth: number) => void
 }
 
+function hashLabel(label: string): number {
+  let h = 2166136261
+  for (let i = 0; i < label.length; i++) {
+    h ^= label.charCodeAt(i)
+    h = Math.imul(h, 16777619)
+  }
+  return h >>> 0
+}
+
 export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange }: Props) {
+  const blobSeed = hashLabel(element.label)
+  const blobX = 20 + (blobSeed % 60)
+  const blobY = 15 + ((blobSeed >> 8) % 70)
+  const blobSize = 220 + ((blobSeed >> 16) % 120)
+  const blobHue = (blobSeed >> 4) % 2 === 0 ? '99,102,241' : '129,140,248'
+  const driftAngle = (blobSeed % 360) * (Math.PI / 180)
+  const driftX = Math.cos(driftAngle) * 12
+  const driftY = Math.sin(driftAngle) * 12
   const [volume, setVolume] = useState(element.volume)
   const [pan, setPan] = useState(element.pan ?? 0)
   const [depth, setDepth] = useState(element.depth ?? 0)
@@ -105,13 +122,55 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className={`flex flex-col items-center rounded-2xl border transition-all duration-200 ${
+        className={`relative flex flex-col items-center rounded-2xl border transition-all duration-300 overflow-hidden ${
           muted
             ? 'bg-[#0d0e14] border-[#0f1018]'
-            : 'bg-[#111218] border-[#1d1e2e] hover:border-[#2a2b40]'
+            : 'border-[#1d1e2e] hover:border-[#2a2b40]'
         }`}
-        style={{ width: '100px', padding: '24px 16px', gap: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+        style={{
+          width: '100px',
+          padding: '24px 16px',
+          gap: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          background: muted
+            ? '#0d0e14'
+            : 'linear-gradient(180deg, rgba(24,26,42,0.85) 0%, rgba(17,18,24,0.85) 100%)',
+          backdropFilter: muted ? 'none' : 'blur(8px)',
+          WebkitBackdropFilter: muted ? 'none' : 'blur(8px)',
+          boxShadow: muted
+            ? 'none'
+            : hovered
+              ? '0 14px 32px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.3)'
+              : '0 8px 20px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.25)',
+        }}
       >
+        {!muted && (
+          <div
+            aria-hidden
+            style={{
+              position: 'absolute',
+              left: `${blobX}%`,
+              top: `${blobY}%`,
+              width: `${blobSize}px`,
+              height: `${blobSize}px`,
+              transform: hovered
+                ? `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(1.08)`
+                : 'translate(-50%, -50%) scale(1)',
+              borderRadius: '50%',
+              background: `radial-gradient(circle, rgba(${blobHue},${hovered ? 0.10 : 0.07}) 0%, rgba(${blobHue},${hovered ? 0.035 : 0.025}) 40%, transparent 70%)`,
+              filter: 'blur(52px)',
+              pointerEvents: 'none',
+              zIndex: 0,
+              transition: 'transform 1.2s cubic-bezier(0.22, 1, 0.36, 1), background 1.2s ease',
+              willChange: 'transform',
+            }}
+          />
+        )}
+
+        <div className="relative w-full flex flex-col items-center" style={{ zIndex: 1, gap: '16px' }}>
+
         {/* Volume % */}
         <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-slate-800' : 'text-slate-700'}`}>
           {muted ? '—' : `${Math.round(dispVolume * 100)}`}
@@ -198,6 +257,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           >
             EQ
           </button>
+        </div>
         </div>
       </div>
 
