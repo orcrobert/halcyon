@@ -300,26 +300,79 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
   const isFailed = a.status === 'failed'
   const isWorking = a.status === 'pending' || a.status === 'generating'
 
+  if (confirming) {
+    return (
+      <div
+        className="relative rounded-xl overflow-hidden"
+        style={{
+          background: 'rgba(239,68,68,0.06)',
+          border: '1px solid rgba(239,68,68,0.18)',
+        }}
+      >
+        <div className="flex items-center gap-3" style={{ padding: '10px 12px' }}>
+          <div
+            className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
+            style={{
+              background: 'rgba(239,68,68,0.10)',
+              border: '1px solid rgba(239,68,68,0.22)',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+              <polyline points="3 6 5 6 21 6" />
+              <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
+              <path d="M10 11v6M14 11v6" />
+            </svg>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="text-[12px] text-red-300/80 leading-tight" style={{ letterSpacing: '0.01em' }}>
+              Delete this atmosphere?
+            </div>
+            <div className="text-[11px] text-slate-500 truncate" style={{ marginTop: '2px' }}>
+              {a.title ?? a.prompt}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={(e) => { e.stopPropagation(); onCancelDelete() }}
+              className="text-[11px] text-slate-400 hover:text-slate-200 rounded-lg transition"
+              style={{ padding: '6px 12px', fontFamily: 'inherit' }}
+            >
+              Cancel
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); onConfirmDelete() }}
+              className="text-[11px] font-semibold text-white rounded-lg transition"
+              style={{
+                padding: '6px 14px',
+                background: 'rgb(220, 38, 38)',
+                fontFamily: 'inherit',
+                boxShadow: '0 0 0 1px rgba(239,68,68,0.35), 0 4px 12px rgba(239,68,68,0.18)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgb(239,68,68)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgb(220, 38, 38)' }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div
       className="group relative rounded-xl transition-colors"
-      style={{
-        padding: '10px 12px',
-        background: confirming ? 'rgba(239,68,68,0.05)' : 'transparent',
-      }}
-      onMouseEnter={(e) => {
-        if (!confirming) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
-      }}
-      onMouseLeave={(e) => {
-        if (!confirming) e.currentTarget.style.background = 'transparent'
-      }}
+      style={{ padding: '10px 12px', background: 'transparent' }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
+      onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >
       <button
         onClick={onOpen}
         disabled={!isReady}
         className="w-full text-left disabled:cursor-not-allowed flex items-start gap-3"
       >
-        {/* Icon */}
         <div
           className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mt-0.5"
           style={{
@@ -344,7 +397,6 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
           )}
         </div>
 
-        {/* Text */}
         <div className="flex-1 min-w-0" style={{ paddingRight: '28px' }}>
           <div className={`text-[13px] truncate leading-snug ${isReady ? 'text-slate-200' : 'text-slate-500'}`}>
             {a.title ?? a.prompt}
@@ -360,36 +412,17 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
         </div>
       </button>
 
-      {/* Delete button */}
-      {!confirming ? (
-        <button
-          onClick={(e) => { e.stopPropagation(); onRequestDelete() }}
-          className="absolute top-1/2 -translate-y-1/2 right-2 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 hover:bg-red-500/[0.08] transition"
-          aria-label="Delete"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="3 6 5 6 21 6" />
-            <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
-            <path d="M10 11v6M14 11v6" />
-          </svg>
-        </button>
-      ) : (
-        <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1.5 bg-[#0d0e18] border border-red-500/30 rounded-lg pl-2.5 pr-1 py-1">
-          <span className="text-[11px] text-red-400/90">Delete?</span>
-          <button
-            onClick={(e) => { e.stopPropagation(); onConfirmDelete() }}
-            className="text-[11px] text-white bg-red-500/80 hover:bg-red-500 rounded px-2 py-0.5 transition"
-          >
-            Yes
-          </button>
-          <button
-            onClick={(e) => { e.stopPropagation(); onCancelDelete() }}
-            className="text-[11px] text-slate-400 hover:text-slate-200 px-1.5 py-0.5 transition"
-          >
-            No
-          </button>
-        </div>
-      )}
+      <button
+        onClick={(e) => { e.stopPropagation(); onRequestDelete() }}
+        className="absolute top-1/2 -translate-y-1/2 right-2 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 hover:bg-red-500/[0.08] transition"
+        aria-label="Delete"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="3 6 5 6 21 6" />
+          <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
+          <path d="M10 11v6M14 11v6" />
+        </svg>
+      </button>
     </div>
   )
 }
