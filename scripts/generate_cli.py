@@ -1,10 +1,13 @@
 import sys
 import json
-sys.path.insert(0, str(__import__("pathlib").Path(__file__).resolve().parents[1]))
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mixer"))
 
 from ai.app.services.decomposer import decompose
 from ai.app.services.generator import generate
-from mixer.mixer.core import mix
+from mixer.core import mix_to_file
 
 
 def main():
@@ -19,9 +22,9 @@ def main():
 
     results = generate(decomposed)
     for e in results:
-        print(f"  [{e['type']}] {e['label']} (vol={e['volume']}) -> {e['file']}")
+        print(f"  [{e['type']}] {e['label']} -> {e['file']}")
 
-    output = mix(results)
+    output = mix_to_file(results)
     print(f"\nMixed: {output}")
 
 
