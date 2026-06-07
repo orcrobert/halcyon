@@ -161,8 +161,9 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
         transform: 'translateX(-50%)',
         width: '4px',
         height: '100%',
-        background: '#1e2035',
+        background: 'linear-gradient(to bottom, #15172a 0%, #1e2035 50%, #15172a 100%)',
         borderRadius: '2px',
+        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.02)',
       }} />
 
       <div style={{
@@ -172,8 +173,12 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
         transform: 'translateX(-50%)',
         width: '4px',
         height: `${display * TRACK_HEIGHT}px`,
-        background: disabled ? '#2a2b40' : 'rgba(99,102,241,0.4)',
+        background: disabled
+          ? '#2a2b40'
+          : 'linear-gradient(to top, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0.55) 60%, rgba(129,140,248,0.85) 100%)',
         borderRadius: '2px',
+        boxShadow: disabled ? 'none' : '0 0 8px rgba(99,102,241,0.35), inset 0 0 0 1px rgba(129,140,248,0.15)',
+        transition: 'box-shadow 0.25s ease',
       }} />
 
       <canvas

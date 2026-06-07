@@ -1,9 +1,141 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Atmosphere } from '../types'
 
 interface Props {
   atmosphere: Atmosphere
   onCancel: () => void
+}
+
+const CANVAS_W = 1520
+const CANVAS_H = 600
+const MID = CANVAS_H / 2
+const SAMPLES = 280
+const MAX_LAYERS = 7
+const NEW_LAYER_EVERY_MS = 2800
+const SLOT_SPACING = (CANVAS_H - 160) / (MAX_LAYERS - 1)
+const SLOT_ORDER = [3, 1, 5, 0, 6, 2, 4]
+
+interface Layer {
+  bornAt: number
+  yOffset: number
+  freq1: number
+  freq2: number
+  phase: number
+  speed: number
+  amp: number
+}
+
+function GenerationCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const rafRef = useRef<number>(0)
+  const layersRef = useRef<Layer[]>([])
+  const startRef = useRef(0)
+  const tRef = useRef(0)
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    startRef.current = performance.now()
+    layersRef.current = [spawnLayer(0, 0)]
+
+    function spawnLayer(seed: number, layerIndex: number): Layer {
+      const rng = () => {
+        seed = (seed * 9301 + 49297) % 233280
+        return seed / 233280
+      }
+      const slot = SLOT_ORDER[layerIndex % MAX_LAYERS]
+      const slotY = (slot - (MAX_LAYERS - 1) / 2) * SLOT_SPACING
+      const jitter = (rng() - 0.5) * 12
+      return {
+        bornAt: performance.now(),
+        yOffset: slotY + jitter,
+        freq1: 1.0 + rng() * 2.5,
+        freq2: 0.5 + rng() * 1.5,
+        phase: rng() * Math.PI * 2,
+        speed: 0.4 + rng() * 0.8,
+        amp: 28 + rng() * 36,
+      }
+    }
+
+    function draw() {
+      rafRef.current = requestAnimationFrame(draw)
+      tRef.current += 0.012
+      const now = performance.now()
+      const ageMs = now - startRef.current
+
+      const wantedLayers = Math.min(MAX_LAYERS, 1 + Math.floor(ageMs / NEW_LAYER_EVERY_MS))
+      while (layersRef.current.length < wantedLayers) {
+        const idx = layersRef.current.length
+        layersRef.current.push(spawnLayer(idx * 1337 + Math.floor(ageMs), idx))
+      }
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const breath = 0.85 + 0.15 * Math.sin(tRef.current * 0.6)
+
+      for (let li = 0; li < layersRef.current.length; li++) {
+        const layer = layersRef.current[li]
+        const age = (now - layer.bornAt) / 1000
+        const fadeIn = Math.min(1, age / 1.5)
+
+        const points: { x: number; y: number }[] = []
+        for (let i = 0; i <= SAMPLES; i++) {
+          const x = (i / SAMPLES) * CANVAS_W
+          const u = (i / SAMPLES) * Math.PI * 2
+          const a = Math.sin(u * layer.freq1 + tRef.current * layer.speed + layer.phase) * layer.amp
+          const b = Math.sin(u * layer.freq2 - tRef.current * layer.speed * 0.6 + layer.phase * 0.5) * layer.amp * 0.5
+          const envelope = Math.sin((i / SAMPLES) * Math.PI)
+          const y = MID + layer.yOffset + (a + b) * envelope * breath
+          points.push({ x, y })
+        }
+
+        ctx.save()
+        ctx.shadowColor = `rgba(99,102,241,${0.6 * fadeIn})`
+        ctx.shadowBlur = 28
+        ctx.strokeStyle = `rgba(99,102,241,${0.55 * fadeIn})`
+        ctx.lineWidth = 4.8
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+
+        ctx.beginPath()
+        ctx.moveTo(points[0].x, points[0].y)
+        for (let i = 0; i < points.length - 1; i++) {
+          const p0 = points[i]
+          const p1 = points[i + 1]
+          ctx.quadraticCurveTo(p0.x, p0.y, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2)
+        }
+        ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y)
+        ctx.stroke()
+        ctx.restore()
+
+        ctx.strokeStyle = `rgba(199,210,254,${0.5 * fadeIn})`
+        ctx.lineWidth = 1.8
+        ctx.beginPath()
+        ctx.moveTo(points[0].x, points[0].y)
+        for (let i = 0; i < points.length - 1; i++) {
+          const p0 = points[i]
+          const p1 = points[i + 1]
+          ctx.quadraticCurveTo(p0.x, p0.y, (p0.x + p1.x) / 2, (p0.y + p1.y) / 2)
+        }
+        ctx.lineTo(points[points.length - 1].x, points[points.length - 1].y)
+        ctx.stroke()
+      }
+    }
+
+    draw()
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [])
+
+  return (
+    <canvas
+      ref={canvasRef}
+      width={CANVAS_W}
+      height={CANVAS_H}
+      style={{ display: 'block', width: '100%', height: 'auto' }}
+    />
+  )
 }
 
 export function GeneratingView({ atmosphere, onCancel }: Props) {
@@ -15,62 +147,45 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
   }, [])
 
   return (
-    <div className="flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
-      <div className="flex flex-col gap-10 w-full" style={{ maxWidth: '560px' }}>
+    <div className="relative flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
+      <div className="flex flex-col gap-10 w-full" style={{ maxWidth: '880px' }}>
 
-        {/* Header */}
-        <div className="flex flex-col items-center gap-5 text-center">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-indigo-500/20 bg-indigo-500/[0.06]">
-            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse" />
-            <span className="text-[11px] uppercase tracking-[0.12em] text-indigo-400 font-semibold">
-              Generating
-            </span>
-          </div>
-
-          <div className="flex flex-col gap-3.5">
-            <h1 className="text-[34px] font-extrabold text-white leading-[1.1]" style={{ letterSpacing: '-0.02em' }}>
-              {atmosphere.title ?? 'Crafting your soundscape'}
+        <div className="flex flex-col items-center gap-2 text-center">
+          <span className="text-[10px] uppercase tracking-[0.32em] text-indigo-400/70 font-medium">
+            Composing
+          </span>
+          {atmosphere.title && (
+            <h1 className="text-[20px] text-slate-200 leading-tight" style={{ fontWeight: 400, letterSpacing: '-0.01em' }}>
+              {atmosphere.title}
             </h1>
-            <p className="text-[14px] text-slate-500 leading-relaxed mx-auto line-clamp-3" style={{ maxWidth: '460px' }}>
-              {atmosphere.prompt}
-            </p>
-          </div>
+          )}
+          <p className="text-[13px] text-slate-500 leading-relaxed mx-auto line-clamp-3 italic" style={{ maxWidth: '560px', fontWeight: 300 }}>
+            &ldquo;{atmosphere.prompt}&rdquo;
+          </p>
         </div>
 
-        {/* Working card */}
-        <div
-          className="rounded-2xl border border-[#1e2035] bg-[#0d0e18] flex items-center gap-4"
-          style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.4)', padding: '24px 28px' }}
-        >
+        <GenerationCanvas />
+
+        <div className="flex items-center justify-center gap-5 text-[11px] uppercase tracking-[0.18em]">
           <div className="flex items-center gap-1.5">
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="w-2 h-2 bg-indigo-400 rounded-full animate-bounce"
-                style={{ animationDelay: `${i * 0.12}s` }}
+                className="w-1 h-1 rounded-full bg-indigo-400/80 animate-pulse"
+                style={{ animationDelay: `${i * 0.18}s`, animationDuration: '1.4s' }}
               />
             ))}
           </div>
-          <div className="flex-1 min-w-0">
-            <div className="text-[14px] text-slate-200 font-medium">
-              Working on it…
-            </div>
-            <div className="text-[12px] text-slate-600 mt-0.5">
-              Decomposing the scene, generating each layer, then mixing.
-            </div>
-          </div>
-          <div className="text-[12px] text-slate-500 font-medium tabular-nums shrink-0">
-            {formatElapsed(elapsed)}
-          </div>
+          <span className="text-slate-700">·</span>
+          <span className="text-indigo-400/80 tabular-nums">{formatElapsed(elapsed)}</span>
         </div>
 
-        {/* Cancel */}
         <div className="flex justify-center">
           <button
             onClick={onCancel}
-            className="text-[12px] text-slate-600 hover:text-slate-300 transition"
+            className="text-[11px] text-slate-600 hover:text-slate-300 transition tracking-wide"
           >
-            ← Back to prompt (job keeps running)
+            ← back to prompt (job keeps running)
           </button>
         </div>
 
