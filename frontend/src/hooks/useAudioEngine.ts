@@ -85,8 +85,17 @@ function buildImpulseResponse(ctx: BaseAudioContext, duration = 2.5, decay = 3.0
   const ir = ctx.createBuffer(2, length, sr)
   for (let c = 0; c < 2; c++) {
     const ch = ir.getChannelData(c)
+    let sumSq = 0
     for (let i = 0; i < length; i++) {
-      ch[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay)
+      const sample = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay)
+      ch[i] = sample
+      sumSq += sample * sample
+    }
+    const rms = Math.sqrt(sumSq / length)
+    const targetRms = 0.05
+    if (rms > 0) {
+      const scale = targetRms / rms
+      for (let i = 0; i < length; i++) ch[i] *= scale
     }
   }
   return ir
@@ -130,6 +139,7 @@ export function useAudioEngine() {
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
   const analyserRef = useRef<AnalyserNode | null>(null)
+  const masterLimiterRef = useRef<DynamicsCompressorNode | null>(null)
   const volumeStateRef = useRef<Map<string, number>>(new Map())
   const eqStateRef = useRef<Map<string, EQState>>(new Map())
   const panStateRef = useRef<Map<string, number>>(new Map())
@@ -142,7 +152,7 @@ export function useAudioEngine() {
 
   const animateRafRef = useRef(0)
   const animateSnapshotRef = useRef<Map<string, { vol: number; pan: number; depth: number }>>(new Map())
-  const animateStateRef = useRef<Map<string, { vol: number; pan: number; depth: number; velVol: number; velPan: number; velDepth: number }>>(new Map())
+  const animateStateRef = useRef<Map<string, { vol: number; pan: number; depth: number; velVol: number; velPan: number; velDepth: number; phasePan: number; phaseDepth: number }>>(new Map())
   const animateCallbackRef = useRef<((values: Map<string, { vol: number; pan: number; depth: number }>) => void) | null>(null)
   const animateMutedRef = useRef<Set<string>>(new Set())
 
@@ -152,7 +162,17 @@ export function useAudioEngine() {
       analyserRef.current = ctxRef.current.createAnalyser()
       analyserRef.current.fftSize = 256
       analyserRef.current.smoothingTimeConstant = 0.8
-      analyserRef.current.connect(ctxRef.current.destination)
+
+      const limiter = ctxRef.current.createDynamicsCompressor()
+      limiter.threshold.value = -4
+      limiter.knee.value = 0
+      limiter.ratio.value = 20
+      limiter.attack.value = 0.001
+      limiter.release.value = 0.1
+      masterLimiterRef.current = limiter
+
+      analyserRef.current.connect(limiter)
+      limiter.connect(ctxRef.current.destination)
     }
     return ctxRef.current
   }, [])
@@ -360,6 +380,7 @@ export function useAudioEngine() {
     const state = new Map<string, {
       vol: number; pan: number; depth: number
       velVol: number; velPan: number; velDepth: number
+      phasePan: number; phaseDepth: number
     }>()
 
     for (const label of tracksRef.current.keys()) {
@@ -367,7 +388,7 @@ export function useAudioEngine() {
       const pan   = panStateRef.current.get(label)   ?? 0
       const depth = depthStateRef.current.get(label) ?? 0
       snapshot.set(label, { vol, pan, depth })
-      state.set(label, { vol, pan, depth, velVol: 0, velPan: 0, velDepth: 0 })
+      state.set(label, { vol, pan, depth, velVol: 0, velPan: 0, velDepth: 0, phasePan: 0, phaseDepth: 0 })
     }
 
     animateSnapshotRef.current = snapshot
@@ -376,9 +397,14 @@ export function useAudioEngine() {
     const DRAG      = 0.992
     const NUDGE_VOL = 0.0002
 
+    const t0 = performance.now() * 0.001
     for (const [, s] of animateStateRef.current) {
       s.velPan   = 0.07 + Math.random() * 0.06
       s.velDepth = s.velPan * (1.0 + Math.random() * 0.8)
+      const panTarget   = Math.max(-1, Math.min(1, s.pan))
+      const depthTarget = Math.max(-1, Math.min(1, (s.depth - 0.5) * 2))
+      s.phasePan   = Math.asin(panTarget)   - t0 * s.velPan
+      s.phaseDepth = Math.asin(depthTarget) - t0 * s.velDepth
     }
 
     function tick() {
@@ -393,8 +419,8 @@ export function useAudioEngine() {
         if (s.vol < 0.15) s.velVol += 0.0004
         if (s.vol > 0.90) s.velVol -= 0.0004
 
-        s.pan   = Math.sin(now * s.velPan)
-        s.depth = 0.5 + 0.5 * Math.sin(now * s.velDepth)
+        s.pan   = Math.sin(now * s.velPan   + s.phasePan)
+        s.depth = 0.5 + 0.5 * Math.sin(now * s.velDepth + s.phaseDepth)
 
         const track = tracksRef.current.get(label)
         if (track && ctx && !animateMutedRef.current.has(label)) {
@@ -453,15 +479,16 @@ export function useAudioEngine() {
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
+    masterLimiterRef.current = null
   }, [stopBinaural])
 
   const getAnalyser = useCallback(() => analyserRef.current, [])
 
   const exportMix = useCallback(async (filename: string) => {
     if (decodedRef.current.length === 0) return
-    const duration = 20
     const sampleRate = 44100
-    const offline = new OfflineAudioContext(2, sampleRate * duration, sampleRate)
+    const duration = Math.max(...decodedRef.current.map(({ buffer }) => buffer.duration))
+    const offline = new OfflineAudioContext(2, Math.ceil(sampleRate * duration), sampleRate)
 
     await SoundTouchNode.register(offline, '/soundtouch-processor.js')
 

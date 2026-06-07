@@ -66,7 +66,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
   } = useAudioEngine()
 
 
-  const { enqueue, flushAll } = useDebouncedPatcher()
+  const { enqueue, flushAll, flushAllSync } = useDebouncedPatcher()
 
   const labelToId = useMemo(() => {
     const map = new Map<string, number>()
@@ -267,10 +267,10 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
   }, [binauralLeftHz, setBinauralFreqs])
 
   useEffect(() => {
-    function onUnload() { void flushAll() }
+    function onUnload() { flushAllSync() }
     window.addEventListener('beforeunload', onUnload)
     return () => window.removeEventListener('beforeunload', onUnload)
-  }, [flushAll])
+  }, [flushAllSync])
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {

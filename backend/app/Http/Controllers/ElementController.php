@@ -49,6 +49,10 @@ class ElementController extends Controller
     public function audio(Request $request, Element $element): StreamedResponse
     {
         abort_unless($request->hasValidSignature(), 403);
+        abort_unless(
+            (int) $request->query('user') === (int) $element->atmosphere->user_id,
+            403,
+        );
         abort_unless(Storage::exists($element->audio_path), 404);
 
         return Storage::download(

@@ -32,7 +32,10 @@ class ElementResource extends JsonResource
                 ? URL::temporarySignedRoute(
                     'elements.audio',
                     now()->addHours(2),
-                    ['element' => $this->id],
+                    [
+                        'element' => $this->id,
+                        'user' => $request->user()?->id ?? $this->atmosphere->user_id,
+                    ],
                 )
                 : null,
         ];

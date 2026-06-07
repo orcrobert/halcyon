@@ -26,6 +26,8 @@ class GenerateRequest(BaseModel):
 def generate_atmosphere(req: GenerateRequest):
     try:
         decomposed = decompose(req.prompt)
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=f"Decomposition failed: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Decomposition failed: {e}")
 
