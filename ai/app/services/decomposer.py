@@ -16,13 +16,39 @@ def _parse_result(raw: str) -> dict:
     if not match:
         raise ValueError(f"No JSON found in model response:\n{raw}")
     result = json.loads(match.group())
+
+    elements = result.get("elements")
+    if not isinstance(elements, list) or len(elements) == 0:
+        raise ValueError("decomposer response missing or empty 'elements' array")
+
     type_map = {
         "audiogen": "sound", "AudioGen": "sound",
         "musicgen": "music", "MusicGen": "music",
     }
-    for element in result.get("elements", []):
+    required_fields = {"label", "type", "prompt"}
+
+    for i, element in enumerate(elements):
+        if not isinstance(element, dict):
+            raise ValueError(f"decomposer element {i} is not an object")
+        missing = required_fields - element.keys()
+        if missing:
+            raise ValueError(
+                f"decomposer element {i} missing required fields: {sorted(missing)}"
+            )
+        prompt_value = element.get("prompt")
+        if not isinstance(prompt_value, str) or not prompt_value.strip():
+            raise ValueError(
+                f"decomposer element {i} has empty or non-string 'prompt'"
+            )
         element.setdefault("volume", 0.5)
-        element["type"] = type_map.get(element.get("type", ""), element.get("type", "sound"))
+        element["type"] = type_map.get(
+            element.get("type", ""), element.get("type", "sound")
+        )
+        if element["type"] not in ("sound", "music"):
+            raise ValueError(
+                f"decomposer element {i} has invalid type: {element['type']!r}"
+            )
+
     return result
 
 
