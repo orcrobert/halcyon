@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p13",
+  "prompt_text": "A Celtic coastal village during a festival — bodhrán drumming, tin whistle melody, crowd cheering, waves crashing on cliffs",
+  "category": "cultural_specific",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Celtic Coastal Festival\", \"elements\": [\n  {\n    \"label\": \"Bodhrán Drumming\",\n    \"type\": \"music\",\n    \"prompt\": \"Folk, energetic, bodhrán drum, tin whistle, 120 BPM, layered rhythm with occasional tin whistle melody, dry and spacious, instrumental, no vocals\"\n  },\n  {\n    \"label\": \"Tin Whistle Melody\",\n    \"type\": \"music\",\n    \"prompt\": \"Celtic folk, warm, solo tin whistle flute, 90 BPM, legato phrases in dorian mode, dry and intimate, instrumental, no vocals\"\n  },\n  {\n    \"label\": \"Crowd Cheering\",\n    \"type\": \"sound\",\n    \"prompt\": \"Cheering, crowd, continuous, festival grounds, close, bright\"\n  },\n  {\n    \"label\": \"Waves Crashing on Cliffs\",\n    \"type\": \"sound\",\n    \"prompt\": \"Crashing, water on rocky cliffs, continuous, open coast, distant, reverberant\"\n  }\n] }",
+  "parsed": {
+    "atmosphere": "Celtic Coastal Festival",
+    "elements": [
+      {
+        "label": "Bodhrán Drumming",
+        "type": "music",
+        "prompt": "Folk, energetic, bodhrán drum, tin whistle, 120 BPM, layered rhythm with occasional tin whistle melody, dry and spacious, instrumental, no vocals"
+      },
+      {
+        "label": "Tin Whistle Melody",
+        "type": "music",
+        "prompt": "Celtic folk, warm, solo tin whistle flute, 90 BPM, legato phrases in dorian mode, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Crowd Cheering",
+        "type": "sound",
+        "prompt": "Cheering, crowd, continuous, festival grounds, close, bright"
+      },
+      {
+        "label": "Waves Crashing on Cliffs",
+        "type": "sound",
+        "prompt": "Crashing, water on rocky cliffs, continuous, open coast, distant, reverberant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 30472,
+  "model_tag": "llama3.1:8b"
+}

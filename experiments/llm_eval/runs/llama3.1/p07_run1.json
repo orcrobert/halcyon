@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p07",
+  "prompt_text": "A beach at sunset — steady ocean waves, seagulls, a gentle coastal breeze, distant sailboat bell, a lone acoustic guitar played slowly nearby",
+  "category": "generic_ambiance",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Coastal Sunset\", \"elements\": [\n{\n\"label\": \"Ocean Waves\",\n\"type\": \"sound\",\n\"prompt\": \"Lapping, water on sandy shore, continuous, beach edge, close, soft\"\n},\n{\n\"label\": \"Seagulls\",\n\"type\": \"sound\",\n\"prompt\": \"Continuous seagull calls, scattered across the sky, open beach, mid, bright and reverberant\"\n},\n{\n\"label\": \"Coastal Breeze\",\n\"type\": \"sound\",\n\"prompt\": \"Whispering, wind through palm trees, continuous, coastal dunes, far, dry\"\n},\n{\n\"label\": \"Sailboat Bell\",\n\"type\": \"sound\",\n\"prompt\": \"Tinkling, sailboat bell, sparse, open sea, mid, soft and muffled\"\n},\n{\n\"label\": \"Acoustic Guitar\",\n\"type\": \"music\",\n\"prompt\": \"Slow, acoustic guitar played in a contemplative style, 60 BPM, legato phrases with a warm tone, dry and intimate, instrumental, no vocals\"\n}\n]}",
+  "parsed": {
+    "atmosphere": "Coastal Sunset",
+    "elements": [
+      {
+        "label": "Ocean Waves",
+        "type": "sound",
+        "prompt": "Lapping, water on sandy shore, continuous, beach edge, close, soft"
+      },
+      {
+        "label": "Seagulls",
+        "type": "sound",
+        "prompt": "Continuous seagull calls, scattered across the sky, open beach, mid, bright and reverberant"
+      },
+      {
+        "label": "Coastal Breeze",
+        "type": "sound",
+        "prompt": "Whispering, wind through palm trees, continuous, coastal dunes, far, dry"
+      },
+      {
+        "label": "Sailboat Bell",
+        "type": "sound",
+        "prompt": "Tinkling, sailboat bell, sparse, open sea, mid, soft and muffled"
+      },
+      {
+        "label": "Acoustic Guitar",
+        "type": "music",
+        "prompt": "Slow, acoustic guitar played in a contemplative style, 60 BPM, legato phrases with a warm tone, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 30277,
+  "model_tag": "llama3.1:8b"
+}

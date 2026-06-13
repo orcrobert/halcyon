@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p04",
+  "prompt_text": "A rainy evening in Coruscant's lower city from Star Wars — distant machinery hum, rain on metal, neon signs buzzing, speeder traffic overhead",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Coruscant Rainy Evening\", \"elements\": [\n{\n\"label\": \"Rain Machinery Hum\",\n\"type\": \"sound\",\n\"prompt\": \"Hissing, metallic factory hull, continuous, abandoned warehouse, distant, dry\"\n},\n{\n\"label\": \"Rain on Metal\",\n\"type\": \"sound\",\n\"prompt\": \"Lapping, water on metal surface, continuous, alleyway, close, soft\"\n},\n{\n\"label\": \"Neon Signs Buzzing\",\n\"type\": \"music\",\n\"prompt\": \"Electronic ambient, nostalgic, solo bright sustained pad, 80 BPM, sparse legato arpeggios in major key, reverberant and spacious, instrumental, no vocals\"\n},\n{\n\"label\": \"Speeder Traffic Overhead\",\n\"type\": \"sound\",\n\"prompt\": \"Rumbling, speeder bikes on metal grating, continuous, city highway, distant, muffled\"\n}\n]}",
+  "parsed": {
+    "atmosphere": "Coruscant Rainy Evening",
+    "elements": [
+      {
+        "label": "Rain Machinery Hum",
+        "type": "sound",
+        "prompt": "Hissing, metallic factory hull, continuous, abandoned warehouse, distant, dry"
+      },
+      {
+        "label": "Rain on Metal",
+        "type": "sound",
+        "prompt": "Lapping, water on metal surface, continuous, alleyway, close, soft"
+      },
+      {
+        "label": "Neon Signs Buzzing",
+        "type": "music",
+        "prompt": "Electronic ambient, nostalgic, solo bright sustained pad, 80 BPM, sparse legato arpeggios in major key, reverberant and spacious, instrumental, no vocals"
+      },
+      {
+        "label": "Speeder Traffic Overhead",
+        "type": "sound",
+        "prompt": "Rumbling, speeder bikes on metal grating, continuous, city highway, distant, muffled"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 28113,
+  "model_tag": "llama3.1:8b"
+}

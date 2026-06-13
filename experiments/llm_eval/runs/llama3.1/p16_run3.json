@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p16",
+  "prompt_text": "Rising tension before a confrontation — a dark corridor, distant footsteps on stone, low rumbling drone, a heartbeat-like bass drum pulse, high strings holding a dissonant sustained note",
+  "category": "abstract_mood",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Tense Confrontation\", \n  \"elements\": [ \n    {\n      \"label\": \"Footsteps\",\n      \"type\": \"sound\",\n      \"prompt\": \"Sporadic, leather boots on stone, sparse, narrow corridor, distant, dry\"\n    },\n    {\n      \"label\": \"Drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Dark ambient drone, tense, sustained low tone, slow, dissonant, reverberant and spacious, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Pulse\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous, bass drum on stone floor, low rumble, corridor end, close, muffled\"\n    },\n    {\n      \"label\": \"Strings\",\n      \"type\": \"music\",\n      \"prompt\": \"Dissonant sustained high strings, tense, legato phrases in minor scale, fast, complex harmony, dry and intimate, instrumental, no vocals\"\n    } \n  ] \n}",
+  "parsed": {
+    "atmosphere": "Tense Confrontation",
+    "elements": [
+      {
+        "label": "Footsteps",
+        "type": "sound",
+        "prompt": "Sporadic, leather boots on stone, sparse, narrow corridor, distant, dry"
+      },
+      {
+        "label": "Drone",
+        "type": "music",
+        "prompt": "Dark ambient drone, tense, sustained low tone, slow, dissonant, reverberant and spacious, instrumental, no vocals"
+      },
+      {
+        "label": "Pulse",
+        "type": "sound",
+        "prompt": "Continuous, bass drum on stone floor, low rumble, corridor end, close, muffled"
+      },
+      {
+        "label": "Strings",
+        "type": "music",
+        "prompt": "Dissonant sustained high strings, tense, legato phrases in minor scale, fast, complex harmony, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 30499,
+  "model_tag": "llama3.1:8b"
+}

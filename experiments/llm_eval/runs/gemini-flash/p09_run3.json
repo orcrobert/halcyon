@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p09",
+  "prompt_text": "A thunderstorm over a mountain lake — heavy rain on water, distant rolling thunder, wind in pine trees, loons calling",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Thunderstorm over mountain lake\",\n  \"elements\": [\n    {\n      \"label\": \"Heavy rain on lake surface\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pattering, heavy rain on water, continuous, mountain lake, close, reverberant\"\n    },\n    {\n      \"label\": \"Distant rolling thunder\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rumbling, distant thunder, slow and continuous, open sky, far, low frequency rumble\"\n    },\n    {\n      \"label\": \"Wind in pine trees\",\n      \"type\": \"sound\",\n      \"prompt\": \"Sighing, wind in pine needles, continuous, mountain slope, mid, soft rustling\"\n    },\n    {\n      \"label\": \"Loon calls\",\n      \"type\": \"sound\",\n      \"prompt\": \"Calling, loons, occasional, mountain lake, distant, clear calls\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Thunderstorm over mountain lake",
+    "elements": [
+      {
+        "label": "Heavy rain on lake surface",
+        "type": "sound",
+        "prompt": "Pattering, heavy rain on water, continuous, mountain lake, close, reverberant"
+      },
+      {
+        "label": "Distant rolling thunder",
+        "type": "sound",
+        "prompt": "Rumbling, distant thunder, slow and continuous, open sky, far, low frequency rumble"
+      },
+      {
+        "label": "Wind in pine trees",
+        "type": "sound",
+        "prompt": "Sighing, wind in pine needles, continuous, mountain slope, mid, soft rustling"
+      },
+      {
+        "label": "Loon calls",
+        "type": "sound",
+        "prompt": "Calling, loons, occasional, mountain lake, distant, clear calls"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1735,
+  "model_tag": "gemini-2.5-flash-lite"
+}

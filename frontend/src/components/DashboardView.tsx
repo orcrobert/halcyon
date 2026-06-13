@@ -300,7 +300,7 @@ export function DashboardView({
       {/* Footer */}
       <footer className="py-6 text-center">
         <p className="text-[11px] text-slate-800 uppercase tracking-widest">
-          Drag faders · M to mute
+          Drag faders · Space to play/pause
         </p>
       </footer>
 

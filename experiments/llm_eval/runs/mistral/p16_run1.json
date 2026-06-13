@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p16",
+  "prompt_text": "Rising tension before a confrontation — a dark corridor, distant footsteps on stone, low rumbling drone, a heartbeat-like bass drum pulse, high strings holding a dissonant sustained note",
+  "category": "abstract_mood",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Rising Tension\",\n  \"elements\": [\n    {\n      \"label\": \"Dark Corridor Ambience\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant stone echo, sparse, dark corridor, mid, reverberant\"\n    },\n    {\n      \"label\": \"Footsteps\",\n      \"type\": \"sound\",\n      \"prompt\": \"Walking on stone, occasional, footsteps, dark corridor, close, dry\"\n    },\n    {\n      \"label\": \"Low Rumble Drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Droning bass tone, slow, mid-frequency emphasis, sustained, large room, distant, muffled\"\n    },\n    {\n      \"label\": \"Heartbeat-like Bass Drum Pulse\",\n      \"type\": \"music\",\n      \"prompt\": \"Pulsing bass drum, continuous, wood drum, tense, dark corridor, close, dry\"\n    },\n    {\n      \"label\": \"Dissonant Sustained Note\",\n      \"type\": \"music\",\n      \"prompt\": \"Sustained dissonant note, string instruments, slow tempo, sustained legato phrases, distant, bright\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rising Tension",
+    "elements": [
+      {
+        "label": "Dark Corridor Ambience",
+        "type": "sound",
+        "prompt": "Distant stone echo, sparse, dark corridor, mid, reverberant"
+      },
+      {
+        "label": "Footsteps",
+        "type": "sound",
+        "prompt": "Walking on stone, occasional, footsteps, dark corridor, close, dry"
+      },
+      {
+        "label": "Low Rumble Drone",
+        "type": "music",
+        "prompt": "Droning bass tone, slow, mid-frequency emphasis, sustained, large room, distant, muffled"
+      },
+      {
+        "label": "Heartbeat-like Bass Drum Pulse",
+        "type": "music",
+        "prompt": "Pulsing bass drum, continuous, wood drum, tense, dark corridor, close, dry"
+      },
+      {
+        "label": "Dissonant Sustained Note",
+        "type": "music",
+        "prompt": "Sustained dissonant note, string instruments, slow tempo, sustained legato phrases, distant, bright"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 36783,
+  "model_tag": "mistral"
+}

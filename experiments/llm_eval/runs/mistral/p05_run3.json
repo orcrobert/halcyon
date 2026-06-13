@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p05",
+  "prompt_text": "The Shire from Lord of the Rings — gentle rolling hills, birdsong, a brook nearby, distant sheep bells, a soft acoustic melody",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"The Peaceful Shire\",\n\"elements\": [\n  {\n    \"label\": \"Gentle Birdsong\",\n    \"type\": \"sound\",\n    \"prompt\": \"Bird calls, feathers, open field, close, soft and bright\"\n  },\n  {\n    \"label\": \"Brook Nearby\",\n    \"type\": \"sound\",\n    \"prompt\": \"Water flowing over stones, wet rocks, forest edge, mid, soft\"\n  },\n  {\n    \"label\": \"Distant Sheep Bells\",\n    \"type\": \"sound\",\n    \"prompt\": \"Bell ringing, sheep hide, open pasture, distant, muffled\"\n  },\n  {\n    \"label\": \"Soft Acoustic Melody\",\n    \"type\": \"music\",\n    \"prompt\": \"Gentle acoustic guitar strumming, minor chords, meditative, solo guitar, slow tempo, sparse arrangement, intimate and dry\"\n  }\n]\n}",
+  "parsed": {
+    "atmosphere": "The Peaceful Shire",
+    "elements": [
+      {
+        "label": "Gentle Birdsong",
+        "type": "sound",
+        "prompt": "Bird calls, feathers, open field, close, soft and bright"
+      },
+      {
+        "label": "Brook Nearby",
+        "type": "sound",
+        "prompt": "Water flowing over stones, wet rocks, forest edge, mid, soft"
+      },
+      {
+        "label": "Distant Sheep Bells",
+        "type": "sound",
+        "prompt": "Bell ringing, sheep hide, open pasture, distant, muffled"
+      },
+      {
+        "label": "Soft Acoustic Melody",
+        "type": "music",
+        "prompt": "Gentle acoustic guitar strumming, minor chords, meditative, solo guitar, slow tempo, sparse arrangement, intimate and dry"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 44018,
+  "model_tag": "mistral"
+}

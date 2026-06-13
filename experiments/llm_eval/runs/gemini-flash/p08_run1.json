@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p08",
+  "prompt_text": "A busy medieval market — crowd murmur, merchant calls, horse hooves on cobblestone, a street musician with lute and drum",
+  "category": "generic_ambiance",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Busy medieval market\",\n  \"elements\": [\n    {\n      \"label\": \"Crowd murmur\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmur, diverse crowd, continuous, market square, mid, dense and reverberant\"\n    },\n    {\n      \"label\": \"Merchant calls\",\n      \"type\": \"sound\",\n      \"prompt\": \"Calls, merchants, intermittent and loud, market square, mid, bright and clear\"\n    },\n    {\n      \"label\": \"Horse hooves\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hooves, horse on cobblestone, continuous and rhythmic, market street, distant, dry and sharp\"\n    },\n    {\n      \"label\": \"Street musician (lute)\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk, lively, lute, light frame drum, 110 BPM, sparse melody with rhythmic accompaniment, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Street musician (drum)\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rhythmic beat, hand drum, continuous and steady, market square, close, dry and resonant\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Busy medieval market",
+    "elements": [
+      {
+        "label": "Crowd murmur",
+        "type": "sound",
+        "prompt": "Murmur, diverse crowd, continuous, market square, mid, dense and reverberant"
+      },
+      {
+        "label": "Merchant calls",
+        "type": "sound",
+        "prompt": "Calls, merchants, intermittent and loud, market square, mid, bright and clear"
+      },
+      {
+        "label": "Horse hooves",
+        "type": "sound",
+        "prompt": "Hooves, horse on cobblestone, continuous and rhythmic, market street, distant, dry and sharp"
+      },
+      {
+        "label": "Street musician (lute)",
+        "type": "music",
+        "prompt": "Folk, lively, lute, light frame drum, 110 BPM, sparse melody with rhythmic accompaniment, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Street musician (drum)",
+        "type": "sound",
+        "prompt": "Rhythmic beat, hand drum, continuous and steady, market square, close, dry and resonant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1523,
+  "model_tag": "gemini-2.5-flash-lite"
+}

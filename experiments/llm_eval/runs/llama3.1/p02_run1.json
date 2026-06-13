@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p02",
+  "prompt_text": "A campfire deep in the wilderness of Blood Meridian — wind across a barren desert plain, distant coyotes, embers crackling",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Desert Campfire\", \"elements\": [\n    {\"label\": \"Wind Across Desert Plain\", \"type\": \"sound\", \"prompt\": \"Howling, dry air, continuous, open desert, close, bright\"}, \n    {\"label\": \"Distant Coyotes\", \"type\": \"sound\", \"prompt\": \"Barking, coyote pack, sparse, rocky outcropping, distant, reverberant\"}, \n    {\"label\": \"Embers Crackle\", \"type\": \"music\", \"prompt\": \"Folk ambient, warm, solo hurdy-gurdy drone, 60 BPM, sustained low drone in minor key, dry and intimate\"}\n]}",
+  "parsed": {
+    "atmosphere": "Desert Campfire",
+    "elements": [
+      {
+        "label": "Wind Across Desert Plain",
+        "type": "sound",
+        "prompt": "Howling, dry air, continuous, open desert, close, bright"
+      },
+      {
+        "label": "Distant Coyotes",
+        "type": "sound",
+        "prompt": "Barking, coyote pack, sparse, rocky outcropping, distant, reverberant"
+      },
+      {
+        "label": "Embers Crackle",
+        "type": "music",
+        "prompt": "Folk ambient, warm, solo hurdy-gurdy drone, 60 BPM, sustained low drone in minor key, dry and intimate"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 13499,
+  "model_tag": "llama3.1:8b"
+}

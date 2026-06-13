@@ -1,0 +1,26 @@
+{
+  "prompt_id": "p18",
+  "prompt_text": "Rain",
+  "category": "edge_case",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Rainy Scene\", \n\"elements\": [\n    {\n      \"label\": \"Raindrops on Metal\",\n      \"type\": \"sound\",\n      \"prompt\": \"Lapping, water on metal roof, continuous, urban alleyway, close, soft\"\n    },\n    {\n      \"label\": \"Distant Thunder\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rumbling, low-frequency thunder, occasional, open sky, distant, reverberant\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rainy Scene",
+    "elements": [
+      {
+        "label": "Raindrops on Metal",
+        "type": "sound",
+        "prompt": "Lapping, water on metal roof, continuous, urban alleyway, close, soft"
+      },
+      {
+        "label": "Distant Thunder",
+        "type": "sound",
+        "prompt": "Rumbling, low-frequency thunder, occasional, open sky, distant, reverberant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 14549,
+  "model_tag": "llama3.1:8b"
+}

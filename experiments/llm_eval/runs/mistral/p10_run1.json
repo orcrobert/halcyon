@@ -1,0 +1,48 @@
+{
+  "prompt_id": "p10",
+  "prompt_text": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room",
+  "category": "generic_ambiance",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Cozy Library Late Night\",\n  \"elements\": [\n    {\n      \"label\": \"Faint Clock Ticking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clock ticking, mechanical, slow and continuous, library, close, dry\"\n    },\n    {\n      \"label\": \"Distant Rain on Windows\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rain droplets, water, occasional, library exterior, distant, soft\"\n    },\n    {\n      \"label\": \"Fireplace Crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackling, wood fire, continuous, fireplace, close, warm and dry\"\n    },\n    {\n      \"label\": \"Soft Page-Turning Sounds\",\n      \"type\": \"sound\",\n      \"prompt\": \"Page turning, paper, sparse, library, mid, dry\"\n    },\n    {\n      \"label\": \"Slow Nocturne-style Piano Chords\",\n      \"type\": \"music\",\n      \"genre\": \"Classical\",\n      \"mood\": \"Calm\",\n      \"lead_instruments\": \"Piano\",\n      \"supporting_instruments\": \"None\",\n      \"tempo\": \"Slow\",\n      \"arrangement\": \"Sparse\",\n      \"production_style\": \"Dry and intimate\",\n      \"vocals\": \"Instrumental\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Cozy Library Late Night",
+    "elements": [
+      {
+        "label": "Faint Clock Ticking",
+        "type": "sound",
+        "prompt": "Clock ticking, mechanical, slow and continuous, library, close, dry"
+      },
+      {
+        "label": "Distant Rain on Windows",
+        "type": "sound",
+        "prompt": "Rain droplets, water, occasional, library exterior, distant, soft"
+      },
+      {
+        "label": "Fireplace Crackling",
+        "type": "sound",
+        "prompt": "Crackling, wood fire, continuous, fireplace, close, warm and dry"
+      },
+      {
+        "label": "Soft Page-Turning Sounds",
+        "type": "sound",
+        "prompt": "Page turning, paper, sparse, library, mid, dry"
+      },
+      {
+        "label": "Slow Nocturne-style Piano Chords",
+        "type": "music",
+        "genre": "Classical",
+        "mood": "Calm",
+        "lead_instruments": "Piano",
+        "supporting_instruments": "None",
+        "tempo": "Slow",
+        "arrangement": "Sparse",
+        "production_style": "Dry and intimate",
+        "vocals": "Instrumental"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 114321,
+  "model_tag": "mistral"
+}

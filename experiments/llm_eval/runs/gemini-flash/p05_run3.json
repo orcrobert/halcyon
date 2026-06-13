@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p05",
+  "prompt_text": "The Shire from Lord of the Rings — gentle rolling hills, birdsong, a brook nearby, distant sheep bells, a soft acoustic melody",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"The Shire countryside\",\n  \"elements\": [\n    {\n      \"label\": \"Gentle birdsong\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chirping, various small birds, continuous, rolling hills, distant, soft\"\n    },\n    {\n      \"label\": \"Babbling brook\",\n      \"type\": \"sound\",\n      \"prompt\": \"Babbling, water over pebbles, continuous, beside path, close, reverberant\"\n    },\n    {\n      \"label\": \"Distant sheep bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ringing, sheep bells, occasional, far hills, distant, soft\"\n    },\n    {\n      \"label\": \"Acoustic melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk, warm, acoustic guitar, light strings, 80 BPM, sparse, intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Shire countryside",
+    "elements": [
+      {
+        "label": "Gentle birdsong",
+        "type": "sound",
+        "prompt": "Chirping, various small birds, continuous, rolling hills, distant, soft"
+      },
+      {
+        "label": "Babbling brook",
+        "type": "sound",
+        "prompt": "Babbling, water over pebbles, continuous, beside path, close, reverberant"
+      },
+      {
+        "label": "Distant sheep bells",
+        "type": "sound",
+        "prompt": "Ringing, sheep bells, occasional, far hills, distant, soft"
+      },
+      {
+        "label": "Acoustic melody",
+        "type": "music",
+        "prompt": "Folk, warm, acoustic guitar, light strings, 80 BPM, sparse, intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1357,
+  "model_tag": "gemini-2.5-flash-lite"
+}

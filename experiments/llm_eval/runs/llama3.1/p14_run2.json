@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p14",
+  "prompt_text": "An Indian classical music concert at twilight — tabla rhythm, sitar melody, tanpura drone, a small audience, evening insects outside",
+  "category": "cultural_specific",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Indian Classical Concert\",\n  \"elements\": [\n    {\n      \"label\": \"Sitar Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"North Indian classical, meditative, sitar, tanpura, 120 BPM, legato phrases in raga yaman, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Tabla Rhythm\",\n      \"type\": \"music\",\n      \"prompt\": \"North Indian classical, driving, tabla, harmonium, 120 BPM, sparse rhythmic patterns, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Tanpura Drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Ambient drone, warm, deep sustained low tone, slow, sustained drone in maqam raga yaman, spacious and reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Audience Chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Conversational murmurs, people seated on stone floor, occasional claps, close, dry\"\n    },\n    {\n      \"label\": \"Evening Insects\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous cricket chirps, sparse frog croaks, distant ambient room tone, mid, reverberant\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Indian Classical Concert",
+    "elements": [
+      {
+        "label": "Sitar Melody",
+        "type": "music",
+        "prompt": "North Indian classical, meditative, sitar, tanpura, 120 BPM, legato phrases in raga yaman, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Tabla Rhythm",
+        "type": "music",
+        "prompt": "North Indian classical, driving, tabla, harmonium, 120 BPM, sparse rhythmic patterns, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Tanpura Drone",
+        "type": "music",
+        "prompt": "Ambient drone, warm, deep sustained low tone, slow, sustained drone in maqam raga yaman, spacious and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Audience Chatter",
+        "type": "sound",
+        "prompt": "Conversational murmurs, people seated on stone floor, occasional claps, close, dry"
+      },
+      {
+        "label": "Evening Insects",
+        "type": "sound",
+        "prompt": "Continuous cricket chirps, sparse frog croaks, distant ambient room tone, mid, reverberant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 38945,
+  "model_tag": "llama3.1:8b"
+}

@@ -1,0 +1,51 @@
+{
+  "prompt_id": "p19",
+  "prompt_text": "A futuristic underwater research station during a systems emergency — alarms pulsing, bubbling water pressure against the hull, crew radio chatter, generator hum, distant sonar pings, emergency lighting flicker represented as a low electrical hum",
+  "category": "edge_case",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"Futuristic Underwater Emergency\",\n\"elements\": [\n  {\n    \"label\": \"Pulsing Alarms\",\n    \"type\": \"sound\",\n    \"prompt\": \"Sustained electronic tones, synthetic material, pulsing action, underwater environment, close, bright\"\n  },\n  {\n    \"label\": \"Water Pressure Against Hull\",\n    \"type\": \"sound\",\n    \"prompt\": \"Rhythmic creaking, metal object, continuous action, underwater environment, mid, reverberant\"\n  },\n  {\n    \"label\": \"Crew Radio Chatter\",\n    \"type\": \"sound\",\n    \"prompt\": \"Spoken words, human voice, occasional action, research station interior, distant, dry\"\n  },\n  {\n    \"label\": \"Generator Hum\",\n    \"type\": \"sound\",\n    \"prompt\": \"Continuous low drone, electrical material, continuous action, research station interior, close, bright\"\n  },\n  {\n    \"label\": \"Distant Sonar Pings\",\n    \"type\": \"sound\",\n    \"prompt\": \"Short beeps, electronic material, occasional action, underwater environment, far, dry\"\n  },\n  {\n    \"label\": \"Emergency Lighting Flicker\",\n    \"type\": \"sound\",\n    \"prompt\": \"Low electrical hum with intermittent variations, electrical material, continuous action, research station interior, distant, bright\"\n  },\n  {\n    \"label\": \"Ambient Drone\",\n    \"type\": \"music\",\n    \"prompt\": \"Deep sustained low tone, slow tempo, sustained drone, spacious and reverberant, instrumental, no vocals\"\n    }\n]\n}",
+  "parsed": {
+    "atmosphere": "Futuristic Underwater Emergency",
+    "elements": [
+      {
+        "label": "Pulsing Alarms",
+        "type": "sound",
+        "prompt": "Sustained electronic tones, synthetic material, pulsing action, underwater environment, close, bright"
+      },
+      {
+        "label": "Water Pressure Against Hull",
+        "type": "sound",
+        "prompt": "Rhythmic creaking, metal object, continuous action, underwater environment, mid, reverberant"
+      },
+      {
+        "label": "Crew Radio Chatter",
+        "type": "sound",
+        "prompt": "Spoken words, human voice, occasional action, research station interior, distant, dry"
+      },
+      {
+        "label": "Generator Hum",
+        "type": "sound",
+        "prompt": "Continuous low drone, electrical material, continuous action, research station interior, close, bright"
+      },
+      {
+        "label": "Distant Sonar Pings",
+        "type": "sound",
+        "prompt": "Short beeps, electronic material, occasional action, underwater environment, far, dry"
+      },
+      {
+        "label": "Emergency Lighting Flicker",
+        "type": "sound",
+        "prompt": "Low electrical hum with intermittent variations, electrical material, continuous action, research station interior, distant, bright"
+      },
+      {
+        "label": "Ambient Drone",
+        "type": "music",
+        "prompt": "Deep sustained low tone, slow tempo, sustained drone, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 36721,
+  "model_tag": "mistral"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p12",
+  "prompt_text": "A Japanese zen garden at dawn — raked gravel stillness, a temple bell in the distance, bamboo water feature, sparse koto melody",
+  "category": "cultural_specific",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Zen Garden at Dawn\",\n  \"elements\": [\n    {\n      \"label\": \"Gravel Sifted\",\n      \"type\": \"sound\",\n      \"prompt\": \"Sifting gravel on stone path, stone path, slow and continuous, temple grounds, mid, dry\"\n    },\n    {\n      \"label\": \"Distant Bell Toll\",\n      \"type\": \"sound\",\n      \"prompt\": \"Tolling bell, metal bell, occasional, distant mountainside, far, bright\"\n    },\n    {\n      \"label\": \"Bamboo Water Feature\",\n      \"type\": \"sound\",\n      \"prompt\": \"Water flowing over bamboo, bamboo stalks in pond, continuous, tranquil garden pool, close, soft\"\n    },\n    {\n      \"label\": \"Koto Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Japanese classical, contemplative, solo koto, 40 BPM, legato phrases in pentatonic scale, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Zen Garden at Dawn",
+    "elements": [
+      {
+        "label": "Gravel Sifted",
+        "type": "sound",
+        "prompt": "Sifting gravel on stone path, stone path, slow and continuous, temple grounds, mid, dry"
+      },
+      {
+        "label": "Distant Bell Toll",
+        "type": "sound",
+        "prompt": "Tolling bell, metal bell, occasional, distant mountainside, far, bright"
+      },
+      {
+        "label": "Bamboo Water Feature",
+        "type": "sound",
+        "prompt": "Water flowing over bamboo, bamboo stalks in pond, continuous, tranquil garden pool, close, soft"
+      },
+      {
+        "label": "Koto Melody",
+        "type": "music",
+        "prompt": "Japanese classical, contemplative, solo koto, 40 BPM, legato phrases in pentatonic scale, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 36232,
+  "model_tag": "llama3.1:8b"
+}

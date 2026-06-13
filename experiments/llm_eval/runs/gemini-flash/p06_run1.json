@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p06",
+  "prompt_text": "A quiet forest at dawn — birds beginning to sing, light wind through leaves, a small stream, distant woodpecker, a soft wooden flute melody drifting through the trees",
+  "category": "generic_ambiance",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Quiet forest dawn\",\n  \"elements\": [\n    {\n      \"label\": \"Birdsong\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chirping, various birds, continuous gentle calls, forest canopy, distant, soft\"\n    },\n    {\n      \"label\": \"Wind in leaves\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rustling, leaves, light and continuous, forest trees, mid, soft\"\n    },\n    {\n      \"label\": \"Small stream\",\n      \"type\": \"sound\",\n      \"prompt\": \"Gurgling, water over pebbles, continuous, forest floor, close, gentle\"\n    },\n    {\n      \"label\": \"Distant woodpecker\",\n      \"type\": \"sound\",\n      \"prompt\": \"Tapping, woodpecker beak on wood, intermittent, forest trees, far, dry\"\n    },\n    {\n      \"label\": \"Wooden flute melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Japanese folk, contemplative, solo shakuhachi flute, 60 BPM, sparse melody, reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Quiet forest dawn",
+    "elements": [
+      {
+        "label": "Birdsong",
+        "type": "sound",
+        "prompt": "Chirping, various birds, continuous gentle calls, forest canopy, distant, soft"
+      },
+      {
+        "label": "Wind in leaves",
+        "type": "sound",
+        "prompt": "Rustling, leaves, light and continuous, forest trees, mid, soft"
+      },
+      {
+        "label": "Small stream",
+        "type": "sound",
+        "prompt": "Gurgling, water over pebbles, continuous, forest floor, close, gentle"
+      },
+      {
+        "label": "Distant woodpecker",
+        "type": "sound",
+        "prompt": "Tapping, woodpecker beak on wood, intermittent, forest trees, far, dry"
+      },
+      {
+        "label": "Wooden flute melody",
+        "type": "music",
+        "prompt": "Japanese folk, contemplative, solo shakuhachi flute, 60 BPM, sparse melody, reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1633,
+  "model_tag": "gemini-2.5-flash-lite"
+}

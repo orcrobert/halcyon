@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p14",
+  "prompt_text": "An Indian classical music concert at twilight — tabla rhythm, sitar melody, tanpura drone, a small audience, evening insects outside",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"Indian Classical Concert Twilight\",\n\"elements\": [\n  {\n    \"label\": \"Tabla Rhythm\",\n    \"type\": \"sound\",\n    \"prompt\": \"Rhythmic, clay tabla, continuous, concert hall, mid, bright\"\n  },\n  {\n    \"label\": \"Sitar Melody\",\n    \"type\": \"music\",\n    \"prompt\": \"Melodic, sitar, sparse, concert hall, close, dry\"\n  },\n  {\n    \"label\": \"Tanpura Drone\",\n    \"type\": \"music\",\n    \"prompt\": \"Sustained low tone, tanpura, continuous, concert hall, distant, soft\"\n  },\n  {\n    \"label\": \"Audience\",\n    \"type\": \"sound\",\n    \"prompt\": \"Ambient rustling, cotton clothing, occasional, concert hall, distant, dry\"\n  },\n  {\n    \"label\": \"Twilight Insects\",\n    \"type\": \"sound\",\n    \"prompt\": \"Continuous cricket chorus, twilight night, outside, far, soft\"\n  }\n]\n}",
+  "parsed": {
+    "atmosphere": "Indian Classical Concert Twilight",
+    "elements": [
+      {
+        "label": "Tabla Rhythm",
+        "type": "sound",
+        "prompt": "Rhythmic, clay tabla, continuous, concert hall, mid, bright"
+      },
+      {
+        "label": "Sitar Melody",
+        "type": "music",
+        "prompt": "Melodic, sitar, sparse, concert hall, close, dry"
+      },
+      {
+        "label": "Tanpura Drone",
+        "type": "music",
+        "prompt": "Sustained low tone, tanpura, continuous, concert hall, distant, soft"
+      },
+      {
+        "label": "Audience",
+        "type": "sound",
+        "prompt": "Ambient rustling, cotton clothing, occasional, concert hall, distant, dry"
+      },
+      {
+        "label": "Twilight Insects",
+        "type": "sound",
+        "prompt": "Continuous cricket chorus, twilight night, outside, far, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 16713,
+  "model_tag": "mistral"
+}

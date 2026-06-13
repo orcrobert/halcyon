@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p05",
+  "prompt_text": "The Shire from Lord of the Rings — gentle rolling hills, birdsong, a brook nearby, distant sheep bells, a soft acoustic melody",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"The Shire\", \n  \"elements\": [\n    {\n      \"label\": \"Birdsong\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chirping, various bird species, continuous, rolling hills, close, bright and reverberant\"\n    },\n    {\n      \"label\": \"Brook\",\n      \"type\": \"sound\",\n      \"prompt\": \"Gurgling, small brook, continuous, valley floor, mid, soft and muffled\"\n    },\n    {\n      \"label\": \"Sheep Bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant sheep bells ringing, sparse, open fields, far, soft and dry\"\n    },\n    {\n      \"label\": \"Acoustic Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk melody, warm, acoustic guitar, solo fiddle, 80 BPM, legato phrases in major key, intimate and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Shire",
+    "elements": [
+      {
+        "label": "Birdsong",
+        "type": "sound",
+        "prompt": "Chirping, various bird species, continuous, rolling hills, close, bright and reverberant"
+      },
+      {
+        "label": "Brook",
+        "type": "sound",
+        "prompt": "Gurgling, small brook, continuous, valley floor, mid, soft and muffled"
+      },
+      {
+        "label": "Sheep Bells",
+        "type": "sound",
+        "prompt": "Distant sheep bells ringing, sparse, open fields, far, soft and dry"
+      },
+      {
+        "label": "Acoustic Melody",
+        "type": "music",
+        "prompt": "Folk melody, warm, acoustic guitar, solo fiddle, 80 BPM, legato phrases in major key, intimate and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 36269,
+  "model_tag": "llama3.1:8b"
+}

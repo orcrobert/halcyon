@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p10",
+  "prompt_text": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Cozy library late at night\",\n  \"elements\": [\n    {\n      \"label\": \"Faint clock ticking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ticking, mechanical clock, slow and steady, library interior, distant, dry\"\n    },\n    {\n      \"label\": \"Distant rain on windows\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pattering, rain on glass, continuous, exterior, distant, reverberant\"\n    },\n    {\n      \"label\": \"Fireplace crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackling, fire in hearth, occasional bursts, library interior, mid, soft\"\n    },\n    {\n      \"label\": \"Soft page-turning\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rustling, paper pages, slow and deliberate, library interior, close, soft\"\n    },\n    {\n      \"label\": \"Piano playing slow nocturne chords\",\n      \"type\": \"music\",\n      \"prompt\": \"Classical nocturne, contemplative, piano, sustained chords, 60 BPM, sparse arrangement, spacious, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Cozy library late at night",
+    "elements": [
+      {
+        "label": "Faint clock ticking",
+        "type": "sound",
+        "prompt": "Ticking, mechanical clock, slow and steady, library interior, distant, dry"
+      },
+      {
+        "label": "Distant rain on windows",
+        "type": "sound",
+        "prompt": "Pattering, rain on glass, continuous, exterior, distant, reverberant"
+      },
+      {
+        "label": "Fireplace crackling",
+        "type": "sound",
+        "prompt": "Crackling, fire in hearth, occasional bursts, library interior, mid, soft"
+      },
+      {
+        "label": "Soft page-turning",
+        "type": "sound",
+        "prompt": "Rustling, paper pages, slow and deliberate, library interior, close, soft"
+      },
+      {
+        "label": "Piano playing slow nocturne chords",
+        "type": "music",
+        "prompt": "Classical nocturne, contemplative, piano, sustained chords, 60 BPM, sparse arrangement, spacious, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2476,
+  "model_tag": "gemini-2.5-flash-lite"
+}

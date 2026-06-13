@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p01",
+  "prompt_text": "A bustling tavern in Novigrad from The Witcher — patrons talking, a bard playing in the corner, fire crackling in the hearth",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{\n  \"atmosphere\": \"Tavern Night\",\n  \"elements\": [\n    {\n      \"label\": \"Bard's Lute\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk music, lively, lead instrument: lute, supporting instruments: none, tempo/BPM: fast, arrangement: layered, production style: intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Patrons' Conversation\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmuring, crowd of people, action: continuous, environment: tavern interior, distance/mic perspective: mid, acoustic qualities: reverberant, soft\"\n    },\n    {\n      \"label\": \"Fire Crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackling, flames on wooden hearth, action: slow and continuous, environment: fireplace, distance/mic perspective: close, acoustic qualities: dry, muffled\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Tavern Night",
+    "elements": [
+      {
+        "label": "Bard's Lute",
+        "type": "music",
+        "prompt": "Folk music, lively, lead instrument: lute, supporting instruments: none, tempo/BPM: fast, arrangement: layered, production style: intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Patrons' Conversation",
+        "type": "sound",
+        "prompt": "Murmuring, crowd of people, action: continuous, environment: tavern interior, distance/mic perspective: mid, acoustic qualities: reverberant, soft"
+      },
+      {
+        "label": "Fire Crackling",
+        "type": "sound",
+        "prompt": "Crackling, flames on wooden hearth, action: slow and continuous, environment: fireplace, distance/mic perspective: close, acoustic qualities: dry, muffled"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 18767,
+  "model_tag": "llama3.1:8b"
+}

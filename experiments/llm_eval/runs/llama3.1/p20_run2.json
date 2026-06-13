@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Café de Paris Rainy Night\", \"elements\": [\n  {\n    \"label\": \"Rainfall\",\n    \"type\": \"sound\",\n    \"prompt\": \"Lapping, water on glass windowpane, continuous, close, soft\"\n  },\n  {\n    \"label\": \"Piano Jazz\",\n    \"type\": \"music\",\n    \"prompt\": \"Jazz, warm, solo piano, 120 BPM, legato arpeggios in minor key, reverberant and spacious, instrumental, no vocals\"\n  },\n  {\n    \"label\": \"Conversations\",\n    \"type\": \"sound\",\n    \"prompt\": \"Murmuring, people speaking French, continuous, distant, muffled\"\n  },\n  {\n    \"label\": \"Dishware Clattering\",\n    \"type\": \"sound\",\n    \"prompt\": \"Clattering, ceramics on metal plate rack, sparse, close, bright and dry\"\n  }\n]}",
+  "parsed": {
+    "atmosphere": "Café de Paris Rainy Night",
+    "elements": [
+      {
+        "label": "Rainfall",
+        "type": "sound",
+        "prompt": "Lapping, water on glass windowpane, continuous, close, soft"
+      },
+      {
+        "label": "Piano Jazz",
+        "type": "music",
+        "prompt": "Jazz, warm, solo piano, 120 BPM, legato arpeggios in minor key, reverberant and spacious, instrumental, no vocals"
+      },
+      {
+        "label": "Conversations",
+        "type": "sound",
+        "prompt": "Murmuring, people speaking French, continuous, distant, muffled"
+      },
+      {
+        "label": "Dishware Clattering",
+        "type": "sound",
+        "prompt": "Clattering, ceramics on metal plate rack, sparse, close, bright and dry"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 22557,
+  "model_tag": "llama3.1:8b"
+}

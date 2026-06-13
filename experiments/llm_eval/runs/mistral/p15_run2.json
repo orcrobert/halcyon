@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Deep Melancholy and Solitude\",\n  \"elements\": [\n    {\n      \"label\": \"Empty Room Reverberation\",\n      \"type\": \"sound\",\n      \"prompt\": \"Long sustained reverb, wide open space, cold and distant, reverberant\"\n    },\n    {\n      \"label\": \"Wind Against Window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Soft wind pressure, against glass pane, slow and continuous, close, dry\"\n    },\n    {\n      \"label\": \"Distant Church Bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Tolling of bells, ancient church tower, occasional, far, bright\"\n    },\n    {\n      \"label\": \"Single-Note Cello Line\",\n      \"type\": \"music\",\n      \"prompt\": \"Cello melody, modal minor scale, solo cello, slow tempo, sustained legato phrases, soft dynamics, sparse arrangement, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Deep Melancholy and Solitude",
+    "elements": [
+      {
+        "label": "Empty Room Reverberation",
+        "type": "sound",
+        "prompt": "Long sustained reverb, wide open space, cold and distant, reverberant"
+      },
+      {
+        "label": "Wind Against Window",
+        "type": "sound",
+        "prompt": "Soft wind pressure, against glass pane, slow and continuous, close, dry"
+      },
+      {
+        "label": "Distant Church Bells",
+        "type": "sound",
+        "prompt": "Tolling of bells, ancient church tower, occasional, far, bright"
+      },
+      {
+        "label": "Single-Note Cello Line",
+        "type": "music",
+        "prompt": "Cello melody, modal minor scale, solo cello, slow tempo, sustained legato phrases, soft dynamics, sparse arrangement, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 26993,
+  "model_tag": "mistral"
+}

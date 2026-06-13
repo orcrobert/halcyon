@@ -1,0 +1,46 @@
+{
+  "prompt_id": "p19",
+  "prompt_text": "A futuristic underwater research station during a systems emergency — alarms pulsing, bubbling water pressure against the hull, crew radio chatter, generator hum, distant sonar pings, emergency lighting flicker represented as a low electrical hum",
+  "category": "edge_case",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"futuristic underwater research station emergency\",\n  \"elements\": [\n    {\n      \"label\": \"pulsing alarm\",\n      \"type\": \"sound\",\n      \"prompt\": \"Alarm, electronic systems, pulsing, research station interior, mid, reverberant\"\n    },\n    {\n      \"label\": \"water pressure\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rumble, water pressure against hull, continuous, underwater exterior, distant, deep\"\n    },\n    {\n      \"label\": \"crew radio chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Radio chatter, crew voices, urgent and fragmented, research station interior, close, muffled\"\n    },\n    {\n      \"label\": \"generator hum\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hum, electrical generator, continuous, research station interior, close, steady\"\n    },\n    {\n      \"label\": \"distant sonar pings\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ping, sonar pulse, regular, underwater exterior, far, echoing\"\n    },\n    {\n      \"label\": \"emergency lighting hum\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hum, electrical lighting, flickering, research station interior, mid, low frequency\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "futuristic underwater research station emergency",
+    "elements": [
+      {
+        "label": "pulsing alarm",
+        "type": "sound",
+        "prompt": "Alarm, electronic systems, pulsing, research station interior, mid, reverberant"
+      },
+      {
+        "label": "water pressure",
+        "type": "sound",
+        "prompt": "Rumble, water pressure against hull, continuous, underwater exterior, distant, deep"
+      },
+      {
+        "label": "crew radio chatter",
+        "type": "sound",
+        "prompt": "Radio chatter, crew voices, urgent and fragmented, research station interior, close, muffled"
+      },
+      {
+        "label": "generator hum",
+        "type": "sound",
+        "prompt": "Hum, electrical generator, continuous, research station interior, close, steady"
+      },
+      {
+        "label": "distant sonar pings",
+        "type": "sound",
+        "prompt": "Ping, sonar pulse, regular, underwater exterior, far, echoing"
+      },
+      {
+        "label": "emergency lighting hum",
+        "type": "sound",
+        "prompt": "Hum, electrical lighting, flickering, research station interior, mid, low frequency"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2145,
+  "model_tag": "gemini-2.5-flash-lite"
+}

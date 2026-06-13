@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p04",
+  "prompt_text": "A rainy evening in Coruscant's lower city from Star Wars — distant machinery hum, rain on metal, neon signs buzzing, speeder traffic overhead",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{\n\n\"atmosphere\": \"Coruscant Rainy Evening\",\n\n\"elements\": [\n\n{\n\"label\": \"Machinery Hum\",\n\"type\": \"sound\",\n\"prompt\": \"Hissing, metallic engine, continuous, industrial complex, distant, dry\"\n},\n\n{\n\"label\": \"Rain on Metal\",\n\"type\": \"sound\",\n\"prompt\": \"Pattering, rain on metal surface, steady, urban streets, close, soft\"\n},\n\n{\n\"label\": \"Neon Signs Buzzing\",\n\"type\": \"sound\",\n\"prompt\": \"Flickering, neon sign tubes, continuous, city street lighting, distant, bright\"\n},\n\n{\n\"label\": \"Speeder Traffic\",\n\"type\": \"sound\",\n\"prompt\": \"Whirring, speeders overhead, sparse, flyway traffic, distant, muffled\"\n}\n\n]\n\n}",
+  "parsed": {
+    "atmosphere": "Coruscant Rainy Evening",
+    "elements": [
+      {
+        "label": "Machinery Hum",
+        "type": "sound",
+        "prompt": "Hissing, metallic engine, continuous, industrial complex, distant, dry"
+      },
+      {
+        "label": "Rain on Metal",
+        "type": "sound",
+        "prompt": "Pattering, rain on metal surface, steady, urban streets, close, soft"
+      },
+      {
+        "label": "Neon Signs Buzzing",
+        "type": "sound",
+        "prompt": "Flickering, neon sign tubes, continuous, city street lighting, distant, bright"
+      },
+      {
+        "label": "Speeder Traffic",
+        "type": "sound",
+        "prompt": "Whirring, speeders overhead, sparse, flyway traffic, distant, muffled"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 26749,
+  "model_tag": "llama3.1:8b"
+}

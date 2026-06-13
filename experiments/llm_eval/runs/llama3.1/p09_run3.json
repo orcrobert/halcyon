@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p09",
+  "prompt_text": "A thunderstorm over a mountain lake — heavy rain on water, distant rolling thunder, wind in pine trees, loons calling",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Mountain Storm\", \"elements\": [\n\t{\n\t\"label\": \"Rainfall\",\n\t\"type\": \"sound\",\n\t\"prompt\": \"Drumming, raindrops on calm lake surface, continuous, open water, close, soft\"\n\t},\n\t{\n\t\"label\": \"Thunder\",\n\t\"type\": \"sound\",\n\t\"prompt\": \"Rumbling, distant thunderclouds, occasional, mountain ridge, far, reverberant\"\n\t},\n\t{\n\t\"label\": \"Wind in Pines\",\n\t\"type\": \"sound\",\n\t\"prompt\": \"Whispering, wind through pine branches, continuous, forest edge, close, soft\"\n\t},\n\t{\n\t\"label\": \"Loon Calls\",\n\t\"type\": \"music\",\n\t\"prompt\": \"Solo haunting loon calls, 40 BPM, sustained legato phrases in minor, dry and intimate, instrumental, no vocals\"\n\t}\n]}",
+  "parsed": {
+    "atmosphere": "Mountain Storm",
+    "elements": [
+      {
+        "label": "Rainfall",
+        "type": "sound",
+        "prompt": "Drumming, raindrops on calm lake surface, continuous, open water, close, soft"
+      },
+      {
+        "label": "Thunder",
+        "type": "sound",
+        "prompt": "Rumbling, distant thunderclouds, occasional, mountain ridge, far, reverberant"
+      },
+      {
+        "label": "Wind in Pines",
+        "type": "sound",
+        "prompt": "Whispering, wind through pine branches, continuous, forest edge, close, soft"
+      },
+      {
+        "label": "Loon Calls",
+        "type": "music",
+        "prompt": "Solo haunting loon calls, 40 BPM, sustained legato phrases in minor, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 25670,
+  "model_tag": "llama3.1:8b"
+}

@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p14",
+  "prompt_text": "An Indian classical music concert at twilight — tabla rhythm, sitar melody, tanpura drone, a small audience, evening insects outside",
+  "category": "cultural_specific",
+  "run": 3,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Indian classical concert at twilight\",\n  \"elements\": [\n    {\n      \"label\": \"Tabla rhythm\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rhythmic drumming, tabla, fast and intricate patterns, concert hall, mid, dry\"\n    },\n    {\n      \"label\": \"Sitar melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Indian classical, contemplative, solo sitar, tabla, tanpura, 80 BPM, layered, reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Tanpura drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Indian classical drone, meditative, tanpura, sustained low drone, slow, sustained drone, spacious, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Small audience murmurs\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmuring, small audience, soft and continuous, concert hall, distant, reverberant\"\n    },\n    {\n      \"label\": \"Evening insects outside\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chirping, crickets, continuous, outdoor garden, far, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Indian classical concert at twilight",
+    "elements": [
+      {
+        "label": "Tabla rhythm",
+        "type": "sound",
+        "prompt": "Rhythmic drumming, tabla, fast and intricate patterns, concert hall, mid, dry"
+      },
+      {
+        "label": "Sitar melody",
+        "type": "music",
+        "prompt": "Indian classical, contemplative, solo sitar, tabla, tanpura, 80 BPM, layered, reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Tanpura drone",
+        "type": "music",
+        "prompt": "Indian classical drone, meditative, tanpura, sustained low drone, slow, sustained drone, spacious, instrumental, no vocals"
+      },
+      {
+        "label": "Small audience murmurs",
+        "type": "sound",
+        "prompt": "Murmuring, small audience, soft and continuous, concert hall, distant, reverberant"
+      },
+      {
+        "label": "Evening insects outside",
+        "type": "sound",
+        "prompt": "Chirping, crickets, continuous, outdoor garden, far, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 3270,
+  "model_tag": "gemini-2.5-flash-lite"
+}

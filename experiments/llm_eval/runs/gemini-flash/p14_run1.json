@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p14",
+  "prompt_text": "An Indian classical music concert at twilight — tabla rhythm, sitar melody, tanpura drone, a small audience, evening insects outside",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Indian classical music concert at twilight\",\n  \"elements\": [\n    {\n      \"label\": \"tabla rhythm\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rhythmic percussion, tabla drum, complex and fast patterns, concert hall, mid, reverberant\"\n    },\n    {\n      \"label\": \"sitar melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Indian classical, contemplative, solo sitar, tanpura drone, 90 BPM, melodic phrases with ornamentation, spacious and resonant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"tanpura drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Indian classical drone, sustained, tanpura, slow, sustained drone, spacious and resonant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"small audience murmurs\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmurs, small audience, low and continuous, concert hall, distant, soft\"\n    },\n    {\n      \"label\": \"evening insects\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chirping, evening insects, continuous, open window, distant, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Indian classical music concert at twilight",
+    "elements": [
+      {
+        "label": "tabla rhythm",
+        "type": "sound",
+        "prompt": "Rhythmic percussion, tabla drum, complex and fast patterns, concert hall, mid, reverberant"
+      },
+      {
+        "label": "sitar melody",
+        "type": "music",
+        "prompt": "Indian classical, contemplative, solo sitar, tanpura drone, 90 BPM, melodic phrases with ornamentation, spacious and resonant, instrumental, no vocals"
+      },
+      {
+        "label": "tanpura drone",
+        "type": "music",
+        "prompt": "Indian classical drone, sustained, tanpura, slow, sustained drone, spacious and resonant, instrumental, no vocals"
+      },
+      {
+        "label": "small audience murmurs",
+        "type": "sound",
+        "prompt": "Murmurs, small audience, low and continuous, concert hall, distant, soft"
+      },
+      {
+        "label": "evening insects",
+        "type": "sound",
+        "prompt": "Chirping, evening insects, continuous, open window, distant, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2688,
+  "model_tag": "gemini-2.5-flash-lite"
+}

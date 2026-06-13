@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p11",
+  "prompt_text": "A Moroccan riad courtyard at dusk — a fountain trickling, swallows in the air, a muezzin call in the distance, traditional oud music",
+  "category": "cultural_specific",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Moroccan Riad Dusk\", \n  \"elements\": [\n    {\n      \"label\": \"Fountain Trickles\",\n      \"type\": \"sound\",\n      \"prompt\": \"Trickling, water on stone fountain edge, continuous, riad courtyard, mid, soft\"\n    },\n    {\n      \"label\": \"Swallows in Flight\",\n      \"type\": \"music\",\n      \"prompt\": \"Middle Eastern classical, meditative, solo qraqeb flute, 80 BPM, legato phrases in maqam hijaz, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Muezzin Call\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant muezzin call, human voice, sparse and intermittent, riad minaret, far, reverberant\"\n    },\n    {\n      \"label\": \"Traditional Oud Music\",\n      \"type\": \"music\",\n      \"prompt\": \"Middle Eastern classical, warm, oud, 70 BPM, layered fingerpicked arpeggios in maqam bayati, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Moroccan Riad Dusk",
+    "elements": [
+      {
+        "label": "Fountain Trickles",
+        "type": "sound",
+        "prompt": "Trickling, water on stone fountain edge, continuous, riad courtyard, mid, soft"
+      },
+      {
+        "label": "Swallows in Flight",
+        "type": "music",
+        "prompt": "Middle Eastern classical, meditative, solo qraqeb flute, 80 BPM, legato phrases in maqam hijaz, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Muezzin Call",
+        "type": "sound",
+        "prompt": "Distant muezzin call, human voice, sparse and intermittent, riad minaret, far, reverberant"
+      },
+      {
+        "label": "Traditional Oud Music",
+        "type": "music",
+        "prompt": "Middle Eastern classical, warm, oud, 70 BPM, layered fingerpicked arpeggios in maqam bayati, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 29738,
+  "model_tag": "llama3.1:8b"
+}

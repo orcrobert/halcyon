@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p09",
+  "prompt_text": "A thunderstorm over a mountain lake — heavy rain on water, distant rolling thunder, wind in pine trees, loons calling",
+  "category": "generic_ambiance",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Thunderstorm over mountain lake\",\n  \"elements\": [\n    {\n      \"label\": \"Heavy rain on lake water\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pattering, heavy raindrops on water surface, continuous, large lake, mid, reverberant\"\n    },\n    {\n      \"label\": \"Distant rolling thunder\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rumbling, distant thunder, slow and continuous, vast mountain range, far, low frequency rumble\"\n    },\n    {\n      \"label\": \"Wind in pine trees\",\n      \"type\": \"sound\",\n      \"prompt\": \"Soughing, wind through pine needles, continuous, mountain forest, mid, soft and airy\"\n    },\n    {\n      \"label\": \"Loon calls\",\n      \"type\": \"sound\",\n      \"prompt\": \"Calling, loon bird, occasional, open lake, distant, echoing\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Thunderstorm over mountain lake",
+    "elements": [
+      {
+        "label": "Heavy rain on lake water",
+        "type": "sound",
+        "prompt": "Pattering, heavy raindrops on water surface, continuous, large lake, mid, reverberant"
+      },
+      {
+        "label": "Distant rolling thunder",
+        "type": "sound",
+        "prompt": "Rumbling, distant thunder, slow and continuous, vast mountain range, far, low frequency rumble"
+      },
+      {
+        "label": "Wind in pine trees",
+        "type": "sound",
+        "prompt": "Soughing, wind through pine needles, continuous, mountain forest, mid, soft and airy"
+      },
+      {
+        "label": "Loon calls",
+        "type": "sound",
+        "prompt": "Calling, loon bird, occasional, open lake, distant, echoing"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1475,
+  "model_tag": "gemini-2.5-flash-lite"
+}

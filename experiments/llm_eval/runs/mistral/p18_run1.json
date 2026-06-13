@@ -1,0 +1,26 @@
+{
+  "prompt_id": "p18",
+  "prompt_text": "Rain",
+  "category": "edge_case",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"Rainy Scene\",\n\"elements\": [\n  {\n    \"label\": \"Distant rain\",\n    \"type\": \"sound\",\n    \"prompt\": \"Continuous, droplets on metal roof, open air, distant, dry\"\n  },\n  {\n    \"label\": \"Sustained low drone\",\n    \"type\": \"music\",\n    \"prompt\": \"Warm, minor key, sustained pad, sparse arrangement, slow tempo, spacious and reverberant, instrumental, no vocals\"\n  }\n]\n}",
+  "parsed": {
+    "atmosphere": "Rainy Scene",
+    "elements": [
+      {
+        "label": "Distant rain",
+        "type": "sound",
+        "prompt": "Continuous, droplets on metal roof, open air, distant, dry"
+      },
+      {
+        "label": "Sustained low drone",
+        "type": "music",
+        "prompt": "Warm, minor key, sustained pad, sparse arrangement, slow tempo, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 13503,
+  "model_tag": "mistral"
+}

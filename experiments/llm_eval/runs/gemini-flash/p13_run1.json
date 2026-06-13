@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p13",
+  "prompt_text": "A Celtic coastal village during a festival — bodhrán drumming, tin whistle melody, crowd cheering, waves crashing on cliffs",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Celtic festival on coast\",\n  \"elements\": [\n    {\n      \"label\": \"Bodhrán drumming\",\n      \"type\": \"sound\",\n      \"prompt\": \"Drumming, bodhrán, rhythmic, festival square, mid, dry\"\n    },\n    {\n      \"label\": \"Tin whistle melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Irish folk, lively, tin whistle, light frame drum, 120 BPM, sparse melody, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Crowd cheering\",\n      \"type\": \"sound\",\n      \"prompt\": \"Cheering, crowd, continuous and layered, festival square, distant, reverberant\"\n    },\n    {\n      \"label\": \"Waves crashing\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crashing, waves on cliffs, continuous, rocky coast, distant, reverberant\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Celtic festival on coast",
+    "elements": [
+      {
+        "label": "Bodhrán drumming",
+        "type": "sound",
+        "prompt": "Drumming, bodhrán, rhythmic, festival square, mid, dry"
+      },
+      {
+        "label": "Tin whistle melody",
+        "type": "music",
+        "prompt": "Irish folk, lively, tin whistle, light frame drum, 120 BPM, sparse melody, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Crowd cheering",
+        "type": "sound",
+        "prompt": "Cheering, crowd, continuous and layered, festival square, distant, reverberant"
+      },
+      {
+        "label": "Waves crashing",
+        "type": "sound",
+        "prompt": "Crashing, waves on cliffs, continuous, rocky coast, distant, reverberant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1808,
+  "model_tag": "gemini-2.5-flash-lite"
+}

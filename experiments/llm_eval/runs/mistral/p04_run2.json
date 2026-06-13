@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p04",
+  "prompt_text": "A rainy evening in Coruscant's lower city from Star Wars — distant machinery hum, rain on metal, neon signs buzzing, speeder traffic overhead",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Rainy evening in Coruscant's lower city\",\n  \"elements\": [\n    {\n      \"label\": \"Distant machinery hum\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hum, metallic machinery, slow and continuous, lower city streets, distant, dry\"\n    },\n    {\n      \"label\": \"Rain on metal\",\n      \"type\": \"sound\",\n      \"prompt\": \"Dripping, metal surfaces, occasional, lower city streets, close, soft\"\n    },\n    {\n      \"label\": \"Neon signs buzzing\",\n      \"type\": \"sound\",\n      \"prompt\": \"Buzzing, neon lights, continuous, lower city alleyways, close, bright\"\n    },\n    {\n      \"label\": \"Speeder traffic overhead\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hovering, speeders, sparse and intermittent, upper city streets, distant, dry\"\n    },\n    {\n      \"label\": \"Ambient drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Deep sustained low tone, slow, sustained drone, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rainy evening in Coruscant's lower city",
+    "elements": [
+      {
+        "label": "Distant machinery hum",
+        "type": "sound",
+        "prompt": "Hum, metallic machinery, slow and continuous, lower city streets, distant, dry"
+      },
+      {
+        "label": "Rain on metal",
+        "type": "sound",
+        "prompt": "Dripping, metal surfaces, occasional, lower city streets, close, soft"
+      },
+      {
+        "label": "Neon signs buzzing",
+        "type": "sound",
+        "prompt": "Buzzing, neon lights, continuous, lower city alleyways, close, bright"
+      },
+      {
+        "label": "Speeder traffic overhead",
+        "type": "sound",
+        "prompt": "Hovering, speeders, sparse and intermittent, upper city streets, distant, dry"
+      },
+      {
+        "label": "Ambient drone",
+        "type": "music",
+        "prompt": "Deep sustained low tone, slow, sustained drone, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 56486,
+  "model_tag": "mistral"
+}

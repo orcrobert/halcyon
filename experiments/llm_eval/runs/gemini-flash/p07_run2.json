@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p07",
+  "prompt_text": "A beach at sunset — steady ocean waves, seagulls, a gentle coastal breeze, distant sailboat bell, a lone acoustic guitar played slowly nearby",
+  "category": "generic_ambiance",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Beach at sunset\",\n  \"elements\": [\n    {\n      \"label\": \"Ocean waves\",\n      \"type\": \"sound\",\n      \"prompt\": \"Lapping, ocean water on sand, continuous, beach, mid, reverberant\"\n    },\n    {\n      \"label\": \"Seagulls\",\n      \"type\": \"sound\",\n      \"prompt\": \"Calls, seagulls, continuous, coastal air, distant, soft\"\n    },\n    {\n      \"label\": \"Coastal breeze\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rustling, gentle wind through dune grass, continuous, coast, close, soft\"\n    },\n    {\n      \"label\": \"Distant sailboat bell\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ringing, metal bell, occasional, far out at sea, distant, clear\"\n    },\n    {\n      \"label\": \"Lone acoustic guitar\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk, melancholic, solo acoustic guitar, 60 BPM, slow legato phrases, intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Beach at sunset",
+    "elements": [
+      {
+        "label": "Ocean waves",
+        "type": "sound",
+        "prompt": "Lapping, ocean water on sand, continuous, beach, mid, reverberant"
+      },
+      {
+        "label": "Seagulls",
+        "type": "sound",
+        "prompt": "Calls, seagulls, continuous, coastal air, distant, soft"
+      },
+      {
+        "label": "Coastal breeze",
+        "type": "sound",
+        "prompt": "Rustling, gentle wind through dune grass, continuous, coast, close, soft"
+      },
+      {
+        "label": "Distant sailboat bell",
+        "type": "sound",
+        "prompt": "Ringing, metal bell, occasional, far out at sea, distant, clear"
+      },
+      {
+        "label": "Lone acoustic guitar",
+        "type": "music",
+        "prompt": "Folk, melancholic, solo acoustic guitar, 60 BPM, slow legato phrases, intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1526,
+  "model_tag": "gemini-2.5-flash-lite"
+}

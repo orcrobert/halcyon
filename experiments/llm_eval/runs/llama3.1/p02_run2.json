@@ -1,0 +1,32 @@
+{
+  "prompt_id": "p02",
+  "prompt_text": "A campfire deep in the wilderness of Blood Meridian — wind across a barren desert plain, distant coyotes, embers crackling",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \"atmosphere\": \"Blood Meridian Wilderness\", \"elements\": [\n{\n\"label\": \"Wind\",\n\"type\": \"sound\",\n\"prompt\": \"Hissing, dry air, continuous, vast open plain, far, bright\",\n\"eq\": []\n},\n{\n\"label\": \"Coyotes\",\n\"type\": \"sound\",\n\"prompt\": \"Distant yips and howls, coyote pack, occasional, rocky outcropping, mid, reverberant\"\n},\n{\n\"label\": \"Embers\",\n\"type\": \"sound\",\n\"prompt\": \"Crackling, burning wood embers, continuous, campfire ring, close, warm\"\n}\n] }",
+  "parsed": {
+    "atmosphere": "Blood Meridian Wilderness",
+    "elements": [
+      {
+        "label": "Wind",
+        "type": "sound",
+        "prompt": "Hissing, dry air, continuous, vast open plain, far, bright",
+        "eq": []
+      },
+      {
+        "label": "Coyotes",
+        "type": "sound",
+        "prompt": "Distant yips and howls, coyote pack, occasional, rocky outcropping, mid, reverberant"
+      },
+      {
+        "label": "Embers",
+        "type": "sound",
+        "prompt": "Crackling, burning wood embers, continuous, campfire ring, close, warm"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 15831,
+  "model_tag": "llama3.1:8b"
+}

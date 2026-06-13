@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p02",
+  "prompt_text": "A campfire deep in the wilderness of Blood Meridian — wind across a barren desert plain, distant coyotes, embers crackling",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Campfire in the Wilderness\",\n  \"elements\": [\n    {\n      \"label\": \"Wind Across Desert Plain\",\n      \"type\": \"sound\",\n      \"prompt\": \"Sustained wind, sand-laden air, sparse and slow, open desert, distant, muffled\"\n    },\n    {\n      \"label\": \"Embers Crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Popping embers, wood burning, continuous, campfire, close, bright\"\n    },\n    {\n      \"label\": \"Distant Coyotes\",\n      \"type\": \"sound\",\n      \"prompt\": \"Single coyote howls, lonely and desolate, sparse, barren desert, far, dry\"\n    },\n    {\n      \"label\": \"Melancholic Desert Drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Ambient drone, melancholic mood, sustained low tone, slow tempo, layered arrangement, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Campfire in the Wilderness",
+    "elements": [
+      {
+        "label": "Wind Across Desert Plain",
+        "type": "sound",
+        "prompt": "Sustained wind, sand-laden air, sparse and slow, open desert, distant, muffled"
+      },
+      {
+        "label": "Embers Crackling",
+        "type": "sound",
+        "prompt": "Popping embers, wood burning, continuous, campfire, close, bright"
+      },
+      {
+        "label": "Distant Coyotes",
+        "type": "sound",
+        "prompt": "Single coyote howls, lonely and desolate, sparse, barren desert, far, dry"
+      },
+      {
+        "label": "Melancholic Desert Drone",
+        "type": "music",
+        "prompt": "Ambient drone, melancholic mood, sustained low tone, slow tempo, layered arrangement, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 48179,
+  "model_tag": "mistral"
+}

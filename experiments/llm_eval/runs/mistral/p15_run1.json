@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Deep Melancholy and Solitude\",\n  \"elements\": [\n    {\n      \"label\": \"Empty Room Reverberation\",\n      \"type\": \"sound\",\n      \"prompt\": \"Long silences, wide reverberation, sparse texture, neutral material, static, large space, cold acoustic qualities\"\n    },\n    {\n      \"label\": \"Wind Against Window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Sustained hiss, glass window, slow and continuous, close mic perspective, windy acoustic qualities\"\n    },\n    {\n      \"label\": \"Church Bells Distant\",\n      \"type\": \"sound\",\n      \"prompt\": \"Intermittent ringing, metal bells, sparse, distant church, far mic perspective, dry acoustic qualities\"\n    },\n    {\n      \"label\": \"Solo Cello Line\",\n      \"type\": \"music\",\n      \"prompt\": \"Slow melancholic cello line, sustained legato phrases, soft dynamics, solo lead instrument, minimal supporting instruments, slow tempo, contemplative mood, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Deep Melancholy and Solitude",
+    "elements": [
+      {
+        "label": "Empty Room Reverberation",
+        "type": "sound",
+        "prompt": "Long silences, wide reverberation, sparse texture, neutral material, static, large space, cold acoustic qualities"
+      },
+      {
+        "label": "Wind Against Window",
+        "type": "sound",
+        "prompt": "Sustained hiss, glass window, slow and continuous, close mic perspective, windy acoustic qualities"
+      },
+      {
+        "label": "Church Bells Distant",
+        "type": "sound",
+        "prompt": "Intermittent ringing, metal bells, sparse, distant church, far mic perspective, dry acoustic qualities"
+      },
+      {
+        "label": "Solo Cello Line",
+        "type": "music",
+        "prompt": "Slow melancholic cello line, sustained legato phrases, soft dynamics, solo lead instrument, minimal supporting instruments, slow tempo, contemplative mood, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 24619,
+  "model_tag": "mistral"
+}

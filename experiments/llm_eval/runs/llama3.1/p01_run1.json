@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p01",
+  "prompt_text": "A bustling tavern in Novigrad from The Witcher — patrons talking, a bard playing in the corner, fire crackling in the hearth",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Tavern Night\", \n\"elements\": [\n  {\"label\": \"Patrons Talk\", \n   \"type\": \"sound\",\n   \"prompt\": \"Mumbling, multiple voices, continuous, crowded tavern, mid, soft\"},\n  \n  {\"label\": \"Bard Plays\", \n   \"type\": \"music\",\n   \"prompt\": \"Medieval folk, lively, lute, gentle percussion on a tambourine, 120 BPM, layered with sustained melodies in the upper register, dry and intimate, instrumental, no vocals\"},\n  \n  {\"label\": \"Hearth Fire\", \n   \"type\": \"sound\",\n   \"prompt\": \"Crackling, firewood on stone hearth, continuous, near the hearth, close, warm\"}\n] }",
+  "parsed": {
+    "atmosphere": "Tavern Night",
+    "elements": [
+      {
+        "label": "Patrons Talk",
+        "type": "sound",
+        "prompt": "Mumbling, multiple voices, continuous, crowded tavern, mid, soft"
+      },
+      {
+        "label": "Bard Plays",
+        "type": "music",
+        "prompt": "Medieval folk, lively, lute, gentle percussion on a tambourine, 120 BPM, layered with sustained melodies in the upper register, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Hearth Fire",
+        "type": "sound",
+        "prompt": "Crackling, firewood on stone hearth, continuous, near the hearth, close, warm"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 44548,
+  "model_tag": "llama3.1:8b"
+}

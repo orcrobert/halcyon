@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Parisian café in rain\",\n  \"elements\": [\n    {\n      \"label\": \"Piano jazz\",\n      \"type\": \"music\",\n      \"prompt\": \"Cool jazz, contemplative, piano, light brushed drums, 90 BPM, sparse melody and chords, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Rain on window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pattering, rain on glass, continuous, exterior window, distant, soft and reverberant\"\n    },\n    {\n      \"label\": \"French conversations\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmuring, indistinct chatter, continuous, indoor café, mid, soft and muffled\"\n    },\n    {\n      \"label\": \"Clinking plates\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clinking, ceramic plates, occasional, café interior, close, dry and sharp\"\n    },\n    {\n      \"label\": \"Distant street ambience\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hiss, wet street sounds, continuous, exterior street, far, soft and distant\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Parisian café in rain",
+    "elements": [
+      {
+        "label": "Piano jazz",
+        "type": "music",
+        "prompt": "Cool jazz, contemplative, piano, light brushed drums, 90 BPM, sparse melody and chords, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Rain on window",
+        "type": "sound",
+        "prompt": "Pattering, rain on glass, continuous, exterior window, distant, soft and reverberant"
+      },
+      {
+        "label": "French conversations",
+        "type": "sound",
+        "prompt": "Murmuring, indistinct chatter, continuous, indoor café, mid, soft and muffled"
+      },
+      {
+        "label": "Clinking plates",
+        "type": "sound",
+        "prompt": "Clinking, ceramic plates, occasional, café interior, close, dry and sharp"
+      },
+      {
+        "label": "Distant street ambience",
+        "type": "sound",
+        "prompt": "Hiss, wet street sounds, continuous, exterior street, far, soft and distant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2284,
+  "model_tag": "gemini-2.5-flash-lite"
+}

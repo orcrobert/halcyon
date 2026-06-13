@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p12",
+  "prompt_text": "A Japanese zen garden at dawn — raked gravel stillness, a temple bell in the distance, bamboo water feature, sparse koto melody",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Japanese zen garden at dawn\",\n  \"elements\": [\n    {\n      \"label\": \"raked gravel stillness\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rustling, raked gravel, slow and continuous, zen garden, distant, dry\"\n    },\n    {\n      \"label\": \"temple bell\",\n      \"type\": \"sound\",\n      \"prompt\": \"Resonance, temple bell, single strike, distant temple, far, reverberant\"\n    },\n    {\n      \"label\": \"bamboo water feature\",\n      \"type\": \"sound\",\n      \"prompt\": \"Trickling, water in bamboo, continuous, zen garden, mid, soft\"\n    },\n    {\n      \"label\": \"sparse koto melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Japanese traditional, contemplative, solo koto, pentatonic scale, 60 BPM, sparse plucked notes, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Japanese zen garden at dawn",
+    "elements": [
+      {
+        "label": "raked gravel stillness",
+        "type": "sound",
+        "prompt": "Rustling, raked gravel, slow and continuous, zen garden, distant, dry"
+      },
+      {
+        "label": "temple bell",
+        "type": "sound",
+        "prompt": "Resonance, temple bell, single strike, distant temple, far, reverberant"
+      },
+      {
+        "label": "bamboo water feature",
+        "type": "sound",
+        "prompt": "Trickling, water in bamboo, continuous, zen garden, mid, soft"
+      },
+      {
+        "label": "sparse koto melody",
+        "type": "music",
+        "prompt": "Japanese traditional, contemplative, solo koto, pentatonic scale, 60 BPM, sparse plucked notes, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1566,
+  "model_tag": "gemini-2.5-flash-lite"
+}

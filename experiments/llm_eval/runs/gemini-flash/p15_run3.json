@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 3,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Deep melancholy and solitude\",\n  \"elements\": [\n    {\n      \"label\": \"wind pressing against window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hiss, wind, pressing continuously, closed window, close, soft and reverberant\"\n    },\n    {\n      \"label\": \"distant church bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chime, church bells, occasional, distant cityscape, far, reverberant\"\n    },\n    {\n      \"label\": \"cello single-note line\",\n      \"type\": \"music\",\n      \"prompt\": \"Classical, melancholic, solo cello, 50 BPM, sparse single notes, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"silence between notes\",\n      \"type\": \"sound\",\n      \"prompt\": \"Room tone, empty room, sustained, cold empty room, distant, sparse and cold\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Deep melancholy and solitude",
+    "elements": [
+      {
+        "label": "wind pressing against window",
+        "type": "sound",
+        "prompt": "Hiss, wind, pressing continuously, closed window, close, soft and reverberant"
+      },
+      {
+        "label": "distant church bells",
+        "type": "sound",
+        "prompt": "Chime, church bells, occasional, distant cityscape, far, reverberant"
+      },
+      {
+        "label": "cello single-note line",
+        "type": "music",
+        "prompt": "Classical, melancholic, solo cello, 50 BPM, sparse single notes, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "silence between notes",
+        "type": "sound",
+        "prompt": "Room tone, empty room, sustained, cold empty room, distant, sparse and cold"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1549,
+  "model_tag": "gemini-2.5-flash-lite"
+}

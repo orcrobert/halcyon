@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p12",
+  "prompt_text": "A Japanese zen garden at dawn — raked gravel stillness, a temple bell in the distance, bamboo water feature, sparse koto melody",
+  "category": "cultural_specific",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Japanese Zen Garden at Dawn\",\n  \"elements\": [\n    {\n      \"label\": \"Raked Gravel Stillness\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous gravel crunch, stone, slow and continuous, zen garden, close, dry\"\n    },\n    {\n      \"label\": \"Temple Bell in the Distance\",\n      \"type\": \"sound\",\n      \"prompt\": \"Single toll of temple bell, iron, occasional, temple courtyard, far, soft\"\n    },\n    {\n      \"label\": \"Bamboo Water Feature\",\n      \"type\": \"sound\",\n      \"prompt\": \"Running water over bamboo, wood, continuous, stone courtyard, mid, soft\"\n    },\n    {\n      \"label\": \"Sparse Koto Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Japanese, calm, koto, sparse, 60 BPM, legato phrases in pentatonic scale, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Japanese Zen Garden at Dawn",
+    "elements": [
+      {
+        "label": "Raked Gravel Stillness",
+        "type": "sound",
+        "prompt": "Continuous gravel crunch, stone, slow and continuous, zen garden, close, dry"
+      },
+      {
+        "label": "Temple Bell in the Distance",
+        "type": "sound",
+        "prompt": "Single toll of temple bell, iron, occasional, temple courtyard, far, soft"
+      },
+      {
+        "label": "Bamboo Water Feature",
+        "type": "sound",
+        "prompt": "Running water over bamboo, wood, continuous, stone courtyard, mid, soft"
+      },
+      {
+        "label": "Sparse Koto Melody",
+        "type": "music",
+        "prompt": "Japanese, calm, koto, sparse, 60 BPM, legato phrases in pentatonic scale, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 15064,
+  "model_tag": "mistral"
+}

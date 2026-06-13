@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p16",
+  "prompt_text": "Rising tension before a confrontation — a dark corridor, distant footsteps on stone, low rumbling drone, a heartbeat-like bass drum pulse, high strings holding a dissonant sustained note",
+  "category": "abstract_mood",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Rising tension\",\n  \"elements\": [\n    {\n      \"label\": \"Dark corridor ambience\",\n      \"type\": \"sound\",\n      \"prompt\": \"Stone walls reverb, slow and continuous, dark corridor, mid, dry\"\n    },\n    {\n      \"label\": \"Distant footsteps\",\n      \"type\": \"sound\",\n      \"prompt\": \"Leather boots on stone, sparse, dark corridor, distant, soft\"\n    },\n    {\n      \"label\": \"Low rumbling drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Dense low-frequency rumble, slow, bass drum pulse, sustained dissonant note, dark corridor, far, muffled\"\n    },\n    {\n      \"label\": \"Heartbeat-like bass drum pulse\",\n      \"type\": \"music\",\n      \"prompt\": \"Heavy bass drum, occasional and sharp, heartbeat-like, dark corridor, close, dry\"\n    },\n    {\n      \"label\": \"Dissonant sustained note\",\n      \"type\": \"music\",\n      \"prompt\": \"High strings, continuous and sustained, dissonant, dark corridor, distant, bright\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rising tension",
+    "elements": [
+      {
+        "label": "Dark corridor ambience",
+        "type": "sound",
+        "prompt": "Stone walls reverb, slow and continuous, dark corridor, mid, dry"
+      },
+      {
+        "label": "Distant footsteps",
+        "type": "sound",
+        "prompt": "Leather boots on stone, sparse, dark corridor, distant, soft"
+      },
+      {
+        "label": "Low rumbling drone",
+        "type": "music",
+        "prompt": "Dense low-frequency rumble, slow, bass drum pulse, sustained dissonant note, dark corridor, far, muffled"
+      },
+      {
+        "label": "Heartbeat-like bass drum pulse",
+        "type": "music",
+        "prompt": "Heavy bass drum, occasional and sharp, heartbeat-like, dark corridor, close, dry"
+      },
+      {
+        "label": "Dissonant sustained note",
+        "type": "music",
+        "prompt": "High strings, continuous and sustained, dissonant, dark corridor, distant, bright"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 34098,
+  "model_tag": "mistral"
+}

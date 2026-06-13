@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p17",
+  "prompt_text": "Peaceful transcendence and meditation — a high mountain plateau, wind across open space, distant Tibetan singing bowls, a slowly evolving pad of warm sustained tones, sparse breath sounds",
+  "category": "abstract_mood",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Peaceful Transcendence and Meditation\",\n  \"elements\": [\n    {\n      \"label\": \"Wind Across Open Space\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous wind, open mountain plateau, sparse, distant, dry\"\n    },\n    {\n      \"label\": \"Tibetan Singing Bowls\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant Tibetan singing bowls, sustained, continuous, mountain plateau, far, reverberant\"\n    },\n    {\n      \"label\": \"Warm Sustained Pad\",\n      \"type\": \"music\",\n      \"prompt\": \"Ambient pad, warm, sustained pad of low tones, slow tempo, sparse arrangement, spacious and reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Sparse Breath Sounds\",\n      \"type\": \"sound\",\n      \"prompt\": \"Sparse breath sounds, soft dynamics, mid-low frequency emphasis, gentle harmonic texture, distant, dry\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Peaceful Transcendence and Meditation",
+    "elements": [
+      {
+        "label": "Wind Across Open Space",
+        "type": "sound",
+        "prompt": "Continuous wind, open mountain plateau, sparse, distant, dry"
+      },
+      {
+        "label": "Tibetan Singing Bowls",
+        "type": "sound",
+        "prompt": "Distant Tibetan singing bowls, sustained, continuous, mountain plateau, far, reverberant"
+      },
+      {
+        "label": "Warm Sustained Pad",
+        "type": "music",
+        "prompt": "Ambient pad, warm, sustained pad of low tones, slow tempo, sparse arrangement, spacious and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Sparse Breath Sounds",
+        "type": "sound",
+        "prompt": "Sparse breath sounds, soft dynamics, mid-low frequency emphasis, gentle harmonic texture, distant, dry"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 28841,
+  "model_tag": "mistral"
+}

@@ -1,0 +1,45 @@
+{
+  "prompt_id": "p18",
+  "prompt_text": "Rain",
+  "category": "edge_case",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Rainy Afternoon\",\n  \"elements\": [ \n    {\n      \"label\": \"Raindrops on Leaves\",\n      \"type\": \"sound\",\n      \"prompt\": \"[Dripping], leaves, continuous, park, close, soft\"\n    },\n    {\n      \"label\": \"Rainfall\",\n      \"type\": \"sound\",\n      \"prompt\": \"[Pattering], rain, continuous, urban street, distant, bright\"\n    },\n    {\n      \"label\": \"Gutter Flow\",\n      \"type\": \"sound\",\n      \"prompt\": \"[Gurgling], water in gutters, sparse, alleyway, close, muffled\"\n    },\n    {\n      \"label\": \"Calming Ambient Pad\",\n      \"type\": \"music\",\n      \"prompt\": [\"Ambient pad\", \"mellow\", \"grand piano, soft strings\", 80, \"layered, sustained drone\", \"dry and intimate\", \"instrumental\", \"no vocals\"]\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rainy Afternoon",
+    "elements": [
+      {
+        "label": "Raindrops on Leaves",
+        "type": "sound",
+        "prompt": "[Dripping], leaves, continuous, park, close, soft"
+      },
+      {
+        "label": "Rainfall",
+        "type": "sound",
+        "prompt": "[Pattering], rain, continuous, urban street, distant, bright"
+      },
+      {
+        "label": "Gutter Flow",
+        "type": "sound",
+        "prompt": "[Gurgling], water in gutters, sparse, alleyway, close, muffled"
+      },
+      {
+        "label": "Calming Ambient Pad",
+        "type": "music",
+        "prompt": [
+          "Ambient pad",
+          "mellow",
+          "grand piano, soft strings",
+          80,
+          "layered, sustained drone",
+          "dry and intimate",
+          "instrumental",
+          "no vocals"
+        ]
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 30084,
+  "model_tag": "llama3.1:8b"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"Deep melancholy and solitude\",\n\"elements\": [\n  {\n    \"label\": \"Cold empty room\",\n    \"type\": \"sound\",\n    \"prompt\": \"Sparse texture, wide reverb, slow tempo, low activity, distant mic perspective, minimal harmony\"\n  },\n  {\n    \"label\": \"Wind pressing against window\",\n    \"type\": \"sound\",\n    \"prompt\": \"Continuous wind, glass, slow, close, dry\"\n  },\n  {\n    \"label\": \"Distant church bells\",\n    \"type\": \"sound\",\n    \"prompt\": \"Occasional bell tolls, metal, mid, reverberant\"\n  },\n  {\n    \"label\": \"Cello playing slow single-note line\",\n    \"type\": \"music\",\n    \"prompt\": \"Solo cello, melancholic, solo cello, minimal, slow, sparse, dry, instrumental, no vocals\"\n  }\n]\n}",
+  "parsed": {
+    "atmosphere": "Deep melancholy and solitude",
+    "elements": [
+      {
+        "label": "Cold empty room",
+        "type": "sound",
+        "prompt": "Sparse texture, wide reverb, slow tempo, low activity, distant mic perspective, minimal harmony"
+      },
+      {
+        "label": "Wind pressing against window",
+        "type": "sound",
+        "prompt": "Continuous wind, glass, slow, close, dry"
+      },
+      {
+        "label": "Distant church bells",
+        "type": "sound",
+        "prompt": "Occasional bell tolls, metal, mid, reverberant"
+      },
+      {
+        "label": "Cello playing slow single-note line",
+        "type": "music",
+        "prompt": "Solo cello, melancholic, solo cello, minimal, slow, sparse, dry, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 28089,
+  "model_tag": "mistral"
+}

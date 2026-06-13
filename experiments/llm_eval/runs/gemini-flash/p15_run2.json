@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"deep melancholy and solitude\",\n  \"elements\": [\n    {\n      \"label\": \"wind pressing against window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Wind, air pressure against glass, continuous, exterior exterior of closed window, distant, soft reverberant\"\n    },\n    {\n      \"label\": \"distant church bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Bell tones, metal, occasional resonant decay, far away city, distant, reverberant\"\n    },\n    {\n      \"label\": \"cello single note line\",\n      \"type\": \"music\",\n      \"prompt\": \"Classical cello, melancholic, solo cello, 50 BPM, sustained single notes with long pauses, sparse arrangement, spacious and reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"room tone\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ambient room tone, air in empty room, continuous, interior of empty room, mid, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "deep melancholy and solitude",
+    "elements": [
+      {
+        "label": "wind pressing against window",
+        "type": "sound",
+        "prompt": "Wind, air pressure against glass, continuous, exterior exterior of closed window, distant, soft reverberant"
+      },
+      {
+        "label": "distant church bells",
+        "type": "sound",
+        "prompt": "Bell tones, metal, occasional resonant decay, far away city, distant, reverberant"
+      },
+      {
+        "label": "cello single note line",
+        "type": "music",
+        "prompt": "Classical cello, melancholic, solo cello, 50 BPM, sustained single notes with long pauses, sparse arrangement, spacious and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "room tone",
+        "type": "sound",
+        "prompt": "Ambient room tone, air in empty room, continuous, interior of empty room, mid, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1421,
+  "model_tag": "gemini-2.5-flash-lite"
+}

@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p18",
+  "prompt_text": "Rain",
+  "category": "edge_case",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\":\"Rain\",\"elements\":[{\"label\":\"Rain Drop Sound\",\"type\":\"sound\",\"prompt\":\"Dropping, water droplet, continuous, puddle, close, soft\"},{\"label\":\"Rain on Roof Sound\",\"type\":\"sound\",\"prompt\":\"Gurgling, asphalt shingle, slow and continuous, roof edge, distant, reverberant\"},{\"label\":\"Ambient Room Tone\",\"type\":\"music\",\"prompt\":\"Calm, ambient pad, sustained mid-tone, no melody, spacious and reverberant\"}]}",
+  "parsed": {
+    "atmosphere": "Rain",
+    "elements": [
+      {
+        "label": "Rain Drop Sound",
+        "type": "sound",
+        "prompt": "Dropping, water droplet, continuous, puddle, close, soft"
+      },
+      {
+        "label": "Rain on Roof Sound",
+        "type": "sound",
+        "prompt": "Gurgling, asphalt shingle, slow and continuous, roof edge, distant, reverberant"
+      },
+      {
+        "label": "Ambient Room Tone",
+        "type": "music",
+        "prompt": "Calm, ambient pad, sustained mid-tone, no melody, spacious and reverberant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 16237,
+  "model_tag": "llama3.1:8b"
+}

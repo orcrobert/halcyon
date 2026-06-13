@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"Parisian café in rain\",\n\"elements\": [\n  {\n    \"label\": \"Jazz piano\",\n    \"type\": \"music\",\n    \"prompt\": \"Jazz piano, calm, piano, solo, medium tempo, sparse legato phrases in minor, dry and intimate, instrumental, no vocals\"\n  },\n  {\n    \"label\": \"Rain on window\",\n    \"type\": \"sound\",\n    \"prompt\": \"Drizzling rain, glass, continuous, café interior, close, soft\"\n  },\n  {\n    \"label\": \"French conversation\",\n    \"type\": \"sound\",\n    \"prompt\": \"Conversations in French, people, sparse, café interior, distant, dry\"\n  },\n  {\n    \"label\": \"Waiter clearing table\",\n    \"type\": \"sound\",\n    \"prompt\": \"Clearing dishes, porcelain, occasional, café interior, close, soft\"\n  }\n]\n}",
+  "parsed": {
+    "atmosphere": "Parisian café in rain",
+    "elements": [
+      {
+        "label": "Jazz piano",
+        "type": "music",
+        "prompt": "Jazz piano, calm, piano, solo, medium tempo, sparse legato phrases in minor, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Rain on window",
+        "type": "sound",
+        "prompt": "Drizzling rain, glass, continuous, café interior, close, soft"
+      },
+      {
+        "label": "French conversation",
+        "type": "sound",
+        "prompt": "Conversations in French, people, sparse, café interior, distant, dry"
+      },
+      {
+        "label": "Waiter clearing table",
+        "type": "sound",
+        "prompt": "Clearing dishes, porcelain, occasional, café interior, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 26535,
+  "model_tag": "mistral"
+}

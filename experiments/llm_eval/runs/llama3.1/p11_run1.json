@@ -1,0 +1,57 @@
+{
+  "prompt_id": "p11",
+  "prompt_text": "A Moroccan riad courtyard at dusk — a fountain trickling, swallows in the air, a muezzin call in the distance, traditional oud music",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Moroccan Riad Dusk\", \n\"elements\": [\n{\n\"label\": \"Fountain\",\n\"type\": \"sound\",\n\"prompt\": [\"Trickling\", \"water fountain\", \"continuous\", \"stone courtyard\", \"distant\", \"soft\"],\n\"eq\": []\n},\n{\n\"label\": \"Swallows\",\n\"type\": \"sound\",\n\"prompt\": [\"Chirping\", \"swallows in flight\", \"occasional\", \"open riad entrance\", \"close\", \"bright\"],\n\"eq\": []\n},\n{\n\"label\": \"Muezzin Call\",\n\"type\": \"music\",\n\"prompt\": [\"Middle Eastern classical\", \"calm\", \"oud, qraqeb\", \"60 BPM\", \"sustained drone in maqam hijaz\", \"reverberant and spacious\", \"instrumental\", \"no vocals\"],\n\"eq\": []\n}\n]}",
+  "parsed": {
+    "atmosphere": "Moroccan Riad Dusk",
+    "elements": [
+      {
+        "label": "Fountain",
+        "type": "sound",
+        "prompt": [
+          "Trickling",
+          "water fountain",
+          "continuous",
+          "stone courtyard",
+          "distant",
+          "soft"
+        ],
+        "eq": []
+      },
+      {
+        "label": "Swallows",
+        "type": "sound",
+        "prompt": [
+          "Chirping",
+          "swallows in flight",
+          "occasional",
+          "open riad entrance",
+          "close",
+          "bright"
+        ],
+        "eq": []
+      },
+      {
+        "label": "Muezzin Call",
+        "type": "music",
+        "prompt": [
+          "Middle Eastern classical",
+          "calm",
+          "oud, qraqeb",
+          "60 BPM",
+          "sustained drone in maqam hijaz",
+          "reverberant and spacious",
+          "instrumental",
+          "no vocals"
+        ],
+        "eq": []
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 21333,
+  "model_tag": "llama3.1:8b"
+}

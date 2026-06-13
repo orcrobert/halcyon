@@ -1,0 +1,46 @@
+{
+  "prompt_id": "p03",
+  "prompt_text": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"The Prancing Pony inn\",\n  \"elements\": [\n    {\n      \"label\": \"Crowd chatter and laughter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chatter and laughter, mixed crowd of people, continuous, main hall, mid, reverberant\"\n    },\n    {\n      \"label\": \"Mugs clinking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clinking, ceramic mugs, occasional, bar area, close, bright\"\n    },\n    {\n      \"label\": \"Folk musician\",\n      \"type\": \"music\",\n      \"prompt\": \"Irish folk, lively, tin whistle, fiddle and bodhrán, 120 BPM, layered melody and rhythm, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Rain outside\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rain, steady, continuous, outside building, distant, soft\"\n    },\n    {\n      \"label\": \"Wooden floor creaks\",\n      \"type\": \"sound\",\n      \"prompt\": \"Creaking, wooden floorboards, intermittent, main hall, mid, dry\"\n    },\n    {\n      \"label\": \"Fireplace crackle\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackle, wood fire, continuous, hearth, close, warm\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Prancing Pony inn",
+    "elements": [
+      {
+        "label": "Crowd chatter and laughter",
+        "type": "sound",
+        "prompt": "Chatter and laughter, mixed crowd of people, continuous, main hall, mid, reverberant"
+      },
+      {
+        "label": "Mugs clinking",
+        "type": "sound",
+        "prompt": "Clinking, ceramic mugs, occasional, bar area, close, bright"
+      },
+      {
+        "label": "Folk musician",
+        "type": "music",
+        "prompt": "Irish folk, lively, tin whistle, fiddle and bodhrán, 120 BPM, layered melody and rhythm, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Rain outside",
+        "type": "sound",
+        "prompt": "Rain, steady, continuous, outside building, distant, soft"
+      },
+      {
+        "label": "Wooden floor creaks",
+        "type": "sound",
+        "prompt": "Creaking, wooden floorboards, intermittent, main hall, mid, dry"
+      },
+      {
+        "label": "Fireplace crackle",
+        "type": "sound",
+        "prompt": "Crackle, wood fire, continuous, hearth, close, warm"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2369,
+  "model_tag": "gemini-2.5-flash-lite"
+}

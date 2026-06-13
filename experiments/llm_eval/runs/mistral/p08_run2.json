@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p08",
+  "prompt_text": "A busy medieval market — crowd murmur, merchant calls, horse hooves on cobblestone, a street musician with lute and drum",
+  "category": "generic_ambiance",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Busy Medieval Market\",\n  \"elements\": [\n    {\n      \"label\": \"Crowd murmur\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous crowd chatter, human voices, close, dry\"\n    },\n    {\n      \"label\": \"Merchant calls\",\n      \"type\": \"sound\",\n      \"prompt\": \"Spasmodic market calls, human voices, mid-distance, bright\"\n    },\n    {\n      \"label\": \"Horse hooves on cobblestone\",\n      \"type\": \"sound\",\n      \"prompt\": \"Intermittent horse hooves clattering on stone, distant, dry\"\n    },\n    {\n      \"label\": \"Street musician with lute and drum\",\n      \"type\": \"music\",\n      \"prompt\": \"Medieval folk, cheerful, lute (lead), tambourine (supporting), 120 BPM, layered arrangement, spacious production style, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Busy Medieval Market",
+    "elements": [
+      {
+        "label": "Crowd murmur",
+        "type": "sound",
+        "prompt": "Continuous crowd chatter, human voices, close, dry"
+      },
+      {
+        "label": "Merchant calls",
+        "type": "sound",
+        "prompt": "Spasmodic market calls, human voices, mid-distance, bright"
+      },
+      {
+        "label": "Horse hooves on cobblestone",
+        "type": "sound",
+        "prompt": "Intermittent horse hooves clattering on stone, distant, dry"
+      },
+      {
+        "label": "Street musician with lute and drum",
+        "type": "music",
+        "prompt": "Medieval folk, cheerful, lute (lead), tambourine (supporting), 120 BPM, layered arrangement, spacious production style, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 53811,
+  "model_tag": "mistral"
+}

@@ -1,0 +1,44 @@
+{
+  "prompt_id": "p04",
+  "prompt_text": "A rainy evening in Coruscant's lower city from Star Wars — distant machinery hum, rain on metal, neon signs buzzing, speeder traffic overhead",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{  \n  \"atmosphere\": \"Rainy Lower City\",\n  \"elements\": [\n    { \n      \"label\": \"Machinery Hum\", \n      \"type\": \"sound\", \n      \"prompt\": \"[Humming], [Industrial machinery], [Continuous], [Abandoned factory, lower city]\", \n      \"distance/mic perspective\": \"distant\", \n      \"acoustic qualities\": \"muffled\" \n    },\n    {\n      \"label\": \"Rain on Metal\",\n      \"type\": \"sound\",\n      \"prompt\": \"[Dripping], [Metal rooftop], [Continuous], [City streets, lower city]\",\n      \"distance/mic perspective\": \"close\",\n      \"acoustic qualities\": \"bright\"\n    },\n    {  \n      \"label\": \"Neon Signs Buzzing\", \n      \"type\": \"sound\", \n      \"prompt\": \"[Buzzing], [Neon signs], [Continuous], [City streets, lower city]\", \n      \"distance/mic perspective\": \"distant\",\n      \"acoustic qualities\": \"reverberant\"\n    },\n    {  \n      \"label\": \"Speeder Traffic\",\n      \"type\": \"sound\", \n      \"prompt\": \"[Droning], [Speeders overhead], [Continuous], [City streets, lower city]\", \n      \"distance/mic perspective\": \"distant\",\n      \"acoustic qualities\": \"dry\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rainy Lower City",
+    "elements": [
+      {
+        "label": "Machinery Hum",
+        "type": "sound",
+        "prompt": "[Humming], [Industrial machinery], [Continuous], [Abandoned factory, lower city]",
+        "distance/mic perspective": "distant",
+        "acoustic qualities": "muffled"
+      },
+      {
+        "label": "Rain on Metal",
+        "type": "sound",
+        "prompt": "[Dripping], [Metal rooftop], [Continuous], [City streets, lower city]",
+        "distance/mic perspective": "close",
+        "acoustic qualities": "bright"
+      },
+      {
+        "label": "Neon Signs Buzzing",
+        "type": "sound",
+        "prompt": "[Buzzing], [Neon signs], [Continuous], [City streets, lower city]",
+        "distance/mic perspective": "distant",
+        "acoustic qualities": "reverberant"
+      },
+      {
+        "label": "Speeder Traffic",
+        "type": "sound",
+        "prompt": "[Droning], [Speeders overhead], [Continuous], [City streets, lower city]",
+        "distance/mic perspective": "distant",
+        "acoustic qualities": "dry"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 44497,
+  "model_tag": "llama3.1:8b"
+}

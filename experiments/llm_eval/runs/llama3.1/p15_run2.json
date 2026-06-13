@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Melancholic Solitude\",\n  \"elements\": [\n    {\n      \"label\": \"Cold Distant Wind\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hissing, air against glass, slow and continuous, empty room, distant, dry\"\n    },\n    {\n      \"label\": \"Distant Church Bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Tolling, metal bells in a church steeple, slow and occasional, open sky, far, reverberant\"\n    },\n    {\n      \"label\": \"Solo Cello Line\",\n      \"type\": \"music\",\n      \"prompt\": \"Classical music, melancholic, solo cello playing sustained low notes, 60 BPM, legato phrases in minor key, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Melancholic Solitude",
+    "elements": [
+      {
+        "label": "Cold Distant Wind",
+        "type": "sound",
+        "prompt": "Hissing, air against glass, slow and continuous, empty room, distant, dry"
+      },
+      {
+        "label": "Distant Church Bells",
+        "type": "sound",
+        "prompt": "Tolling, metal bells in a church steeple, slow and occasional, open sky, far, reverberant"
+      },
+      {
+        "label": "Solo Cello Line",
+        "type": "music",
+        "prompt": "Classical music, melancholic, solo cello playing sustained low notes, 60 BPM, legato phrases in minor key, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 24647,
+  "model_tag": "llama3.1:8b"
+}

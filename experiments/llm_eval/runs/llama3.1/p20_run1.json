@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Café de Paris\", \"elements\": [\n    {\n      \"label\": \"Rain on window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Dripping, water on glass window, continuous, close, bright\"\n    },\n    {\n      \"label\": \"Conversation in French\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmuring, multiple people speaking French, continuous, close, reverberant\"\n    },\n    {\n      \"label\": \"Piano jazz\",\n      \"type\": \"music\",\n      \"prompt\": \"Jazz swing, melancholic, piano as lead instrument, 120 BPM, legato phrases in minor key, dry and intimate, instrumental, no vocals\"\n    }\n]}",
+  "parsed": {
+    "atmosphere": "Café de Paris",
+    "elements": [
+      {
+        "label": "Rain on window",
+        "type": "sound",
+        "prompt": "Dripping, water on glass window, continuous, close, bright"
+      },
+      {
+        "label": "Conversation in French",
+        "type": "sound",
+        "prompt": "Murmuring, multiple people speaking French, continuous, close, reverberant"
+      },
+      {
+        "label": "Piano jazz",
+        "type": "music",
+        "prompt": "Jazz swing, melancholic, piano as lead instrument, 120 BPM, legato phrases in minor key, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 18439,
+  "model_tag": "llama3.1:8b"
+}

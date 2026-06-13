@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p03",
+  "prompt_text": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"The Prancing Pony Inn\",\n  \"elements\": [\n    {\n      \"label\": \"Laughter and chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Conversational voices, wood furniture, close, bright\"\n    },\n    {\n      \"label\": \"Mugs clinking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Glassware on stone, continuous, tavern bar, mid, dry\"\n    },\n    {\n      \"label\": \"Folk musician\",\n      \"type\": \"music\",\n      \"prompt\": \"Irish folk, lively, tin whistle, fiddle, 120 BPM, sparse, intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Rain outside\",\n      \"type\": \"sound\",\n      \"prompt\": \"Drizzling rain on thatched roof, continuous, courtyard, distant, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Prancing Pony Inn",
+    "elements": [
+      {
+        "label": "Laughter and chatter",
+        "type": "sound",
+        "prompt": "Conversational voices, wood furniture, close, bright"
+      },
+      {
+        "label": "Mugs clinking",
+        "type": "sound",
+        "prompt": "Glassware on stone, continuous, tavern bar, mid, dry"
+      },
+      {
+        "label": "Folk musician",
+        "type": "music",
+        "prompt": "Irish folk, lively, tin whistle, fiddle, 120 BPM, sparse, intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Rain outside",
+        "type": "sound",
+        "prompt": "Drizzling rain on thatched roof, continuous, courtyard, distant, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 45092,
+  "model_tag": "mistral"
+}

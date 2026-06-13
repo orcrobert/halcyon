@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p01",
+  "prompt_text": "A bustling tavern in Novigrad from The Witcher — patrons talking, a bard playing in the corner, fire crackling in the hearth",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{  \n  \"atmosphere\": \"Tavern\",\n  \"elements\": [\n    {\n      \"label\": \"Patrons Talking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmuring, crowd of patrons, continuous, tavern interior, mid, bright\"\n    },\n    {\n      \"label\": \"Bard Playing\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk, melancholic, solo fiddle, 90 BPM, legato phrases in minor key, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Fire Crackle\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackling, fire on hearth, continuous, near hearth, close, soft, muffled\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Tavern",
+    "elements": [
+      {
+        "label": "Patrons Talking",
+        "type": "sound",
+        "prompt": "Murmuring, crowd of patrons, continuous, tavern interior, mid, bright"
+      },
+      {
+        "label": "Bard Playing",
+        "type": "music",
+        "prompt": "Folk, melancholic, solo fiddle, 90 BPM, legato phrases in minor key, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Fire Crackle",
+        "type": "sound",
+        "prompt": "Crackling, fire on hearth, continuous, near hearth, close, soft, muffled"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 14226,
+  "model_tag": "llama3.1:8b"
+}

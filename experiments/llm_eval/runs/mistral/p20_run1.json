@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"Café de Paris in Rain\",\n\"elements\": [\n  {\n    \"label\": \"Rain on Window\",\n    \"type\": \"sound\",\n    \"prompt\": \"Drizzling, raindrops on window pane, continuous, café interior, mid, reverberant\"\n  },\n  {\n    \"label\": \"French Conversations\",\n    \"type\": \"sound\",\n    \"prompt\": \"Chatter, French speakers, sparse, café interior, close, dry\"\n  },\n  {\n    \"label\": \"Waiter Straightening Tables\",\n    \"type\": \"sound\",\n    \"prompt\": \"Straightening, waiter's movements, occasional, café interior, distant, dry\"\n  },\n  {\n    \"label\": \"Jazz Piano\",\n    \"type\": \"music\",\n    \"prompt\": \"Jazz, calm, piano, bass, slow tempo, sparse, intimate, instrumental, no vocals\"\n  }\n]\n}",
+  "parsed": {
+    "atmosphere": "Café de Paris in Rain",
+    "elements": [
+      {
+        "label": "Rain on Window",
+        "type": "sound",
+        "prompt": "Drizzling, raindrops on window pane, continuous, café interior, mid, reverberant"
+      },
+      {
+        "label": "French Conversations",
+        "type": "sound",
+        "prompt": "Chatter, French speakers, sparse, café interior, close, dry"
+      },
+      {
+        "label": "Waiter Straightening Tables",
+        "type": "sound",
+        "prompt": "Straightening, waiter's movements, occasional, café interior, distant, dry"
+      },
+      {
+        "label": "Jazz Piano",
+        "type": "music",
+        "prompt": "Jazz, calm, piano, bass, slow tempo, sparse, intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 25866,
+  "model_tag": "mistral"
+}

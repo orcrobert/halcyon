@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p17",
+  "prompt_text": "Peaceful transcendence and meditation — a high mountain plateau, wind across open space, distant Tibetan singing bowls, a slowly evolving pad of warm sustained tones, sparse breath sounds",
+  "category": "abstract_mood",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Serene Elevation\", \n  \"elements\": [\n    {\n      \"label\": \"Wind Across Plateau\",\n      \"type\": \"sound\",\n      \"prompt\": \"Whooshing, wind across open space, continuous, high mountain plateau, close, soft\"\n    },\n    {\n      \"label\": \"Distant Singing Bowls\",\n      \"type\": \"music\",\n      \"prompt\": \"Tibetan chanting, meditative, solo Tibetan singing bowl, 80 BPM, layered sustained tones in a warm minor key, spacious and reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Warm Pad Evolution\",\n      \"type\": \"music\",\n      \"prompt\": \"Ambient pad, warm, deep sustained low tone, slow, sustained drone, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Sparse Breath Sounds\",\n      \"type\": \"sound\",\n      \"prompt\": \"Breathing, human lungs, sparse, high mountain plateau, close, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Serene Elevation",
+    "elements": [
+      {
+        "label": "Wind Across Plateau",
+        "type": "sound",
+        "prompt": "Whooshing, wind across open space, continuous, high mountain plateau, close, soft"
+      },
+      {
+        "label": "Distant Singing Bowls",
+        "type": "music",
+        "prompt": "Tibetan chanting, meditative, solo Tibetan singing bowl, 80 BPM, layered sustained tones in a warm minor key, spacious and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Warm Pad Evolution",
+        "type": "music",
+        "prompt": "Ambient pad, warm, deep sustained low tone, slow, sustained drone, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Sparse Breath Sounds",
+        "type": "sound",
+        "prompt": "Breathing, human lungs, sparse, high mountain plateau, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 27973,
+  "model_tag": "llama3.1:8b"
+}

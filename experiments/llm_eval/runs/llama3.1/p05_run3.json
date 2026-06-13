@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p05",
+  "prompt_text": "The Shire from Lord of the Rings — gentle rolling hills, birdsong, a brook nearby, distant sheep bells, a soft acoustic melody",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Peaceful Rolling Hills\",\n  \"elements\": [\n    {\n      \"label\": \"Brook Flow\",\n      \"type\": \"sound\",\n      \"prompt\": \"Gurgling, water in stone banks, continuous, brook bank, close, soft\"\n    },\n    {\n      \"label\": \"Birdsong\",\n      \"type\": \"music\",\n      \"prompt\": \"Light Celtic, warm, tin whistle, gentle acoustic guitar accompaniment, 80 BPM, legato phrases in dorian mode, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Sheep Bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clanging, metal bell on sheep collar, continuous, open meadow, distant, bright\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Peaceful Rolling Hills",
+    "elements": [
+      {
+        "label": "Brook Flow",
+        "type": "sound",
+        "prompt": "Gurgling, water in stone banks, continuous, brook bank, close, soft"
+      },
+      {
+        "label": "Birdsong",
+        "type": "music",
+        "prompt": "Light Celtic, warm, tin whistle, gentle acoustic guitar accompaniment, 80 BPM, legato phrases in dorian mode, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Sheep Bells",
+        "type": "sound",
+        "prompt": "Clanging, metal bell on sheep collar, continuous, open meadow, distant, bright"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 28364,
+  "model_tag": "llama3.1:8b"
+}

@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p16",
+  "prompt_text": "Rising tension before a confrontation — a dark corridor, distant footsteps on stone, low rumbling drone, a heartbeat-like bass drum pulse, high strings holding a dissonant sustained note",
+  "category": "abstract_mood",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Rising Tension\",\n  \"elements\": [\n    {\n      \"label\": \"Dark Corridor Ambience\",\n      \"type\": \"sound\",\n      \"prompt\": \"Stone corridor, sparse, slow, distant, reverberant\"\n    },\n    {\n      \"label\": \"Footsteps on Stone\",\n      \"type\": \"sound\",\n      \"prompt\": \"Leather boots on stone, sparse, slow, distant, dry\"\n    },\n    {\n      \"label\": \"Low Rumbling Drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Dissonant low drone, slow tempo, sustained legato phrases, soft dynamics, large reverberant space\"\n    },\n    {\n      \"label\": \"Heartbeat-like Bass Drum Pulse\",\n      \"type\": \"music\",\n      \"prompt\": \"Bass drum pulse, continuous, ominous, distant, dry\"\n    },\n    {\n      \"label\": \"Sustained Dissonant Note\",\n      \"type\": \"music\",\n      \"prompt\": \"Holding dissonant sustained note, high strings, slow tempo, tense atmosphere\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rising Tension",
+    "elements": [
+      {
+        "label": "Dark Corridor Ambience",
+        "type": "sound",
+        "prompt": "Stone corridor, sparse, slow, distant, reverberant"
+      },
+      {
+        "label": "Footsteps on Stone",
+        "type": "sound",
+        "prompt": "Leather boots on stone, sparse, slow, distant, dry"
+      },
+      {
+        "label": "Low Rumbling Drone",
+        "type": "music",
+        "prompt": "Dissonant low drone, slow tempo, sustained legato phrases, soft dynamics, large reverberant space"
+      },
+      {
+        "label": "Heartbeat-like Bass Drum Pulse",
+        "type": "music",
+        "prompt": "Bass drum pulse, continuous, ominous, distant, dry"
+      },
+      {
+        "label": "Sustained Dissonant Note",
+        "type": "music",
+        "prompt": "Holding dissonant sustained note, high strings, slow tempo, tense atmosphere"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 34006,
+  "model_tag": "mistral"
+}

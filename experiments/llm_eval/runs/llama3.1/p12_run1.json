@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p12",
+  "prompt_text": "A Japanese zen garden at dawn — raked gravel stillness, a temple bell in the distance, bamboo water feature, sparse koto melody",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Zen Garden Dawn\",\n  \"elements\": [\n    {\n      \"label\": \"Gravel Ripples\",\n      \"type\": \"sound\",\n      \"prompt\": \"Water trickling, raked gravel, continuous, bamboo water feature, close, soft\"\n    },\n    {\n      \"label\": \"Temple Bell Distant\",\n      \"type\": \"music\",\n      \"prompt\": \"Japanese classical, calm, solo koto, sparse and contemplative arrangement, 40 BPM, sustained legato phrases in pentatonic scale, reverberant and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Bamboo Water Feature\",\n      \"type\": \"sound\",\n      \"prompt\": \"Water flow, bamboo pipes, continuous, Zen garden pond, close, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Zen Garden Dawn",
+    "elements": [
+      {
+        "label": "Gravel Ripples",
+        "type": "sound",
+        "prompt": "Water trickling, raked gravel, continuous, bamboo water feature, close, soft"
+      },
+      {
+        "label": "Temple Bell Distant",
+        "type": "music",
+        "prompt": "Japanese classical, calm, solo koto, sparse and contemplative arrangement, 40 BPM, sustained legato phrases in pentatonic scale, reverberant and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Bamboo Water Feature",
+        "type": "sound",
+        "prompt": "Water flow, bamboo pipes, continuous, Zen garden pond, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 20750,
+  "model_tag": "llama3.1:8b"
+}

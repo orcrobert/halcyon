@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p09",
+  "prompt_text": "A thunderstorm over a mountain lake — heavy rain on water, distant rolling thunder, wind in pine trees, loons calling",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n\"atmosphere\": \"Thunderstorm over a mountain lake\",\n\"elements\": [\n  {\n    \"label\": \"Heavy rain on water\",\n    \"type\": \"sound\",\n    \"prompt\": \"Raindrops, water surface, continuous, lake shore, close, bright and reverberant\"\n  },\n  {\n    \"label\": \"Distant rolling thunder\",\n    \"type\": \"sound\",\n    \"prompt\": \"Thunder, distant, slow and continuous, mountainous environment, far, dry and sparse\"\n  },\n  {\n    \"label\": \"Wind in pine trees\",\n    \"type\": \"sound\",\n    \"prompt\": \"Wind, pine needles, gentle breeze, forested mountainside, mid, muffled\"\n  },\n  {\n    \"label\": \"Loons calling\",\n    \"type\": \"sound\",\n    \"prompt\": \"Loons, bird calls, occasional, mountain lake, close, natural and reverb-free\"\n  }\n]\n}",
+  "parsed": {
+    "atmosphere": "Thunderstorm over a mountain lake",
+    "elements": [
+      {
+        "label": "Heavy rain on water",
+        "type": "sound",
+        "prompt": "Raindrops, water surface, continuous, lake shore, close, bright and reverberant"
+      },
+      {
+        "label": "Distant rolling thunder",
+        "type": "sound",
+        "prompt": "Thunder, distant, slow and continuous, mountainous environment, far, dry and sparse"
+      },
+      {
+        "label": "Wind in pine trees",
+        "type": "sound",
+        "prompt": "Wind, pine needles, gentle breeze, forested mountainside, mid, muffled"
+      },
+      {
+        "label": "Loons calling",
+        "type": "sound",
+        "prompt": "Loons, bird calls, occasional, mountain lake, close, natural and reverb-free"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 67920,
+  "model_tag": "mistral"
+}

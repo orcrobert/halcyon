@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p06",
+  "prompt_text": "A quiet forest at dawn — birds beginning to sing, light wind through leaves, a small stream, distant woodpecker, a soft wooden flute melody drifting through the trees",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Quiet forest at dawn\",\n  \"elements\": [\n    {\n      \"label\": \"Birds singing\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chirping, feathers, continuous, forest interior, mid, bright\"\n    },\n    {\n      \"label\": \"Wind through leaves\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rustling, foliage, occasional, forest edge, distant, soft\"\n    },\n    {\n      \"label\": \"Stream\",\n      \"type\": \"sound\",\n      \"prompt\": \"Running water, stone, continuous, stream bank, close, dry\"\n    },\n    {\n      \"label\": \"Woodpecker\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pecking, wood, sparse, forest interior, far, muffled\"\n    },\n    {\n      \"label\": \"Soft wooden flute melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Tune, wooden flute, slow, forest clearing, close, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Quiet forest at dawn",
+    "elements": [
+      {
+        "label": "Birds singing",
+        "type": "sound",
+        "prompt": "Chirping, feathers, continuous, forest interior, mid, bright"
+      },
+      {
+        "label": "Wind through leaves",
+        "type": "sound",
+        "prompt": "Rustling, foliage, occasional, forest edge, distant, soft"
+      },
+      {
+        "label": "Stream",
+        "type": "sound",
+        "prompt": "Running water, stone, continuous, stream bank, close, dry"
+      },
+      {
+        "label": "Woodpecker",
+        "type": "sound",
+        "prompt": "Pecking, wood, sparse, forest interior, far, muffled"
+      },
+      {
+        "label": "Soft wooden flute melody",
+        "type": "music",
+        "prompt": "Tune, wooden flute, slow, forest clearing, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 66665,
+  "model_tag": "mistral"
+}

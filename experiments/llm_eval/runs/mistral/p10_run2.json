@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p10",
+  "prompt_text": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room",
+  "category": "generic_ambiance",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Cozy Library Late at Night\",\n  \"elements\": [\n    {\n      \"label\": \"Faint Ticking Clock\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clock, metal gears, occasional, library, distant, dry\"\n    },\n    {\n      \"label\": \"Distant Rain on Windows\",\n      \"type\": \"sound\",\n      \"prompt\": \"Raindrops, glass windows, continuous, library exterior, far, soft\"\n    },\n    {\n      \"label\": \"Cracking Fireplace\",\n      \"type\": \"sound\",\n      \"prompt\": \"Firewood crackling, fireplace, sparse, stone hearth, close, warm\"\n    },\n    {\n      \"label\": \"Soft Page-Turning Sounds\",\n      \"type\": \"sound\",\n      \"prompt\": \"Paper pages turning, leather book bindings, continuous, library, mid, soft\"\n    },\n    {\n      \"label\": \"Slow Nocturne Chords (Piano)\",\n      \"type\": \"music\",\n      \"prompt\": \"Piano, nocturne-style chords, slow tempo, grand piano, adjacent room, close, dry\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Cozy Library Late at Night",
+    "elements": [
+      {
+        "label": "Faint Ticking Clock",
+        "type": "sound",
+        "prompt": "Clock, metal gears, occasional, library, distant, dry"
+      },
+      {
+        "label": "Distant Rain on Windows",
+        "type": "sound",
+        "prompt": "Raindrops, glass windows, continuous, library exterior, far, soft"
+      },
+      {
+        "label": "Cracking Fireplace",
+        "type": "sound",
+        "prompt": "Firewood crackling, fireplace, sparse, stone hearth, close, warm"
+      },
+      {
+        "label": "Soft Page-Turning Sounds",
+        "type": "sound",
+        "prompt": "Paper pages turning, leather book bindings, continuous, library, mid, soft"
+      },
+      {
+        "label": "Slow Nocturne Chords (Piano)",
+        "type": "music",
+        "prompt": "Piano, nocturne-style chords, slow tempo, grand piano, adjacent room, close, dry"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 78645,
+  "model_tag": "mistral"
+}

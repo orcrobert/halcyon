@@ -74,7 +74,7 @@ baseline_mae = mean_absolute_error(y_test, np.full_like(y_test, y_train.mean()))
 
 print(f'\nMAE:          {mae:.4f}  (pan units, range -1 to +1)')
 print(f'R²:           {r2:.4f}')
-print(f'Baseline MAE: {baseline_mae:.4f}  (predict mean — dumb baseline)')
+print(f'Baseline MAE: {baseline_mae:.4f}  (predict mean — naive baseline)')
 print(f'Improvement:  {(1 - mae/baseline_mae)*100:.1f}% over baseline')
 
 for stem in ['drums', 'bass', 'other', 'vocals']:

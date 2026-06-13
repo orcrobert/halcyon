@@ -1,0 +1,64 @@
+{
+  "prompt_id": "p05",
+  "prompt_text": "The Shire from Lord of the Rings — gentle rolling hills, birdsong, a brook nearby, distant sheep bells, a soft acoustic melody",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"The Shire\",\n  \"elements\": [\n    {\n      \"label\": \"Birdsong\",\n      \"type\": \"sound\",\n      \"prompt\": [\"Songing\", \" birds\", \"continuous\", \"open meadow\", \"close\", \"soft, bright\"],\n      \"eq\": []\n    },\n    {\n      \"label\": \"Brook\",\n      \"type\": \"sound\",\n      \"prompt\": [\"Gurgling\", \"water\", \"continuous\", \"brook bank\", \"mid\", \"reverberant\"]\n    },\n    {\n      \"label\": \"Sheep Bells\",\n      \"type\": \"sound\",\n      \"prompt\": [\"Tinkling\", \"metal bells\", \"sparse, occasional\", \"open hillside\", \"distant, dry\"]\n    },\n    {\n      \"label\": \"Acoustic Melody\",\n      \"type\": \"music\",\n      \"prompt\": [\"Celtic folk\", \"calm\", \"acoustic guitar\", \"bodhrán\", \"80 BPM, legato phrases in dorian mode\", \"sparse, sustained drone arrangement\"]\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Shire",
+    "elements": [
+      {
+        "label": "Birdsong",
+        "type": "sound",
+        "prompt": [
+          "Songing",
+          " birds",
+          "continuous",
+          "open meadow",
+          "close",
+          "soft, bright"
+        ],
+        "eq": []
+      },
+      {
+        "label": "Brook",
+        "type": "sound",
+        "prompt": [
+          "Gurgling",
+          "water",
+          "continuous",
+          "brook bank",
+          "mid",
+          "reverberant"
+        ]
+      },
+      {
+        "label": "Sheep Bells",
+        "type": "sound",
+        "prompt": [
+          "Tinkling",
+          "metal bells",
+          "sparse, occasional",
+          "open hillside",
+          "distant, dry"
+        ]
+      },
+      {
+        "label": "Acoustic Melody",
+        "type": "music",
+        "prompt": [
+          "Celtic folk",
+          "calm",
+          "acoustic guitar",
+          "bodhrán",
+          "80 BPM, legato phrases in dorian mode",
+          "sparse, sustained drone arrangement"
+        ]
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 39919,
+  "model_tag": "llama3.1:8b"
+}

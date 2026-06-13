@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p09",
+  "prompt_text": "A thunderstorm over a mountain lake — heavy rain on water, distant rolling thunder, wind in pine trees, loons calling",
+  "category": "generic_ambiance",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Thunderstorm Over Mountain Lake\",\n  \"elements\": [\n    {\n      \"label\": \"Rain on Water\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pounding, water surface, continuous, lake edge, close, soft\"\n    },\n    {\n      \"label\": \"Distant Thunder\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rolling, dark clouds, occasional, open sky, distant, reverberant\"\n    },\n    {\n      \"label\": \"Wind in Pine Trees\",\n      \"type\": \"sound\",\n      \"prompt\": \"Swishing, pine branches, continuous, forest edge, mid, bright\"\n    },\n    {\n      \"label\": \"Loons Calling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Wailing, loon's call, occasional, lake shore, close, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Thunderstorm Over Mountain Lake",
+    "elements": [
+      {
+        "label": "Rain on Water",
+        "type": "sound",
+        "prompt": "Pounding, water surface, continuous, lake edge, close, soft"
+      },
+      {
+        "label": "Distant Thunder",
+        "type": "sound",
+        "prompt": "Rolling, dark clouds, occasional, open sky, distant, reverberant"
+      },
+      {
+        "label": "Wind in Pine Trees",
+        "type": "sound",
+        "prompt": "Swishing, pine branches, continuous, forest edge, mid, bright"
+      },
+      {
+        "label": "Loons Calling",
+        "type": "sound",
+        "prompt": "Wailing, loon's call, occasional, lake shore, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 29835,
+  "model_tag": "llama3.1:8b"
+}

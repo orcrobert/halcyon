@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p11",
+  "prompt_text": "A Moroccan riad courtyard at dusk — a fountain trickling, swallows in the air, a muezzin call in the distance, traditional oud music",
+  "category": "cultural_specific",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Moroccan Riad Courtyard Dusk\",\n  \"elements\": [\n    {\n      \"label\": \"Trickling Fountain\",\n      \"type\": \"sound\",\n      \"prompt\": \"Trickling, water, continuous, riad courtyard, close, wet and smooth\"\n    },\n    {\n      \"label\": \"Swallows Fluttering\",\n      \"type\": \"sound\",\n      \"prompt\": \"Fluttering, air, sparse, open courtyard, distant, bright and clear\"\n    },\n    {\n      \"label\": \"Muezzin Call in Distance\",\n      \"type\": \"sound\",\n      \"prompt\": \"Calling, human voice, occasional, mosque minaret, far, dry and echoey\"\n    },\n    {\n      \"label\": \"Traditional oud Music\",\n      \"type\": \"music\",\n      \"prompt\": \"Andalusian classical, calm, solo oud, djembe, 60 BPM, layered, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Moroccan Riad Courtyard Dusk",
+    "elements": [
+      {
+        "label": "Trickling Fountain",
+        "type": "sound",
+        "prompt": "Trickling, water, continuous, riad courtyard, close, wet and smooth"
+      },
+      {
+        "label": "Swallows Fluttering",
+        "type": "sound",
+        "prompt": "Fluttering, air, sparse, open courtyard, distant, bright and clear"
+      },
+      {
+        "label": "Muezzin Call in Distance",
+        "type": "sound",
+        "prompt": "Calling, human voice, occasional, mosque minaret, far, dry and echoey"
+      },
+      {
+        "label": "Traditional oud Music",
+        "type": "music",
+        "prompt": "Andalusian classical, calm, solo oud, djembe, 60 BPM, layered, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 19006,
+  "model_tag": "mistral"
+}

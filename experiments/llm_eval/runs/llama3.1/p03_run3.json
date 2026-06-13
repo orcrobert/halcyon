@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p03",
+  "prompt_text": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"The Prancing Pony Inn\",\n  \"elements\": [\n    {\n      \"label\": \"Laughter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Loud laughing, patrons, continuous, crowded room, close, reverberant\"\n    },\n    {\n      \"label\": \"Mugs Clinking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clattering, wooden mugs on a bar, sparse and occasional, crowded bar area, mid, bright\"\n    },\n    {\n      \"label\": \"Folk Musician\",\n      \"type\": \"music\",\n      \"prompt\": \"Celtic folk, lively, fiddle, tin whistle, bodhrán, 120 BPM, layered arpeggios in dorian mode, reverberant and spacious, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Rain outside\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous rain patter, roof above the inn, continuous, rainy street outside, distant, muffled\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Prancing Pony Inn",
+    "elements": [
+      {
+        "label": "Laughter",
+        "type": "sound",
+        "prompt": "Loud laughing, patrons, continuous, crowded room, close, reverberant"
+      },
+      {
+        "label": "Mugs Clinking",
+        "type": "sound",
+        "prompt": "Clattering, wooden mugs on a bar, sparse and occasional, crowded bar area, mid, bright"
+      },
+      {
+        "label": "Folk Musician",
+        "type": "music",
+        "prompt": "Celtic folk, lively, fiddle, tin whistle, bodhrán, 120 BPM, layered arpeggios in dorian mode, reverberant and spacious, instrumental, no vocals"
+      },
+      {
+        "label": "Rain outside",
+        "type": "sound",
+        "prompt": "Continuous rain patter, roof above the inn, continuous, rainy street outside, distant, muffled"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 36334,
+  "model_tag": "llama3.1:8b"
+}

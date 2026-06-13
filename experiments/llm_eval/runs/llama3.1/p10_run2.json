@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p10",
+  "prompt_text": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room",
+  "category": "generic_ambiance",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Cozy Library Nocturne\", \n  \"elements\": [\n    {\n      \"label\": \"Clock Ticking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ticking, clock mechanism, slow and continuous, dimly lit room, close, dry\"\n    },\n    {\n      \"label\": \"Rain on Windows\",\n      \"type\": \"sound\",\n      \"prompt\": \"Lapping, rain on glass windows, continuous, exterior wall, distant, soft\"\n    },\n    {\n      \"label\": \"Fireplace Crackling\",\n      \"type\": \"music\",\n      \"prompt\": \"Acoustic folk, warm, solo acoustic guitar, 80 BPM, sparse fingerpicked arpeggios in a minor key, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Page-Turning Sounds\",\n      \"type\": \"sound\",\n      \"prompt\": \"Turning, leather-bound book pages, sparse, library shelves, distant, soft\"\n    },\n    {\n      \"label\": \"Piano Playing Slow Nocturne\",\n      \"type\": \"music\",\n      \"prompt\": \"Classical piano, melancholic, solo piano, 60 BPM, legato phrases in a minor key, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Cozy Library Nocturne",
+    "elements": [
+      {
+        "label": "Clock Ticking",
+        "type": "sound",
+        "prompt": "Ticking, clock mechanism, slow and continuous, dimly lit room, close, dry"
+      },
+      {
+        "label": "Rain on Windows",
+        "type": "sound",
+        "prompt": "Lapping, rain on glass windows, continuous, exterior wall, distant, soft"
+      },
+      {
+        "label": "Fireplace Crackling",
+        "type": "music",
+        "prompt": "Acoustic folk, warm, solo acoustic guitar, 80 BPM, sparse fingerpicked arpeggios in a minor key, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Page-Turning Sounds",
+        "type": "sound",
+        "prompt": "Turning, leather-bound book pages, sparse, library shelves, distant, soft"
+      },
+      {
+        "label": "Piano Playing Slow Nocturne",
+        "type": "music",
+        "prompt": "Classical piano, melancholic, solo piano, 60 BPM, legato phrases in a minor key, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 38396,
+  "model_tag": "llama3.1:8b"
+}

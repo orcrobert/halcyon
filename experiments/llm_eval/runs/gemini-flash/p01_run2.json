@@ -1,0 +1,46 @@
+{
+  "prompt_id": "p01",
+  "prompt_text": "A bustling tavern in Novigrad from The Witcher — patrons talking, a bard playing in the corner, fire crackling in the hearth",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Novigrad tavern\",\n  \"elements\": [\n    {\n      \"label\": \"background chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chatter, human patrons, continuous and overlapping, tavern interior, mid, reverberant\"\n    },\n    {\n      \"label\": \"bard performance\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk, lively, lute and male vocals, light percussion, 120 BPM, layered, dry and present, vocals\"\n    },\n    {\n      \"label\": \"fire crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackling, wood fire, continuous, hearth, close, bright\"\n    },\n    {\n      \"label\": \"clinking glasses\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clinking, glass and ceramic, sparse and occasional, tavern tables, mid, dry\"\n    },\n    {\n      \"label\": \"footsteps on wood\",\n      \"type\": \"sound\",\n      \"prompt\": \"Footsteps, leather boots on wooden floor, sparse, tavern interior, distant, dry\"\n    },\n    {\n      \"label\": \"distant street noise\",\n      \"type\": \"sound\",\n      \"prompt\": \"Muffled street sounds, urban, continuous, outside tavern, far, low fidelity\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Novigrad tavern",
+    "elements": [
+      {
+        "label": "background chatter",
+        "type": "sound",
+        "prompt": "Chatter, human patrons, continuous and overlapping, tavern interior, mid, reverberant"
+      },
+      {
+        "label": "bard performance",
+        "type": "music",
+        "prompt": "Folk, lively, lute and male vocals, light percussion, 120 BPM, layered, dry and present, vocals"
+      },
+      {
+        "label": "fire crackling",
+        "type": "sound",
+        "prompt": "Crackling, wood fire, continuous, hearth, close, bright"
+      },
+      {
+        "label": "clinking glasses",
+        "type": "sound",
+        "prompt": "Clinking, glass and ceramic, sparse and occasional, tavern tables, mid, dry"
+      },
+      {
+        "label": "footsteps on wood",
+        "type": "sound",
+        "prompt": "Footsteps, leather boots on wooden floor, sparse, tavern interior, distant, dry"
+      },
+      {
+        "label": "distant street noise",
+        "type": "sound",
+        "prompt": "Muffled street sounds, urban, continuous, outside tavern, far, low fidelity"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1731,
+  "model_tag": "gemini-2.5-flash-lite"
+}

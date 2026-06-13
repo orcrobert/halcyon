@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Melancholy Solitude\",\n  \"elements\": [\n    {\n      \"label\": \"Cello\",\n      \"type\": \"music\",\n      \"prompt\": \"Classical, melancholic, solo cello, slow, sustained single-note line, sparse arrangement, reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Wind\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pressing, wind, continuous, against closed window, distant, soft\"\n    },\n    {\n      \"label\": \"Church Bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ringing, church bells, occasional, distant cityscape, far, reverberant\"\n    },\n    {\n      \"label\": \"Room Tone\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ambient, room tone, continuous, empty room, distant, cold\"\n    },\n    {\n      \"label\": \"Silence\",\n      \"type\": \"sound\",\n      \"prompt\": \"Absence, silence, between notes, empty room, close, dry\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Melancholy Solitude",
+    "elements": [
+      {
+        "label": "Cello",
+        "type": "music",
+        "prompt": "Classical, melancholic, solo cello, slow, sustained single-note line, sparse arrangement, reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Wind",
+        "type": "sound",
+        "prompt": "Pressing, wind, continuous, against closed window, distant, soft"
+      },
+      {
+        "label": "Church Bells",
+        "type": "sound",
+        "prompt": "Ringing, church bells, occasional, distant cityscape, far, reverberant"
+      },
+      {
+        "label": "Room Tone",
+        "type": "sound",
+        "prompt": "Ambient, room tone, continuous, empty room, distant, cold"
+      },
+      {
+        "label": "Silence",
+        "type": "sound",
+        "prompt": "Absence, silence, between notes, empty room, close, dry"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1911,
+  "model_tag": "gemini-2.5-flash-lite"
+}

@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p10",
+  "prompt_text": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room",
+  "category": "generic_ambiance",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Cozy library night\",\n  \"elements\": [\n    {\n      \"label\": \"Clock ticking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ticking, mechanical clock, slow and steady, library main room, mid, dry\"\n    },\n    {\n      \"label\": \"Distant rain\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pattering, rain on glass, continuous, library exterior, distant, reverberant\"\n    },\n    {\n      \"label\": \"Fireplace crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackle and pop, fireplace logs, continuous, library hearth, close, warm\"\n    },\n    {\n      \"label\": \"Page turning\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rustling, paper pages, sparse and occasional, library reading nook, close, soft\"\n    },\n    {\n      \"label\": \"Piano nocturne\",\n      \"type\": \"music\",\n      \"prompt\": \"Classical nocturne, melancholic, solo piano, 60 BPM, sustained chords, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Cozy library night",
+    "elements": [
+      {
+        "label": "Clock ticking",
+        "type": "sound",
+        "prompt": "Ticking, mechanical clock, slow and steady, library main room, mid, dry"
+      },
+      {
+        "label": "Distant rain",
+        "type": "sound",
+        "prompt": "Pattering, rain on glass, continuous, library exterior, distant, reverberant"
+      },
+      {
+        "label": "Fireplace crackling",
+        "type": "sound",
+        "prompt": "Crackle and pop, fireplace logs, continuous, library hearth, close, warm"
+      },
+      {
+        "label": "Page turning",
+        "type": "sound",
+        "prompt": "Rustling, paper pages, sparse and occasional, library reading nook, close, soft"
+      },
+      {
+        "label": "Piano nocturne",
+        "type": "music",
+        "prompt": "Classical nocturne, melancholic, solo piano, 60 BPM, sustained chords, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1907,
+  "model_tag": "gemini-2.5-flash-lite"
+}

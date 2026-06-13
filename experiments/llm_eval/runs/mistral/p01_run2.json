@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p01",
+  "prompt_text": "A bustling tavern in Novigrad from The Witcher — patrons talking, a bard playing in the corner, fire crackling in the hearth",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Bustling Tavern in Novigrad\",\n  \"elements\": [\n    {\n      \"label\": \"Patron conversation\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous crowd chatter, wooden tables, close, bright\"\n    },\n    {\n      \"label\": \"Bard playing lute\",\n      \"type\": \"music\",\n      \"prompt\": \"Medium tempo, melancholic, lute, 60 BPM, sparse, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Fire crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Intermittent crackle, burning wood, close, warm\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Bustling Tavern in Novigrad",
+    "elements": [
+      {
+        "label": "Patron conversation",
+        "type": "sound",
+        "prompt": "Continuous crowd chatter, wooden tables, close, bright"
+      },
+      {
+        "label": "Bard playing lute",
+        "type": "music",
+        "prompt": "Medium tempo, melancholic, lute, 60 BPM, sparse, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Fire crackling",
+        "type": "sound",
+        "prompt": "Intermittent crackle, burning wood, close, warm"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 35391,
+  "model_tag": "mistral"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p12",
+  "prompt_text": "A Japanese zen garden at dawn — raked gravel stillness, a temple bell in the distance, bamboo water feature, sparse koto melody",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Japanese Zen Garden at Dawn\",\n  \"elements\": [\n    {\n      \"label\": \"Raked Gravel Stillness\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous gravel crunch, stone path, slow and continuous, zen garden, close, soft\"\n    },\n    {\n      \"label\": \"Temple Bell Distance\",\n      \"type\": \"sound\",\n      \"prompt\": \"Single toll, temple bell, occasional, distant, muffled\"\n    },\n    {\n      \"label\": \"Bamboo Water Feature\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous bamboo stream gurgle, water feature, continuous, bamboo grove, close, soft\"\n    },\n    {\n      \"label\": \"Sparse Koto Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Japanese classical, contemplative, koto, sparse supporting shamisen, 60 BPM, legato phrases in pentatonic scale, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Japanese Zen Garden at Dawn",
+    "elements": [
+      {
+        "label": "Raked Gravel Stillness",
+        "type": "sound",
+        "prompt": "Continuous gravel crunch, stone path, slow and continuous, zen garden, close, soft"
+      },
+      {
+        "label": "Temple Bell Distance",
+        "type": "sound",
+        "prompt": "Single toll, temple bell, occasional, distant, muffled"
+      },
+      {
+        "label": "Bamboo Water Feature",
+        "type": "sound",
+        "prompt": "Continuous bamboo stream gurgle, water feature, continuous, bamboo grove, close, soft"
+      },
+      {
+        "label": "Sparse Koto Melody",
+        "type": "music",
+        "prompt": "Japanese classical, contemplative, koto, sparse supporting shamisen, 60 BPM, legato phrases in pentatonic scale, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 15927,
+  "model_tag": "mistral"
+}

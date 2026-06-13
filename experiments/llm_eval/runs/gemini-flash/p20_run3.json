@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 3,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Parisian cafe in rain\",\n  \"elements\": [\n    {\n      \"label\": \"Piano jazz\",\n      \"type\": \"music\",\n      \"prompt\": \"French cafe jazz, melancholic, solo piano, 70 BPM, sparse melody with arpeggiated chords, intimate and reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Rain on window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Raindrops, water on glass, continuous and gentle, cafe window, mid perspective, soft and reverberant\"\n    },\n    {\n      \"label\": \"French conversations\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmuring, mixed voices, continuous low chatter, cafe interior, distant, muffled and reverberant\"\n    },\n    {\n      \"label\": \"Clattering plates\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clatter, ceramic plates, occasional and sharp, cafe interior, close perspective, dry\"\n    },\n    {\n      \"label\": \"Distant street ambiance\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant traffic, car horns, continuous low rumble, parisian street, far, soft and reverberant\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Parisian cafe in rain",
+    "elements": [
+      {
+        "label": "Piano jazz",
+        "type": "music",
+        "prompt": "French cafe jazz, melancholic, solo piano, 70 BPM, sparse melody with arpeggiated chords, intimate and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Rain on window",
+        "type": "sound",
+        "prompt": "Raindrops, water on glass, continuous and gentle, cafe window, mid perspective, soft and reverberant"
+      },
+      {
+        "label": "French conversations",
+        "type": "sound",
+        "prompt": "Murmuring, mixed voices, continuous low chatter, cafe interior, distant, muffled and reverberant"
+      },
+      {
+        "label": "Clattering plates",
+        "type": "sound",
+        "prompt": "Clatter, ceramic plates, occasional and sharp, cafe interior, close perspective, dry"
+      },
+      {
+        "label": "Distant street ambiance",
+        "type": "sound",
+        "prompt": "Distant traffic, car horns, continuous low rumble, parisian street, far, soft and reverberant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2043,
+  "model_tag": "gemini-2.5-flash-lite"
+}

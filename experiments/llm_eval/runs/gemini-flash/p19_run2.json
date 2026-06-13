@@ -1,0 +1,51 @@
+{
+  "prompt_id": "p19",
+  "prompt_text": "A futuristic underwater research station during a systems emergency — alarms pulsing, bubbling water pressure against the hull, crew radio chatter, generator hum, distant sonar pings, emergency lighting flicker represented as a low electrical hum",
+  "category": "edge_case",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Futuristic underwater research station emergency\",\n  \"elements\": [\n    {\n      \"label\": \"Pulsing alarm\",\n      \"type\": \"sound\",\n      \"prompt\": \"Pulsing, alarm siren, continuous, research station, mid, reverberant\"\n    },\n    {\n      \"label\": \"Water pressure\",\n      \"type\": \"sound\",\n      \"prompt\": \"Bubbling, water pressure against hull, constant, underwater, close, deep\"\n    },\n    {\n      \"label\": \"Crew radio chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chatter, distorted radio signals, intermittent, research station interior, distant, muffled\"\n    },\n    {\n      \"label\": \"Generator hum\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hum, electrical generator, constant, research station machinery room, mid, low frequency\"\n    },\n    {\n      \"label\": \"Sonar pings\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ping, sonar pulse, sparse, open ocean, far, echoing\"\n    },\n    {\n      \"label\": \"Emergency lighting hum\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hum, flickering electrical lights, irregular pulse, research station corridor, close, high frequency\"\n    },\n    {\n      \"label\": \"Emergency ambient music\",\n      \"type\": \"music\",\n      \"prompt\": \"Industrial ambient, tense, low synth drones, distorted percussive hits, slow, sustained drone, spacious and metallic, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Futuristic underwater research station emergency",
+    "elements": [
+      {
+        "label": "Pulsing alarm",
+        "type": "sound",
+        "prompt": "Pulsing, alarm siren, continuous, research station, mid, reverberant"
+      },
+      {
+        "label": "Water pressure",
+        "type": "sound",
+        "prompt": "Bubbling, water pressure against hull, constant, underwater, close, deep"
+      },
+      {
+        "label": "Crew radio chatter",
+        "type": "sound",
+        "prompt": "Chatter, distorted radio signals, intermittent, research station interior, distant, muffled"
+      },
+      {
+        "label": "Generator hum",
+        "type": "sound",
+        "prompt": "Hum, electrical generator, constant, research station machinery room, mid, low frequency"
+      },
+      {
+        "label": "Sonar pings",
+        "type": "sound",
+        "prompt": "Ping, sonar pulse, sparse, open ocean, far, echoing"
+      },
+      {
+        "label": "Emergency lighting hum",
+        "type": "sound",
+        "prompt": "Hum, flickering electrical lights, irregular pulse, research station corridor, close, high frequency"
+      },
+      {
+        "label": "Emergency ambient music",
+        "type": "music",
+        "prompt": "Industrial ambient, tense, low synth drones, distorted percussive hits, slow, sustained drone, spacious and metallic, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2162,
+  "model_tag": "gemini-2.5-flash-lite"
+}

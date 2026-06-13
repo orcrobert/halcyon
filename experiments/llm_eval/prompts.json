@@ -1,0 +1,102 @@
+[
+  {
+    "id": "p01",
+    "category": "pop_culture",
+    "prompt": "A bustling tavern in Novigrad from The Witcher — patrons talking, a bard playing in the corner, fire crackling in the hearth"
+  },
+  {
+    "id": "p02",
+    "category": "pop_culture",
+    "prompt": "A campfire deep in the wilderness of Blood Meridian — wind across a barren desert plain, distant coyotes, embers crackling"
+  },
+  {
+    "id": "p03",
+    "category": "pop_culture",
+    "prompt": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside"
+  },
+  {
+    "id": "p04",
+    "category": "pop_culture",
+    "prompt": "A rainy evening in Coruscant's lower city from Star Wars — distant machinery hum, rain on metal, neon signs buzzing, speeder traffic overhead"
+  },
+  {
+    "id": "p05",
+    "category": "pop_culture",
+    "prompt": "The Shire from Lord of the Rings — gentle rolling hills, birdsong, a brook nearby, distant sheep bells, a soft acoustic melody"
+  },
+  {
+    "id": "p06",
+    "category": "generic_ambiance",
+    "prompt": "A quiet forest at dawn — birds beginning to sing, light wind through leaves, a small stream, distant woodpecker, a soft wooden flute melody drifting through the trees"
+  },
+  {
+    "id": "p07",
+    "category": "generic_ambiance",
+    "prompt": "A beach at sunset — steady ocean waves, seagulls, a gentle coastal breeze, distant sailboat bell, a lone acoustic guitar played slowly nearby"
+  },
+  {
+    "id": "p08",
+    "category": "generic_ambiance",
+    "prompt": "A busy medieval market — crowd murmur, merchant calls, horse hooves on cobblestone, a street musician with lute and drum"
+  },
+  {
+    "id": "p09",
+    "category": "generic_ambiance",
+    "prompt": "A thunderstorm over a mountain lake — heavy rain on water, distant rolling thunder, wind in pine trees, loons calling"
+  },
+  {
+    "id": "p10",
+    "category": "generic_ambiance",
+    "prompt": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room"
+  },
+  {
+    "id": "p11",
+    "category": "cultural_specific",
+    "prompt": "A Moroccan riad courtyard at dusk — a fountain trickling, swallows in the air, a muezzin call in the distance, traditional oud music"
+  },
+  {
+    "id": "p12",
+    "category": "cultural_specific",
+    "prompt": "A Japanese zen garden at dawn — raked gravel stillness, a temple bell in the distance, bamboo water feature, sparse koto melody"
+  },
+  {
+    "id": "p13",
+    "category": "cultural_specific",
+    "prompt": "A Celtic coastal village during a festival — bodhrán drumming, tin whistle melody, crowd cheering, waves crashing on cliffs"
+  },
+  {
+    "id": "p14",
+    "category": "cultural_specific",
+    "prompt": "An Indian classical music concert at twilight — tabla rhythm, sitar melody, tanpura drone, a small audience, evening insects outside"
+  },
+  {
+    "id": "p15",
+    "category": "abstract_mood",
+    "prompt": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes"
+  },
+  {
+    "id": "p16",
+    "category": "abstract_mood",
+    "prompt": "Rising tension before a confrontation — a dark corridor, distant footsteps on stone, low rumbling drone, a heartbeat-like bass drum pulse, high strings holding a dissonant sustained note"
+  },
+  {
+    "id": "p17",
+    "category": "abstract_mood",
+    "prompt": "Peaceful transcendence and meditation — a high mountain plateau, wind across open space, distant Tibetan singing bowls, a slowly evolving pad of warm sustained tones, sparse breath sounds"
+  },
+  {
+    "id": "p18",
+    "category": "edge_case",
+    "prompt": "Rain"
+  },
+  {
+    "id": "p19",
+    "category": "edge_case",
+    "prompt": "A futuristic underwater research station during a systems emergency — alarms pulsing, bubbling water pressure against the hull, crew radio chatter, generator hum, distant sonar pings, emergency lighting flicker represented as a low electrical hum"
+  },
+  {
+    "id": "p20",
+    "category": "edge_case",
+    "prompt": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii"
+  }
+]

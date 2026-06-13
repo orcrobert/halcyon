@@ -1,0 +1,12 @@
+{
+  "prompt_id": "p06",
+  "prompt_text": "A quiet forest at dawn — birds beginning to sing, light wind through leaves, a small stream, distant woodpecker, a soft wooden flute melody drifting through the trees",
+  "category": "generic_ambiance",
+  "run": 2,
+  "model": "gemini-flash",
+  "raw": null,
+  "parsed": null,
+  "valid": false,
+  "latency_ms": null,
+  "error": "503 UNAVAILABLE. {'error': {'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'}}"
+}

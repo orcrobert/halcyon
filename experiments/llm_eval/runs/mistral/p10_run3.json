@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p10",
+  "prompt_text": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Cozy late-night library\",\n  \"elements\": [\n    {\n      \"label\": \"Ticking clock\",\n      \"type\": \"sound\",\n      \"prompt\": \"Tick, mechanical clock, slow and continuous, library interior, close, dry\"\n    },\n    {\n      \"label\": \"Rain on windows\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant rain drops, glass panes, sparse, library exterior, far, soft\"\n    },\n    {\n      \"label\": \"Fireplace crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackle, burning logs, occasional, fireplace, close, warm and dry\"\n    },\n    {\n      \"label\": \"Page turning\",\n      \"type\": \"sound\",\n      \"prompt\": \"Turn, book pages, slow and continuous, library interior, distant, soft\"\n    },\n    {\n      \"label\": \"Piano nocturne\",\n      \"type\": \"music\",\n      \"prompt\": \"Andalusian classical, calm, piano, strings, 60 BPM, legato phrases in dorian mode, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Cozy late-night library",
+    "elements": [
+      {
+        "label": "Ticking clock",
+        "type": "sound",
+        "prompt": "Tick, mechanical clock, slow and continuous, library interior, close, dry"
+      },
+      {
+        "label": "Rain on windows",
+        "type": "sound",
+        "prompt": "Distant rain drops, glass panes, sparse, library exterior, far, soft"
+      },
+      {
+        "label": "Fireplace crackling",
+        "type": "sound",
+        "prompt": "Crackle, burning logs, occasional, fireplace, close, warm and dry"
+      },
+      {
+        "label": "Page turning",
+        "type": "sound",
+        "prompt": "Turn, book pages, slow and continuous, library interior, distant, soft"
+      },
+      {
+        "label": "Piano nocturne",
+        "type": "music",
+        "prompt": "Andalusian classical, calm, piano, strings, 60 BPM, legato phrases in dorian mode, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 80382,
+  "model_tag": "mistral"
+}

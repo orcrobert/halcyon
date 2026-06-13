@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p13",
+  "prompt_text": "A Celtic coastal village during a festival — bodhrán drumming, tin whistle melody, crowd cheering, waves crashing on cliffs",
+  "category": "cultural_specific",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Celtic Coastal Festival\",\n  \"elements\": [\n    {\n      \"label\": \"Bodhrán Drumming\",\n      \"type\": \"sound\",\n      \"prompt\": \"Drumming, bodhrán, continuous, village square, close, dry\"\n    },\n    {\n      \"label\": \"Tin Whistle Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Melodic phrases, tin whistle, continuous, village square, mid, bright\"\n    },\n    {\n      \"label\": \"Crowd Cheering\",\n      \"type\": \"sound\",\n      \"prompt\": \"Cheers, voices, occasional, village square, distant, reverberant\"\n    },\n    {\n      \"label\": \"Waves Crashing on Cliffs\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crashing, water on rock, continuous, cliff edge, far, wet and bright\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Celtic Coastal Festival",
+    "elements": [
+      {
+        "label": "Bodhrán Drumming",
+        "type": "sound",
+        "prompt": "Drumming, bodhrán, continuous, village square, close, dry"
+      },
+      {
+        "label": "Tin Whistle Melody",
+        "type": "music",
+        "prompt": "Melodic phrases, tin whistle, continuous, village square, mid, bright"
+      },
+      {
+        "label": "Crowd Cheering",
+        "type": "sound",
+        "prompt": "Cheers, voices, occasional, village square, distant, reverberant"
+      },
+      {
+        "label": "Waves Crashing on Cliffs",
+        "type": "sound",
+        "prompt": "Crashing, water on rock, continuous, cliff edge, far, wet and bright"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 13883,
+  "model_tag": "mistral"
+}

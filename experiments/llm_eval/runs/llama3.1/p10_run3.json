@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p10",
+  "prompt_text": "A cozy library late at night — faint clock ticking, distant rain on windows, a fireplace crackling, soft page-turning sounds, a piano playing slow nocturne-style chords in an adjacent room",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Cozy Library\", \"elements\":\n [\n  {\"label\": \"Clock Ticking\", \"type\": \"sound\", \"prompt\": \"Ticking, clock mechanism, continuous, library interior, close, dry\"},\n  {\"label\": \"Rain on Windows\", \"type\": \"sound\", \"prompt\": \"Gentle pattering, rain on glass, continuous, windowpane, close, soft\"},\n  {\"label\": \"Fireplace Crackling\", \"type\": \"sound\", \"prompt\": \"Flickering, wooden logs burning, occasional, fireplace hearth, mid, bright\"},\n  {\"label\": \"Page-Turning Sounds\", \"type\": \"sound\", \"prompt\": \"Soft rustling, book pages turning, sparse, library shelves, distant, dry\"},\n  {\"label\": \"Piano Playing Nocturne\", \"type\": \"music\", \"prompt\": \"Ambient classical, melancholic, grand piano, soft celesta, 60 BPM, legato sustained chords in minor key, intimate and reverberant\"}\n ]\n}",
+  "parsed": {
+    "atmosphere": "Cozy Library",
+    "elements": [
+      {
+        "label": "Clock Ticking",
+        "type": "sound",
+        "prompt": "Ticking, clock mechanism, continuous, library interior, close, dry"
+      },
+      {
+        "label": "Rain on Windows",
+        "type": "sound",
+        "prompt": "Gentle pattering, rain on glass, continuous, windowpane, close, soft"
+      },
+      {
+        "label": "Fireplace Crackling",
+        "type": "sound",
+        "prompt": "Flickering, wooden logs burning, occasional, fireplace hearth, mid, bright"
+      },
+      {
+        "label": "Page-Turning Sounds",
+        "type": "sound",
+        "prompt": "Soft rustling, book pages turning, sparse, library shelves, distant, dry"
+      },
+      {
+        "label": "Piano Playing Nocturne",
+        "type": "music",
+        "prompt": "Ambient classical, melancholic, grand piano, soft celesta, 60 BPM, legato sustained chords in minor key, intimate and reverberant"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 25701,
+  "model_tag": "llama3.1:8b"
+}

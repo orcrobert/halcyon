@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p14",
+  "prompt_text": "An Indian classical music concert at twilight — tabla rhythm, sitar melody, tanpura drone, a small audience, evening insects outside",
+  "category": "cultural_specific",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Indian Classical Music Concert at Twilight\",\n  \"elements\": [\n    {\n      \"label\": \"Tabla Rhythm\",\n      \"type\": \"sound\",\n      \"prompt\": \"Tabla, rhythmic pattern, central stage, close, dry\"\n    },\n    {\n      \"label\": \"Sitar Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Solo sitar, melodic phrases, central stage, mid, bright\"\n    },\n    {\n      \"label\": \"Tanpura Drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Droning tanpura, low frequency, background, distant, reverberant\"\n    },\n    {\n      \"label\": \"Audience\",\n      \"type\": \"sound\",\n      \"prompt\": \"Whispers and rustling clothes, sparse, audience area, distant, dry\"\n    },\n    {\n      \"label\": \"Evening Insects\",\n      \"type\": \"music\",\n      \"prompt\": \"Continuous cricket chorus, background, outside venue, distant, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Indian Classical Music Concert at Twilight",
+    "elements": [
+      {
+        "label": "Tabla Rhythm",
+        "type": "sound",
+        "prompt": "Tabla, rhythmic pattern, central stage, close, dry"
+      },
+      {
+        "label": "Sitar Melody",
+        "type": "music",
+        "prompt": "Solo sitar, melodic phrases, central stage, mid, bright"
+      },
+      {
+        "label": "Tanpura Drone",
+        "type": "music",
+        "prompt": "Droning tanpura, low frequency, background, distant, reverberant"
+      },
+      {
+        "label": "Audience",
+        "type": "sound",
+        "prompt": "Whispers and rustling clothes, sparse, audience area, distant, dry"
+      },
+      {
+        "label": "Evening Insects",
+        "type": "music",
+        "prompt": "Continuous cricket chorus, background, outside venue, distant, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 16566,
+  "model_tag": "mistral"
+}

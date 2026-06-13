@@ -1,0 +1,53 @@
+{
+  "prompt_id": "p04",
+  "prompt_text": "A rainy evening in Coruscant's lower city from Star Wars — distant machinery hum, rain on metal, neon signs buzzing, speeder traffic overhead",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Rainy Evening in Coruscant's Lower City\",\n  \"elements\": [\n    {\n      \"label\": \"Distant Machinery Hum\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hum, metallic machinery, slow and continuous, lower city streets, distant, dry\"\n    },\n    {\n      \"label\": \"Rain on Metal\",\n      \"type\": \"sound\",\n      \"prompt\": \"Droplets, metal roofs, sparse and continuous, open alleyway, close, wet and reverbant\"\n    },\n    {\n      \"label\": \"Neon Signs Buzzing\",\n      \"type\": \"sound\",\n      \"prompt\": \"Buzz, neon lights, occasional and sustained, city streets, mid-distance, bright\"\n    },\n    {\n      \"label\": \"Speeder Traffic Overhead\",\n      \"type\": \"sound\",\n      \"prompt\": \"Engine hums, speeders flying overhead, sparse and continuous, upper city roads, far, dry\"\n    },\n    {\n      \"label\": \"Coruscant Ambient Drone\",\n      \"type\": \"music\",\n      \"genre\": \"Ambient Drone\",\n      \"mood\": \"calm\",\n      \"lead_instruments\": \"sustained low synth tone\",\n      \"tempo\": \"slow\",\n      \"arrangement\": \"sustained drone\",\n      \"production_style\": \"reverberant\",\n      \"eq\": [\n        {\"type\": \"low_shelf\", \"freq\": 200, \"gain_db\": -3.0}\n      ]\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rainy Evening in Coruscant's Lower City",
+    "elements": [
+      {
+        "label": "Distant Machinery Hum",
+        "type": "sound",
+        "prompt": "Hum, metallic machinery, slow and continuous, lower city streets, distant, dry"
+      },
+      {
+        "label": "Rain on Metal",
+        "type": "sound",
+        "prompt": "Droplets, metal roofs, sparse and continuous, open alleyway, close, wet and reverbant"
+      },
+      {
+        "label": "Neon Signs Buzzing",
+        "type": "sound",
+        "prompt": "Buzz, neon lights, occasional and sustained, city streets, mid-distance, bright"
+      },
+      {
+        "label": "Speeder Traffic Overhead",
+        "type": "sound",
+        "prompt": "Engine hums, speeders flying overhead, sparse and continuous, upper city roads, far, dry"
+      },
+      {
+        "label": "Coruscant Ambient Drone",
+        "type": "music",
+        "genre": "Ambient Drone",
+        "mood": "calm",
+        "lead_instruments": "sustained low synth tone",
+        "tempo": "slow",
+        "arrangement": "sustained drone",
+        "production_style": "reverberant",
+        "eq": [
+          {
+            "type": "low_shelf",
+            "freq": 200,
+            "gain_db": -3.0
+          }
+        ]
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 71674,
+  "model_tag": "mistral"
+}

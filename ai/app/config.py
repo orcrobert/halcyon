@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     llama_model: str = "llama3.1:8b"
     gemini_api_key: str | None = None
-    decomposer_model: str = "mistral"
+    decomposer_model: str = "gemini"
 
     model_config = {"env_file": str(Path(__file__).resolve().parents[2] / ".env")}
 

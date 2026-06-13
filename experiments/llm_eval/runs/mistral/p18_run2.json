@@ -1,0 +1,46 @@
+{
+  "prompt_id": "p18",
+  "prompt_text": "Rain",
+  "category": "edge_case",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Rainy Street\",\n  \"elements\": [\n    {\n      \"label\": \"Drizzle on rooftop\",\n      \"type\": \"sound\",\n      \"prompt\": \"Soft, sparse drips, metal roof, street corner, distant, bright\"\n    },\n    {\n      \"label\": \"Rain on cobblestones\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous patter, stone pavement, sparse, street center, close, dry\"\n    },\n    {\n      \"label\": \"Wind through buildings\",\n      \"type\": \"sound\",\n      \"prompt\": \"Soft rustling, brick walls, continuous, street alley, distant, reverberant\"\n    },\n    {\n      \"label\": \"Lone car passing\",\n      \"type\": \"sound\",\n      \"prompt\": \"Single engine rumble, metal chassis, sparse, wide road, far, dry\"\n    },\n    {\n      \"label\": \"Ambient street ambience\",\n      \"type\": \"sound\",\n      \"prompt\": \"Sparse distant voices, soft footsteps, distant room tone, street corner, distant, dry\"\n    },\n    {\n      \"label\": \"Melancholic drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Minor key sustained low drone, slow tempo, layered texture, spacious and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Rainy Street",
+    "elements": [
+      {
+        "label": "Drizzle on rooftop",
+        "type": "sound",
+        "prompt": "Soft, sparse drips, metal roof, street corner, distant, bright"
+      },
+      {
+        "label": "Rain on cobblestones",
+        "type": "sound",
+        "prompt": "Continuous patter, stone pavement, sparse, street center, close, dry"
+      },
+      {
+        "label": "Wind through buildings",
+        "type": "sound",
+        "prompt": "Soft rustling, brick walls, continuous, street alley, distant, reverberant"
+      },
+      {
+        "label": "Lone car passing",
+        "type": "sound",
+        "prompt": "Single engine rumble, metal chassis, sparse, wide road, far, dry"
+      },
+      {
+        "label": "Ambient street ambience",
+        "type": "sound",
+        "prompt": "Sparse distant voices, soft footsteps, distant room tone, street corner, distant, dry"
+      },
+      {
+        "label": "Melancholic drone",
+        "type": "music",
+        "prompt": "Minor key sustained low drone, slow tempo, layered texture, spacious and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 31120,
+  "model_tag": "mistral"
+}

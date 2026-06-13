@@ -1,0 +1,97 @@
+{
+  "prompt_id": "p01",
+  "prompt_text": "A bustling tavern in Novigrad from The Witcher — patrons talking, a bard playing in the corner, fire crackling in the hearth",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Bustling Novigrad Tavern\",\n  \"elements\": [\n    {\n      \"label\": \"Crowd murmur\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmur, human voices, continuous chatter and laughter, tavern interior, mid, reverberant\",\n      \"eq\": [\n        {\"type\": \"high_shelf\", \"freq\": 8000, \"gain_db\": -2.0},\n        {\"type\": \"low_shelf\", \"freq\": 200, \"gain_db\": 1.0}\n      ]\n    },\n    {\n      \"label\": \"Bard's lute music\",\n      \"type\": \"music\",\n      \"prompt\": \"Medieval folk, lively and boisterous, lute, light percussion, 120 BPM, layered melody and rhythm, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Fire crackling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackling, wood in fire, continuous, hearth, close, bright and warm\",\n      \"eq\": [\n        {\"type\": \"high_shelf\", \"freq\": 12000, \"gain_db\": -1.0},\n        {\"type\": \"peak\", \"freq\": 300, \"gain_db\": 1.5, \"q\": 1.0}\n      ]\n    },\n    {\n      \"label\": \"Clinking glasses\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clinking, glass on glass, occasional, tavern tables, mid, bright and sharp\",\n      \"eq\": [\n        {\"type\": \"high_shelf\", \"freq\": 15000, \"gain_db\": -1.5}\n      ]\n    },\n    {\n      \"label\": \"Footsteps on wood\",\n      \"type\": \"sound\",\n      \"prompt\": \"Footsteps, leather boots on wooden floor, sparse, tavern floor, mid, dull thud\",\n      \"eq\": [\n        {\"type\": \"high_shelf\", \"freq\": 6000, \"gain_db\": -3.0}\n      ]\n    },\n    {\n      \"label\": \"Distant shouting\",\n      \"type\": \"sound\",\n      \"prompt\": \"Shouting, human voices, occasional, far side of tavern, distant, muffled\",\n      \"eq\": [\n        {\"type\": \"high_shelf\", \"freq\": 5000, \"gain_db\": -4.0},\n        {\"type\": \"low_shelf\", \"freq\": 150, \"gain_db\": -1.0}\n      ]\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Bustling Novigrad Tavern",
+    "elements": [
+      {
+        "label": "Crowd murmur",
+        "type": "sound",
+        "prompt": "Murmur, human voices, continuous chatter and laughter, tavern interior, mid, reverberant",
+        "eq": [
+          {
+            "type": "high_shelf",
+            "freq": 8000,
+            "gain_db": -2.0
+          },
+          {
+            "type": "low_shelf",
+            "freq": 200,
+            "gain_db": 1.0
+          }
+        ]
+      },
+      {
+        "label": "Bard's lute music",
+        "type": "music",
+        "prompt": "Medieval folk, lively and boisterous, lute, light percussion, 120 BPM, layered melody and rhythm, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Fire crackling",
+        "type": "sound",
+        "prompt": "Crackling, wood in fire, continuous, hearth, close, bright and warm",
+        "eq": [
+          {
+            "type": "high_shelf",
+            "freq": 12000,
+            "gain_db": -1.0
+          },
+          {
+            "type": "peak",
+            "freq": 300,
+            "gain_db": 1.5,
+            "q": 1.0
+          }
+        ]
+      },
+      {
+        "label": "Clinking glasses",
+        "type": "sound",
+        "prompt": "Clinking, glass on glass, occasional, tavern tables, mid, bright and sharp",
+        "eq": [
+          {
+            "type": "high_shelf",
+            "freq": 15000,
+            "gain_db": -1.5
+          }
+        ]
+      },
+      {
+        "label": "Footsteps on wood",
+        "type": "sound",
+        "prompt": "Footsteps, leather boots on wooden floor, sparse, tavern floor, mid, dull thud",
+        "eq": [
+          {
+            "type": "high_shelf",
+            "freq": 6000,
+            "gain_db": -3.0
+          }
+        ]
+      },
+      {
+        "label": "Distant shouting",
+        "type": "sound",
+        "prompt": "Shouting, human voices, occasional, far side of tavern, distant, muffled",
+        "eq": [
+          {
+            "type": "high_shelf",
+            "freq": 5000,
+            "gain_db": -4.0
+          },
+          {
+            "type": "low_shelf",
+            "freq": 150,
+            "gain_db": -1.0
+          }
+        ]
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 2738,
+  "model_tag": "gemini-2.5-flash-lite"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p03",
+  "prompt_text": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"The Prancing Pony Inn\",\n  \"elements\": [\n    {\n      \"label\": \"Crowd chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Laughter and conversation, wooden furniture, close, bright\"\n    },\n    {\n      \"label\": \"Mug clinking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Metal mugs on stone table, continuous, tavern interior, mid, dry\"\n    },\n    {\n      \"label\": \"Folk musician\",\n      \"type\": \"music\",\n      \"prompt\": \"Celtic folk, calm, fiddle and bodhrán, 80 BPM, layered, intimate\"\n    },\n    {\n      \"label\": \"Rain\",\n      \"type\": \"sound\",\n      \"prompt\": \"Dense rain drops on stone roof, occasional, tavern exterior, distant, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Prancing Pony Inn",
+    "elements": [
+      {
+        "label": "Crowd chatter",
+        "type": "sound",
+        "prompt": "Laughter and conversation, wooden furniture, close, bright"
+      },
+      {
+        "label": "Mug clinking",
+        "type": "sound",
+        "prompt": "Metal mugs on stone table, continuous, tavern interior, mid, dry"
+      },
+      {
+        "label": "Folk musician",
+        "type": "music",
+        "prompt": "Celtic folk, calm, fiddle and bodhrán, 80 BPM, layered, intimate"
+      },
+      {
+        "label": "Rain",
+        "type": "sound",
+        "prompt": "Dense rain drops on stone roof, occasional, tavern exterior, distant, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 45567,
+  "model_tag": "mistral"
+}

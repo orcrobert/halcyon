@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p03",
+  "prompt_text": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside",
+  "category": "pop_culture",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Prancing Pony Inn\",\n  \"elements\": [\n    {\n      \"label\": \"Crowded Tavern Ambience\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous crowd chatter, mugs clinking, distant fire crackling, mid, bright\"\n    },\n    {\n      \"label\": \"Folk Music\",\n      \"type\": \"music\",\n      \"prompt\": \"Celtic folk, warm, fiddle, whistle, 120 BPM, sparse arrangement, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Rain Outside\",\n      \"type\": \"sound\",\n      \"prompt\": \"Dense rain drops hitting roof, slow, continuous, open courtyard, distant, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Prancing Pony Inn",
+    "elements": [
+      {
+        "label": "Crowded Tavern Ambience",
+        "type": "sound",
+        "prompt": "Continuous crowd chatter, mugs clinking, distant fire crackling, mid, bright"
+      },
+      {
+        "label": "Folk Music",
+        "type": "music",
+        "prompt": "Celtic folk, warm, fiddle, whistle, 120 BPM, sparse arrangement, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Rain Outside",
+        "type": "sound",
+        "prompt": "Dense rain drops hitting roof, slow, continuous, open courtyard, distant, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 44075,
+  "model_tag": "mistral"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p16",
+  "prompt_text": "Rising tension before a confrontation — a dark corridor, distant footsteps on stone, low rumbling drone, a heartbeat-like bass drum pulse, high strings holding a dissonant sustained note",
+  "category": "abstract_mood",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\n\n  \"atmosphere\": \"Tense Preconfrontation\",\n\n  \"elements\": [\n\n    {\n\n      \"label\": \"Footsteps\",\n\n      \"type\": \"sound\",\n\n      \"prompt\": \"Creaking, stone floor, sparse and continuous, dark corridor, mid-distance, reverberant\"\n\n    },\n\n    {\n\n      \"label\": \"Low Drone\",\n\n      \"type\": \"music\",\n\n      \"prompt\": \"Dissonant drone, low sustained tone, slow, sustained dissonant note in minor scale, distant, dry and intimate, instrumental, no vocals\"\n\n    },\n\n    {\n\n      \"label\": \"Heartbeat Pulse\",\n\n      \"type\": \"sound\",\n\n      \"prompt\": \"Bass drum pulse, occasional and driving, dark corridor, close, muffled\"\n\n    },\n\n    {\n\n      \"label\": \"High Strings\",\n\n      \"type\": \"music\",\n\n      \"prompt\": \"Dissonant sustained note, high strings holding a dissonant note in minor scale, slow, legato phrases in minor harmony, distant, dry and intimate, instrumental, no vocals\"\n\n    }\n\n  ]\n\n}",
+  "parsed": {
+    "atmosphere": "Tense Preconfrontation",
+    "elements": [
+      {
+        "label": "Footsteps",
+        "type": "sound",
+        "prompt": "Creaking, stone floor, sparse and continuous, dark corridor, mid-distance, reverberant"
+      },
+      {
+        "label": "Low Drone",
+        "type": "music",
+        "prompt": "Dissonant drone, low sustained tone, slow, sustained dissonant note in minor scale, distant, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Heartbeat Pulse",
+        "type": "sound",
+        "prompt": "Bass drum pulse, occasional and driving, dark corridor, close, muffled"
+      },
+      {
+        "label": "High Strings",
+        "type": "music",
+        "prompt": "Dissonant sustained note, high strings holding a dissonant note in minor scale, slow, legato phrases in minor harmony, distant, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 30445,
+  "model_tag": "llama3.1:8b"
+}

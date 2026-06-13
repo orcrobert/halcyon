@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p13",
+  "prompt_text": "A Celtic coastal village during a festival — bodhrán drumming, tin whistle melody, crowd cheering, waves crashing on cliffs",
+  "category": "cultural_specific",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Celtic Coastal Village Festival\",\n  \"elements\": [\n    {\n      \"label\": \"Bodhrán Drumming\",\n      \"type\": \"music\",\n      \"prompt\": \"Celtic drumbeat, bodhrán drum, continuous, stone courtyard, close, soft\"\n    },\n    {\n      \"label\": \"Tin Whistle Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Airy melody, tin whistle, legato phrases in dorian mode, 120 BPM, layered and reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Crowd Cheering\",\n      \"type\": \"sound\",\n      \"prompt\": \"Cheering crowd, enthusiastic shouts and clapping, continuous, open village square, close, bright and reverberant\"\n    },\n    {\n      \"label\": \"Waves Crashing on Cliffs\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crashing waves, water on rocky cliffs, continuous, coastal edge, far, dry and muffled\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Celtic Coastal Village Festival",
+    "elements": [
+      {
+        "label": "Bodhrán Drumming",
+        "type": "music",
+        "prompt": "Celtic drumbeat, bodhrán drum, continuous, stone courtyard, close, soft"
+      },
+      {
+        "label": "Tin Whistle Melody",
+        "type": "music",
+        "prompt": "Airy melody, tin whistle, legato phrases in dorian mode, 120 BPM, layered and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Crowd Cheering",
+        "type": "sound",
+        "prompt": "Cheering crowd, enthusiastic shouts and clapping, continuous, open village square, close, bright and reverberant"
+      },
+      {
+        "label": "Waves Crashing on Cliffs",
+        "type": "sound",
+        "prompt": "Crashing waves, water on rocky cliffs, continuous, coastal edge, far, dry and muffled"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 31413,
+  "model_tag": "llama3.1:8b"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"Caf\\u00e9 de Paris Rainy Night\", \"elements\": [{\"label\": \"Piano Jazz\", \"type\": \"music\", \"prompt\": \"Jazz subgenre, warm, piano as lead instrument, double bass and drums for accompaniment, 120 BPM, legato phrases in minor key, dry and intimate production style, instrumental, no vocals\"}, {\"label\": \"Rain on the Window\", \"type\": \"sound\", \"prompt\": \"Tapping, raindrops on glass windowpane, continuous, exterior, close, bright\"}, {\"label\": \"Customer Conversations\", \"type\": \"sound\", \"prompt\": \"Speaking, patrons in French, occasional, interior, mid, reverberant\"}, {\"label\": \"Waiter Collecting Dishes\", \"type\": \"sound\", \"prompt\": \"Clattering, waiter collecting plates and glasses, sparse, kitchen area, distant, dry\"}]}",
+  "parsed": {
+    "atmosphere": "Café de Paris Rainy Night",
+    "elements": [
+      {
+        "label": "Piano Jazz",
+        "type": "music",
+        "prompt": "Jazz subgenre, warm, piano as lead instrument, double bass and drums for accompaniment, 120 BPM, legato phrases in minor key, dry and intimate production style, instrumental, no vocals"
+      },
+      {
+        "label": "Rain on the Window",
+        "type": "sound",
+        "prompt": "Tapping, raindrops on glass windowpane, continuous, exterior, close, bright"
+      },
+      {
+        "label": "Customer Conversations",
+        "type": "sound",
+        "prompt": "Speaking, patrons in French, occasional, interior, mid, reverberant"
+      },
+      {
+        "label": "Waiter Collecting Dishes",
+        "type": "sound",
+        "prompt": "Clattering, waiter collecting plates and glasses, sparse, kitchen area, distant, dry"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 21136,
+  "model_tag": "llama3.1:8b"
+}

@@ -1,0 +1,46 @@
+{
+  "prompt_id": "p19",
+  "prompt_text": "A futuristic underwater research station during a systems emergency — alarms pulsing, bubbling water pressure against the hull, crew radio chatter, generator hum, distant sonar pings, emergency lighting flicker represented as a low electrical hum",
+  "category": "edge_case",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Underwater Emergency\",\n  \"elements\": [\n    {\n      \"label\": \"Alarm Pulsing\",\n      \"type\": \"sound\",\n      \"prompt\": \"Beeping, metal control panel, continuous, cramped control room, close, bright\"\n    },\n    {\n      \"label\": \"Water Pressure\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hissing, water against steel hull, continuous, dark corridor outside laboratory, distant, muffled\"\n    },\n    {\n      \"label\": \"Crew Radio Chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Voiced shouting, comms device, sparse, central communication hub, close, soft\"\n    },\n    {\n      \"label\": \"Generator Hum\",\n      \"type\": \"sound\",\n      \"prompt\": \"Rumbling, electrical generator, continuous, narrow alleyway with power conduits, close, dry\"\n    },\n    {\n      \"label\": \"Sonar Pings\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant beeping, sonar equipment, occasional, dark research laboratory, distant, reverberant\"\n    },\n    {\n      \"label\": \"Emergency Lighting Flicker\",\n      \"type\": \"music\",\n      \"prompt\": \"Dissonant ambient drone, cold, sustained low tone in minor key, slow, 40 BPM, sparse and reverberant, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Underwater Emergency",
+    "elements": [
+      {
+        "label": "Alarm Pulsing",
+        "type": "sound",
+        "prompt": "Beeping, metal control panel, continuous, cramped control room, close, bright"
+      },
+      {
+        "label": "Water Pressure",
+        "type": "sound",
+        "prompt": "Hissing, water against steel hull, continuous, dark corridor outside laboratory, distant, muffled"
+      },
+      {
+        "label": "Crew Radio Chatter",
+        "type": "sound",
+        "prompt": "Voiced shouting, comms device, sparse, central communication hub, close, soft"
+      },
+      {
+        "label": "Generator Hum",
+        "type": "sound",
+        "prompt": "Rumbling, electrical generator, continuous, narrow alleyway with power conduits, close, dry"
+      },
+      {
+        "label": "Sonar Pings",
+        "type": "sound",
+        "prompt": "Distant beeping, sonar equipment, occasional, dark research laboratory, distant, reverberant"
+      },
+      {
+        "label": "Emergency Lighting Flicker",
+        "type": "music",
+        "prompt": "Dissonant ambient drone, cold, sustained low tone in minor key, slow, 40 BPM, sparse and reverberant, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 36144,
+  "model_tag": "llama3.1:8b"
+}

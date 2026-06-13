@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p05",
+  "prompt_text": "The Shire from Lord of the Rings — gentle rolling hills, birdsong, a brook nearby, distant sheep bells, a soft acoustic melody",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"The Shire Ambiance\",\n  \"elements\": [\n    {\n      \"label\": \"Birdsong\",\n      \"type\": \"sound\",\n      \"prompt\": \"Bird calls, feathers, continuous, open rolling hills, close, soft and bright\"\n    },\n    {\n      \"label\": \"Brook Nearby\",\n      \"type\": \"sound\",\n      \"prompt\": \"Running water, stone bed, gentle flow, banks, mid-distance, soft and wet\"\n    },\n    {\n      \"label\": \"Sheep Bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Ringing bells, sheep collar, occasional, hills, distant, dry and bright\"\n    },\n    {\n      \"label\": \"Soft Acoustic Melody\",\n      \"type\": \"music\",\n      \"prompt\": \"Melodic hobbit tune, lute, sustained legato phrases, calm, sparse arrangement, mid-tempo, intimate production style, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Shire Ambiance",
+    "elements": [
+      {
+        "label": "Birdsong",
+        "type": "sound",
+        "prompt": "Bird calls, feathers, continuous, open rolling hills, close, soft and bright"
+      },
+      {
+        "label": "Brook Nearby",
+        "type": "sound",
+        "prompt": "Running water, stone bed, gentle flow, banks, mid-distance, soft and wet"
+      },
+      {
+        "label": "Sheep Bells",
+        "type": "sound",
+        "prompt": "Ringing bells, sheep collar, occasional, hills, distant, dry and bright"
+      },
+      {
+        "label": "Soft Acoustic Melody",
+        "type": "music",
+        "prompt": "Melodic hobbit tune, lute, sustained legato phrases, calm, sparse arrangement, mid-tempo, intimate production style, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 47331,
+  "model_tag": "mistral"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p11",
+  "prompt_text": "A Moroccan riad courtyard at dusk — a fountain trickling, swallows in the air, a muezzin call in the distance, traditional oud music",
+  "category": "cultural_specific",
+  "run": 2,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Moroccan Riad Courtyard Dusk\",\n  \"elements\": [\n    {\n      \"label\": \"Fountain Trickling\",\n      \"type\": \"sound\",\n      \"prompt\": \"Water trickle, stone basin, continuous, courtyard center, close, wet\"\n    },\n    {\n      \"label\": \"Swallows In Air\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous seagull calls, open sky, continuous, courtyard perimeter, distant, soft\"\n    },\n    {\n      \"label\": \"Muezzin Call in Distance\",\n      \"type\": \"sound\",\n      \"prompt\": \"Spoken call to prayer, mosque minaret, occasional, courtyard edge, far, reverberant\"\n    },\n    {\n      \"label\": \"Traditional Oud Music\",\n      \"type\": \"music\",\n      \"prompt\": \"Middle Eastern classical, warm, oud, qraqeb, 70 BPM, layered fingerpicked arpeggios in maqam hijaz, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Moroccan Riad Courtyard Dusk",
+    "elements": [
+      {
+        "label": "Fountain Trickling",
+        "type": "sound",
+        "prompt": "Water trickle, stone basin, continuous, courtyard center, close, wet"
+      },
+      {
+        "label": "Swallows In Air",
+        "type": "sound",
+        "prompt": "Continuous seagull calls, open sky, continuous, courtyard perimeter, distant, soft"
+      },
+      {
+        "label": "Muezzin Call in Distance",
+        "type": "sound",
+        "prompt": "Spoken call to prayer, mosque minaret, occasional, courtyard edge, far, reverberant"
+      },
+      {
+        "label": "Traditional Oud Music",
+        "type": "music",
+        "prompt": "Middle Eastern classical, warm, oud, qraqeb, 70 BPM, layered fingerpicked arpeggios in maqam hijaz, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 60455,
+  "model_tag": "mistral"
+}

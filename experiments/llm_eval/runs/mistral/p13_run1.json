@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p13",
+  "prompt_text": "A Celtic coastal village during a festival — bodhrán drumming, tin whistle melody, crowd cheering, waves crashing on cliffs",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Celtic Coastal Festival\",\n  \"elements\": [\n    {\n      \"label\": \"Bodhrán Drumming\",\n      \"type\": \"sound\",\n      \"prompt\": \"Drumming, wooden bodhrán, continuous, festival square, mid, bright\"\n    },\n    {\n      \"label\": \"Tin Whistle Melody\",\n      \"type\": \"sound\",\n      \"prompt\": \"Melody, tin whistle, continuous, festival square, close, dry\"\n    },\n    {\n      \"label\": \"Crowd Cheering\",\n      \"type\": \"sound\",\n      \"prompt\": \"Cheering, crowd, intermittent, festival square, far, reverberant\"\n    },\n    {\n      \"label\": \"Waves Crashing on Cliffs\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crashing, water on rocky cliff, continuous, coastline, distant, dry\"\n    },\n    {\n      \"label\": \"Celtic Music\",\n      \"type\": \"music\",\n      \"prompt\": \"Irish folk, cheerful, tin whistle, bodhrán, 120 BPM, sparse arrangement, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Celtic Coastal Festival",
+    "elements": [
+      {
+        "label": "Bodhrán Drumming",
+        "type": "sound",
+        "prompt": "Drumming, wooden bodhrán, continuous, festival square, mid, bright"
+      },
+      {
+        "label": "Tin Whistle Melody",
+        "type": "sound",
+        "prompt": "Melody, tin whistle, continuous, festival square, close, dry"
+      },
+      {
+        "label": "Crowd Cheering",
+        "type": "sound",
+        "prompt": "Cheering, crowd, intermittent, festival square, far, reverberant"
+      },
+      {
+        "label": "Waves Crashing on Cliffs",
+        "type": "sound",
+        "prompt": "Crashing, water on rocky cliff, continuous, coastline, distant, dry"
+      },
+      {
+        "label": "Celtic Music",
+        "type": "music",
+        "prompt": "Irish folk, cheerful, tin whistle, bodhrán, 120 BPM, sparse arrangement, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 17916,
+  "model_tag": "mistral"
+}

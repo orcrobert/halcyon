@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p20",
+  "prompt_text": "Café de Paris în ploaie — jazz la pian, ploaie pe fereastră, conversații în franceză, un chelner care strânge farfurii",
+  "category": "edge_case",
+  "run": 3,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Jazz café in rain\",\n  \"elements\": [\n    {\n      \"label\": \"Rain on window\",\n      \"type\": \"sound\",\n      \"prompt\": \"Dripping, water on glass, continuous, café interior, close, soft\"\n    },\n    {\n      \"label\": \"French conversations\",\n      \"type\": \"sound\",\n      \"prompt\": \"Chatter, voices, sparse and intermittent, café interior, mid, dry\"\n    },\n    {\n      \"label\": \"Waiter clearing tables\",\n      \"type\": \"sound\",\n      \"prompt\": \"Scraping chairs, moving around, occasional, café interior, distant, dry\"\n    },\n    {\n      \"label\": \"Piano jazz\",\n      \"type\": \"music\",\n      \"prompt\": \"Jazz piano, solo, 80 BPM, sparse chords in minor key, intimate and dry, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Jazz café in rain",
+    "elements": [
+      {
+        "label": "Rain on window",
+        "type": "sound",
+        "prompt": "Dripping, water on glass, continuous, café interior, close, soft"
+      },
+      {
+        "label": "French conversations",
+        "type": "sound",
+        "prompt": "Chatter, voices, sparse and intermittent, café interior, mid, dry"
+      },
+      {
+        "label": "Waiter clearing tables",
+        "type": "sound",
+        "prompt": "Scraping chairs, moving around, occasional, café interior, distant, dry"
+      },
+      {
+        "label": "Piano jazz",
+        "type": "music",
+        "prompt": "Jazz piano, solo, 80 BPM, sparse chords in minor key, intimate and dry, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 26691,
+  "model_tag": "mistral"
+}

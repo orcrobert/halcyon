@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p03",
+  "prompt_text": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside",
+  "category": "pop_culture",
+  "run": 2,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"The Prancing Pony Inn\",\n  \"elements\": [\n    {\n      \"label\": \"Laughter and chatter\",\n      \"type\": \"sound\",\n      \"prompt\": \"Loud talking, patrons, continuous, crowded inn, close, reverberant\"\n    },\n    {\n      \"label\": \"Mugs clinking\",\n      \"type\": \"sound\",\n      \"prompt\": \"Clinking, mugs on wooden table, occasional, wooden tavern, mid, bright\"\n    },\n    {\n      \"label\": \"Folk musician\",\n      \"type\": \"music\",\n      \"prompt\": \"Folk, lively, tin whistle, fiddle, 120 BPM, layered melody with accompaniment in dorian mode, dry and intimate, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Rain outside\",\n      \"type\": \"sound\",\n      \"prompt\": \"Patterning, rain on wooden roof, continuous, open courtyard, close, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "The Prancing Pony Inn",
+    "elements": [
+      {
+        "label": "Laughter and chatter",
+        "type": "sound",
+        "prompt": "Loud talking, patrons, continuous, crowded inn, close, reverberant"
+      },
+      {
+        "label": "Mugs clinking",
+        "type": "sound",
+        "prompt": "Clinking, mugs on wooden table, occasional, wooden tavern, mid, bright"
+      },
+      {
+        "label": "Folk musician",
+        "type": "music",
+        "prompt": "Folk, lively, tin whistle, fiddle, 120 BPM, layered melody with accompaniment in dorian mode, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Rain outside",
+        "type": "sound",
+        "prompt": "Patterning, rain on wooden roof, continuous, open courtyard, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 35000,
+  "model_tag": "llama3.1:8b"
+}

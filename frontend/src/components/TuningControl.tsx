@@ -413,7 +413,7 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
 
             <DiamondMarker x={AXIS_X} y={apexY} glowColor={glowColor} filterId="tcd-apex" />
           </svg>
-          {/* subtle top/bottom fades using divs — no masks, no SVG filter bullshit */}
+          {/* subtle top/bottom fades using divs — no masks, no SVG filters */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, rgba(7,8,13,0.98), transparent)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to top, rgba(7,8,13,0.98), transparent)', pointerEvents: 'none' }} />
         </div>

@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p14",
+  "prompt_text": "An Indian classical music concert at twilight — tabla rhythm, sitar melody, tanpura drone, a small audience, evening insects outside",
+  "category": "cultural_specific",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Twilight Concert\", \n  \"elements\": [\n    { \n      \"label\": \"Tabla Rhythm\", \n      \"type\": \"music\", \n      \"prompt\": \"North Indian classical, meditative, tabla drums, layered rhythm with snare and bass, 120 BPM, driving cycle in raga Bhimpalasi, dry and reverberant, instrumental, no vocals\" \n    },\n    { \n      \"label\": \"Sitar Melody\", \n      \"type\": \"music\", \n      \"prompt\": \"North Indian classical, melancholic, sitar with sympathetic strings, solo melody with ornaments, 90 BPM, legato phrases in raga Bhimpalasi, dry and intimate, instrumental, no vocals\" \n    },\n    { \n      \"label\": \"Tanpura Drone\", \n      \"type\": \"music\", \n      \"prompt\": \"Ambient drone, warm, deep sustained low tone on tanpura, slow, sustained drone in raga Bhimpalasi, spacious and reverberant, instrumental, no vocals\" \n    },\n    { \n      \"label\": \"Audience Murmur\", \n      \"type\": \"sound\", \n      \"prompt\": \"Murmuring, crowd of people in a large hall, sparse, occasional whispers, open concert hall, mid, soft and reverberant\" \n    },\n    { \n      \"label\": \"Evening Insects\", \n      \"type\": \"sound\", \n      \"prompt\": \"Chirping, evening crickets outside the concert hall, continuous, light background noise, outdoor environment at dusk, close, soft\" \n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Twilight Concert",
+    "elements": [
+      {
+        "label": "Tabla Rhythm",
+        "type": "music",
+        "prompt": "North Indian classical, meditative, tabla drums, layered rhythm with snare and bass, 120 BPM, driving cycle in raga Bhimpalasi, dry and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Sitar Melody",
+        "type": "music",
+        "prompt": "North Indian classical, melancholic, sitar with sympathetic strings, solo melody with ornaments, 90 BPM, legato phrases in raga Bhimpalasi, dry and intimate, instrumental, no vocals"
+      },
+      {
+        "label": "Tanpura Drone",
+        "type": "music",
+        "prompt": "Ambient drone, warm, deep sustained low tone on tanpura, slow, sustained drone in raga Bhimpalasi, spacious and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Audience Murmur",
+        "type": "sound",
+        "prompt": "Murmuring, crowd of people in a large hall, sparse, occasional whispers, open concert hall, mid, soft and reverberant"
+      },
+      {
+        "label": "Evening Insects",
+        "type": "sound",
+        "prompt": "Chirping, evening crickets outside the concert hall, continuous, light background noise, outdoor environment at dusk, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 51665,
+  "model_tag": "llama3.1:8b"
+}

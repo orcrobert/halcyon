@@ -1,0 +1,41 @@
+{
+  "prompt_id": "p08",
+  "prompt_text": "A busy medieval market — crowd murmur, merchant calls, horse hooves on cobblestone, a street musician with lute and drum",
+  "category": "generic_ambiance",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Medieval Market\",\n  \"elements\": [\n    {\n      \"label\": \"Crowd Murmur\",\n      \"type\": \"sound\",\n      \"prompt\": \"Murmuring crowd, human voices, continuous, market square, close, soft\"\n    },\n    {\n      \"label\": \"Merchant Calls\",\n      \"type\": \"sound\",\n      \"prompt\": \"Shouting merchant, human voice, occasional, market stall, close, loud\"\n    },\n    {\n      \"label\": \"Horse Hooves\",\n      \"type\": \"sound\",\n      \"prompt\": \"Hoofbeats on cobblestone, horse hooves, slow and continuous, market street, mid, dry\"\n    },\n    {\n      \"label\": \"Lute Music\",\n      \"type\": \"music\",\n      \"prompt\": \"Middle Eastern classical, lively, solo lute, 120 BPM, fast arpeggios in maqam hijaz, spacious and reverberant, instrumental, no vocals\"\n    },\n    {\n      \"label\": \"Drumming\",\n      \"type\": \"music\",\n      \"prompt\": \"Middle Eastern percussion, rhythmic, frame drum, driving rhythm in 4/4 time, 120 BPM, sustained rhythmic pattern, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Medieval Market",
+    "elements": [
+      {
+        "label": "Crowd Murmur",
+        "type": "sound",
+        "prompt": "Murmuring crowd, human voices, continuous, market square, close, soft"
+      },
+      {
+        "label": "Merchant Calls",
+        "type": "sound",
+        "prompt": "Shouting merchant, human voice, occasional, market stall, close, loud"
+      },
+      {
+        "label": "Horse Hooves",
+        "type": "sound",
+        "prompt": "Hoofbeats on cobblestone, horse hooves, slow and continuous, market street, mid, dry"
+      },
+      {
+        "label": "Lute Music",
+        "type": "music",
+        "prompt": "Middle Eastern classical, lively, solo lute, 120 BPM, fast arpeggios in maqam hijaz, spacious and reverberant, instrumental, no vocals"
+      },
+      {
+        "label": "Drumming",
+        "type": "music",
+        "prompt": "Middle Eastern percussion, rhythmic, frame drum, driving rhythm in 4/4 time, 120 BPM, sustained rhythmic pattern, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 42479,
+  "model_tag": "llama3.1:8b"
+}

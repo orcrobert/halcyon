@@ -1,0 +1,31 @@
+{
+  "prompt_id": "p15",
+  "prompt_text": "Deep melancholy and solitude — a cold empty room, wind pressing against a closed window, distant church bells, a cello playing a slow single-note line, silence between the notes",
+  "category": "abstract_mood",
+  "run": 3,
+  "model": "llama3.1",
+  "raw": "{ \n  \"atmosphere\": \"Melancholic Solitude\", \n  \"elements\": [ \n    {\n      \"label\": \"Wind\",\n      \"type\": \"sound\",\n      \"prompt\": \"Whispering, air against closed window, continuous, cold empty room, distant, bright and dry\"\n    },\n    {\n      \"label\": \"Bells\",\n      \"type\": \"sound\",\n      \"prompt\": \"Distant church bells, slow tolls, continuous, urban environment, far, reverberant and muffled\"\n    },\n    {\n      \"label\": \"Cello\",\n      \"type\": \"music\",\n      \"prompt\": \"Solo classical, melancholic, solo cello, 40 BPM, legato single-note line in minor key, dry and intimate, instrumental, no vocals\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Melancholic Solitude",
+    "elements": [
+      {
+        "label": "Wind",
+        "type": "sound",
+        "prompt": "Whispering, air against closed window, continuous, cold empty room, distant, bright and dry"
+      },
+      {
+        "label": "Bells",
+        "type": "sound",
+        "prompt": "Distant church bells, slow tolls, continuous, urban environment, far, reverberant and muffled"
+      },
+      {
+        "label": "Cello",
+        "type": "music",
+        "prompt": "Solo classical, melancholic, solo cello, 40 BPM, legato single-note line in minor key, dry and intimate, instrumental, no vocals"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 20625,
+  "model_tag": "llama3.1:8b"
+}

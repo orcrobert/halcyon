@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p03",
+  "prompt_text": "The Prancing Pony inn from Lord of the Rings — a crowded inn with laughter, mugs clinking, a folk musician, rain outside",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "llama3.1",
+  "raw": "{\"atmosphere\": \"The Prancing Pony\", \"elements\": [\n{\n\"label\": \"Mug Clinks\",\n\"type\": \"sound\",\n\"prompt\": \"Clanking, metal mugs, continuous, busy tavern, close, reverberant\"\n},\n{\n\"label\": \"Laughter and Conversation\",\n\"type\": \"sound\",\n\"prompt\": \"Muffled voices, patrons in a crowded room, sparse and continuous, cozy inn, mid, soft\"\n},\n{\n\"label\": \"Folk Musician\",\n\"type\": \"music\",\n\"prompt\": \"Folk music, lively, acoustic guitar, fiddle, 120 BPM, layered, dry, instrumental, no vocals\"\n},\n{\n\"label\": \"Rain Outside\",\n\"type\": \"sound\",\n\"prompt\": \"Gentle patter, rain on a roof, continuous, narrow alley, distant, muffled\"\n}\n]}",
+  "parsed": {
+    "atmosphere": "The Prancing Pony",
+    "elements": [
+      {
+        "label": "Mug Clinks",
+        "type": "sound",
+        "prompt": "Clanking, metal mugs, continuous, busy tavern, close, reverberant"
+      },
+      {
+        "label": "Laughter and Conversation",
+        "type": "sound",
+        "prompt": "Muffled voices, patrons in a crowded room, sparse and continuous, cozy inn, mid, soft"
+      },
+      {
+        "label": "Folk Musician",
+        "type": "music",
+        "prompt": "Folk music, lively, acoustic guitar, fiddle, 120 BPM, layered, dry, instrumental, no vocals"
+      },
+      {
+        "label": "Rain Outside",
+        "type": "sound",
+        "prompt": "Gentle patter, rain on a roof, continuous, narrow alley, distant, muffled"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 30380,
+  "model_tag": "llama3.1:8b"
+}

@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p02",
+  "prompt_text": "A campfire deep in the wilderness of Blood Meridian — wind across a barren desert plain, distant coyotes, embers crackling",
+  "category": "pop_culture",
+  "run": 1,
+  "model": "gemini-flash",
+  "raw": "{\n  \"atmosphere\": \"Blood Meridian campfire\",\n  \"elements\": [\n    {\n      \"label\": \"wind\",\n      \"type\": \"sound\",\n      \"prompt\": \"Wind, dry air, sweeping across, barren desert plain, distant, soft\"\n    },\n    {\n      \"label\": \"coyotes\",\n      \"type\": \"sound\",\n      \"prompt\": \"Coyote calls, wild canids, distant howling and yipping, sparse desert night, far, reverberant\"\n    },\n    {\n      \"label\": \"embers\",\n      \"type\": \"sound\",\n      \"prompt\": \"Crackling, embers and small logs, continuous and sporadic, campfire, close, dry and bright\"\n    },\n    {\n      \"label\": \"campfire drone\",\n      \"type\": \"music\",\n      \"prompt\": \"Ambient drone, warm, sustained low drone, slow, sustained drone, spacious\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Blood Meridian campfire",
+    "elements": [
+      {
+        "label": "wind",
+        "type": "sound",
+        "prompt": "Wind, dry air, sweeping across, barren desert plain, distant, soft"
+      },
+      {
+        "label": "coyotes",
+        "type": "sound",
+        "prompt": "Coyote calls, wild canids, distant howling and yipping, sparse desert night, far, reverberant"
+      },
+      {
+        "label": "embers",
+        "type": "sound",
+        "prompt": "Crackling, embers and small logs, continuous and sporadic, campfire, close, dry and bright"
+      },
+      {
+        "label": "campfire drone",
+        "type": "music",
+        "prompt": "Ambient drone, warm, sustained low drone, slow, sustained drone, spacious"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 1707,
+  "model_tag": "gemini-2.5-flash-lite"
+}

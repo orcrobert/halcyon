@@ -1,0 +1,36 @@
+{
+  "prompt_id": "p17",
+  "prompt_text": "Peaceful transcendence and meditation — a high mountain plateau, wind across open space, distant Tibetan singing bowls, a slowly evolving pad of warm sustained tones, sparse breath sounds",
+  "category": "abstract_mood",
+  "run": 1,
+  "model": "mistral",
+  "raw": "{\n  \"atmosphere\": \"Peaceful transcendence and meditation\",\n  \"elements\": [\n    {\n      \"label\": \"Wind across open space\",\n      \"type\": \"sound\",\n      \"prompt\": \"Continuous wind, open plateau, mid, soft\"\n    },\n    {\n      \"label\": \"Sustained Tibetan singing bowls\",\n      \"type\": \"music\",\n      \"prompt\": \"Tibetan singing bowl, metal, continuous resonance, high mountain plateau, distant, bright and reverberant\"\n    },\n    {\n      \"label\": \"Warm sustained pad\",\n      \"type\": \"music\",\n      \"prompt\": \"Ambient pad, warm sustained tone, slow, sustained drone, spacious and reverberant\"\n    },\n    {\n      \"label\": \"Sparse breath sounds\",\n      \"type\": \"sound\",\n      \"prompt\": \"Occasional breath sounds, meditative focus, close, soft\"\n    }\n  ]\n}",
+  "parsed": {
+    "atmosphere": "Peaceful transcendence and meditation",
+    "elements": [
+      {
+        "label": "Wind across open space",
+        "type": "sound",
+        "prompt": "Continuous wind, open plateau, mid, soft"
+      },
+      {
+        "label": "Sustained Tibetan singing bowls",
+        "type": "music",
+        "prompt": "Tibetan singing bowl, metal, continuous resonance, high mountain plateau, distant, bright and reverberant"
+      },
+      {
+        "label": "Warm sustained pad",
+        "type": "music",
+        "prompt": "Ambient pad, warm sustained tone, slow, sustained drone, spacious and reverberant"
+      },
+      {
+        "label": "Sparse breath sounds",
+        "type": "sound",
+        "prompt": "Occasional breath sounds, meditative focus, close, soft"
+      }
+    ]
+  },
+  "valid": true,
+  "latency_ms": 25000,
+  "model_tag": "mistral"
+}
