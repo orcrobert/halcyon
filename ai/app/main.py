@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from ai.app.routers import generate
 from ai.app.config import settings
 
-app = FastAPI(title="Soundscape Generator")
+app = FastAPI(title="Halcyon")
 
 app.add_middleware(
     CORSMiddleware,

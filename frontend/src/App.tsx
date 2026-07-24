@@ -14,7 +14,7 @@ import {
 } from './api/atmospheres'
 import type { Atmosphere, EQBand } from './types'
 
-const PENDING_KEY = 'soundscape_pending_atmosphere_id'
+const PENDING_KEY = 'halcyon_pending_atmosphere_id'
 
 type View = 'prompt' | 'generating' | 'dashboard'
 

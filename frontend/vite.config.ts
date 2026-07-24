@@ -8,9 +8,9 @@ export default defineConfig({
     host: 'localhost',
     port: 5173,
     strictPort: true,
-    allowedHosts: ['app.soundscape.test'],
+    allowedHosts: ['app.halcyon.test'],
     hmr: {
-      host: 'app.soundscape.test',
+      host: 'app.halcyon.test',
       protocol: 'wss',
       clientPort: 443,
     },

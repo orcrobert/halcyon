@@ -1,6 +1,6 @@
 ---
 name: run-stack
-description: Bring up the full Soundscape Generator stack locally (frontend, Laravel API + queue worker, FastAPI AI service, Colab generator). Use when asked to run, start, or smoke-test the app end to end.
+description: Bring up the full Halcyon stack locally (frontend, Laravel API + queue worker, FastAPI AI service, Colab generator). Use when asked to run, start, or smoke-test the app end to end.
 ---
 
 # Run the stack

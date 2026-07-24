@@ -27,9 +27,9 @@ and repo-hygiene items.
 
 ## Coupling / structure
 
-- 🔴 **`ai/app/routers/sessions.py` imports the mixer via a `sys.path.insert`
+- 🔴 **`ai/app/routers/generate.py` imports the mixer via a `sys.path.insert`
   hack** (`parents[3] / "mixer"`). Fragile and non-portable. *Safe-ish: declare
-  `soundscape-mixer` as a dependency of `ai/` (editable install / path dep) and
+  `halcyon-mixer` as a dependency of `ai/` (editable install / path dep) and
   `from mixer.core import analyze` normally. Requires updating `ai/pyproject.toml`
   and the dev setup.*
 - 🟡 **`ai/app/services/generator.py` writes WAVs and a global

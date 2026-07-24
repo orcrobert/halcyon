@@ -1,4 +1,4 @@
-# Soundscape Generator
+# Halcyon
 
 Turn a natural-language scene into an infinite, mixable ambient soundscape.
 
