@@ -170,14 +170,6 @@ def assign_spatial(elements: Sequence[tuple[np.ndarray, int]]) -> list[tuple[flo
     return list(zip(pans, depths))
 
 
-def assign_pans(elements: Sequence[tuple[np.ndarray, int]]) -> list[float]:
-    return [pan for pan, _ in assign_spatial(elements)]
-
-
-def predict_pan(wav: np.ndarray, sr: int) -> float:
-    return 0.0
-
-
 def apply_pan(wav: np.ndarray, pan: float) -> np.ndarray:
     pan = float(np.clip(pan, -1.0, 1.0))
     theta = (pan + 1.0) / 2.0 * (np.pi / 2.0)
@@ -193,8 +185,3 @@ def apply_pan(wav: np.ndarray, pan: float) -> np.ndarray:
     out[0] *= l_gain
     out[1] *= r_gain
     return out
-
-
-def predict_and_apply(wav: np.ndarray, sr: int) -> tuple[np.ndarray, float]:
-    pan = predict_pan(wav, sr)
-    return apply_pan(wav, pan), pan
