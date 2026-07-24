@@ -17,9 +17,10 @@ mixer/models/
 
 # Research / personal docs
 *.pdf
-CLAUDE.md
-.claude/
 thesis/
+
+# Local Claude Code overrides (shared tooling under .claude/ is committed)
+.claude/settings.local.json
 
 # Python
 __pycache__/
