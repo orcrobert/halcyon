@@ -5,8 +5,8 @@ theme, tagged by severity (🔴 high / 🟡 medium / 🟢 low) and whether a fix
 **safe** (behaviour-preserving, low risk) or **risky** (could change behaviour /
 needs care — this is a thesis project with almost no tests).
 
-Nothing here blocks the app from running today; these are quality/correctness
-and open-source-readiness items.
+Nothing here blocks the app from running today; these are quality, correctness,
+and repo-hygiene items.
 
 ---
 
@@ -93,17 +93,16 @@ and open-source-readiness items.
   `frontend/README.md` is the Vite template; neither documents this project.
   *Safe: replace with project-specific notes (or point to root docs).*
 
-## Repo hygiene / open-source readiness
+## Repo hygiene
 
-- 🔴 **No root `README.md`.** For an open-source project this is the first thing
-  visitors need. *Safe: add one (overview, screenshot, quickstart → MANUAL.md,
+- 🔴 **No root `README.md`.** The repo has no top-level entry point describing
+  what it is or how to run it. *Safe: add one (overview, quickstart → MANUAL.md,
   license, architecture link).*
-- 🟡 **No `LICENSE` at the repo root.** "Open source" needs an explicit license.
-  *Safe: add one (author's choice).*
-- 🟢 **No test coverage for the core IP.** Only Laravel example stubs exist; the
-  mixer (auto_eq/volume/spatial/looping) has zero tests despite being the
-  thesis contribution. *Safe and high value: add `pytest` regression tests for
-  the mixer.*
+- 🟡 **No `LICENSE` at the repo root.** *Safe: add one (author's choice).*
+- 🟢 **No test coverage for the mixer.** Only Laravel example stubs exist; the
+  mixer (auto_eq/volume/spatial/looping) has zero tests despite being the core of
+  the system. *Safe and high value: add `pytest` regression tests for the
+  mixer.*
 - 🟢 **`.DS_Store` files and macOS "keep both" duplicates** (`favicon 2.svg`,
   `index 2.html`, `icons 2.svg` under `frontend/dist/`, and `frontend/public/`)
   litter the tree. Gitignored, but worth cleaning locally.

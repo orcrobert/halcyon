@@ -16,10 +16,10 @@ infinite, mixable ambient soundscape. The pipeline is:
 prompt → LLM decomposition → per-element audio generation → rule-based mixer → browser playback
 ```
 
-It is a monorepo bachelor-thesis project. The **mixer** (`mixer/`) is the core
-intellectual contribution: it assigns EQ, volume, and spatial placement to each
-generated element automatically, from audio analysis alone — the LLM never
-suggests mixing parameters.
+The repo is a monorepo. The **mixer** (`mixer/`) is the core of the system: it
+assigns EQ, volume, and spatial placement to each generated element
+automatically, from audio analysis alone — the LLM never suggests mixing
+parameters.
 
 **Core UX principle: this is ambient audio.** Calm, soft, immersive. Never
 aggressive. The decomposer prompt enforces this and any feature must respect it.
