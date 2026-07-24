@@ -99,7 +99,7 @@ Untracked-by-design (gitignored): `output/`, `audiocraft/`, `frontend/dist/`,
 3. **Job** calls the AI service `POST /generate` with the prompt (auth via
    `X-AI-Service-Secret`).
 4. **AI service** decomposes the prompt (Gemini by default, Ollama fallback) into
-   typed elements, forwards them to the **Colab** generator, receives WAVs, runs
+   typed elements, forwards them to the **generator**, receives WAVs, runs
    the **mixer** `analyze()` to compute `eq_json` / `volume` / `pan` / `depth`,
    and returns base64 audio + params.
 5. **Job** persists each `Element` (audio to Laravel storage; original mix params

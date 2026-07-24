@@ -50,8 +50,8 @@ Definitive reference for how the system fits together. Skim
 - **`services/decomposer.py`**: loads `prompts/decomposer.txt`, calls Gemini or
   Ollama, parses/validates the element list (type normalization, required
   fields, defaults).
-- **`services/generator.py`**: forwards decomposed elements to the Colab
-  generator and decodes the returned audio.
+- **`services/generator.py`**: forwards decomposed elements to the generator
+  (`GENERATOR_URL`) and decodes the returned audio.
 - **Config**: `config.py` (pydantic-settings) reads the repo-root `.env`.
 
 ### `mixer/` — the DSP core (standalone package)
@@ -94,7 +94,7 @@ the `ai/` service treats any generator as a black box behind `GENERATOR_URL`
 ## Request lifecycle (generation)
 
 ```
-Frontend                Laravel                 AI service            Colab
+Frontend                Laravel                 AI service         Generator
    │  POST /atmospheres    │                        │                   │
    ├──────────────────────▶│ create + queue job     │                   │
    │◀─ 202 (pending) ──────┤                        │                   │
