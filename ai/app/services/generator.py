@@ -17,7 +17,7 @@ def generate(decomposed: dict) -> list[dict]:
     session_path = os.path.join(settings.output_dir, "session.json")
 
     response = requests.post(
-        f"{settings.colab_url}/generate",
+        f"{settings.generator_url}/generate",
         json={"elements": decomposed["elements"]},
         timeout=300,
     )
