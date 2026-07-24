@@ -77,10 +77,11 @@ Effects:
 - **`looping.py`**: cross-correlation loop-point search + equal-power crossfade
   so every clip loops seamlessly (infinite playback).
 
-### `colab/` — GPU generator
+### `colab/` — reference generator
 Runs AudioGen (sound) and MusicGen (music) from Meta's AudioCraft, exposes
-`POST /generate` over ngrok. The `ai/` service treats it as a black box behind
-`COLAB_URL`.
+`POST /generate` over ngrok. It is one implementation of the generator contract;
+the `ai/` service treats any generator as a black box behind `GENERATOR_URL`
+(legacy alias `COLAB_URL`). See [SELF_HOSTING.md](../../SELF_HOSTING.md#the-generator-contract).
 
 ### Research
 - `experiments/llm_eval/` — decomposition benchmark (prompts, per-run JSON,
@@ -135,5 +136,6 @@ known correctness risk (see AUDIT).
 - Browser ↔ Laravel: Sanctum session cookies + CSRF; ownership checks on every
   atmosphere/element route; audio served via **signed** URLs scoped to the owner.
 - Laravel ↔ AI service: shared `AI_SERVICE_SECRET` header.
-- AI service ↔ Colab: `COLAB_URL` only (no auth — it's an ephemeral tunnel).
-- Never expose the AI service or Colab endpoint publicly without the secret.
+- AI service ↔ generator: `GENERATOR_URL` only (no auth by default — run it on a
+  private network or add your own).
+- Never expose the AI service or generator publicly without protection.

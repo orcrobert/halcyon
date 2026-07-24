@@ -34,21 +34,23 @@ Ambient by design — the output stays calm, soft, and immersive.
 - **Backend** — Laravel 12 (PHP 8.2), Sanctum auth, queued jobs, SQLite
 - **AI service** — FastAPI (Python 3.11) orchestrating decomposition, generation, and mixing
 - **Mixer** — standalone Python/NumPy/librosa DSP package (the core IP)
-- **Generator** — Meta's AudioCraft (AudioGen / MusicGen) on Colab, exposed via ngrok
+- **Generator** — bring your own: Meta's AudioCraft (AudioGen / MusicGen) or any service implementing the [generator contract](SELF_HOSTING.md#the-generator-contract)
 
 ## Quickstart
 
 Full setup and run instructions are in **[MANUAL.md](MANUAL.md)**. In brief:
 
 ```bash
-cp .env.example .env            # fill in GEMINI_API_KEY, COLAB_URL, AI_SERVICE_SECRET
-python -m venv .venv && source .venv/bin/activate && pip install -e ai -e mixer
+cp .env.example .env            # fill in GEMINI_API_KEY, GENERATOR_URL, AI_SERVICE_SECRET
+python -m venv .venv && source .venv/bin/activate && pip install -e ./mixer -e ./ai
 cd backend && composer install && php artisan migrate && cd ..
 cd frontend && npm install && cd ..
 ```
 
 Then bring up the stack (AI service, `php artisan serve`, `php artisan queue:work`,
-`npm run dev`, and the Colab generator). See MANUAL.md §4.
+`npm run dev`, and your generator). See MANUAL.md §4.
+
+Running your own instance? Start with **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 
 ## Repository layout
 
@@ -63,6 +65,7 @@ Then bring up the stack (AI service, `php artisan serve`, `php artisan queue:wor
 
 ## Documentation
 
+- **[SELF_HOSTING.md](SELF_HOSTING.md)** — run your own instance (config, generator contract, containerization map)
 - **[MANUAL.md](MANUAL.md)** — set up and run the whole stack
 - **[CLAUDE.md](CLAUDE.md)** — guide for contributors and AI coding agents
 - **[.claude/docs/architecture.md](.claude/docs/architecture.md)** — system architecture and data flow
