@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from ai.app.routers import sessions
+from ai.app.routers import generate
 from ai.app.config import settings
 
 app = FastAPI(title="Soundscape Generator")
@@ -40,4 +40,4 @@ def health():
     return {"status": "ok"}
 
 
-app.include_router(sessions.router)
+app.include_router(generate.router)

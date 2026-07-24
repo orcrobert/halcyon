@@ -12,10 +12,13 @@ def _load_prompt(name: str) -> str:
 
 
 def _parse_result(raw: str) -> dict:
-    match = re.search(r"\{.*\}", raw, re.DOTALL)
-    if not match:
-        raise ValueError(f"No JSON found in model response:\n{raw}")
-    result = json.loads(match.group())
+    try:
+        result = json.loads(raw)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", raw, re.DOTALL)
+        if not match:
+            raise ValueError(f"No JSON found in model response:\n{raw}")
+        result = json.loads(match.group())
 
     elements = result.get("elements")
     if not isinstance(elements, list) or len(elements) == 0:
