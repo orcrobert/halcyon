@@ -1,6 +1,6 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios'
 
-export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL ?? 'https://api.soundscape.test').replace(/\/+$/, '')
+export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL ?? 'https://api.halcyon.test').replace(/\/+$/, '')
 
 export const api: AxiosInstance = axios.create({
   baseURL: BACKEND_URL,
