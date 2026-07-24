@@ -9,8 +9,8 @@ For humans, see [MANUAL.md](MANUAL.md). For deep detail, see [`.claude/docs/`](.
 
 ## What this project is
 
-**Soundscape Generator** turns a natural-language scene description into an
-infinite, mixable ambient soundscape. The pipeline is:
+**Halcyon** turns a natural-language scene description into an infinite, mixable
+ambient soundscape. The pipeline is:
 
 ```
 prompt → LLM decomposition → per-element audio generation → rule-based mixer → browser playback

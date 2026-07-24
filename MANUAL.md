@@ -1,4 +1,4 @@
-# Manual — Soundscape Generator
+# Manual — Halcyon
 
 How to set up, run, and operate the whole stack locally. For architecture and
 contribution rules see [CLAUDE.md](CLAUDE.md) and [`.claude/docs/`](.claude/docs/).
@@ -12,13 +12,13 @@ Four services cooperate:
 | Service   | Port (default) | Command |
 |-----------|----------------|---------|
 | Frontend  | 5173           | `npm run dev` (Vite) |
-| Backend   | 8000 / `api.soundscape.test` | `php artisan serve` + `php artisan queue:work` |
+| Backend   | 8000 / `api.halcyon.test` | `php artisan serve` + `php artisan queue:work` |
 | AI service| 8000 (uvicorn) | `uvicorn ai.app.main:app --reload` |
 | Generator | ngrok URL      | Colab notebook (`colab/soundscape_generator.ipynb`) |
 
 The backend and AI service both default to port 8000 — run them on different
 ports (e.g. AI on 8001) or hosts. The Laravel app is typically served under the
-`api.soundscape.test` domain via Herd/Valet; adjust `.env` accordingly.
+`api.halcyon.test` domain via Herd/Valet; adjust `.env` accordingly.
 
 ---
 
