@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { useAuth } from './auth/AuthContext'
+import { useAuth } from './auth/context'
 import { AuthView } from './components/AuthView'
 import { PromptView } from './components/PromptView'
 import { GeneratingView } from './components/GeneratingView'

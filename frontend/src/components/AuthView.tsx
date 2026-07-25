@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { AxiosError } from 'axios'
-import { useAuth } from '../auth/AuthContext'
+import { useAuth } from '../auth/context'
 
 type Mode = 'login' | 'register'
 

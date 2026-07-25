@@ -6,7 +6,6 @@ interface Props {
   depth: number
   defaultPan: number
   defaultDepth: number
-  label: string
   open: boolean
   anchorRef: React.RefObject<HTMLButtonElement | null>
   onPanChange: (pan: number) => void
@@ -39,7 +38,7 @@ function wobblePath(cx: number, cy: number, r: number, amp: number, phase: numbe
 }
 
 export function SpatialModal({
-  pan, depth, defaultPan, defaultDepth, label,
+  pan, depth, defaultPan, defaultDepth,
   open, anchorRef, onPanChange, onDepthChange, onClose
 }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -49,6 +48,7 @@ export function SpatialModal({
   const phaseRef = useRef(0)
 
   const [dotHovered, setDotHovered] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
   const [waveAmp, setWaveAmp] = useState(0)
   const [wavePhase, setWavePhase] = useState(0)
   const [pos, setPos] = useState({ x: 0, y: 0 })
@@ -151,6 +151,7 @@ export function SpatialModal({
   const onPointerDown = useCallback((e: React.PointerEvent) => {
     e.preventDefault()
     dragging.current = true
+    setIsDragging(true)
     ;(e.currentTarget as SVGElement).setPointerCapture(e.pointerId)
     const { pan: p, depth: d } = xyToValues(e.clientX, e.clientY)
     onPanChange(p); onDepthChange(d)
@@ -162,7 +163,10 @@ export function SpatialModal({
     onPanChange(p); onDepthChange(d)
   }, [onPanChange, onDepthChange])
 
-  const onPointerUp = useCallback(() => { dragging.current = false }, [])
+  const onPointerUp = useCallback(() => {
+    dragging.current = false
+    setIsDragging(false)
+  }, [])
 
   const onDoubleClick = useCallback(() => {
     onPanChange(defaultPan); onDepthChange(defaultDepth)
@@ -295,7 +299,7 @@ export function SpatialModal({
           <circle cx={HALF} cy={HALF} r="2" fill="rgba(255,255,255,0.15)" style={{ pointerEvents: 'none' }} />
 
           {/* Outer wobbly ring — faint */}
-          {(dotHovered || dragging.current) && waveAmp > 0.1 && (
+          {(dotHovered || isDragging) && waveAmp > 0.1 && (
             <path
               d={dotPathBig}
               fill="none"
