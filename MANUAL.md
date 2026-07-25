@@ -12,13 +12,14 @@ Four services cooperate:
 | Service   | Port (default) | Command |
 |-----------|----------------|---------|
 | Frontend  | 5173           | `npm run dev` (Vite) |
-| Backend   | 8000 / `api.halcyon.test` | `php artisan serve` + `php artisan queue:work` |
-| AI service| 8000 (uvicorn) | `uvicorn ai.app.main:app --reload` |
-| Generator | ngrok URL      | Colab notebook (`colab/soundscape_generator.ipynb`) |
+| Backend   | 8000           | `php artisan serve` + `php artisan queue:work` |
+| AI service| 8001           | `uvicorn ai.app.main:app --port 8001` |
+| Generator | 9000 (yours)   | your own; reference: `colab/soundscape_generator.ipynb` |
 
-The backend and AI service both default to port 8000 — run them on different
-ports (e.g. AI on 8001) or hosts. The Laravel app is typically served under the
-`api.halcyon.test` domain via Herd/Valet; adjust `.env` accordingly.
+The AI service runs on a different port from the backend (8001 vs 8000). For a
+custom dev domain (Herd/Valet), set `VITE_DEV_HOST` and the backend sanctum
+domains accordingly. See [SELF_HOSTING.md](SELF_HOSTING.md) to run your own
+instance.
 
 ---
 
@@ -52,7 +53,7 @@ Key variables:
 | `DECOMPOSER_MODEL`  | `gemini` (default), `llama`, or `mistral` |
 | `GEMINI_API_KEY`    | required when `DECOMPOSER_MODEL=gemini` |
 | `OLLAMA_URL` / `OLLAMA_MODEL` / `LLAMA_MODEL` | Ollama fallback config |
-| `COLAB_URL`         | the ngrok URL printed by the Colab notebook |
+| `GENERATOR_URL`     | base URL of your generator (legacy alias: `COLAB_URL`) |
 | `AI_SERVICE_SECRET` | shared secret between Laravel and the AI service (must be non-empty) |
 | `BACKEND_ORIGIN`    | origin allowed by the AI service CORS policy |
 
@@ -68,14 +69,14 @@ cd frontend && npm install && cd ..
 # backend
 cd backend && composer install && cp .env.example .env && php artisan key:generate && cd ..
 
-# ai + mixer (editable installs into your venv)
+# ai + mixer (editable installs into your venv; mixer first — ai imports it)
 python -m venv .venv && source .venv/bin/activate
-pip install -e ai -e mixer
+pip install -e ./mixer -e ./ai
 ```
 
-The mixer benefits from `librosa` for full-quality analysis; without it the code
-falls back to a NumPy path. Install it if you work on DSP:
-`pip install librosa`.
+Installing the mixer pulls `numpy`, `scipy`, `soundfile`, and `librosa`. The code
+still falls back to a NumPy-only path if `librosa` is ever absent, at reduced
+quality.
 
 ### 3.3 Database
 
@@ -95,8 +96,8 @@ Open four terminals (order matters a little — the worker and AI service should
 up before you submit a prompt):
 
 ```bash
-# 1. Colab generator: run all cells in colab/soundscape_generator.ipynb,
-#    copy the printed ngrok URL into COLAB_URL in .env
+# 1. Generator: start your own (see SELF_HOSTING.md) or run all cells in
+#    colab/soundscape_generator.ipynb and put its URL in GENERATOR_URL in .env
 
 # 2. AI service
 source .venv/bin/activate
@@ -140,7 +141,7 @@ Open the Vite URL, register an account, type a scene, and generate.
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
 | Atmosphere stuck on `pending` | No queue worker | Start `php artisan queue:work` |
-| Generation fails after ~minutes | Stale/down `COLAB_URL` | Re-run Colab, update `COLAB_URL`, restart AI service |
+| Generation fails after ~minutes | Stale/down `GENERATOR_URL` | Restart your generator, update `GENERATOR_URL`, restart AI service |
 | Every AI request returns 500 | `AI_SERVICE_SECRET` unset | Set it in `.env` and `backend/.env` (must match) |
 | AI request returns 401 | Secret mismatch | Align `AI_SERVICE_SECRET` on both sides |
 | Decomposition 422 | Model returned malformed/empty elements | Check model availability; try a clearer prompt or switch `DECOMPOSER_MODEL` |

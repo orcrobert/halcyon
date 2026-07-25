@@ -11,9 +11,9 @@ Full detail in [MANUAL.md](../../../MANUAL.md). This is the operational checklis
 
 Bring services up bottom-up so a submitted prompt has everything it needs.
 
-1. **Colab generator** — run all cells in
-   `colab/soundscape_generator.ipynb`, copy the printed **ngrok URL** into
-   `COLAB_URL` in the repo-root `.env`.
+1. **Generator** — start your own (see [SELF_HOSTING.md](../../../SELF_HOSTING.md#the-generator-contract))
+   or run all cells in `colab/soundscape_generator.ipynb`, then put its URL in
+   `GENERATOR_URL` (legacy alias `COLAB_URL`) in the repo-root `.env`.
 
 2. **AI service** (reads repo-root `.env`; needs a non-empty `AI_SERVICE_SECRET`):
    ```bash
@@ -48,7 +48,7 @@ Bring services up bottom-up so a submitted prompt has everything it needs.
 | Symptom | Check |
 |---------|-------|
 | Stuck `pending` | Is `php artisan queue:work` running? |
-| Fails after minutes | Is `COLAB_URL` current and the notebook alive? |
+| Fails after minutes | Is `GENERATOR_URL` current and the generator alive? |
 | Every request 500 | `AI_SERVICE_SECRET` set on both sides? |
 | Request 401 | Secret mismatch between `.env` and `backend/.env` |
 | No audio | Interact with page (autoplay); is `public/soundtouch-processor.js` present? |

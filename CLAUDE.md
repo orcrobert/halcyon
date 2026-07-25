@@ -99,7 +99,7 @@ Untracked-by-design (gitignored): `output/`, `audiocraft/`, `frontend/dist/`,
 3. **Job** calls the AI service `POST /generate` with the prompt (auth via
    `X-AI-Service-Secret`).
 4. **AI service** decomposes the prompt (Gemini by default, Ollama fallback) into
-   typed elements, forwards them to the **Colab** generator, receives WAVs, runs
+   typed elements, forwards them to the **generator**, receives WAVs, runs
    the **mixer** `analyze()` to compute `eq_json` / `volume` / `pan` / `depth`,
    and returns base64 audio + params.
 5. **Job** persists each `Element` (audio to Laravel storage; original mix params
@@ -153,8 +153,10 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
 ## Gotchas
 
 - **The queue worker must be running** or atmospheres stay `pending` forever.
-- **Colab + ngrok is the fragile link.** `COLAB_URL` changes every session; the
-  generator will time out (300 s) if it's stale or the notebook is down.
+- **The generator is a bring-your-own HTTP service** (`GENERATOR_URL`, legacy
+  alias `COLAB_URL`). The bundled Colab notebook is one reference implementation
+  and a fragile link — the AI service times out (300 s) if the generator is down.
+  The contract is documented in [SELF_HOSTING.md](SELF_HOSTING.md#the-generator-contract).
 - **Decomposer defaults to Gemini** (`DECOMPOSER_MODEL=gemini`). Needs
   `GEMINI_API_KEY`. Set `DECOMPOSER_MODEL=llama` or `mistral` for the offline
   Ollama path.
@@ -171,6 +173,7 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
 ## Where to look next
 
 - [MANUAL.md](MANUAL.md) — human setup + run guide for the whole stack.
+- [SELF_HOSTING.md](SELF_HOSTING.md) — self-host config, generator contract, containerization map.
 - [`.claude/docs/architecture.md`](.claude/docs/architecture.md) — deep architecture.
 - [`.claude/docs/conventions.md`](.claude/docs/conventions.md) — coding standards.
 - [`.claude/docs/git-workflow.md`](.claude/docs/git-workflow.md) — branch/commit/PR policy.
