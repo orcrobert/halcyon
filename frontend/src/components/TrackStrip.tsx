@@ -262,7 +262,6 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
       </div>
 
       <EQPanel
-        label={element.label}
         initialBands={element.eq_json ?? undefined}
         open={eqOpen}
         anchorRef={eqBtnRef}
