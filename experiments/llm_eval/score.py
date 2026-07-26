@@ -226,7 +226,12 @@ def write_manual_scoring(results_by_model: dict[str, list[dict]]):
                 lines.append("_No valid output_")
             lines.append("")
 
-    (OUT_DIR / "manual_scoring.md").write_text("\n".join(lines))
+    target = OUT_DIR / "manual_scoring.md"
+    if target.exists():
+        print("Kept manual_scoring.md (already filled in)")
+        return
+
+    target.write_text("\n".join(lines))
     print("Wrote manual_scoring.md")
 
 
