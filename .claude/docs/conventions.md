@@ -18,7 +18,7 @@ file you are editing.** These are the defaults when there is no local precedent.
 
 ---
 
-## Python (`api/`, `mixer/`, `scripts/`, `pan_model/`)
+## Python (`api/`, `mixer/`, `scripts/`, `experiments/`)
 
 - Target **3.11**. Use modern typing (`X | None`, `list[dict]`).
 - Type-hint public functions. Private helpers prefixed `_`.

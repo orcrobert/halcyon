@@ -42,9 +42,9 @@ The Python API rewrite closed these out. Kept here as a record.
 - 🟡 **`mixer/effects/spatial.py::predict_pan` always returns `0.0`** and
   `predict_and_apply` is unused legacy from the abandoned learned-pan approach.
   *Safe: remove both; keep `apply_pan` and `assign_spatial`.*
-- 🟢 **`mixer/models/*.pkl` + `pan_model/` are a documented negative result** but
-  sit alongside production code with no marker. *Safe: add a README to
-  `pan_model/` stating it's an experiment; the shipped mixer is heuristic.*
+- ✅ **`mixer/models/*.pkl` are a documented negative result.** The experiment
+  moved to `experiments/spatial_model/` with a README; the shipped mixer is
+  heuristic.
 
 ## Coupling / structure
 

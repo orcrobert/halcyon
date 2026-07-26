@@ -56,5 +56,5 @@ item in [`.claude/AUDIT.md`](../../AUDIT.md). Before changing behaviour:
 ## Known issues here (see AUDIT for detail)
 
 - `predict_pan` / `predict_and_apply` are dead legacy stubs — safe to remove.
-- `mixer/models/*.pkl` + `pan_model/` are a negative-result experiment, not used
-  by the shipped heuristic.
+- `mixer/models/*.pkl` + `experiments/spatial_model/` are a negative-result
+  experiment, not used by the shipped heuristic.

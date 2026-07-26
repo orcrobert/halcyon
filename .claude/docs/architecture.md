@@ -88,10 +88,13 @@ the `api/` service treats any generator as a black box behind `GENERATOR_URL`
 (legacy alias `COLAB_URL`). See [SELF_HOSTING.md](../../SELF_HOSTING.md#the-generator-contract).
 
 ### Research
+Everything research-only lives under `experiments/`, one directory per
+experiment; see [`experiments/README.md`](../../experiments/README.md).
+
 - `experiments/llm_eval/` — decomposition benchmark (prompts, per-run JSON,
   scoring).
-- `pan_model/`, `notebooks/`, `scripts/train_spatial_model.py` — the learned
-  spatial-placement experiment (negative result).
+- `experiments/spatial_model/` — the learned spatial-placement experiment
+  (negative result).
 
 ---
 

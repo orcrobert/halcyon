@@ -11,7 +11,7 @@ node_modules/
 output/
 *.wav
 
-# ML artifacts — regenerate with scripts/train_spatial_model.py
+# ML artifacts — regenerate with experiments/spatial_model/train_mlp.py
 data/
 mixer/models/
 

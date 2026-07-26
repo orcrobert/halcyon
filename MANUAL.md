@@ -153,8 +153,11 @@ uvicorn api.app.main:app --port 8001
 
 ## 8. Experiments (thesis)
 
-- `experiments/llm_eval/` — LLM decomposition benchmark. See its `requirements.txt`
-  and the `scripts/run_llm_eval.py` / `scripts/score_llm_eval.py` CLIs.
-- `pan_model/` + `notebooks/train_spatial_model.ipynb` — learned spatial
-  placement experiment (documented negative result; the shipped mixer uses the
-  heuristic in `mixer/mixer/effects/spatial.py`).
+All research code lives under `experiments/`, one directory per experiment, with
+run instructions in [`experiments/README.md`](experiments/README.md).
+
+- `experiments/llm_eval/` — LLM decomposition benchmark (`run.py`, `score.py`,
+  and its own `requirements.txt`).
+- `experiments/spatial_model/` — learned spatial placement experiment
+  (documented negative result; the shipped mixer uses the heuristic in
+  `mixer/mixer/effects/spatial.py`).

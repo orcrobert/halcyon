@@ -78,9 +78,8 @@ The full policy, including commit-message shape and PR-body template, lives in
 | `api/`          | FastAPI, Python 3.11, SQLModel, SQLite | Accounts, persistence, generation pipeline, audio serving, and the built UI |
 | `mixer/`        | Python 3.11, NumPy, librosa | **Core IP.** Standalone package: auto-EQ, volume, spatial placement, looping |
 | `colab/`        | Jupyter notebook          | GPU host for AudioGen/MusicGen, exposed to `api/` via ngrok |
-| `pan_model/`    | Python, scikit-learn      | Experiment: learned spatial model (negative result — see AUDIT) |
-| `experiments/`  | data + scripts            | LLM decomposition benchmark (thesis experiment) |
-| `scripts/`      | Python CLIs               | Training / evaluation / dataset-building utilities |
+| `experiments/`  | Python, scikit-learn      | All research code: LLM decomposition benchmark, learned spatial model (negative result — see AUDIT) |
+| `scripts/`      | Python CLIs               | Operational utilities for the shipped pipeline |
 | `audiocraft/`   | vendored (gitignored)     | Meta's AudioCraft, used by the Colab notebook — not part of our source |
 
 Untracked-by-design (gitignored): `output/`, `audiocraft/`, `frontend/dist/`,
