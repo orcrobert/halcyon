@@ -5,8 +5,9 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "mixer"))
 
-from ai.app.services.decomposer import decompose
-from ai.app.services.generator import generate
+from api.app.services.decomposer import decompose
+from api.app.services.generator import generate
+from api.app.services.runconfig import default_config
 from mixer.core import mix_to_file
 
 
@@ -15,12 +16,14 @@ def main():
 
     print(f"Prompt: {prompt}\n")
 
-    decomposed = decompose(prompt)
+    config = default_config()
+
+    decomposed = decompose(prompt, config)
     print("Decomposition:")
     print(json.dumps(decomposed, indent=2))
     print()
 
-    results = generate(decomposed)
+    results = generate(decomposed, config)
     for e in results:
         print(f"  [{e['type']}] {e['label']} -> {e['file']}")
 
