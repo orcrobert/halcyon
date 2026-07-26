@@ -15,24 +15,23 @@ Everything else runs comfortably on a normal machine.
 
 | Service    | Default port | What it is | You must run it |
 |------------|--------------|-----------|-----------------|
-| Frontend   | 5173 | Vite/React UI | yes |
-| Backend    | 8000 | Laravel API + queue worker | yes (two processes) |
-| AI service | 8001 | FastAPI orchestration (decompose → generate → mix) | yes |
+| API        | 8001 | FastAPI: accounts, persistence, generation, and the built UI | yes |
 | Generator  | 9000 | Audio synthesis (AudioGen/MusicGen or equivalent) | yes — your own |
-| Decomposer | — | Gemini API **or** local Ollama | pick one |
+| Decomposer | — | Any local or cloud LLM (see below) | pick one |
 
-The four HTTP services talk to each other over these ports by default; every URL
-is configurable via environment variables (below).
+One process serves everything the browser needs. The generator is separate
+because it wants a GPU and may live on another host entirely.
+
+During development the Vite dev server runs on 5173 and proxies `/api` to the
+API, so dev and production behave identically and neither needs CORS.
 
 ---
 
 ## Prerequisites
 
-- PHP 8.2+ and Composer
-- Node.js 20+ and npm
 - Python 3.11+
-- A **decomposer**: a Google Gemini API key (default), or Ollama running locally
-  with `mistral` / `llama3.1:8b` pulled
+- Node.js 20+ and npm (only to build the UI)
+- A **decomposer**: an API key for any cloud LLM, or Ollama running locally
 - A **generator**: a machine that can run Meta's AudioCraft (a CUDA GPU is
   strongly recommended) or any service that implements the generator contract
 
@@ -40,60 +39,57 @@ is configurable via environment variables (below).
 
 ## Configuration
 
-Three env files, one per runtime. Copy each `*.example` and fill it in. **OS
-environment variables always override these files**, which is what container
+One env file at the repo root. Copy `.env.example` to `.env` and fill it in.
+**OS environment variables always override the file**, which is what container
 runtimes rely on.
 
-### Root `.env` — AI service
-
 | Variable | Purpose |
 |----------|---------|
-| `DECOMPOSER_MODEL` | `gemini` (default), `llama`, or `mistral` |
-| `GEMINI_API_KEY` | required for the Gemini decomposer |
-| `OLLAMA_URL` / `OLLAMA_MODEL` / `LLAMA_MODEL` | local Ollama fallback |
+| `DECOMPOSER_PROVIDER` | `gemini`, `ollama`, or `openai` |
+| `DECOMPOSER_MODEL` | model id; blank uses the provider's default |
+| `DECOMPOSER_BASE_URL` | endpoint; blank uses the provider's default |
+| `DECOMPOSER_API_KEY` | key for the provider (not needed for local servers) |
 | `GENERATOR_URL` | base URL of your generator (legacy alias: `COLAB_URL`) |
-| `AI_SERVICE_SECRET` | shared secret with the backend (must match) |
-| `BACKEND_ORIGIN` | backend origin allowed by CORS (e.g. `http://localhost:8000`) |
-| `OUTPUT_DIR` | writable dir for the audio cache |
+| `DATA_DIR` | SQLite database, generated audio, and the encryption key |
+| `SECRET_KEY` | encrypts stored API keys; auto-generated if blank |
+| `ALLOW_REGISTRATION` | set `false` to close signups once your users exist |
+| `FRONTEND_ORIGIN` | only for running the dev server against a remote API |
 
-### `backend/.env` — Laravel
+Every decomposer value is an **instance default**. Each user can override the
+provider, model, base URL, API key, and generator URL from their account page,
+so one instance can serve people using different models.
 
-Standard Laravel config plus:
+### Choosing a decomposer
 
-| Variable | Purpose |
-|----------|---------|
-| `APP_KEY` | generate with `php artisan key:generate` |
-| `DB_CONNECTION` | `sqlite` by default (self-contained) |
-| `AI_SERVICE_URL` | base URL of the AI service (e.g. `http://localhost:8001`) |
-| `AI_SERVICE_SECRET` | shared secret with the AI service (must match) |
-| `SANCTUM_STATEFUL_DOMAINS` / `SESSION_DOMAIN` / `FRONTEND_URL` | the frontend origin, for cookie auth |
-| `QUEUE_CONNECTION` | `database` by default — no Redis required |
+| Provider | Use it for | Needs a key |
+|----------|-----------|-------------|
+| `gemini` | Google's API | yes |
+| `ollama` | any local Ollama host | no |
+| `openai` | any OpenAI-compatible `/chat/completions` endpoint — OpenAI, Groq, OpenRouter, Together, DeepSeek, vLLM, LM Studio, llama.cpp | usually |
 
-### `frontend/.env.local` — Vite
+For a fully offline install, run Ollama and set `DECOMPOSER_PROVIDER=ollama`.
 
-| Variable | Purpose |
-|----------|---------|
-| `VITE_BACKEND_URL` | URL of the backend API (default `http://localhost:8000`) |
-| `VITE_DEV_HOST` | optional custom dev-server host (e.g. behind a TLS proxy) |
+### Secrets
 
-### The shared secret
-
-The backend authenticates to the AI service with a shared secret. Generate one
-and put the **same** value in both `.env` (`AI_SERVICE_SECRET`) and
-`backend/.env` (`AI_SERVICE_SECRET`):
+Per-user API keys are encrypted at rest with `SECRET_KEY`. Leave it blank and
+one is generated into `DATA_DIR/secret.key` on first boot. Set it explicitly if
+you want the same key across rebuilt containers:
 
 ```bash
 openssl rand -hex 32
 ```
 
+Losing the key does not lose atmospheres — only stored API keys, which users can
+re-enter.
+
 ---
 
 ## The generator contract
 
-The AI service delegates all audio synthesis to whatever HTTP service
-`GENERATOR_URL` points at. Implement this one endpoint and you can generate with
-anything — a local AudioCraft server, a cloud GPU box, the bundled Colab
-notebook, or a stub for testing.
+The API delegates all audio synthesis to whatever HTTP service `GENERATOR_URL`
+points at. Implement this one endpoint and you can generate with anything — a
+local AudioCraft server, a cloud GPU box, the bundled Colab notebook, or a stub
+for testing.
 
 **Request** — `POST {GENERATOR_URL}/generate`
 
@@ -121,10 +117,10 @@ notebook, or a stub for testing.
 ```
 
 - `audio_b64` must be the base64 encoding of a complete WAV file.
-- Keep the other element fields; the AI service reads them back.
-- The AI service waits up to **300 s** per request. There is no auth between the
-  AI service and the generator by default — run the generator on a private
-  network or add your own.
+- Keep the other element fields; the API reads them back.
+- The API waits up to **300 s** per request. There is no auth between the API
+  and the generator by default — run the generator on a private network or add
+  your own.
 
 `colab/soundscape_generator.ipynb` is a working reference implementation
 (AudioCraft on a Colab GPU, exposed via ngrok).
@@ -136,35 +132,29 @@ notebook, or a stub for testing.
 ```bash
 # 1. Config
 cp .env.example .env
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
-# fill in GEMINI_API_KEY, GENERATOR_URL, and a shared AI_SERVICE_SECRET
+# fill in DECOMPOSER_* and GENERATOR_URL
 
-# 2. Python: mixer (brings numpy/scipy/soundfile/librosa) + AI service deps
+# 2. Python: mixer (brings numpy/scipy/soundfile/librosa) + API deps
 python -m venv .venv && source .venv/bin/activate
 pip install -e ./mixer
-pip install -e ./ai
+pip install -e ./api
 
-# 3. Backend
-cd backend && composer install && php artisan key:generate && php artisan migrate && cd ..
+# 3. Build the UI
+cd frontend && npm install && npm run build && cd ..
 
-# 4. Frontend
-cd frontend && npm install && cd ..
+# 4. Run
+uvicorn api.app.main:app --port 8001    # from the repo root
 ```
 
-Then start the four services (the AI service and generator should be up before
-you submit a prompt):
+Open <http://localhost:8001>, register, and you are running. Plus your generator
+on `GENERATOR_URL`.
 
-```bash
-uvicorn ai.app.main:app --port 8001          # from the repo root
-cd backend && php artisan serve               # :8000
-cd backend && php artisan queue:work          # separate process — required
-cd frontend && npm run dev                    # :5173
-# plus your generator on GENERATOR_URL
-```
+The API imports the mixer from the repo tree, so keep `mixer/` alongside `api/`.
+It serves `frontend/dist` at the root when that build exists; without it you get
+the API only.
 
-The AI service imports the mixer from the repo tree, so keep `mixer/` alongside
-`ai/`.
+The database is created on first boot. There is no migration step and no queue
+worker to remember.
 
 ---
 
@@ -176,21 +166,19 @@ for when they are:
 
 | Container | Base | Build/run | Ports | Volumes / state | Key env |
 |-----------|------|-----------|-------|-----------------|---------|
-| frontend | node → static | `npm run build`, serve `dist/` | 5173/80 | — | `VITE_BACKEND_URL` |
-| backend  | php-fpm + nginx | `composer install`, `artisan migrate` | 8000 | `database/` (sqlite), `storage/` | `APP_KEY`, `AI_SERVICE_*`, sanctum domains |
-| worker   | same image as backend | `artisan queue:work` | — | shares backend storage/db | same as backend |
-| ai       | python:3.11-slim | `pip install ./mixer ./ai`, `uvicorn ai.app.main:app` | 8001 | `OUTPUT_DIR` (writable) | `GENERATOR_URL`, `AI_SERVICE_SECRET`, `BACKEND_ORIGIN`, decomposer vars |
-| generator| CUDA + python | your AudioCraft server | 9000 | model weights cache | — |
+| halcyon | node → `python:3.11-slim` | build `frontend/dist`, `pip install ./mixer ./api`, `uvicorn api.app.main:app` | 8001 | `DATA_DIR` | `DECOMPOSER_*`, `GENERATOR_URL`, `SECRET_KEY` |
+| generator | CUDA + python | your AudioCraft server | 9000 | model weights cache | — |
 
 Notes for that phase:
-- The **worker is a separate container** from the API, sharing the same image,
-  database, and storage volume.
-- SQLite keeps state in a file — mount `backend/database` and `backend/storage`
-  as volumes, or switch `DB_CONNECTION` to Postgres/MySQL.
-- The AI service container must include **both** `ai/` and `mixer/`.
-- `OUTPUT_DIR` is written on every generation — back it with a writable volume or
-  make it ephemeral.
+
+- It is a **single multi-stage build**: a Node stage produces `frontend/dist`,
+  the Python stage copies it in and serves it. No nginx, no second container.
+- The image must include **both** `api/` and `mixer/`.
+- `DATA_DIR` holds the SQLite file, all generated audio, and `secret.key`. It is
+  the only thing that must survive a rebuild — mount it as a volume.
+- Set `SECRET_KEY` explicitly so stored API keys survive a volume reset.
+- The system packages that are easy to miss: `libsndfile1` for soundfile, and
+  llvm/numba for librosa. Pin versions.
+- Healthcheck on `GET /health`.
 - The generator is the only GPU container and the only piece that may live on a
   different host; wire it in via `GENERATOR_URL`.
-- Startup order / healthchecks: generator and AI service ready before the worker
-  processes a job; backend migrated before it accepts traffic.
