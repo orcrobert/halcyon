@@ -5,6 +5,7 @@ import { PromptView } from './components/PromptView'
 import { GeneratingView } from './components/GeneratingView'
 import { DashboardView } from './components/DashboardView'
 import { HistoryPanel } from './components/HistoryPanel'
+import { AccountPanel } from './components/AccountPanel'
 import { useAudioEngine, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
 import {
@@ -27,7 +28,7 @@ function eqStateToBands(eq: EQState): EQBand[] {
 }
 
 export default function App() {
-  const { state, logout } = useAuth()
+  const { state } = useAuth()
 
   if (state.status === 'loading') {
     return <FullScreenStatus>Loading…</FullScreenStatus>
@@ -41,16 +42,17 @@ export default function App() {
     )
   }
 
-  return <AuthedApp onLogout={logout} />
+  return <AuthedApp />
 }
 
-function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
+function AuthedApp() {
   const [view, setView] = useState<View>('prompt')
   const [atmosphere, setAtmosphere] = useState<Atmosphere | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [playing, setPlaying] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
   const [binauralActive, setBinauralActive] = useState(false)
   const [binauralBeatHz, setBinauralBeatHz] = useState(8)
   const [binauralLeftHz, setBinauralLeftHz] = useState(200)
@@ -292,7 +294,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
           onSubmit={handleGenerate}
           loading={submitting}
           error={error}
-          onLogout={onLogout}
+          onOpenAccount={() => setAccountOpen(true)}
           onOpenHistory={() => setHistoryOpen(true)}
         />
       )}
@@ -330,6 +332,7 @@ function AuthedApp({ onLogout }: { onLogout: () => Promise<void> }) {
         onClose={() => setHistoryOpen(false)}
         onOpenAtmosphere={handleOpenFromHistory}
       />
+      <AccountPanel open={accountOpen} onClose={() => setAccountOpen(false)} />
     </div>
   )
 }

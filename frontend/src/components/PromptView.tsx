@@ -4,7 +4,7 @@ interface Props {
   onSubmit: (prompt: string) => void
   loading: boolean
   error: string | null
-  onLogout?: () => void
+  onOpenAccount?: () => void
   onOpenHistory?: () => void
 }
 
@@ -145,7 +145,7 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
   )
 }
 
-export function PromptView({ onSubmit, loading, error, onLogout, onOpenHistory }: Props) {
+export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHistory }: Props) {
   const [prompt, setPrompt] = useState('')
   const [pulse, setPulse] = useState({ key: '', seq: 0 })
 
@@ -177,12 +177,17 @@ export function PromptView({ onSubmit, loading, error, onLogout, onOpenHistory }
         </button>
       )}
 
-      {onLogout && (
+      {onOpenAccount && (
         <button
-          onClick={onLogout}
-          className="absolute top-6 right-6 text-xs text-white/40 hover:text-white/70 transition"
+          onClick={onOpenAccount}
+          className="absolute top-6 right-6 w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-200 hover:bg-white/[0.04] transition"
+          aria-label="Open account settings"
+          title="Account"
         >
-          Sign out
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
         </button>
       )}
 
