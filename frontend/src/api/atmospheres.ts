@@ -13,7 +13,6 @@ export async function listAtmospheres(): Promise<PaginatedResponse<Atmosphere>> 
 export async function createAtmosphere(payload: {
   prompt: string
   title?: string
-  style_clip_id?: number
 }): Promise<Atmosphere> {
   const { data } = await api.post<AtmosphereResponse>('/api/atmospheres', payload)
   return data.data

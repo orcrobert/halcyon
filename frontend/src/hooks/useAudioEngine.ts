@@ -1,5 +1,6 @@
 import { useRef, useCallback } from 'react'
 import { SoundTouchNode } from '@soundtouchjs/audio-worklet'
+import { apiUrl, authHeaders } from '../api/client'
 import type { Element, EQBand } from '../types'
 
 function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
@@ -238,7 +239,7 @@ export function useAudioEngine() {
         if (!el.audio_url) {
           throw new Error(`Element ${el.label} has no audio_url`)
         }
-        const res = await fetch(el.audio_url, { credentials: 'include' })
+        const res = await fetch(apiUrl(el.audio_url), { headers: authHeaders() })
         if (!res.ok) {
           throw new Error(`Failed to load audio for ${el.label}: ${res.status}`)
         }

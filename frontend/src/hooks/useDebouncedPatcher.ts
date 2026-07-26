@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { updateElement } from '../api/elements'
-import { BACKEND_URL } from '../api/client'
+import { apiUrl, authHeaders } from '../api/client'
 import type { ElementMixUpdate } from '../types'
 
 const DEBOUNCE_MS = 250
@@ -9,11 +9,6 @@ interface PendingEntry {
   patch: ElementMixUpdate
   timer: ReturnType<typeof setTimeout> | null
   inFlight: boolean
-}
-
-function readCsrfTokenFromCookie(): string | null {
-  const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/)
-  return match ? decodeURIComponent(match[1]) : null
 }
 
 export function useDebouncedPatcher() {
@@ -75,7 +70,6 @@ export function useDebouncedPatcher() {
   }, [flush])
 
   const flushAllSync = useCallback(() => {
-    const csrf = readCsrfTokenFromCookie()
     queueRef.current.forEach((entry, id) => {
       if (entry.inFlight) return
       const patch = entry.patch
@@ -85,16 +79,14 @@ export function useDebouncedPatcher() {
         clearTimeout(entry.timer)
         entry.timer = null
       }
-      fetch(`${BACKEND_URL}/api/elements/${id}`, {
+      fetch(apiUrl(`/api/elements/${id}`), {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
-          'X-Requested-With': 'XMLHttpRequest',
-          ...(csrf ? { 'X-XSRF-TOKEN': csrf } : {}),
+          Accept: 'application/json',
+          ...authHeaders(),
         },
         body: JSON.stringify(patch),
-        credentials: 'include',
         keepalive: true,
       }).catch(() => {})
     })

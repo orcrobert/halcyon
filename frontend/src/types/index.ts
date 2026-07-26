@@ -2,7 +2,6 @@ export interface User {
   id: number
   name: string
   email: string
-  email_verified_at: string | null
   created_at: string
   updated_at: string
 }
@@ -32,29 +31,23 @@ export interface Element {
     depth: number
     eq_json: EQBand[] | null
   }
-  audio_url: string | null
+  audio_url: string
 }
 
 export type AtmosphereStatus = 'pending' | 'generating' | 'ready' | 'failed'
-export type JobStatus = 'queued' | 'running' | 'completed' | 'failed'
 
 export interface Atmosphere {
   id: number
   title: string | null
   prompt: string
   status: AtmosphereStatus
-  style_clip_id: number | null
+  progress: number
+  current_stage: string | null
   error: string | null
   generated_at: string | null
   created_at: string
   updated_at: string
-  elements?: Element[]
-  job?: {
-    status: JobStatus
-    progress: number
-    current_stage: string | null
-    error: string | null
-  }
+  elements?: Element[] | null
 }
 
 export interface PaginatedResponse<T> {
@@ -73,4 +66,35 @@ export type ElementMixUpdate = Partial<{
   depth: number
   tuning_hz: number
   eq_json: EQBand[]
+}>
+
+export interface DecomposerProvider {
+  key: string
+  label: string
+  default_model: string
+  default_base_url: string | null
+  requires_api_key: boolean
+}
+
+export interface Settings {
+  generator_url: string | null
+  decomposer_provider: string | null
+  decomposer_model: string | null
+  decomposer_base_url: string | null
+  decomposer_api_key_set: boolean
+  defaults: {
+    generator_url: string | null
+    decomposer_provider: string | null
+    decomposer_model: string | null
+    decomposer_base_url: string | null
+  }
+  providers: DecomposerProvider[]
+}
+
+export type SettingsUpdate = Partial<{
+  generator_url: string
+  decomposer_provider: string
+  decomposer_model: string
+  decomposer_base_url: string
+  decomposer_api_key: string
 }>
