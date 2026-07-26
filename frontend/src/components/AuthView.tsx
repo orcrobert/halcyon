@@ -1,23 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
-import { AxiosError } from 'axios'
+import { extractErrors, type ValidationErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
 
 type Mode = 'login' | 'register'
-
-interface ValidationErrors {
-  [field: string]: string[]
-}
-
-function extractErrors(error: unknown): { message: string; fields: ValidationErrors } {
-  if (error instanceof AxiosError) {
-    const data = error.response?.data as { message?: string; errors?: ValidationErrors } | undefined
-    return {
-      message: data?.message ?? error.message,
-      fields: data?.errors ?? {},
-    }
-  }
-  return { message: error instanceof Error ? error.message : 'Something went wrong', fields: {} }
-}
 
 function BreathingWave() {
   const [path, setPath] = useState('')
@@ -102,12 +87,11 @@ export function AuthView() {
       if (mode === 'login') {
         await login(email, password)
       } else {
-        await register({
-          name,
-          email,
-          password,
-          password_confirmation: passwordConfirm,
-        })
+        if (password !== passwordConfirm) {
+          setFieldErrors({ password_confirmation: ['The passwords do not match.'] })
+          return
+        }
+        await register({ name, email, password })
       }
     } catch (err) {
       const { message, fields } = extractErrors(err)
