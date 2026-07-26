@@ -34,7 +34,7 @@ docs, test). It encodes the mandatory Git policy in
 
 4. **Verify before pushing.** Run the checks relevant to what you touched:
    - frontend: `cd frontend && npm run lint`
-   - backend: `cd backend && php artisan test`
+   - api: `python -m pytest api/tests/`
    - mixer/ai: `pytest`
 
 5. **Push and open the PR:**

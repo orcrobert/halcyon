@@ -13,11 +13,12 @@ file you are editing.** These are the defaults when there is no local precedent.
   new ones.
 - Small, pure, named functions over large procedural blocks.
 - No dead code. If you replace something, delete the old path.
-- Keep secrets out of source. Config comes from `.env` / Laravel config.
+- Keep secrets out of source. Config comes from the repo-root `.env`, or from
+  per-user settings stored encrypted in the database.
 
 ---
 
-## Python (`ai/`, `mixer/`, `scripts/`, `pan_model/`)
+## Python (`api/`, `mixer/`, `scripts/`, `pan_model/`)
 
 - Target **3.11**. Use modern typing (`X | None`, `list[dict]`).
 - Type-hint public functions. Private helpers prefixed `_`.
@@ -30,18 +31,21 @@ file you are editing.** These are the defaults when there is no local precedent.
   status (422 for bad decomposition input, 5xx for upstream failures).
 - Tests with `pytest`. New DSP behaviour should ship with a regression test.
 
-## PHP (`backend/`)
+## FastAPI (`api/`)
 
-- Laravel 12 / PHP 8.2 conventions; PSR-12 formatting.
-- Controllers stay thin: validate → delegate → return a Resource. Business logic
-  in jobs/services/models, not controllers.
-- Validate every request with `$request->validate([...])`.
-- Shape all API responses through `Http/Resources` — never return raw models.
-- **Authorize ownership** on every atmosphere/element action
-  (`authorizeOwnership` / `abort_unless`).
-- Long-running or external work goes through queued jobs, not request handlers.
-- Migrations: one concern per file, **unique timestamps** (a past batch reused a
-  timestamp — don't repeat that).
+- Routers stay thin: validate → delegate → return a schema. Domain work lives in
+  `services/`, not in route handlers.
+- Request and response shapes are Pydantic models in `models/schemas.py`; never
+  return a SQLModel table row directly.
+- Database models live in `models/tables.py`. Keep the `Envelope` / `Page`
+  wrappers on responses — the frontend depends on them.
+- **Scope every query to the current user.** A row belonging to someone else is
+  a 404, not a 403; do not leak existence.
+- Secrets are write-only over the API: store encrypted, return a boolean.
+- Long-running work goes to the worker thread via `app.state.worker`, never
+  inline in a request handler.
+- Raise `HTTPException` with the right status (422 for bad input, 5xx for
+  upstream failures).
 
 ## TypeScript / React (`frontend/`)
 
@@ -49,8 +53,8 @@ file you are editing.** These are the defaults when there is no local precedent.
 - `type`-only imports (`import type { ... }`) for types.
 - Audio/graph and side-effectful logic live in `hooks/`; components stay
   presentational. `useAudioEngine.ts` is the imperative audio boundary.
-- `types/index.ts` mirrors the Laravel resource shapes — update it in the same
-  change as any backend contract change.
+- `types/index.ts` mirrors `api/app/models/schemas.py` — update it in the same
+  change as any API contract change.
 - Keep magic audio constants named and centralized rather than scattered
   (current code has duplicated literals like the `* 0.5` gain scale — new code
   should not add more).

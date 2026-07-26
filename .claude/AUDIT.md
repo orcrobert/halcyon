@@ -10,6 +10,27 @@ and repo-hygiene items.
 
 ---
 
+## Resolved by the Laravel removal
+
+The Python API rewrite closed these out. Kept here as a record.
+
+- ✅ **The `sys.path` mixer hack** is now a single guarded bootstrap in
+  `api/app/__init__.py` rather than repeated per module.
+- ✅ **`services/generator.py` no longer writes to disk.** The global
+  `output/session.json` and the per-element WAV cache are gone; audio goes to a
+  per-run temporary directory for mixer analysis, then straight to
+  `DATA_DIR/audio/`. `OUTPUT_DIR` was removed with them.
+- ✅ **`ai/app/sessions/` and the misnamed `routers/sessions.py`** are gone; the
+  legacy `/generate` endpoint went with the Laravel backend.
+- ✅ **Stock Laravel README and boilerplate** removed with `backend/`.
+- ✅ **No test coverage on the web layer** — the API now has 78 tests covering
+  auth, ownership scoping, validation ranges, settings encryption, provider
+  dispatch, the worker, and a full generation run.
+- ✅ **Deleting an atmosphere orphaned its audio on disk.** The API removes the
+  directory.
+
+---
+
 ## Dead code / legacy
 
 - 🟡 **`ai/app/sessions/store.py` is entirely unused.** An in-memory session

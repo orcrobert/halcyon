@@ -21,7 +21,7 @@ the language model never touches mixing decisions.
 
 | Stage | What happens |
 |-------|--------------|
-| **Decompose** | An LLM (Gemini by default) turns the prompt into typed audio elements — distinct sound and music layers, each with a generation prompt. |
+| **Decompose** | An LLM turns the prompt into typed audio elements — distinct sound and music layers, each with a generation prompt. Bring any model: a cloud API or a local one. |
 | **Generate** | AudioGen (sound) and MusicGen (music) synthesize each element on a GPU host. |
 | **Mix** | The `mixer` package analyzes the clips and computes per-element auto-EQ, perceptual volume, stereo pan, and reverb depth — plus seamless looping. |
 | **Play** | The browser builds a live Web Audio graph: play/pause, per-track volume/EQ/pan/depth, global tuning, binaural beats, an autonomous "animate" drift, and offline WAV export. |
@@ -31,8 +31,7 @@ Ambient by design — the output stays calm, soft, and immersive.
 ## Tech stack
 
 - **Frontend** — React 19 + TypeScript + Vite + Tailwind, Web Audio API
-- **Backend** — Laravel 12 (PHP 8.2), Sanctum auth, queued jobs, SQLite
-- **AI service** — FastAPI (Python 3.11) orchestrating decomposition, generation, and mixing
+- **API** — FastAPI (Python 3.11): accounts, persistence, generation, and the built UI, in one process backed by SQLite
 - **Mixer** — standalone Python/NumPy/librosa DSP package (the core IP)
 - **Generator** — bring your own: Meta's AudioCraft (AudioGen / MusicGen) or any service implementing the [generator contract](SELF_HOSTING.md#the-generator-contract)
 
@@ -41,14 +40,14 @@ Ambient by design — the output stays calm, soft, and immersive.
 Full setup and run instructions are in **[MANUAL.md](MANUAL.md)**. In brief:
 
 ```bash
-cp .env.example .env            # fill in GEMINI_API_KEY, GENERATOR_URL, AI_SERVICE_SECRET
-python -m venv .venv && source .venv/bin/activate && pip install -e ./mixer -e ./ai
-cd backend && composer install && php artisan migrate && cd ..
-cd frontend && npm install && cd ..
+cp .env.example .env            # fill in DECOMPOSER_* and GENERATOR_URL
+python -m venv .venv && source .venv/bin/activate && pip install -e ./mixer -e ./api
+cd frontend && npm install && npm run build && cd ..
+uvicorn api.app.main:app --port 8001
 ```
 
-Then bring up the stack (AI service, `php artisan serve`, `php artisan queue:work`,
-`npm run dev`, and your generator). See MANUAL.md §4.
+Open <http://localhost:8001> and register. You also need a generator running at
+`GENERATOR_URL`. See MANUAL.md §4.
 
 Running your own instance? Start with **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 
@@ -57,8 +56,7 @@ Running your own instance? Start with **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 | Path | Role |
 |------|------|
 | `frontend/` | React UI + browser audio engine |
-| `backend/` | Laravel API, auth, persistence, job queue |
-| `ai/` | FastAPI orchestration service |
+| `api/` | FastAPI service: auth, persistence, generation, audio serving |
 | `mixer/` | Auto-EQ / volume / spatial / looping DSP package |
 | `colab/` | GPU generator notebook |
 | `experiments/`, `pan_model/`, `scripts/` | Thesis experiments and utilities |

@@ -55,7 +55,7 @@ git commit -m "Add spatial separation minimum for overlapping elements"
 ### 3. Push and open the PR when done and verified
 
 Only after the work is complete and you've run the relevant checks
-(`npm run lint`, `php artisan test`, `pytest`).
+(`npm run lint`, `python -m pytest api/tests/`, `pytest`).
 
 ```bash
 git push -u origin <branch>

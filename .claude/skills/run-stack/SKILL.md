@@ -1,6 +1,6 @@
 ---
 name: run-stack
-description: Bring up the full Halcyon stack locally (frontend, Laravel API + queue worker, FastAPI AI service, Colab generator). Use when asked to run, start, or smoke-test the app end to end.
+description: Bring up the Halcyon stack locally (FastAPI API, Vite dev server, your own generator). Use when asked to run, start, or smoke-test the app end to end.
 ---
 
 # Run the stack
@@ -15,42 +15,41 @@ Bring services up bottom-up so a submitted prompt has everything it needs.
    or run all cells in `colab/soundscape_generator.ipynb`, then put its URL in
    `GENERATOR_URL` (legacy alias `COLAB_URL`) in the repo-root `.env`.
 
-2. **AI service** (reads repo-root `.env`; needs a non-empty `AI_SERVICE_SECRET`):
+2. **API** (reads the repo-root `.env`; creates its database on first boot):
    ```bash
    source .venv/bin/activate
-   uvicorn ai.app.main:app --reload --port 8001
+   uvicorn api.app.main:app --reload --port 8001
    ```
    Sanity check: `curl localhost:8001/health` → `{"status":"ok"}`.
 
-3. **Backend** — API and queue worker are **two processes**; the worker is
-   mandatory or generation never starts:
-   ```bash
-   cd backend
-   php artisan serve          # API
-   php artisan queue:work     # worker (separate terminal)
-   ```
-   Ensure `backend/.env` has `AI_SERVICE_URL` (e.g. `http://localhost:8001`) and
-   a matching `AI_SERVICE_SECRET`.
+   Generation runs on a worker thread inside this process. There is no second
+   process to start.
 
-4. **Frontend**:
+3. **Frontend** — only for development. The dev server proxies `/api` to
+   port 8001:
    ```bash
    cd frontend && npm run dev
    ```
+
+   To exercise the production path instead, `npm run build` and open
+   <http://localhost:8001> directly — the API serves the build.
 
 ## Smoke test
 
 1. Open the Vite URL, register, submit a simple prompt (e.g. "distant foghorn").
 2. Watch the generating view poll to `ready`.
 3. On the dashboard: play/pause, move a fader/EQ/pan, toggle binaural, export.
+4. Reload — the mix edits should have persisted.
 
 ## Fast failure triage
 
 | Symptom | Check |
 |---------|-------|
-| Stuck `pending` | Is `php artisan queue:work` running? |
+| Fails immediately with a key error | Is a key set for the chosen provider, in `.env` or the account panel? |
 | Fails after minutes | Is `GENERATOR_URL` current and the generator alive? |
-| Every request 500 | `AI_SERVICE_SECRET` set on both sides? |
-| Request 401 | Secret mismatch between `.env` and `backend/.env` |
+| Failed with "interrupted by a server restart" | The API restarted mid-run; generate again |
+| 401 on everything | Token cleared or revoked — sign in again |
+| Blank page on :8001 | No `frontend/dist` build |
 | No audio | Interact with page (autoplay); is `public/soundtouch-processor.js` present? |
 
 See MANUAL.md §6 for the full troubleshooting table.
