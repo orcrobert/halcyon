@@ -60,7 +60,7 @@ function GenerationCanvas() {
       }
     }
 
-    function draw() {
+    const draw = () => {
       rafRef.current = requestAnimationFrame(draw)
       tRef.current += 0.012
       const now = performance.now()
