@@ -11,7 +11,13 @@ dependencies = [
     "google-genai>=1.0",
     "numpy>=1.24",
     "soundfile>=0.12",
+    "sqlmodel>=0.0.22",
+    "pwdlib[argon2]>=0.2",
+    "cryptography>=42.0",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0"]
+dev = ["pytest>=8.0", "httpx>=0.27"]
+
+[tool.pytest.ini_options]
+testpaths = ["ai/tests"]

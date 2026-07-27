@@ -1,46 +1,48 @@
 import base64
 import io
-import sys
+import tempfile
 from pathlib import Path
 
 import soundfile as sf
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel
-
-from ai.app.services.decomposer import decompose
-from ai.app.services.generator import generate
-
-_mixer_path = str(Path(__file__).resolve().parents[3] / "mixer")
-if _mixer_path not in sys.path:
-    sys.path.insert(0, _mixer_path)
 from mixer.core import analyze
 
-router = APIRouter()
+from ai.app.models.schemas import GenerateRequest
+from ai.app.services.decomposer import decompose
+from ai.app.services.generator import generate
+from ai.app.services.runconfig import default_config
+
+router = APIRouter(tags=["legacy"])
 
 
-class GenerateRequest(BaseModel):
-    prompt: str
-
-
-@router.post("/generate")
+@router.post("/generate", deprecated=True)
 def generate_atmosphere(req: GenerateRequest):
+    config = default_config()
+
     try:
-        decomposed = decompose(req.prompt)
+        decomposed = decompose(req.prompt, config)
     except ValueError as e:
         raise HTTPException(status_code=422, detail=f"Decomposition failed: {e}")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Decomposition failed: {e}")
 
     try:
-        elements = generate(decomposed)
+        elements = generate(decomposed, config)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Generation failed: {e}")
 
-    valid, wavs, srs = analyze(elements)
+    with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:
+        for index, element in enumerate(elements):
+            path = Path(scratch) / f"{index:02d}.wav"
+            path.write_bytes(element.pop("audio"))
+            element["file"] = str(path)
 
-    for element, wav, sr in zip(valid, wavs, srs):
-        buf = io.BytesIO()
-        sf.write(buf, wav.T, sr, format="WAV")
-        element["audio_b64"] = base64.b64encode(buf.getvalue()).decode()
+        valid, wavs, srs = analyze(elements)
+
+        for element, wav, sr in zip(valid, wavs, srs):
+            buffer = io.BytesIO()
+            sf.write(buffer, wav.T, sr, format="WAV")
+            element["audio_b64"] = base64.b64encode(buffer.getvalue()).decode()
+            element.pop("file", None)
 
     return {"atmosphere": decomposed["atmosphere"], "elements": valid}
