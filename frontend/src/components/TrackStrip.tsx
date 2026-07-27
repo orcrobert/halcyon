@@ -262,6 +262,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
       </div>
 
       <EQPanel
+        label={element.label}
         initialBands={element.eq_json ?? undefined}
         open={eqOpen}
         anchorRef={eqBtnRef}
@@ -274,7 +275,6 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         depth={dispDepth}
         defaultPan={element.pan ?? 0}
         defaultDepth={0}
-        label={element.label}
         open={spatialOpen}
         anchorRef={spatialBtnRef}
         onPanChange={handlePanChange}
