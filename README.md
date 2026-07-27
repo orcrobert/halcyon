@@ -59,7 +59,8 @@ Running your own instance? Start with **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 | `api/` | FastAPI service: auth, persistence, generation, audio serving |
 | `mixer/` | Auto-EQ / volume / spatial / looping DSP package |
 | `colab/` | GPU generator notebook |
-| `experiments/`, `pan_model/`, `scripts/` | Thesis experiments and utilities |
+| `experiments/` | Thesis research: decomposition benchmark, learned spatial model |
+| `scripts/` | Operational CLIs |
 
 ## Documentation
 

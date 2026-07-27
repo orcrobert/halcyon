@@ -7,11 +7,14 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
 
-PROMPTS_FILE = Path(__file__).resolve().parents[1] / "experiments/llm_eval/prompts.json"
-RUNS_DIR = Path(__file__).resolve().parents[1] / "experiments/llm_eval/runs"
-SYSTEM_PROMPT_FILE = Path(__file__).resolve().parents[1] / "ai/prompts/decomposer.txt"
+load_dotenv(ROOT / ".env")
+
+PROMPTS_FILE = HERE / "prompts.json"
+RUNS_DIR = HERE / "runs"
+SYSTEM_PROMPT_FILE = ROOT / "api/prompts/decomposer.txt"
 
 MODELS = ["mistral", "llama3.1", "gemini-flash"]
 
@@ -165,7 +168,7 @@ def main():
     for m in targets:
         run_model(m, args.runs)
 
-    print("\nDone. Run `python scripts/score_llm_eval.py` to compute metrics.")
+    print("\nDone. Run `python experiments/llm_eval/score.py` to compute metrics.")
 
 
 if __name__ == "__main__":

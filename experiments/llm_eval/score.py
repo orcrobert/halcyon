@@ -3,9 +3,11 @@ import re
 import statistics
 from pathlib import Path
 
-RUNS_DIR = Path(__file__).resolve().parents[1] / "experiments/llm_eval/runs"
-OUT_DIR = Path(__file__).resolve().parents[1] / "experiments/llm_eval"
-PROMPTS_FILE = Path(__file__).resolve().parents[1] / "experiments/llm_eval/prompts.json"
+HERE = Path(__file__).resolve().parent
+
+RUNS_DIR = HERE / "runs"
+OUT_DIR = HERE
+PROMPTS_FILE = HERE / "prompts.json"
 
 MANUAL_SCORING_PROMPTS = ["p02", "p05", "p11", "p15", "p19"]
 MODELS = ["mistral", "llama3.1", "gemini-flash"]
@@ -224,7 +226,12 @@ def write_manual_scoring(results_by_model: dict[str, list[dict]]):
                 lines.append("_No valid output_")
             lines.append("")
 
-    (OUT_DIR / "manual_scoring.md").write_text("\n".join(lines))
+    target = OUT_DIR / "manual_scoring.md"
+    if target.exists():
+        print("Kept manual_scoring.md (already filled in)")
+        return
+
+    target.write_text("\n".join(lines))
     print("Wrote manual_scoring.md")
 
 
