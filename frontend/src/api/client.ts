@@ -1,43 +1,44 @@
 import axios, { AxiosError, type AxiosInstance } from 'axios'
+import { getToken, setToken } from './token'
 
-export const BACKEND_URL = (import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:8000').replace(/\/+$/, '')
+export const API_URL = (import.meta.env.VITE_API_URL ?? '').replace(/\/+$/, '')
 
 export const api: AxiosInstance = axios.create({
-  baseURL: BACKEND_URL,
-  withCredentials: true,
-  withXSRFToken: true,
-  xsrfCookieName: 'XSRF-TOKEN',
-  xsrfHeaderName: 'X-XSRF-TOKEN',
+  baseURL: API_URL,
   headers: {
     Accept: 'application/json',
-    'X-Requested-With': 'XMLHttpRequest',
   },
 })
 
-let csrfPromise: Promise<void> | null = null
+let onUnauthorized: (() => void) | null = null
 
-export async function ensureCsrf(): Promise<void> {
-  if (!csrfPromise) {
-    csrfPromise = axios
-      .get(`${BACKEND_URL}/sanctum/csrf-cookie`, { withCredentials: true })
-      .then(() => undefined)
-      .catch((e) => {
-        csrfPromise = null
-        throw e
-      })
-  }
-  return csrfPromise
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
+  onUnauthorized = handler
 }
 
+export function authHeaders(): Record<string, string> {
+  const token = getToken()
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+export function apiUrl(path: string): string {
+  return `${API_URL}${path}`
+}
+
+api.interceptors.request.use((config) => {
+  const token = getToken()
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
+
 api.interceptors.response.use(
-  (r) => r,
-  async (error: AxiosError) => {
-    const config = error.config as (typeof error.config & { _retried?: boolean }) | undefined
-    if (error.response?.status === 419 && config && !config._retried) {
-      config._retried = true
-      csrfPromise = null
-      await ensureCsrf()
-      return api.request(config)
+  (response) => response,
+  (error: AxiosError) => {
+    if (error.response?.status === 401) {
+      setToken(null)
+      onUnauthorized?.()
     }
     return Promise.reject(error)
   },
