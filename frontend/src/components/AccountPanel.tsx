@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { getSettings, updateSettings } from '../api/settings'
 import { extractErrors } from '../api/errors'
-import { useAuth } from '../auth/AuthContext'
+import { useAuth } from '../auth/context'
 import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
 interface Props {
