@@ -7,29 +7,28 @@ contribution rules see [CLAUDE.md](CLAUDE.md) and [`.claude/docs/`](.claude/docs
 
 ## 1. What you are running
 
-Four services cooperate:
+Two services cooperate:
 
 | Service   | Port (default) | Command |
 |-----------|----------------|---------|
-| Frontend  | 5173           | `npm run dev` (Vite) |
-| Backend   | 8000           | `php artisan serve` + `php artisan queue:work` |
-| AI service| 8001           | `uvicorn ai.app.main:app --port 8001` |
+| API       | 8001           | `uvicorn api.app.main:app --port 8001` |
 | Generator | 9000 (yours)   | your own; reference: `colab/soundscape_generator.ipynb` |
 
-The AI service runs on a different port from the backend (8001 vs 8000). For a
-custom dev domain (Herd/Valet), set `VITE_DEV_HOST` and the backend sanctum
-domains accordingly. See [SELF_HOSTING.md](SELF_HOSTING.md) to run your own
-instance.
+The API owns accounts, persistence, generation, audio serving, and — when
+`frontend/dist` exists — the UI itself.
+
+For frontend work you also run the Vite dev server on 5173. It proxies `/api` to
+the API, so the browser only ever talks to one origin and CORS never enters the
+picture. For a custom dev domain (Herd/Valet), set `VITE_DEV_HOST`. See
+[SELF_HOSTING.md](SELF_HOSTING.md) to run your own instance.
 
 ---
 
 ## 2. Prerequisites
 
-- Node.js 20+ and npm
-- PHP 8.2+ and Composer
 - Python 3.11+ (a virtualenv is recommended)
-- A Google Gemini API key (default decomposer), **or** Ollama running locally
-  with `mistral` / `llama3.1:8b` pulled (offline fallback)
+- Node.js 20+ and npm
+- A decomposer: an API key for any cloud LLM, **or** Ollama running locally
 - A Google account for Colab (GPU generator) — or any host that exposes the
   generator `POST /generate` contract
 
@@ -39,8 +38,7 @@ instance.
 
 ### 3.1 Environment file
 
-Copy the example and fill it in. The AI service reads the **repo-root** `.env`
-(`ai/app/config.py` points there):
+One file, at the repo root (`api/app/config.py` points there):
 
 ```bash
 cp .env.example .env
@@ -48,30 +46,29 @@ cp .env.example .env
 
 Key variables:
 
-| Variable            | Meaning |
-|---------------------|---------|
-| `DECOMPOSER_MODEL`  | `gemini` (default), `llama`, or `mistral` |
-| `GEMINI_API_KEY`    | required when `DECOMPOSER_MODEL=gemini` |
-| `OLLAMA_URL` / `OLLAMA_MODEL` / `LLAMA_MODEL` | Ollama fallback config |
-| `GENERATOR_URL`     | base URL of your generator (legacy alias: `COLAB_URL`) |
-| `AI_SERVICE_SECRET` | shared secret between Laravel and the AI service (must be non-empty) |
-| `BACKEND_ORIGIN`    | origin allowed by the AI service CORS policy |
+| Variable | Meaning |
+|----------|---------|
+| `DECOMPOSER_PROVIDER` | `gemini`, `ollama`, or `openai` (any OpenAI-compatible endpoint) |
+| `DECOMPOSER_MODEL` | model id; blank uses the provider's default |
+| `DECOMPOSER_BASE_URL` | endpoint; blank uses the provider's default |
+| `DECOMPOSER_API_KEY` | key for the provider; unnecessary for local servers |
+| `GENERATOR_URL` | base URL of your generator (legacy alias: `COLAB_URL`) |
+| `DATA_DIR` | database, generated audio, and the encryption key |
+| `SECRET_KEY` | encrypts stored API keys; auto-generated if blank |
+| `ALLOW_REGISTRATION` | set `false` to close signups |
 
-The backend has its own `backend/.env` (Laravel). Set `AI_SERVICE_URL` and
-`AI_SERVICE_SECRET` there to match (`config/services.php` reads them).
+These are only defaults. Each user can override the decomposer and generator
+from the in-app account panel.
 
 ### 3.2 Install dependencies
 
 ```bash
+# api + mixer (editable installs into your venv; mixer first — api imports it)
+python -m venv .venv && source .venv/bin/activate
+pip install -e ./mixer -e ./api
+
 # frontend
 cd frontend && npm install && cd ..
-
-# backend
-cd backend && composer install && cp .env.example .env && php artisan key:generate && cd ..
-
-# ai + mixer (editable installs into your venv; mixer first — ai imports it)
-python -m venv .venv && source .venv/bin/activate
-pip install -e ./mixer -e ./ai
 ```
 
 Installing the mixer pulls `numpy`, `scipy`, `soundfile`, and `librosa`. The code
@@ -80,45 +77,39 @@ quality.
 
 ### 3.3 Database
 
-Laravel uses SQLite by default (`backend/database/database.sqlite`):
-
-```bash
-cd backend
-touch database/database.sqlite   # if missing
-php artisan migrate
-```
+None. The SQLite file is created under `DATA_DIR` on first boot.
 
 ---
 
 ## 4. Running the stack
 
-Open four terminals (order matters a little — the worker and AI service should be
-up before you submit a prompt):
-
 ```bash
 # 1. Generator: start your own (see SELF_HOSTING.md) or run all cells in
 #    colab/soundscape_generator.ipynb and put its URL in GENERATOR_URL in .env
 
-# 2. AI service
+# 2. API
 source .venv/bin/activate
-uvicorn ai.app.main:app --reload --port 8001
+uvicorn api.app.main:app --reload --port 8001
 
-# 3. Backend API + queue worker (two processes)
-cd backend
-php artisan serve            # terminal 3a
-php artisan queue:work       # terminal 3b  ← generation does nothing without this
-
-# 4. Frontend
+# 3. Frontend (dev only — production is served by the API)
 cd frontend && npm run dev
 ```
 
 Open the Vite URL, register an account, type a scene, and generate.
 
+To run the way a self-hosted instance does, build the UI instead and open
+<http://localhost:8001>:
+
+```bash
+cd frontend && npm run build && cd ..
+uvicorn api.app.main:app --port 8001
+```
+
 ---
 
 ## 5. Using the app
 
-1. **Register / log in** (Sanctum session auth).
+1. **Register / log in** (bearer token, stored in localStorage).
 2. **Enter a prompt** — a scene, a mood, or a single sound ("rainy Kyoto garden
    at dusk", "cold and lonely", "a distant foghorn"). Abstract/emotional prompts
    are supported and translated to sonic qualities, not literal objects.
@@ -133,6 +124,7 @@ Open the Vite URL, register an account, type a scene, and generate.
    - **Animate** — slow autonomous drift of pan/volume/depth for a living mix.
    - **Export** — offline render of the current mix to a downloadable WAV.
 5. **History** — reopen any previous atmosphere; edits persist server-side.
+6. **Account** — point Halcyon at your own generator and your own LLM.
 
 ---
 
@@ -140,21 +132,20 @@ Open the Vite URL, register an account, type a scene, and generate.
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| Atmosphere stuck on `pending` | No queue worker | Start `php artisan queue:work` |
-| Generation fails after ~minutes | Stale/down `GENERATOR_URL` | Restart your generator, update `GENERATOR_URL`, restart AI service |
-| Every AI request returns 500 | `AI_SERVICE_SECRET` unset | Set it in `.env` and `backend/.env` (must match) |
-| AI request returns 401 | Secret mismatch | Align `AI_SERVICE_SECRET` on both sides |
-| Decomposition 422 | Model returned malformed/empty elements | Check model availability; try a clearer prompt or switch `DECOMPOSER_MODEL` |
-| CORS error in browser | `BACKEND_ORIGIN` / Sanctum `stateful` domains wrong | Match frontend origin in AI + Laravel config |
+| Generation fails after ~minutes | Stale/down `GENERATOR_URL` | Restart your generator and update the URL in `.env` or the account panel |
+| Generation fails immediately with a key error | No API key for the chosen provider | Add one in the account panel, or switch to a local Ollama model |
+| Atmosphere failed with "interrupted by a server restart" | The API restarted mid-generation | Generate again; nothing is left stranded |
+| Decomposition 422 | Model returned malformed/empty elements | Check model availability; try a clearer prompt or another model |
+| 401 on every call | Token expired or revoked | Sign in again |
+| Blank page at `:8001` | No `frontend/dist` build | `cd frontend && npm run build`, or use the dev server |
 | No audio in browser | Autoplay blocked / worklet not served | Interact with the page first; ensure `public/soundtouch-processor.js` exists (`npm run copy-worklets`) |
-| 419 on API calls | Missing CSRF cookie | The client auto-retries after `sanctum/csrf-cookie`; ensure cookies aren't blocked |
 
 ---
 
 ## 7. Tests and quality
 
-- **Backend**: `cd backend && php artisan test`
-- **Frontend**: `cd frontend && npm run lint`
+- **API**: `python -m pytest api/tests/`
+- **Frontend**: `cd frontend && npm run lint` and `npx tsc --noEmit`
 - **Mixer**: `pytest` (see the [`mixer`](.claude/skills/mixer/SKILL.md) skill;
   coverage is a known gap tracked in [`.claude/AUDIT.md`](.claude/AUDIT.md))
 

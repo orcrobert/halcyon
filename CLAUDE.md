@@ -75,10 +75,9 @@ The full policy, including commit-message shape and PR-body template, lives in
 | Path            | Stack                     | Role |
 |-----------------|---------------------------|------|
 | `frontend/`     | React 19, TS, Vite, Tailwind, Web Audio API | UI + the browser audio engine (playback, live mixing, export) |
-| `backend/`      | Laravel 12, PHP 8.2, Sanctum, SQLite | Auth, persistence, job queue, signed audio URLs |
-| `ai/`           | FastAPI, Python 3.11      | Orchestration: decompose prompt → call generator → run mixer analysis |
+| `api/`          | FastAPI, Python 3.11, SQLModel, SQLite | Accounts, persistence, generation pipeline, audio serving, and the built UI |
 | `mixer/`        | Python 3.11, NumPy, librosa | **Core IP.** Standalone package: auto-EQ, volume, spatial placement, looping |
-| `colab/`        | Jupyter notebook          | GPU host for AudioGen/MusicGen, exposed to `ai/` via ngrok |
+| `colab/`        | Jupyter notebook          | GPU host for AudioGen/MusicGen, exposed to `api/` via ngrok |
 | `pan_model/`    | Python, scikit-learn      | Experiment: learned spatial model (negative result — see AUDIT) |
 | `experiments/`  | data + scripts            | LLM decomposition benchmark (thesis experiment) |
 | `scripts/`      | Python CLIs               | Training / evaluation / dataset-building utilities |
@@ -91,23 +90,26 @@ Untracked-by-design (gitignored): `output/`, `audiocraft/`, `frontend/dist/`,
 
 ## Data flow (end to end)
 
-1. **Frontend** `POST /api/atmospheres` with `{prompt}` → Laravel creates an
-   `Atmosphere` (`status: pending`) + `GenerationJob`, dispatches
-   `GenerateAtmosphereJob`, returns `202`.
+1. **Frontend** `POST /api/atmospheres` with `{prompt}` → the API creates an
+   `Atmosphere` (`status: pending`), hands its id to the in-process worker
+   thread, and returns `202`.
 2. Frontend **polls** `GET /api/atmospheres/{id}` (1.5 s interval) until status
    is `ready` or `failed`.
-3. **Job** calls the AI service `POST /generate` with the prompt (auth via
-   `X-AI-Service-Secret`).
-4. **AI service** decomposes the prompt (Gemini by default, Ollama fallback) into
-   typed elements, forwards them to the **generator**, receives WAVs, runs
-   the **mixer** `analyze()` to compute `eq_json` / `volume` / `pan` / `depth`,
-   and returns base64 audio + params.
-5. **Job** persists each `Element` (audio to Laravel storage; original mix params
-   copied into `original_*` columns for reset), marks the atmosphere `ready`.
-6. **Frontend** fetches audio via signed URLs, builds a Web Audio graph in
-   `useAudioEngine.ts`, plays looped, and lets the user re-mix live (volume, EQ,
-   pan, depth, tuning, binaural). Edits are debounced (250 ms) and patched back
-   via `PATCH /api/elements/{id}`. Export renders offline to a WAV.
+3. **Worker** runs `services/pipeline.py`, writing `status` / `progress` /
+   `current_stage` onto the atmosphere row as it goes: decompose → generate →
+   mix → persist.
+4. **Decompose** resolves the user's provider settings (falling back to the
+   instance `.env`) and calls their LLM; **generate** posts the elements to
+   `GENERATOR_URL` and gets WAVs back; the **mixer** `analyze()` computes
+   `eq_json` / `volume` / `pan` / `depth` and makes each clip loopable.
+5. **Persist** writes the processed WAVs to `DATA_DIR/audio/{atmosphere}/` and
+   inserts `Element` rows, copying the mix params into `original_*` columns for
+   reset. The atmosphere goes `ready`.
+6. **Frontend** fetches audio from `/api/elements/{id}/audio` with its bearer
+   token, builds a Web Audio graph in `useAudioEngine.ts`, plays looped, and lets
+   the user re-mix live (volume, EQ, pan, depth, tuning, binaural). Edits are
+   debounced (250 ms) and patched back via `PATCH /api/elements/{id}`. Export
+   renders offline to a WAV.
 
 The definitive version is in
 [`.claude/docs/architecture.md`](.claude/docs/architecture.md).
@@ -120,14 +122,11 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
 
 - **frontend** — `cd frontend && npm install && npm run dev`. Lint with
   `npm run lint`. Types in `src/types/index.ts` are the source of truth for the
-  API contract; keep them in sync with Laravel resources.
-- **backend** — `cd backend && composer install && php artisan migrate`. Run the
-  API with `php artisan serve` and a worker with `php artisan queue:work`
-  (generation is queued — nothing happens without a running worker). Tests:
-  `php artisan test`.
-- **ai** — `cd ai && uvicorn ai.app.main:app --reload`. Config comes from the
-  repo-root `.env` via `ai/app/config.py`. Requires `AI_SERVICE_SECRET` set to a
-  non-null value or every request 500s.
+  API contract; keep them in sync with `api/app/models/schemas.py`.
+- **api** — `uvicorn api.app.main:app --reload --port 8001` from the repo root.
+  Config comes from the repo-root `.env` via `api/app/config.py`. Tests:
+  `python -m pytest api/tests/`. The database is created on first boot; there is
+  no migration step.
 - **mixer** — pure library, no server. Public API is `analyze()` and
   `mix_to_file()` in `mixer/mixer/core.py`. See the
   [`mixer`](.claude/skills/mixer/SKILL.md) skill before changing DSP.
@@ -140,9 +139,9 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
 - **Python**: 3.11, type hints on public functions, `snake_case`, small pure
   functions. The mixer keeps DSP constants as module-level UPPER_CASE and is
   written to degrade gracefully when `librosa` is absent — preserve that.
-- **PHP**: Laravel conventions. Controllers thin, validation via
-  `$request->validate`, API shapes via `Http/Resources`. Authorize ownership on
-  every atmosphere/element route.
+- **FastAPI**: routers thin, validation via Pydantic schemas in
+  `api/app/models/schemas.py`, database models in `api/app/models/tables.py`.
+  Scope every atmosphere/element query to the current user.
 - **TypeScript**: functional components, hooks, `type`-only imports where
   possible. Audio-graph logic lives in `hooks/`, presentation in `components/`.
 - Details per language in
@@ -152,14 +151,20 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
 
 ## Gotchas
 
-- **The queue worker must be running** or atmospheres stay `pending` forever.
+- **Generation runs on one in-process worker thread**, started in the FastAPI
+  lifespan. It is not a separate process. Anything left `generating` when the
+  server restarts is reclaimed and marked `failed` on the next boot.
 - **The generator is a bring-your-own HTTP service** (`GENERATOR_URL`, legacy
   alias `COLAB_URL`). The bundled Colab notebook is one reference implementation
-  and a fragile link — the AI service times out (300 s) if the generator is down.
+  and a fragile link — the API times out (300 s) if the generator is down.
   The contract is documented in [SELF_HOSTING.md](SELF_HOSTING.md#the-generator-contract).
-- **Decomposer defaults to Gemini** (`DECOMPOSER_MODEL=gemini`). Needs
-  `GEMINI_API_KEY`. Set `DECOMPOSER_MODEL=llama` or `mistral` for the offline
-  Ollama path.
+- **The decomposer is any LLM.** `DECOMPOSER_PROVIDER` is `gemini`, `ollama`, or
+  `openai` (any OpenAI-compatible endpoint). Providers live in
+  `api/app/services/providers.py`; add one there and it appears in the account
+  panel automatically. Every setting is a per-user override of the `.env`
+  default, resolved by `services/runconfig.py`.
+- **Per-user API keys are encrypted at rest** and must never be returned by the
+  API — expose `decomposer_api_key_set: bool`, never the value.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and

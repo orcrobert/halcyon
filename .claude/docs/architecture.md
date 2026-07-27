@@ -22,37 +22,41 @@ Definitive reference for how the system fits together. Skim
   (`setVolume`, `setEQ`, `setPan`, `setDepth`, `setTuning`), an autonomous
   `startAnimate` drift loop, binaural oscillators, and an offline `exportMix`.
 - **Persistence of edits**: `hooks/useDebouncedPatcher.ts` batches mix edits and
-  `PATCH`es them to the backend (250 ms debounce, flush on unload).
-- **API layer** (`api/`): `client.ts` (axios + Sanctum CSRF handling with a 419
-  retry), `atmospheres.ts` (create/get/poll/delete), `elements.ts`, `auth.ts`.
-- **Contract**: `types/index.ts` mirrors the Laravel resources. Treat it as the
-  single source of truth for the client-side API shape.
+  `PATCH`es them to the API (250 ms debounce, flush on unload).
+- **API layer** (`api/`): `client.ts` (axios + bearer token injection, 401
+  handling), `token.ts` (localStorage), `errors.ts` (FastAPI error shapes),
+  `atmospheres.ts` (create/get/poll/delete), `elements.ts`, `auth.ts`,
+  `settings.ts`.
+- **Contract**: `types/index.ts` mirrors `api/app/models/schemas.py`. Treat it as
+  the single source of truth for the client-side API shape.
 
-### `backend/` — Laravel API
-- **Auth**: Sanctum session-based; `AuthController` (register/login/logout/me).
-- **Domain**: `Atmosphere` has many `Element`; each atmosphere has one
-  `GenerationJob`. `StyleClip` is an optional style reference. `original_*`
-  columns on `Element` store the mixer's computed defaults so the UI can reset.
-- **Endpoints** (`routes/api.php`): atmospheres CRUD, element `PATCH`/`reset`,
-  and a **public, signed** `GET /elements/{element}/audio` for streaming audio.
-- **Generation**: `AtmosphereController::store` creates the row + job and
-  dispatches `GenerateAtmosphereJob` (queued). The job calls the AI service,
-  persists elements + audio to storage, and flips status to `ready`/`failed`.
-- **Resources**: `AtmosphereResource` / `ElementResource` shape the JSON,
-  including signed audio URLs.
-
-### `ai/` — FastAPI orchestration
-- **`main.py`**: app + CORS + a middleware requiring `X-AI-Service-Secret` on
-  everything except `/health` and docs.
-- **`routers/sessions.py`**: the `POST /generate` endpoint (decompose → generate
-  → analyze → return base64 audio + params). *(Note: file name is legacy; it
-  serves generation, not sessions — see AUDIT.)*
-- **`services/decomposer.py`**: loads `prompts/decomposer.txt`, calls Gemini or
-  Ollama, parses/validates the element list (type normalization, required
-  fields, defaults).
-- **`services/generator.py`**: forwards decomposed elements to the generator
-  (`GENERATOR_URL`) and decodes the returned audio.
-- **Config**: `config.py` (pydantic-settings) reads the repo-root `.env`.
+### `api/` — FastAPI service
+- **`main.py`**: lifespan (create tables, reclaim interrupted runs, start the
+  worker), routers, and the SPA mount that serves `frontend/dist` when present.
+- **Auth**: opaque bearer tokens, SHA-256 hashed in `auth_tokens`. Passwords are
+  argon2 via `pwdlib`. `deps.py` exposes the `CurrentUser` dependency.
+- **Domain** (`models/tables.py`): `User` has many `Atmosphere`, each with many
+  `Element` ordered by `position`. Status, progress and current stage live on the
+  atmosphere itself. `original_*` columns on `Element` store the mixer's computed
+  defaults so the UI can reset. `UserSettings` holds per-user provider config.
+- **Routers**: `auth.py`, `settings.py`, `atmospheres.py`, `elements.py`. Every
+  query is scoped to the current user; a foreign id returns 404, not 403.
+- **Generation**: `AtmosphereController`-equivalent `store` creates the row and
+  hands the id to `worker.GenerationWorker`, a single daemon thread consuming a
+  `queue.Queue`. `services/pipeline.py` is the job body.
+- **Providers** (`services/providers.py`): a registry of LLM backends — `gemini`
+  (native), `ollama` (native), `openai` (any OpenAI-compatible endpoint). Adding
+  an entry surfaces it in the account panel with no frontend change.
+- **Config resolution** (`services/runconfig.py`): merges a user's `UserSettings`
+  over the instance `.env` defaults into a frozen `RunConfig`. Switching provider
+  drops inherited credentials so one provider's key is never sent to another.
+- **Storage** (`services/storage.py`): audio at
+  `DATA_DIR/audio/{atmosphere_id}/{position}_{label}.wav`, with path-escape
+  checks on read.
+- **Secrets** (`security.py`): per-user API keys encrypted with Fernet, keyed off
+  `SECRET_KEY` or an auto-generated `DATA_DIR/secret.key`.
+- **Config**: `config.py` (pydantic-settings) reads the repo-root `.env` and
+  migrates legacy `DECOMPOSER_MODEL` provider names.
 
 ### `mixer/` — the DSP core (standalone package)
 Public API in `mixer/mixer/core.py`:
@@ -80,7 +84,7 @@ Effects:
 ### `colab/` — reference generator
 Runs AudioGen (sound) and MusicGen (music) from Meta's AudioCraft, exposes
 `POST /generate` over ngrok. It is one implementation of the generator contract;
-the `ai/` service treats any generator as a black box behind `GENERATOR_URL`
+the `api/` service treats any generator as a black box behind `GENERATOR_URL`
 (legacy alias `COLAB_URL`). See [SELF_HOSTING.md](../../SELF_HOSTING.md#the-generator-contract).
 
 ### Research
@@ -94,19 +98,20 @@ the `ai/` service treats any generator as a black box behind `GENERATOR_URL`
 ## Request lifecycle (generation)
 
 ```
-Frontend                Laravel                 AI service         Generator
-   │  POST /atmospheres    │                        │                   │
-   ├──────────────────────▶│ create + queue job     │                   │
-   │◀─ 202 (pending) ──────┤                        │                   │
-   │  poll GET /{id} ──────▶│ (worker picks up job)  │                   │
-   │                        ├── POST /generate ─────▶│ decompose         │
-   │                        │                        ├── POST /generate ▶│
-   │                        │                        │◀── wavs (b64) ────┤
-   │                        │                        │ mixer.analyze()   │
-   │                        │◀── elements + params ──┤                   │
-   │                        │ persist + status=ready │                   │
-   │◀─ ready + elements ────┤                        │                   │
-   │  fetch signed audio, build graph, play          │                   │
+Frontend                    API                          LLM      Generator
+   │  POST /api/atmospheres  │                            │           │
+   ├────────────────────────▶│ insert row, submit to      │           │
+   │◀─ 202 (pending) ────────┤ the worker thread          │           │
+   │  poll GET /{id} ───────▶│                            │           │
+   │                         │ ── decompose ─────────────▶│           │
+   │                         │ ◀─ typed elements ─────────┤           │
+   │                         │ ── POST /generate ────────────────────▶│
+   │                         │ ◀─ wavs (b64) ─────────────────────────┤
+   │                         │ mixer.analyze()            │           │
+   │                         │ write wavs + element rows  │           │
+   │◀─ ready + elements ─────┤ status=ready               │           │
+   │  GET /api/elements/{id}/audio with bearer token      │           │
+   │  build graph, play                                   │           │
 ```
 
 ---
@@ -123,7 +128,8 @@ Frontend                Laravel                 AI service         Generator
 | Binaural  | 200/208 Hz default, gain 0.15, 10 presets | `useAudioEngine` |
 | Loop      | 3 s search window, 1.5 s crossfade | `looping.py` |
 | Poll      | 1.5 s interval, 20 s stuck-pending guard, 10 min timeout | `atmospheres.ts` |
-| Job       | `tries=1`, `timeout=600 s` | `GenerateAtmosphereJob` |
+| Generator | 300 s request timeout | `services/generator.py` |
+| Progress  | 10 / 30 / 70 / 90 / 100 per stage | `services/pipeline.py` |
 
 There are **two mixing implementations** (Python at generation time, browser for
 live/export). They must stay conceptually aligned. Divergence between them is a
@@ -133,9 +139,10 @@ known correctness risk (see AUDIT).
 
 ## Trust boundaries
 
-- Browser ↔ Laravel: Sanctum session cookies + CSRF; ownership checks on every
-  atmosphere/element route; audio served via **signed** URLs scoped to the owner.
-- Laravel ↔ AI service: shared `AI_SERVICE_SECRET` header.
-- AI service ↔ generator: `GENERATOR_URL` only (no auth by default — run it on a
+- Browser ↔ API: bearer token in `Authorization`, hashed at rest. Every
+  atmosphere/element query is scoped to the owning user, audio included.
+- API ↔ LLM: the user's own credentials, decrypted per run and never returned by
+  any endpoint.
+- API ↔ generator: `GENERATOR_URL` only (no auth by default — run it on a
   private network or add your own).
-- Never expose the AI service or generator publicly without protection.
+- Never expose the generator publicly without protection.
