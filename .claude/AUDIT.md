@@ -1,145 +1,124 @@
 # Project audit
 
-Findings from a full-repository review, kept as the cleanup backlog. Grouped by
-theme, tagged by severity (🔴 high / 🟡 medium / 🟢 low) and whether a fix is
-**safe** (behaviour-preserving, low risk) or **risky** (could change behaviour /
-needs care — this is a thesis project with almost no tests).
+The cleanup backlog. Tagged by severity (🔴 high / 🟡 medium / 🟢 low) and by
+whether a fix is **safe** (behaviour-preserving) or **risky** (could change
+behaviour — this is a thesis project and the audio path has no browser tests).
 
-Nothing here blocks the app from running today; these are quality, correctness,
-and repo-hygiene items.
+Nothing here blocks the app. These are quality, correctness, and hygiene items.
 
----
-
-## Resolved by the Laravel removal
-
-The Python API rewrite closed these out. Kept here as a record.
-
-- ✅ **The `sys.path` mixer hack** is now a single guarded bootstrap in
-  `api/app/__init__.py` rather than repeated per module.
-- ✅ **`services/generator.py` no longer writes to disk.** The global
-  `output/session.json` and the per-element WAV cache are gone; audio goes to a
-  per-run temporary directory for mixer analysis, then straight to
-  `DATA_DIR/audio/`. `OUTPUT_DIR` was removed with them.
-- ✅ **`ai/app/sessions/` and the misnamed `routers/sessions.py`** are gone; the
-  legacy `/generate` endpoint went with the Laravel backend.
-- ✅ **Stock Laravel README and boilerplate** removed with `backend/`.
-- ✅ **No test coverage on the web layer** — the API now has 78 tests covering
-  auth, ownership scoping, validation ranges, settings encryption, provider
-  dispatch, the worker, and a full generation run.
-- ✅ **Deleting an atmosphere orphaned its audio on disk.** The API removes the
-  directory.
+Last reviewed against the tree at `refactor/architecture-cleanup`.
 
 ---
 
-## Dead code / legacy
+## Correctness
 
-- 🟡 **`ai/app/sessions/store.py` is entirely unused.** An in-memory session
-  store (`create_session`, etc.) imported by nothing. *Safe: delete the
-  `sessions/` package.*
-- 🟡 **`ai/app/routers/sessions.py` is misnamed.** It defines `POST /generate`,
-  not sessions. *Safe: rename to `routers/generate.py` and update the import in
-  `main.py`.*
-- 🟡 **`mixer/effects/spatial.py::predict_pan` always returns `0.0`** and
-  `predict_and_apply` is unused legacy from the abandoned learned-pan approach.
-  *Safe: remove both; keep `apply_pan` and `assign_spatial`.*
-- ✅ **`mixer/models/*.pkl` are a documented negative result.** The experiment
-  moved to `experiments/spatial_model/` with a README; the shipped mixer is
-  heuristic.
+- 🟡 **Binaural oscillators bypass the master bus.** In `useAudioEngine.ts`,
+  `startBinaural` connects its gain node straight to `ctx.destination`, while
+  every track routes through the analyser and the −4 dB limiter. So the beat
+  tones are neither visualised nor limited, and they survive a track mute. They
+  are also absent from `exportMix`, which renders tracks only. *Risky: routing
+  them through the analyser changes what the visualiser shows and what the
+  limiter clamps; decide deliberately whether binaural is part of the mix or an
+  overlay, then make playback and export agree.*
+- 🟡 **A generator failure is terminal.** `GenerationWorker` runs each
+  atmosphere once; any exception marks it `failed`. Against a Colab+ngrok link
+  that drops routinely, one transient error loses the whole run. *Risky:
+  retries with backoff change failure semantics and re-spend GPU time; decide
+  deliberately rather than drifting into it.*
+- 🟢 **The two mixing engines can drift in loudness.** The Python mixer
+  peak-normalizes in `mix_to_file`; the browser uses a −4 dB 20:1 limiter. A
+  backend mix and a browser export of the same atmosphere will not match. Their
+  *parameter* conventions are now pinned (EQ 200/1k/8k, pan −1..1, depth 0..1,
+  and the shared constants at the top of `useAudioEngine.ts`), but the gain
+  stage is not. *Risky: align intentionally and document which chain is
+  canonical.*
 
-## Coupling / structure
+## Test coverage
 
-- 🔴 **`ai/app/routers/generate.py` imports the mixer via a `sys.path.insert`
-  hack** (`parents[3] / "mixer"`). Fragile and non-portable. *Safe-ish: declare
-  `halcyon-mixer` as a dependency of `ai/` (editable install / path dep) and
-  `from mixer.core import analyze` normally. Requires updating `ai/pyproject.toml`
-  and the dev setup.*
-- 🟡 **`ai/app/services/generator.py` writes WAVs and a global
-  `output/session.json` to local disk on every request**, even though the audio
-  is already returned as base64 and persisted by Laravel. The single shared
-  `session.json` is overwritten by concurrent generations (not concurrency-safe)
-  and couples a stateless service to a local filesystem. *Risky: removing the
-  disk writes changes behaviour if anything downstream reads `output/`; verify
-  nothing depends on it (the Colab notebook / scripts may). Likely
-  safe to drop the `session.json` write; keep or gate the WAV cache behind a
-  flag.*
-- 🟢 **`OUTPUT_DIR` in `.env.example`/config exists only for that disk write.**
-  Remove alongside the above.
-
-## Correctness / bugs
-
-- 🔴 **Play/pause is inconsistent in `useAudioEngine.ts`.** `pause()` uses
-  `ctx.suspend()` (preserves position) but `unpause()` calls `startFromDecoded`,
-  which tears down and rebuilds every track from sample 0. Result: playback
-  restarts from the top on resume instead of continuing. `App.tsx::handlePlayPause`
-  also calls `start()` then `unpause()`, risking a double rebuild. *Risky:
-  reconcile to a single resume path (`ctx.resume()` without rebuilding when tracks
-  exist). Needs manual audio verification.*
-- 🟡 **`sanitize_label` filename collisions** in `generator.py`: labels differing
-  only by punctuation map to the same `<atmosphere>_<label>.wav` and silently
-  overwrite. *Safe: include the element index or a hash in the filename (only
-  matters while the disk write exists).*
-- 🟡 **Fragile JSON extraction** in `decomposer.py::_parse_result`
-  (`re.search(r"\{.*\}", ...)` greedy/DOTALL) even though both providers are
-  already forced into JSON mode. Can mis-slice on nested braces. *Safe: try
-  `json.loads` on the whole response first, fall back to the regex.*
-- 🟡 **`GenerateAtmosphereJob` has `tries=1`** against the flaky Colab+ngrok
-  link — a single transient failure kills the whole generation. *Risky: adding
-  retries/backoff changes failure semantics and could double-charge GPU time;
-  decide deliberately.*
-- 🟢 **Two mixing engines can drift.** The Python mixer peak-normalizes; the
-  browser uses a −4 dB 20:1 limiter. Backend `mix_to_file` and browser export can
-  differ in loudness. *Risky: align intentionally; document the canonical chain.*
+- 🟡 **`auto_eq` and `volume` have no direct tests.** `mixer/tests/test_core.py`
+  covers `analyze`, `mix_to_file`, `apply_pan`, `assign_spatial`, and
+  `make_loopable`, but the two modules that carry the most tuning — masking cuts
+  and perceptual level assignment — are only exercised through `analyze`, which
+  asserts shape, not behaviour. *Safe and high value: pin their output for
+  synthetic inputs before touching the DSP.*
+- 🟢 **No frontend tests at all.** The audio engine is verified by ear. Even a
+  couple of jsdom tests over the pure helpers (`buildEQState`, `trackGain`,
+  `dryGainFor`/`wetGainFor`, `audioBufferToWav` headers) would catch the
+  drift class of bug the constants refactor was aimed at.
 
 ## Frontend maintainability
 
-- 🟡 **`useAudioEngine.ts` is a 550-line monolith** doing decode, graph
-  construction, EQ, pan, reverb, tuning, binaural, animation, and offline export
-  in one hook. *Risky but high value: extract cohesive units (graph builder,
-  binaural, animation, export) behind the same public surface. Do incrementally
-  with audio verification.*
-- 🟢 **Duplicated magic constants** — the `* 0.5` gain scale and reverb
-  coefficients (`1 - depth*0.7`, `depth*0.6`) are repeated across
-  `startFromDecoded`, `setVolume`, `setDepth`, `startAnimate`, `exportMix`. *Safe:
-  hoist to named constants / small helpers.*
-- 🟢 **`preload`'s dependency array lists `getContext` but the callback doesn't
-  use it directly.** Minor; tidy while refactoring.
-
-## Backend / data
-
-- 🟡 **Three migrations share the timestamp `2026_05_02_132114`**
-  (atmospheres, elements, generation_jobs). Ordering currently works by filename
-  but is fragile. *Risky: renaming applied migrations desyncs existing databases;
-  only fix on a fresh migration history or leave as-is and note it.*
-- 🟢 **Stock READMEs.** `backend/README.md` is the Laravel boilerplate and
-  `frontend/README.md` is the Vite template; neither documents this project.
-  *Safe: replace with project-specific notes (or point to root docs).*
+- 🟡 **`useAudioEngine.ts` is a ~530-line monolith** doing decode, graph
+  construction, EQ, pan, reverb, tuning, binaural, the animate loop, and offline
+  export in one hook. *Risky but high value: extract cohesive units (graph
+  builder, binaural, animate, export) behind the same public surface, one at a
+  time, with listening checks between.*
+- 🟢 **`exportMix` duplicates the graph construction in `startFromDecoded`.**
+  Both build filters → gain → reverb → panner in the same order; only the
+  context and the parameter sources differ. The shared constants removed the
+  numeric drift, but the topology is still written twice. *Safe: extract one
+  builder taking a `BaseAudioContext`.*
 
 ## Repo hygiene
 
-- 🔴 **No root `README.md`.** The repo has no top-level entry point describing
-  what it is or how to run it. *Safe: add one (overview, quickstart → MANUAL.md,
-  license, architecture link).*
-- 🟡 **No `LICENSE` at the repo root.** *Safe: add one (author's choice).*
-- 🟢 **No test coverage for the mixer.** Only Laravel example stubs exist; the
-  mixer (auto_eq/volume/spatial/looping) has zero tests despite being the core of
-  the system. *Safe and high value: add `pytest` regression tests for the
-  mixer.*
-- 🟢 **`.DS_Store` files and macOS "keep both" duplicates** (`favicon 2.svg`,
-  `index 2.html`, `icons 2.svg` under `frontend/dist/`, and `frontend/public/`)
-  litter the tree. Gitignored, but worth cleaning locally.
-- 🟢 **No CI.** No automated lint/test on push. *Safe: add a minimal GitHub
-  Actions workflow (lint frontend, test backend, pytest mixer).*
+- 🟡 **`backend/` is an untracked leftover of the removed Laravel app.** Still on
+  disk locally with a `vendor/` tree and its own `.env`. Gitignored by nothing —
+  it is simply untracked, so it is one `git add -A` away from being committed,
+  secrets included. *Safe: delete it locally once you have confirmed nothing in
+  it is wanted.*
+- 🟢 **Local `.DS_Store` files and macOS "keep both" duplicates**
+  (`favicon 2.svg`, `index 2.html`) litter `frontend/public/` and `frontend/dist/`.
+  Gitignored, but worth cleaning.
 
 ---
 
-## Suggested refactor order (safest first)
+## Resolved
 
-1. Root `README.md` + `LICENSE`; project READMEs for `backend/`/`frontend/`. (docs)
-2. Delete dead code: `ai/app/sessions/`, `predict_pan`/`predict_and_apply`. (safe)
-3. Rename `routers/sessions.py` → `routers/generate.py`. (safe)
-4. Mixer as a real dependency of `ai/`; drop the `sys.path` hack. (safe-ish)
-5. Add `pytest` regression tests for the mixer. (safe, enables the rest)
-6. Robust JSON parsing in the decomposer. (safe)
-7. Centralize frontend audio constants. (safe)
-8. Then, with tests in place and manual audio checks: play/pause fix, generator
-   disk-write removal, `useAudioEngine` decomposition, engine alignment. (risky)
+Kept as a record of what the earlier audits called for.
+
+**Laravel removal / Python API rewrite**
+- ✅ `ai/app/sessions/`, `routers/sessions.py`, and the legacy `/generate`
+  endpoint are gone with the Laravel backend, as are its migrations and its
+  stock README.
+- ✅ `services/generator.py` no longer writes to disk. The global
+  `output/session.json` and the per-element WAV cache are gone; audio goes to a
+  per-run temporary directory for mixer analysis, then to `DATA_DIR/audio/`.
+  `OUTPUT_DIR` went with them.
+- ✅ Deleting an atmosphere now removes its audio directory.
+- ✅ The web layer has real tests — 68 covering auth, ownership scoping,
+  validation ranges, settings encryption, provider dispatch, the worker, and a
+  full generation run.
+
+**Packaging**
+- ✅ The `sys.path` hacks are gone. The repo root is the `api` distribution and
+  takes `mixer/` as a path dependency; `api/__init__.py` makes `api.app` a real
+  package. `api/app/__init__.py`, `mixer/conftest.py`, and
+  `scripts/generate_cli.py` no longer touch `sys.path`, and imports work from
+  any working directory.
+
+**Correctness**
+- ✅ Play/pause resumed from sample 0. `unpause` rebuilt the whole graph on
+  every resume; the resume path is now `start()` alone, which only builds when
+  there are no live tracks.
+- ✅ `sanitize_label` filename collisions — element filenames are prefixed with
+  the position (`00_rain.wav`).
+- ✅ Fragile JSON extraction in `decomposer._parse_result` — it tries
+  `json.loads` on the whole response first and only then falls back to the
+  regex, and it validates element shape.
+
+**Dead code**
+- ✅ `predict_pan` / `predict_and_apply` (abandoned learned-pan approach) are
+  removed; `apply_pan` and `assign_spatial` are the shipped heuristic.
+- ✅ `useAudioEngine`'s unused `preload` export and write-only
+  `masterLimiterRef` are removed.
+- ✅ `mixer/models/*.pkl` are a documented negative result; the experiment lives
+  in `experiments/spatial_model/` with a README and the shipped mixer is
+  heuristic.
+
+**Hygiene**
+- ✅ Root `README.md` and `LICENSE` exist; `frontend/README.md` documents this
+  project instead of the Vite template.
+- ✅ Duplicated frontend audio constants (`* 0.5` gain scale, reverb
+  coefficients, EQ frequencies) are named at the top of `useAudioEngine.ts`.
+- ✅ CI runs lint, typecheck, build, and both pytest suites on every push and
+  pull request (`.github/workflows/ci.yml`).

@@ -40,6 +40,30 @@ function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   return arrayBuffer
 }
 
+const TRACK_GAIN_SCALE = 0.5
+const REVERB_DRY_ATTENUATION = 0.7
+const REVERB_WET_SEND = 0.6
+const REVERB_IR_DURATION_S = 2.5
+const REVERB_IR_DECAY = 3.0
+const REVERB_IR_TARGET_RMS = 0.05
+
+const EQ_LOW_FREQ_HZ = 200
+const EQ_MID_FREQ_HZ = 1000
+const EQ_MID_Q = 1.4
+const EQ_HIGH_FREQ_HZ = 8000
+
+function trackGain(volume: number): number {
+  return volume * TRACK_GAIN_SCALE
+}
+
+function dryGainFor(depth: number): number {
+  return 1 - depth * REVERB_DRY_ATTENUATION
+}
+
+function wetGainFor(depth: number): number {
+  return depth * REVERB_WET_SEND
+}
+
 export interface EQState {
   low: number   // dB, low shelf at 200Hz
   mid: number   // dB, peak at 1000Hz
@@ -80,7 +104,7 @@ function buildEQState(bands: EQBand[] | undefined): EQState {
   return state
 }
 
-function buildImpulseResponse(ctx: BaseAudioContext, duration = 2.5, decay = 3.0): AudioBuffer {
+function buildImpulseResponse(ctx: BaseAudioContext, duration = REVERB_IR_DURATION_S, decay = REVERB_IR_DECAY): AudioBuffer {
   const sr = ctx.sampleRate
   const length = Math.floor(sr * duration)
   const ir = ctx.createBuffer(2, length, sr)
@@ -93,9 +117,8 @@ function buildImpulseResponse(ctx: BaseAudioContext, duration = 2.5, decay = 3.0
       sumSq += sample * sample
     }
     const rms = Math.sqrt(sumSq / length)
-    const targetRms = 0.05
     if (rms > 0) {
-      const scale = targetRms / rms
+      const scale = REVERB_IR_TARGET_RMS / rms
       for (let i = 0; i < length; i++) ch[i] *= scale
     }
   }
@@ -107,26 +130,26 @@ function createReverb(ctx: BaseAudioContext, depth: number): { convolver: Convol
   convolver.buffer = buildImpulseResponse(ctx)
   const dryGain = ctx.createGain()
   const wetGain = ctx.createGain()
-  dryGain.gain.value = 1 - depth * 0.7
-  wetGain.gain.value = depth * 0.6
+  dryGain.gain.value = dryGainFor(depth)
+  wetGain.gain.value = wetGainFor(depth)
   return { convolver, dryGain, wetGain }
 }
 
 function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode] {
   const low = ctx.createBiquadFilter()
   low.type = 'lowshelf'
-  low.frequency.value = 200
+  low.frequency.value = EQ_LOW_FREQ_HZ
   low.gain.value = eq.low
 
   const mid = ctx.createBiquadFilter()
   mid.type = 'peaking'
-  mid.frequency.value = 1000
-  mid.Q.value = 1.4
+  mid.frequency.value = EQ_MID_FREQ_HZ
+  mid.Q.value = EQ_MID_Q
   mid.gain.value = eq.mid
 
   const high = ctx.createBiquadFilter()
   high.type = 'highshelf'
-  high.frequency.value = 8000
+  high.frequency.value = EQ_HIGH_FREQ_HZ
   high.gain.value = eq.high
 
   low.connect(mid)
@@ -140,7 +163,6 @@ export function useAudioEngine() {
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
   const analyserRef = useRef<AnalyserNode | null>(null)
-  const masterLimiterRef = useRef<DynamicsCompressorNode | null>(null)
   const volumeStateRef = useRef<Map<string, number>>(new Map())
   const eqStateRef = useRef<Map<string, EQState>>(new Map())
   const panStateRef = useRef<Map<string, number>>(new Map())
@@ -170,7 +192,6 @@ export function useAudioEngine() {
       limiter.ratio.value = 20
       limiter.attack.value = 0.001
       limiter.release.value = 0.1
-      masterLimiterRef.current = limiter
 
       analyserRef.current.connect(limiter)
       limiter.connect(ctxRef.current.destination)
@@ -200,7 +221,7 @@ export function useAudioEngine() {
       const vol = volumeStateRef.current.has(el.label)
         ? volumeStateRef.current.get(el.label)!
         : el.volume
-      masterGain.gain.value = vol * 0.5
+      masterGain.gain.value = trackGain(vol)
 
       const panner = ctx.createStereoPanner()
       panner.pan.value = panStateRef.current.has(el.label)
@@ -258,17 +279,13 @@ export function useAudioEngine() {
     startFromDecoded(ctx, decodedRef.current)
   }, [getContext])
 
-  const preload = useCallback(async (elements: Element[]) => {
-    decodedRef.current = await decodeElements(elements)
-  }, [getContext])
-
   const start = useCallback(async () => {
     const ctx = getContext()
-    if (ctx.state === 'suspended') await ctx.resume()
     if (tracksRef.current.size === 0 && decodedRef.current.length > 0) {
       await ensureWorklet(ctx)
       startFromDecoded(ctx, decodedRef.current)
     }
+    if (ctx.state === 'suspended') await ctx.resume()
   }, [getContext])
 
   const pause = useCallback(async () => {
@@ -276,17 +293,11 @@ export function useAudioEngine() {
     await ctxRef.current.suspend()
   }, [])
 
-  const unpause = useCallback(async () => {
-    const ctx = getContext()
-    if (ctx.state === 'suspended') await ctx.resume()
-    startFromDecoded(ctx, decodedRef.current)
-  }, [getContext])
-
   const setVolume = useCallback((label: string, volume: number) => {
     volumeStateRef.current.set(label, volume)
     const track = tracksRef.current.get(label)
     if (track) {
-      track.masterGain.gain.setTargetAtTime(volume * 0.5, getContext().currentTime, 0.05)
+      track.masterGain.gain.setTargetAtTime(trackGain(volume), getContext().currentTime, 0.05)
     }
   }, [getContext])
 
@@ -322,8 +333,8 @@ export function useAudioEngine() {
     const track = tracksRef.current.get(label)
     if (!track) return
     const t = getContext().currentTime
-    track.dryGain.gain.setTargetAtTime(1 - depth * 0.7, t, 0.05)
-    track.wetGain.gain.setTargetAtTime(depth * 0.6, t, 0.05)
+    track.dryGain.gain.setTargetAtTime(dryGainFor(depth), t, 0.05)
+    track.wetGain.gain.setTargetAtTime(wetGainFor(depth), t, 0.05)
   }, [getContext])
 
   const startBinaural = useCallback(() => {
@@ -426,10 +437,10 @@ export function useAudioEngine() {
         const track = tracksRef.current.get(label)
         if (track && ctx && !animateMutedRef.current.has(label)) {
           const t = ctx.currentTime
-          track.masterGain.gain.setTargetAtTime(s.vol * 0.5, t, 1.5)
+          track.masterGain.gain.setTargetAtTime(trackGain(s.vol), t, 1.5)
           track.panner.pan.setTargetAtTime(s.pan, t, 1.5)
-          track.dryGain.gain.setTargetAtTime(1 - s.depth * 0.7, t, 1.5)
-          track.wetGain.gain.setTargetAtTime(s.depth * 0.6, t, 1.5)
+          track.dryGain.gain.setTargetAtTime(dryGainFor(s.depth), t, 1.5)
+          track.wetGain.gain.setTargetAtTime(wetGainFor(s.depth), t, 1.5)
         }
 
         out.set(label, { vol: s.vol, pan: s.pan, depth: s.depth })
@@ -450,10 +461,10 @@ export function useAudioEngine() {
       const track = tracksRef.current.get(label)
       if (track && ctx) {
         const t = ctx.currentTime
-        track.masterGain.gain.setTargetAtTime(snap.vol * 0.5, t, 0.08)
+        track.masterGain.gain.setTargetAtTime(trackGain(snap.vol), t, 0.08)
         track.panner.pan.setTargetAtTime(snap.pan, t, 0.08)
-        track.dryGain.gain.setTargetAtTime(1 - snap.depth * 0.7, t, 0.08)
-        track.wetGain.gain.setTargetAtTime(snap.depth * 0.6, t, 0.08)
+        track.dryGain.gain.setTargetAtTime(dryGainFor(snap.depth), t, 0.08)
+        track.wetGain.gain.setTargetAtTime(wetGainFor(snap.depth), t, 0.08)
       }
     }
 
@@ -480,7 +491,6 @@ export function useAudioEngine() {
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
-    masterLimiterRef.current = null
   }, [stopBinaural])
 
   const getAnalyser = useCallback(() => analyserRef.current, [])
@@ -505,7 +515,7 @@ export function useAudioEngine() {
       const [lowFilter,, highFilter] = offlineFilters
 
       const gain = offline.createGain()
-      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : el.volume * 0.5
+      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : trackGain(el.volume)
 
       const depth = depthStateRef.current.get(el.label) ?? 0
       const { convolver, dryGain, wetGain } = createReverb(offline, depth)
@@ -547,5 +557,5 @@ export function useAudioEngine() {
     animateMutedRef.current = muted
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
+  return { load, start, pause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
 }

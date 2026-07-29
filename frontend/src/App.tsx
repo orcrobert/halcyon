@@ -61,7 +61,7 @@ function AuthedApp() {
   const pollAbortRef = useRef<AbortController | null>(null)
 
   const {
-    load, start, pause, unpause, setVolume, setEQ, setPan, setDepth,
+    load, start, pause, setVolume, setEQ, setPan, setDepth,
     setTuning, stop, exportMix, getAnalyser,
     startAnimate, stopAnimate, setAnimateMuted,
     startBinaural, stopBinaural, setBinauralFreqs,
@@ -184,10 +184,9 @@ function AuthedApp() {
       setPlaying(false)
     } else {
       await start()
-      await unpause()
       setPlaying(true)
     }
-  }, [playing, pause, start, unpause])
+  }, [playing, pause, start])
 
   const handleNewAtmosphere = useCallback(async () => {
     pollAbortRef.current?.abort()
