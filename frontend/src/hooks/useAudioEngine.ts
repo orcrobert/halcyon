@@ -258,29 +258,19 @@ export function useAudioEngine() {
     startFromDecoded(ctx, decodedRef.current)
   }, [getContext])
 
-  const preload = useCallback(async (elements: Element[]) => {
-    decodedRef.current = await decodeElements(elements)
-  }, [getContext])
-
   const start = useCallback(async () => {
     const ctx = getContext()
-    if (ctx.state === 'suspended') await ctx.resume()
     if (tracksRef.current.size === 0 && decodedRef.current.length > 0) {
       await ensureWorklet(ctx)
       startFromDecoded(ctx, decodedRef.current)
     }
+    if (ctx.state === 'suspended') await ctx.resume()
   }, [getContext])
 
   const pause = useCallback(async () => {
     if (ctxRef.current?.state !== 'running') return
     await ctxRef.current.suspend()
   }, [])
-
-  const unpause = useCallback(async () => {
-    const ctx = getContext()
-    if (ctx.state === 'suspended') await ctx.resume()
-    startFromDecoded(ctx, decodedRef.current)
-  }, [getContext])
 
   const setVolume = useCallback((label: string, volume: number) => {
     volumeStateRef.current.set(label, volume)
@@ -547,5 +537,5 @@ export function useAudioEngine() {
     animateMutedRef.current = muted
   }, [])
 
-  return { load, preload, start, pause, unpause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
+  return { load, start, pause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
 }
