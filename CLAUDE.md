@@ -82,6 +82,11 @@ The full policy, including commit-message shape and PR-body template, lives in
 | `scripts/`      | Python CLIs               | Operational utilities for the shipped pipeline |
 | `audiocraft/`   | vendored (gitignored)     | Meta's AudioCraft, used by the Colab notebook — not part of our source |
 
+Python is one workspace: the root `pyproject.toml` is the `api` distribution and
+takes `mixer/` as a path dependency. Install with `pip install -e ./mixer -e
+'.[dev]'` (or `uv sync`) and import `api.app.*` / `mixer.*` normally — nothing
+manipulates `sys.path`.
+
 Untracked-by-design (gitignored): `output/`, `audiocraft/`, `frontend/dist/`,
 `.env`, `data/`, `mixer/models/`, `thesis/`.
 
@@ -124,7 +129,7 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   API contract; keep them in sync with `api/app/models/schemas.py`.
 - **api** — `uvicorn api.app.main:app --reload --port 8001` from the repo root.
   Config comes from the repo-root `.env` via `api/app/config.py`. Tests:
-  `python -m pytest api/tests/`. The database is created on first boot; there is
+  `pytest api/tests`. The database is created on first boot; there is
   no migration step.
 - **mixer** — pure library, no server. Public API is `analyze()` and
   `mix_to_file()` in `mixer/mixer/core.py`. See the

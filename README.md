@@ -41,7 +41,7 @@ Full setup and run instructions are in **[MANUAL.md](MANUAL.md)**. In brief:
 
 ```bash
 cp .env.example .env            # fill in DECOMPOSER_* and GENERATOR_URL
-python -m venv .venv && source .venv/bin/activate && pip install -e ./mixer -e ./api
+python -m venv .venv && source .venv/bin/activate && pip install -e ./mixer -e '.[dev]'
 cd frontend && npm install && npm run build && cd ..
 uvicorn api.app.main:app --port 8001
 ```

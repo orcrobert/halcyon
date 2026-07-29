@@ -1,6 +1,11 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "halcyon-api"
+name = "halcyon"
 version = "0.1.0"
+description = "Prompt-driven ambient soundscape generation and mixing"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.110",
@@ -14,10 +19,20 @@ dependencies = [
     "sqlmodel>=0.0.22",
     "pwdlib[argon2]>=0.2",
     "cryptography>=42.0",
+    "halcyon-mixer",
 ]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "httpx>=0.27"]
 
+[tool.setuptools.packages.find]
+include = ["api*"]
+
+[tool.uv.workspace]
+members = ["mixer"]
+
+[tool.uv.sources]
+halcyon-mixer = { workspace = true }
+
 [tool.pytest.ini_options]
-testpaths = ["api/tests"]
+testpaths = ["api/tests", "mixer/tests"]

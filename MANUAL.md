@@ -63,9 +63,10 @@ from the in-app account panel.
 ### 3.2 Install dependencies
 
 ```bash
-# api + mixer (editable installs into your venv; mixer first — api imports it)
+# the repo is one Python workspace: the root project (api) depends on ./mixer
 python -m venv .venv && source .venv/bin/activate
-pip install -e ./mixer -e ./api
+pip install -e ./mixer -e '.[dev]'
+# with uv, the workspace resolves itself: uv sync
 
 # frontend
 cd frontend && npm install && cd ..
@@ -144,10 +145,14 @@ uvicorn api.app.main:app --port 8001
 
 ## 7. Tests and quality
 
-- **API**: `python -m pytest api/tests/`
+- **Python**: `pytest` from the repo root runs both suites (`api/tests`,
+  `mixer/tests`); narrow with `pytest api/tests` or `pytest mixer/tests`
 - **Frontend**: `cd frontend && npm run lint` and `npx tsc --noEmit`
-- **Mixer**: `pytest` (see the [`mixer`](.claude/skills/mixer/SKILL.md) skill;
-  coverage is a known gap tracked in [`.claude/AUDIT.md`](.claude/AUDIT.md))
+- **DSP**: see the [`mixer`](.claude/skills/mixer/SKILL.md) skill before changing
+  anything under `mixer/mixer/`
+
+CI runs all three on every push and pull request
+(`.github/workflows/ci.yml`).
 
 ---
 

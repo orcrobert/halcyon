@@ -136,8 +136,7 @@ cp .env.example .env
 
 # 2. Python: mixer (brings numpy/scipy/soundfile/librosa) + API deps
 python -m venv .venv && source .venv/bin/activate
-pip install -e ./mixer
-pip install -e ./api
+pip install -e ./mixer -e .
 
 # 3. Build the UI
 cd frontend && npm install && npm run build && cd ..
@@ -166,7 +165,7 @@ for when they are:
 
 | Container | Base | Build/run | Ports | Volumes / state | Key env |
 |-----------|------|-----------|-------|-----------------|---------|
-| halcyon | node → `python:3.11-slim` | build `frontend/dist`, `pip install ./mixer ./api`, `uvicorn api.app.main:app` | 8001 | `DATA_DIR` | `DECOMPOSER_*`, `GENERATOR_URL`, `SECRET_KEY` |
+| halcyon | node → `python:3.11-slim` | build `frontend/dist`, `pip install ./mixer .`, `uvicorn api.app.main:app` | 8001 | `DATA_DIR` | `DECOMPOSER_*`, `GENERATOR_URL`, `SECRET_KEY` |
 | generator | CUDA + python | your AudioCraft server | 9000 | model weights cache | — |
 
 Notes for that phase:

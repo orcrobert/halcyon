@@ -43,18 +43,16 @@ penalty) → `spatial.assign_spatial` (reach→pan, loudness/HF/onset→depth).
 
 ## Testing DSP changes
 
-There is currently **no test suite for the mixer** — this is the top cleanup
-item in [`.claude/AUDIT.md`](../../AUDIT.md). Before changing behaviour:
+Regression tests live in `mixer/tests/`. Before changing behaviour:
 
-1. Add/extend `pytest` regression tests under `mixer/tests/` that pin the current
-   output for representative inputs (synthetic tones + noise at a couple of
-   sample rates), so refactors are provably behaviour-preserving.
-2. Run: `cd mixer && pip install -e '.[dev]' librosa && pytest`.
+1. Extend them to pin the current output for representative inputs (synthetic
+   tones + noise at a couple of sample rates), so the refactor is provably
+   behaviour-preserving.
+2. Run: `pytest mixer/tests` from the repo root.
 3. For audible changes, render with `mix_to_file` and listen — numbers alone
    don't prove it sounds right.
 
 ## Known issues here (see AUDIT for detail)
 
-- `predict_pan` / `predict_and_apply` are dead legacy stubs — safe to remove.
 - `mixer/models/*.pkl` + `experiments/spatial_model/` are a negative-result
   experiment, not used by the shipped heuristic.
