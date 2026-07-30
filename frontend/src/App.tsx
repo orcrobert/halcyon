@@ -5,7 +5,7 @@ import { PromptView } from './components/PromptView'
 import { GeneratingView } from './components/GeneratingView'
 import { DashboardView } from './components/DashboardView'
 import { HistoryPanel } from './components/HistoryPanel'
-import { AccountPanel } from './components/AccountPanel'
+import { AccountView } from './components/AccountView'
 import { useAudioEngine, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
 import {
@@ -17,7 +17,7 @@ import type { Atmosphere, EQBand } from './types'
 
 const PENDING_KEY = 'halcyon_pending_atmosphere_id'
 
-type View = 'prompt' | 'generating' | 'dashboard'
+type View = 'prompt' | 'generating' | 'dashboard' | 'account'
 
 function eqStateToBands(eq: EQState): EQBand[] {
   return [
@@ -52,7 +52,7 @@ function AuthedApp() {
   const [submitting, setSubmitting] = useState(false)
   const [playing, setPlaying] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
-  const [accountOpen, setAccountOpen] = useState(false)
+  const [accountReturnView, setAccountReturnView] = useState<View>('prompt')
   const [binauralActive, setBinauralActive] = useState(false)
   const [binauralBeatHz, setBinauralBeatHz] = useState(8)
   const [binauralLeftHz, setBinauralLeftHz] = useState(200)
@@ -293,9 +293,15 @@ function AuthedApp() {
           onSubmit={handleGenerate}
           loading={submitting}
           error={error}
-          onOpenAccount={() => setAccountOpen(true)}
+          onOpenAccount={() => {
+            setAccountReturnView('prompt')
+            setView('account')
+          }}
           onOpenHistory={() => setHistoryOpen(true)}
         />
+      )}
+      {view === 'account' && (
+        <AccountView onBack={() => setView(accountReturnView)} />
       )}
       {view === 'generating' && atmosphere && (
         <GeneratingView atmosphere={atmosphere} onCancel={handleCancelGenerating} />
@@ -331,7 +337,6 @@ function AuthedApp() {
         onClose={() => setHistoryOpen(false)}
         onOpenAtmosphere={handleOpenFromHistory}
       />
-      <AccountPanel open={accountOpen} onClose={() => setAccountOpen(false)} />
     </div>
   )
 }

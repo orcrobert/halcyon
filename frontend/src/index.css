@@ -16,6 +16,24 @@ body {
   font-family: system-ui, -apple-system, sans-serif;
 }
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: #e2e8f0;
+  caret-color: #e2e8f0;
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
+input:autofill,
+input:autofill:hover,
+input:autofill:focus,
+input:autofill:active {
+  -webkit-text-fill-color: #e2e8f0;
+  caret-color: #e2e8f0;
+  transition: background-color 600000s 0s, color 600000s 0s;
+}
+
 input[type="range"].fader {
   -webkit-appearance: none;
   appearance: none;
