@@ -33,3 +33,29 @@ jobs:
       - run: npm run lint
       - run: npx tsc --noEmit
       - run: npm run build
+
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: halcyon:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Boot the image and check it serves
+        run: |
+          docker run -d --name halcyon-ci -p 8001:8001 halcyon:ci
+          for _ in $(seq 1 30); do
+            [ "$(docker inspect -f '{{.State.Health.Status}}' halcyon-ci)" = "healthy" ] && break
+            sleep 2
+          done
+          test "$(docker inspect -f '{{.State.Health.Status}}' halcyon-ci)" = "healthy"
+          curl -fsS localhost:8001/health
+          curl -fsS localhost:8001/ | grep -q "<!doctype html"
+          docker exec halcyon-ci python -c "from api.app.services.decomposer import _load_prompt; _load_prompt('decomposer')"
+      - if: always()
+        run: docker logs halcyon-ci || true

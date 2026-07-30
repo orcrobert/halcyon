@@ -27,6 +27,7 @@ dev = ["pytest>=8.0", "httpx>=0.27"]
 
 [tool.setuptools.packages.find]
 include = ["api*"]
+exclude = ["api.tests*"]
 
 [tool.setuptools.package-data]
 api = ["prompts/*.txt"]

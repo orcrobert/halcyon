@@ -1,0 +1,15 @@
+*
+
+!api/
+!mixer/
+!frontend/
+!pyproject.toml
+
+api/tests/
+frontend/node_modules/
+frontend/dist/
+mixer/models/
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
+**/.pytest_cache/
