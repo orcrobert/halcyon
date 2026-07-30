@@ -239,6 +239,7 @@ export function AccountPanel({ open, onClose }: Props) {
               >
                 <Field
                   label="Generator URL"
+                  name="halcyon-generator-url"
                   value={draft.generator_url}
                   placeholder={settings.defaults.generator_url ?? 'http://localhost:9000'}
                   onChange={(v) => set('generator_url', v)}
@@ -254,6 +255,8 @@ export function AccountPanel({ open, onClose }: Props) {
                     Provider
                   </span>
                   <select
+                    name="halcyon-decomposer-provider"
+                    autoComplete="off"
                     value={draft.decomposer_provider}
                     onChange={(e) => set('decomposer_provider', e.target.value)}
                     className="w-full bg-[#0d0e18] border border-[#1e2035] rounded-xl text-slate-200 text-[13px] outline-none focus:border-indigo-500/40 transition-colors"
@@ -267,6 +270,7 @@ export function AccountPanel({ open, onClose }: Props) {
 
                 <Field
                   label="Model"
+                  name="halcyon-decomposer-model"
                   value={draft.decomposer_model}
                   placeholder={provider?.default_model ?? ''}
                   onChange={(v) => set('decomposer_model', v)}
@@ -275,6 +279,7 @@ export function AccountPanel({ open, onClose }: Props) {
                 {provider?.key !== 'gemini' && (
                   <Field
                     label="Base URL"
+                    name="halcyon-decomposer-base-url"
                     value={draft.decomposer_base_url}
                     placeholder={provider?.default_base_url ?? ''}
                     onChange={(v) => set('decomposer_base_url', v)}
@@ -299,7 +304,11 @@ export function AccountPanel({ open, onClose }: Props) {
                   </div>
                   <input
                     type="password"
-                    autoComplete="off"
+                    name="halcyon-decomposer-api-key"
+                    autoComplete="new-password"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-form-type="other"
                     value={draft.decomposer_api_key}
                     onChange={(e) => set('decomposer_api_key', e.target.value)}
                     placeholder={settings.decomposer_api_key_set ? 'Stored — type to replace' : 'Not set'}
@@ -362,11 +371,13 @@ function Section({ title, hint, children }: { title: string; hint: string; child
 
 function Field({
   label,
+  name,
   value,
   placeholder,
   onChange,
 }: {
   label: string
+  name: string
   value: string
   placeholder: string
   onChange: (value: string) => void
@@ -376,8 +387,12 @@ function Field({
       <span className="text-[11px] uppercase tracking-[0.14em] text-slate-600 font-semibold">{label}</span>
       <input
         type="text"
+        name={name}
         spellCheck={false}
         autoComplete="off"
+        data-lpignore="true"
+        data-1p-ignore
+        data-form-type="other"
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
