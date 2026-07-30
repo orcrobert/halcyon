@@ -15,6 +15,12 @@ services:
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
     volumes:
       - halcyon-data:/data
+    tmpfs:
+      - /tmp
+    read_only: true
+    init: true
+    security_opt:
+      - no-new-privileges:true
     extra_hosts:
       - "host.docker.internal:host-gateway"
 

@@ -11,16 +11,17 @@ RUN npm run build
 FROM python:3.11-slim AS python-build
 WORKDIR /build
 
-ENV PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1
+ENV PIP_DISABLE_PIP_VERSION_CHECK=1
 
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
-COPY pyproject.toml ./
 COPY mixer/ ./mixer/
+RUN --mount=type=cache,target=/root/.cache/pip pip install ./mixer
+
+COPY pyproject.toml ./
 COPY api/ ./api/
-RUN pip install ./mixer .
+RUN --mount=type=cache,target=/root/.cache/pip pip install .
 
 
 FROM python:3.11-slim AS runtime
