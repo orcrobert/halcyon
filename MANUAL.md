@@ -84,6 +84,18 @@ None. The SQLite file is created under `DATA_DIR` on first boot.
 
 ## 4. Running the stack
 
+To run the whole thing in a container instead of the steps below — the closest
+thing to how a self-hosted instance runs — see
+[SELF_HOSTING.md](SELF_HOSTING.md#running-it-with-docker):
+
+```bash
+docker compose up -d      # http://localhost:8001
+```
+
+The rest of this section is the from-source workflow you want for development,
+where the Vite dev server gives you HMR.
+
+
 ```bash
 # 1. Generator: start your own (see SELF_HOSTING.md) or run all cells in
 #    colab/soundscape_generator.ipynb and put its URL in GENERATOR_URL in .env
@@ -148,6 +160,7 @@ uvicorn api.app.main:app --port 8001
 - **Python**: `pytest` from the repo root runs both suites (`api/tests`,
   `mixer/tests`); narrow with `pytest api/tests` or `pytest mixer/tests`
 - **Frontend**: `cd frontend && npm run lint` and `npx tsc --noEmit`
+- **Image**: `docker build -t halcyon .` — CI also boots it and checks `/health`
 - **DSP**: see the [`mixer`](.claude/skills/mixer/SKILL.md) skill before changing
   anything under `mixer/mixer/`
 

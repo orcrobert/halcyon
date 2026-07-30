@@ -1,0 +1,28 @@
+services:
+  halcyon:
+    build: .
+    image: halcyon:latest
+    restart: unless-stopped
+    ports:
+      - "${HALCYON_PORT:-8001}:8001"
+    environment:
+      GENERATOR_URL: ${GENERATOR_URL:-http://host.docker.internal:9000}
+      DECOMPOSER_PROVIDER: ${DECOMPOSER_PROVIDER:-gemini}
+      DECOMPOSER_MODEL: ${DECOMPOSER_MODEL:-}
+      DECOMPOSER_BASE_URL: ${DECOMPOSER_BASE_URL:-}
+      DECOMPOSER_API_KEY: ${DECOMPOSER_API_KEY:-}
+      SECRET_KEY: ${SECRET_KEY:-}
+      ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
+    volumes:
+      - halcyon-data:/data
+    tmpfs:
+      - /tmp
+    read_only: true
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  halcyon-data:
