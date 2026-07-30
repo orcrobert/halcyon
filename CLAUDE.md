@@ -82,6 +82,11 @@ The full policy, including commit-message shape and PR-body template, lives in
 | `scripts/`      | Python CLIs               | Operational utilities for the shipped pipeline |
 | `audiocraft/`   | vendored (gitignored)     | Meta's AudioCraft, used by the Colab notebook — not part of our source |
 
+`Dockerfile` + `docker-compose.yml` build and run the whole stack as one
+container (Node stage → `frontend/dist`, Python stage → venv, slim runtime).
+The image installs non-editable, so `DATA_DIR` and `FRONTEND_DIST` are absolute
+paths set in the Dockerfile rather than the repo-relative defaults.
+
 Python is one workspace: the root `pyproject.toml` is the `api` distribution and
 takes `mixer/` as a path dependency. Install with `pip install -e ./mixer -e
 '.[dev]'` (or `uv sync`) and import `api.app.*` / `mixer.*` normally — nothing

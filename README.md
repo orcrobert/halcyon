@@ -39,8 +39,17 @@ Ambient by design — the output stays calm, soft, and immersive.
 
 Full setup and run instructions are in **[MANUAL.md](MANUAL.md)**. In brief:
 
+With Docker:
+
 ```bash
 cp .env.example .env            # fill in DECOMPOSER_* and GENERATOR_URL
+docker compose up -d
+```
+
+From source:
+
+```bash
+cp .env.example .env
 python -m venv .venv && source .venv/bin/activate && pip install -e ./mixer -e '.[dev]'
 cd frontend && npm install && npm run build && cd ..
 uvicorn api.app.main:app --port 8001

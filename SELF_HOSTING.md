@@ -29,8 +29,8 @@ API, so dev and production behave identically and neither needs CORS.
 
 ## Prerequisites
 
-- Python 3.11+
-- Node.js 20+ and npm (only to build the UI)
+- Docker and Docker Compose — **or**, to run from source, Python 3.11+ and
+  Node.js 24+ with npm (the latter only to build the UI)
 - A **decomposer**: an API key for any cloud LLM, or Ollama running locally
 - A **generator**: a machine that can run Meta's AudioCraft (a CUDA GPU is
   strongly recommended) or any service that implements the generator contract
@@ -127,7 +127,10 @@ for testing.
 
 ---
 
-## Running it
+## Running it from source
+
+For development, or if you would rather not use containers. To run it with
+Docker instead, skip to [Running it with Docker](#running-it-with-docker).
 
 ```bash
 # 1. Config
@@ -157,27 +160,83 @@ worker to remember.
 
 ---
 
-## Preparing to containerize
+## Running it with Docker
 
-Everything above is arranged so containerization is a fill-in-the-blanks step.
-Dockerfiles and compose are intentionally **not** included yet; this is the map
-for when they are:
+The shortest path to a running instance. You still need a generator and a
+decomposer — the image contains neither.
 
-| Container | Base | Build/run | Ports | Volumes / state | Key env |
-|-----------|------|-----------|-------|-----------------|---------|
-| halcyon | node → `python:3.11-slim` | build `frontend/dist`, `pip install ./mixer .`, `uvicorn api.app.main:app` | 8001 | `DATA_DIR` | `DECOMPOSER_*`, `GENERATOR_URL`, `SECRET_KEY` |
-| generator | CUDA + python | your AudioCraft server | 9000 | model weights cache | — |
+```bash
+cp .env.example .env
+# fill in DECOMPOSER_* and GENERATOR_URL
 
-Notes for that phase:
+docker compose up -d
+```
 
-- It is a **single multi-stage build**: a Node stage produces `frontend/dist`,
-  the Python stage copies it in and serves it. No nginx, no second container.
-- The image must include **both** `api/` and `mixer/`.
-- `DATA_DIR` holds the SQLite file, all generated audio, and `secret.key`. It is
-  the only thing that must survive a rebuild — mount it as a volume.
-- Set `SECRET_KEY` explicitly so stored API keys survive a volume reset.
-- The system packages that are easy to miss: `libsndfile1` for soundfile, and
-  llvm/numba for librosa. Pin versions.
-- Healthcheck on `GET /health`.
-- The generator is the only GPU container and the only piece that may live on a
-  different host; wire it in via `GENERATOR_URL`.
+Open <http://localhost:8001>. `docker compose logs -f` follows the API,
+`docker compose down` stops it, and `docker compose up -d --build` rebuilds
+after a code change.
+
+### What you get
+
+One container. A Node stage builds `frontend/dist`, a Python stage installs the
+workspace into a venv, and the runtime stage carries only that venv, the built
+UI, and `libsndfile1` — about 220 MB. It runs as an unprivileged user and
+reports readiness on `/health`, so `docker compose ps` tells you the truth.
+
+### Configuration
+
+Compose reads the repo-root `.env` and passes each variable through, so the
+table in [Configuration](#configuration) applies unchanged. Anything set in your
+shell wins over `.env`, and both win over the image defaults.
+
+Two variables are fixed by the image and should not be overridden:
+`DATA_DIR=/data` and `FRONTEND_DIST=/app/frontend/dist`.
+
+`HALCYON_PORT` (default `8001`) changes the host port only.
+
+### State
+
+Everything that must survive a rebuild lives in the `halcyon-data` volume
+mounted at `/data`: the SQLite database, all generated audio, and `secret.key`.
+
+Set `SECRET_KEY` explicitly if you want stored API keys to survive losing that
+volume — otherwise a new key is generated on first boot and the old encrypted
+keys become unreadable. Atmospheres are unaffected either way.
+
+```bash
+docker compose exec halcyon ls /data          # inspect
+docker volume rm app_halcyon-data             # destroy, after `down`
+```
+
+### Reaching your generator
+
+`GENERATOR_URL` defaults to `http://host.docker.internal:9000`, which resolves
+to the host from inside the container — right for a generator running on the
+same machine. For a generator elsewhere (a Colab/ngrok URL, another box), set
+the URL and the value is used as-is.
+
+The generator is deliberately not in the compose file: it wants a GPU, it is
+often on another host, and it is yours to run. See
+[The generator contract](#the-generator-contract).
+
+### Without compose
+
+```bash
+docker build -t halcyon .
+docker run -d --name halcyon \
+  -p 8001:8001 \
+  -v halcyon-data:/data \
+  -e GENERATOR_URL=http://your-generator:9000 \
+  -e DECOMPOSER_PROVIDER=gemini \
+  -e DECOMPOSER_API_KEY=... \
+  halcyon
+```
+
+### The generator container
+
+Not shipped, for the reasons above. If you build one, it is the only GPU
+container and the only piece that may live on a different host:
+
+| Container | Base | Ports | Volumes | Wire-up |
+|-----------|------|-------|---------|---------|
+| generator | CUDA + python | 9000 | model weights cache | `GENERATOR_URL` |
