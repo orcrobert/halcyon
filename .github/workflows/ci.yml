@@ -59,13 +59,7 @@ jobs:
           curl -fsS localhost:8001/health
           curl -fsS localhost:8001/ | grep -q "<!doctype html"
           docker exec halcyon-ci python -c "from api.app.services.decomposer import _load_prompt; _load_prompt('decomposer')"
-          docker exec halcyon-ci python -c "
-import numpy as np, soundfile as sf
-from mixer.core import analyze
-rng = np.random.default_rng(0)
-sf.write('/tmp/ci-tone.wav', rng.normal(0, 0.05, 44100).astype(np.float32), 22050)
-valid, wavs, srs = analyze([{'file': '/tmp/ci-tone.wav', 'label': 'noise', 'type': 'sound'}])
-assert valid and valid[0].get('eq_json'), valid
-print('mixer analyze OK:', valid[0]['volume'], valid[0]['pan'])"
+      - name: Check the mixer runs under the read-only rootfs
+        run: docker exec -i halcyon-ci python - < .github/scripts/mix_smoke.py
       - if: always()
         run: docker logs halcyon-ci || true
