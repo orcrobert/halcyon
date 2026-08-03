@@ -51,6 +51,19 @@ Keep the Space public, or put it behind your own proxy.
 Set them as Space variables. Models load at startup, so the first boot after a
 change is slow.
 
+## Private repository
+
+The image installs `halcyon-generator` from GitHub, so while `orcrobert/halcyon`
+is private the build cannot clone it and fails with `exit code: 128`.
+
+Add a [fine-grained token](https://github.com/settings/tokens) with read access
+to the repository as a **build-time secret** named `GH_TOKEN` — Settings →
+Variables and secrets → New secret, and tick *Use as build secret*.
+
+It is mounted with `--mount=type=secret`, so it is never written into an image
+layer. If the repository is public, leave the secret unset and the build works
+unchanged.
+
 ## Deploying
 
 From a checkout of the main repository:
