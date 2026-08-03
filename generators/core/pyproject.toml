@@ -15,7 +15,9 @@ halcyon-generator = "halcyon_generator.cli:main"
 [project.optional-dependencies]
 audiocraft = [
     "torch==2.1.2",
+    "torchvision==0.16.2",
     "torchaudio==2.1.2",
+    "xformers==0.0.23.post1",
     "numpy<2",
     "transformers==4.40.2",
     "av==12.0.0",
@@ -36,6 +38,7 @@ audiocraft = [
     "sentencepiece",
     "soundfile",
     "librosa",
+    "huggingface_hub",
 ]
 
 [build-system]

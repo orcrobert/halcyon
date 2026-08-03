@@ -19,7 +19,6 @@ RUN apt-get update && apt-get install -y \
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install --no-cache-dir --no-deps git+https://github.com/facebookresearch/audiocraft.git
 
 ARG HALCYON_REPO=github.com/orcrobert/halcyon
 ARG HALCYON_REF=main
@@ -27,7 +26,9 @@ ARG HALCYON_REF=main
 RUN --mount=type=secret,id=GH_TOKEN,mode=0444,required=false \
     CREDS="$([ -s /run/secrets/GH_TOKEN ] && echo "$(cat /run/secrets/GH_TOKEN)@")" \
     && pip install --no-cache-dir \
-        "halcyon-generator @ git+https://${CREDS}${HALCYON_REPO}@${HALCYON_REF}#subdirectory=generators/core"
+        "halcyon-generator[audiocraft] @ git+https://${CREDS}${HALCYON_REPO}@${HALCYON_REF}#subdirectory=generators/core"
+
+RUN pip install --no-cache-dir --no-deps git+https://github.com/facebookresearch/audiocraft.git
 
 COPY . .
 

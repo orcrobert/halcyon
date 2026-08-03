@@ -10,38 +10,21 @@ CORE_DST = "/opt/halcyon-core"
 
 CACHE_DIR = "/cache"
 GPU = os.getenv("HALCYON_MODAL_GPU", "A10G")
+CUDA_INDEX = "https://download.pytorch.org/whl/cu121"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("git", "ffmpeg", "libsndfile1")
     .pip_install(
         "torch==2.1.2",
+        "torchvision==0.16.2",
         "torchaudio==2.1.2",
-        "numpy<2",
-        "transformers==4.40.2",
-        "av==12.0.0",
-        "encodec",
-        "lameenc",
-        "num2words",
-        "spacy",
-        "demucs",
-        "cloudpickle",
-        "flashy",
-        "torchmetrics",
-        "torchdiffeq",
-        "julius",
-        "einops",
-        "omegaconf",
-        "hydra-core",
-        "hydra-colorlog",
-        "sentencepiece",
-        "soundfile",
-        "librosa",
-        extra_index_url="https://download.pytorch.org/whl/cu121",
+        "xformers==0.0.23.post1",
+        extra_index_url=CUDA_INDEX,
     )
-    .run_commands(f"pip install --no-deps {AUDIOCRAFT}")
     .add_local_dir(CORE_SRC, CORE_DST, copy=True, ignore=["__pycache__", "*.egg-info"])
-    .run_commands(f"pip install {CORE_DST}")
+    .run_commands(f"pip install '{CORE_DST}[audiocraft]'")
+    .run_commands(f"pip install --no-deps {AUDIOCRAFT}")
     .env(
         {
             "HF_HOME": f"{CACHE_DIR}/hf",

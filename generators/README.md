@@ -96,6 +96,18 @@ Configuration is environment-only, and identical on every host:
 `core` depends on FastAPI and Pydantic only. AudioCraft and torch are imported
 lazily, so the package installs and its tests run without a GPU.
 
+### The dependency list lives in one place
+
+Everything AudioCraft needs at runtime is the `[audiocraft]` extra in
+`generators/core/pyproject.toml`. Modal and the Hugging Face Space install that
+extra rather than restating it; each pins only the four CUDA wheels that have to
+come from PyTorch's index (`torch`, `torchvision`, `torchaudio`, `xformers`).
+
+**Add a runtime dependency there and nowhere else.** When the list was duplicated
+per host it drifted, and the hosts missing `xformers` crashed on the first
+generation — `audiocraft.modules.transformer` imports it at module load, so the
+failure comes at model load, not at install.
+
 ### While this repository is private
 
 The git URL above cannot be cloned without credentials, so any build using it
