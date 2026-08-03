@@ -9,8 +9,34 @@ dependencies = [
     "uvicorn[standard]",
 ]
 
+[project.scripts]
+halcyon-generator = "halcyon_generator.cli:main"
+
 [project.optional-dependencies]
-serve = ["uvicorn[standard]"]
+audiocraft = [
+    "torch==2.1.2",
+    "torchaudio==2.1.2",
+    "numpy<2",
+    "transformers==4.40.2",
+    "av==12.0.0",
+    "encodec",
+    "lameenc",
+    "num2words",
+    "spacy",
+    "demucs",
+    "cloudpickle",
+    "flashy",
+    "torchmetrics",
+    "torchdiffeq",
+    "julius",
+    "einops",
+    "omegaconf",
+    "hydra-core",
+    "hydra-colorlog",
+    "sentencepiece",
+    "soundfile",
+    "librosa",
+]
 
 [build-system]
 requires = ["setuptools>=68"]

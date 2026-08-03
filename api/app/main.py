@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from api.app.config import settings
 from api.app.db import init_db
-from api.app.routers import atmospheres, auth, elements
+from api.app.routers import atmospheres, auth, elements, generators
 from api.app.routers import settings as settings_router
 from api.app.services.pipeline import run_generation
 from api.app.worker import GenerationWorker, reclaim_interrupted
@@ -52,6 +52,7 @@ def health():
 
 app.include_router(auth.router)
 app.include_router(settings_router.router)
+app.include_router(generators.router)
 app.include_router(atmospheres.router)
 app.include_router(elements.router)
 

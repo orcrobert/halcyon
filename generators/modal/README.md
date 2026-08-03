@@ -1,18 +1,15 @@
 # Halcyon generator — Modal
 
-> **Status: unverified.** The deployment below is written but has not been run
-> against Modal yet. Treat it as a starting point, not a tested path.
+The best host for intermittent use. Containers scale to zero between requests,
+so an idle generator costs nothing, and the GPU is billed by the second while it
+runs. Colab needs a browser tab open; a Hugging Face Space with GPU hardware
+bills continuously.
 
-Modal is the best fit of the three hosts for occasional use: containers scale to
-zero between requests, so an idle generator costs nothing, and a GPU is billed
-by the second while it runs. Colab needs a browser tab open; a Hugging Face
-Space with GPU hardware bills continuously.
+The trade is a cold start. The first request after an idle period pays for
+container boot plus model load. Weights are cached on a Modal volume, so only
+the very first container pays the download.
 
-The cost is a cold start. The first request after an idle period pays for
-container boot plus model load — well inside the API's 300 s timeout once the
-weights are cached on the volume, but slow the very first time.
-
-## Deploying
+## Deploy
 
 ```bash
 pip install modal
@@ -20,25 +17,56 @@ modal setup
 modal deploy generators/modal/deploy.py
 ```
 
-Modal prints a URL. Put it in Halcyon's `.env`:
+Modal prints the URL on success. Paste it into the account page under
+**Generators → Add → Modal**, or set it in `.env`:
 
 ```
 GENERATOR_URL=https://<workspace>--halcyon-generator-generator-web.modal.run
 ```
 
-## How it is wired
-
-`@modal.enter()` loads AudioGen and MusicGen once per container, and
-`create_app(engine=..., eager=False)` mounts the shared FastAPI app over that
-already-loaded engine — so a warm container answers `POST /generate`
-immediately. Model weights persist in the `halcyon-model-cache` volume, so only
-the first container of a given image pays the download.
-
-`max_containers=1` keeps a single generator alive. Raise it if you want
-concurrent atmospheres, and expect a cold start per new container.
+To iterate on the deployment without publishing it, `modal serve
+generators/modal/deploy.py` gives you a temporary URL that reloads on save.
 
 ## Configuration
 
-The same variables as every other host — `AUDIOGEN_MODEL`, `MUSICGEN_MODEL`,
-`GENERATION_DURATION`, `GENERATION_DEVICE`. Set them in the image's `.env({...})`
-call or as Modal secrets.
+Read from your shell at deploy time and baked into the image:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `HALCYON_MODAL_GPU` | `A10G` | any Modal GPU string — `T4`, `L4`, `A100` |
+| `AUDIOGEN_MODEL` | `facebook/audiogen-medium` | model for `type: sound` |
+| `MUSICGEN_MODEL` | `facebook/musicgen-large` | model for `type: music` |
+| `GENERATION_DURATION` | `10` | seconds per element |
+
+```bash
+HALCYON_MODAL_GPU=T4 MUSICGEN_MODEL=facebook/musicgen-medium \
+  modal deploy generators/modal/deploy.py
+```
+
+Changing any of them rebuilds the image, so the next deploy is slow.
+
+## How it works
+
+`@modal.enter()` loads AudioGen and MusicGen once per container and
+`create_app(engine=..., eager=False)` mounts the shared FastAPI app over that
+already-loaded engine, so a warm container answers `POST /generate` with no
+per-request load.
+
+`startup_timeout=900` covers a cold model load, and `timeout=900` covers a
+generation request — both comfortably above the 300 s the Halcyon API waits, so
+a cold start is the only case that can time out on the API side. Hit `GET /`
+once after deploying to warm a container before you generate for real.
+
+`max_containers=1` keeps a single generator alive. Raise it for concurrent
+atmospheres and expect a cold start per new container.
+
+## What is verified
+
+`deploy.py` is checked against the real `modal` package (1.5.3): the module
+imports, the image spec builds, and the class and ASGI endpoint register. That
+catches API drift — `modal.Stub` is gone, `container_idle_timeout` is now
+`scaledown_window` — but it is not a deployment.
+
+**It has not been run on Modal hardware.** Deploying needs an account, and the
+GPU path, cold-start timings and volume caching are unexercised. Treat the first
+`modal deploy` as the real test.

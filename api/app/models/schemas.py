@@ -82,6 +82,59 @@ class SettingsOut(BaseModel):
     providers: list[ProviderOut]
 
 
+GeneratorKind = Literal["colab", "modal", "huggingface", "local", "custom"]
+
+GeneratorUrl = Annotated[
+    str,
+    StringConstraints(strip_whitespace=True, min_length=1, max_length=2000),
+]
+
+
+class GeneratorCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=60)
+    url: GeneratorUrl
+    kind: GeneratorKind = "custom"
+    activate: bool = True
+
+
+class GeneratorUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=60)
+    url: GeneratorUrl | None = None
+    kind: GeneratorKind | None = None
+
+
+class GeneratorOut(BaseModel):
+    id: int
+    name: str
+    kind: str
+    url: str
+    is_active: bool
+    last_status: str | None
+    last_checked_at: datetime | None
+    reported: dict[str, Any] | None
+
+
+class GeneratorProbe(BaseModel):
+    status: str
+    detail: str | None = None
+    reported: dict[str, Any] | None = None
+
+
+class GeneratorKindOut(BaseModel):
+    key: str
+    label: str
+    hint: str
+    url_example: str
+    docs_url: str
+
+
+class GeneratorListOut(BaseModel):
+    generators: list[GeneratorOut]
+    active_url: str
+    instance_default_url: str
+    kinds: list[GeneratorKindOut]
+
+
 class EQBand(BaseModel):
     type: Literal["lowshelf", "peaking", "highshelf"]
     freq: float = Field(gt=0)

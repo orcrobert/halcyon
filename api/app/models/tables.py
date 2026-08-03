@@ -34,6 +34,11 @@ class User(SQLModel, table=True):
         cascade_delete=True,
         sa_relationship_kwargs={"uselist": False},
     )
+    generators: list["GeneratorProfile"] = Relationship(
+        back_populates="user",
+        cascade_delete=True,
+        sa_relationship_kwargs={"order_by": "GeneratorProfile.created_at"},
+    )
 
 
 class AuthToken(SQLModel, table=True):
@@ -63,6 +68,29 @@ class UserSettings(SQLModel, table=True):
     decomposer_api_key_enc: str | None = None
 
     user: User = Relationship(back_populates="preferences")
+
+
+class GeneratorProfile(SQLModel, table=True):
+    __tablename__ = "generator_profiles"
+    __table_args__ = (UniqueConstraint("user_id", "name"),)
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="users.id", index=True, ondelete="CASCADE")
+    name: str
+    kind: str = "custom"
+    url: str
+    is_active: bool = Field(default=False, index=True)
+    last_status: str | None = None
+    last_checked_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    reported_json: dict[str, Any] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
+    created_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
+    updated_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
+
+    user: User = Relationship(back_populates="generators")
 
 
 class Atmosphere(SQLModel, table=True):

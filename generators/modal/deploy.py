@@ -1,6 +1,12 @@
+import os
+
 import modal
 
 CORE = "halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
+AUDIOCRAFT = "git+https://github.com/facebookresearch/audiocraft.git"
+
+CACHE_DIR = "/cache"
+GPU = os.getenv("HALCYON_MODAL_GPU", "A10G")
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -30,11 +36,18 @@ image = (
         "librosa",
         extra_index_url="https://download.pytorch.org/whl/cu121",
     )
-    .run_commands(
-        "pip install --no-deps git+https://github.com/facebookresearch/audiocraft.git"
-    )
+    .run_commands(f"pip install --no-deps {AUDIOCRAFT}")
     .pip_install(CORE)
-    .env({"HF_HOME": "/cache/hf", "HF_HUB_CACHE": "/cache/hf"})
+    .env(
+        {
+            "HF_HOME": f"{CACHE_DIR}/hf",
+            "HF_HUB_CACHE": f"{CACHE_DIR}/hf",
+            "AUDIOGEN_MODEL": os.getenv("AUDIOGEN_MODEL", "facebook/audiogen-medium"),
+            "MUSICGEN_MODEL": os.getenv("MUSICGEN_MODEL", "facebook/musicgen-large"),
+            "GENERATION_DURATION": os.getenv("GENERATION_DURATION", "10"),
+            "GENERATION_DEVICE": "cuda",
+        }
+    )
 )
 
 app = modal.App("halcyon-generator", image=image)
@@ -42,9 +55,10 @@ cache = modal.Volume.from_name("halcyon-model-cache", create_if_missing=True)
 
 
 @app.cls(
-    gpu="A10G",
-    volumes={"/cache": cache},
+    gpu=GPU,
+    volumes={CACHE_DIR: cache},
     scaledown_window=300,
+    startup_timeout=900,
     timeout=900,
     max_containers=1,
 )
@@ -55,6 +69,7 @@ class Generator:
 
         self.engine = AudioCraftEngine()
         self.engine.load()
+        cache.commit()
 
     @modal.asgi_app()
     def web(self):

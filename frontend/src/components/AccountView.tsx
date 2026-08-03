@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { getSettings, updateSettings } from '../api/settings'
 import { extractErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
+import { GeneratorsCard } from './GeneratorsCard'
 import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
 interface Props {
@@ -9,7 +10,6 @@ interface Props {
 }
 
 interface Draft {
-  generator_url: string
   decomposer_provider: string
   decomposer_model: string
   decomposer_base_url: string
@@ -17,7 +17,6 @@ interface Draft {
 }
 
 const EMPTY_DRAFT: Draft = {
-  generator_url: '',
   decomposer_provider: '',
   decomposer_model: '',
   decomposer_base_url: '',
@@ -31,7 +30,6 @@ const LABEL_CLASS = 'text-[10px] uppercase tracking-[0.18em] text-slate-600 font
 
 function toDraft(settings: Settings): Draft {
   return {
-    generator_url: settings.generator_url ?? '',
     decomposer_provider: settings.decomposer_provider ?? settings.defaults.decomposer_provider ?? '',
     decomposer_model: settings.decomposer_model ?? '',
     decomposer_base_url: settings.decomposer_base_url ?? '',
@@ -93,7 +91,6 @@ export function AccountView({ onBack }: Props) {
     setError(null)
 
     const patch: SettingsUpdate = {
-      generator_url: draft.generator_url.trim(),
       decomposer_provider: draft.decomposer_provider,
       decomposer_model: draft.decomposer_model.trim(),
       decomposer_base_url: draft.decomposer_base_url.trim(),
@@ -189,18 +186,7 @@ export function AccountView({ onBack }: Props) {
 
         {!loading && settings && (
           <div className="flex flex-col gap-4">
-            <Card
-              title="Generator"
-              hint="The audio-synthesis service you run. Leave blank to use this instance's default."
-            >
-              <Field
-                label="Generator URL"
-                name="halcyon-generator-url"
-                value={draft.generator_url}
-                placeholder={settings.defaults.generator_url ?? 'http://localhost:9000'}
-                onChange={(v) => set('generator_url', v)}
-              />
-            </Card>
+            <GeneratorsCard />
 
             <Card
               title="Decomposer"

@@ -100,7 +100,9 @@ def run_generation(atmosphere_id: int) -> None:
             logger.warning("Atmosphere %s vanished before generation", atmosphere_id)
             return
 
-        config = resolve_config(atmosphere.user.preferences)
+        config = resolve_config(
+            atmosphere.user.preferences, atmosphere.user.generators
+        )
 
         try:
             _set_stage(session, atmosphere, "decomposing")
