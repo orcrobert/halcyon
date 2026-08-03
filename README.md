@@ -67,7 +67,7 @@ Running your own instance? Start with **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 | `frontend/` | React UI + browser audio engine |
 | `api/` | FastAPI service: auth, persistence, generation, audio serving |
 | `mixer/` | Auto-EQ / volume / spatial / looping DSP package |
-| `colab/` | GPU generator notebook |
+| `generators/` | GPU generator: shared server package + Colab, Hugging Face and Modal hosts |
 | `experiments/` | Thesis research: decomposition benchmark, learned spatial model |
 | `scripts/` | Operational CLIs |
 

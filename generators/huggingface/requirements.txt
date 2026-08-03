@@ -1,0 +1,29 @@
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.1.2
+torchvision==0.16.2
+torchaudio==2.1.2
+xformers==0.0.23.post1
+numpy<2
+transformers==4.40.2
+fastapi
+uvicorn[standard]
+soundfile
+librosa
+av==12.0.0
+encodec
+lameenc
+num2words
+spacy
+demucs
+cloudpickle
+flashy
+torchmetrics
+torchdiffeq
+julius
+einops
+omegaconf
+hydra-core
+hydra-colorlog
+sentencepiece
+huggingface_hub
+halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core
