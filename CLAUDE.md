@@ -167,11 +167,16 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   alias `COLAB_URL`) and a fragile link — the API times out (300 s) if it is
   down. The contract is documented in
   [SELF_HOSTING.md](SELF_HOSTING.md#the-generator-contract).
-- **`generators/` holds three hosts over one package.** Generation logic belongs
-  in `generators/core`; `colab/`, `huggingface/` and `modal/` install it from git
-  and should stay thin. Do not fix a generation bug in one host — fix `core` and
-  they all inherit it. Its tests run without AudioCraft or a GPU
+- **`generators/` holds four hosts over one package.** Generation logic belongs
+  in `generators/core`; `colab/`, `local/`, `huggingface/` and `modal/` install
+  it from git and should stay thin. Do not fix a generation bug in one host — fix
+  `core` and they all inherit it. Its tests run without AudioCraft or a GPU
   (`cd generators/core && pytest`).
+- **Generators are per-user rows, not a setting.** `GeneratorProfile` holds the
+  saved hosts and exactly one is active; `resolve_config()` prefers it over
+  `user_settings.generator_url` (legacy, still honoured) and then the instance
+  `GENERATOR_URL`. Anything resolving a generator must go through
+  `resolve_config`, never read `settings.generator_url` directly.
 - **The decomposer is any LLM.** `DECOMPOSER_PROVIDER` is `gemini`, `ollama`, or
   `openai` (any OpenAI-compatible endpoint). Providers live in
   `api/app/services/providers.py`; add one there and it appears in the account

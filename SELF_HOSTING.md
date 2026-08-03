@@ -56,8 +56,12 @@ runtimes rely on.
 | `FRONTEND_ORIGIN` | only for running the dev server against a remote API |
 
 Every decomposer value is an **instance default**. Each user can override the
-provider, model, base URL, API key, and generator URL from their account page,
-so one instance can serve people using different models.
+provider, model, base URL, and API key from their account page, so one instance
+can serve people using different models.
+
+`GENERATOR_URL` is a fallback rather than a setting most users will touch. Each
+user saves their own generators in the account page and switches between them
+there; the instance value is only used by users who have saved none.
 
 ### Choosing a decomposer
 
@@ -129,13 +133,15 @@ one shared package (`generators/core`), so they behave identically:
 
 | Host | Cost | Setup |
 |------|------|-------|
+| `generators/local/` | free | `halcyon-generator serve` on your own GPU |
 | `generators/colab/` | free tier | run the notebook, copy the ngrok URL |
 | `generators/modal/` | per-second GPU, scales to zero | `modal deploy` |
 | `generators/huggingface/` | paid GPU hardware, always on | `git subtree push` |
 
-Modal is the sensible default for real use; Colab is the quickest way to see it
-working. [generators/README.md](generators/README.md) compares them and covers
-the shared package.
+If you have a CUDA GPU, run it locally — it is the fastest and costs nothing.
+Otherwise Modal is the sensible default for real use, and Colab is the quickest
+way to see it working. [generators/README.md](generators/README.md) has a
+quickstart for each.
 
 ---
 

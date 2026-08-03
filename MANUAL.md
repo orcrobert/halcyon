@@ -139,7 +139,7 @@ uvicorn api.app.main:app --port 8001
    - **Animate** — slow autonomous drift of pan/volume/depth for a living mix.
    - **Export** — offline render of the current mix to a downloadable WAV.
 5. **History** — reopen any previous atmosphere; edits persist server-side.
-6. **Account** — point Halcyon at your own generator and your own LLM.
+6. **Account** — save your generators and switch between them, and pick your LLM.
 
 ---
 
@@ -147,7 +147,7 @@ uvicorn api.app.main:app --port 8001
 
 | Symptom | Likely cause | Fix |
 |---------|--------------|-----|
-| Generation fails after ~minutes | Stale/down `GENERATOR_URL` | Restart your generator and update the URL in `.env` or the account panel |
+| Generation fails after ~minutes | Stale or unreachable generator | Hit **Test** on it in the account page; for Colab, paste the new session URL |
 | Generation fails immediately with a key error | No API key for the chosen provider | Add one in the account panel, or switch to a local Ollama model |
 | Atmosphere failed with "interrupted by a server restart" | The API restarted mid-generation | Generate again; nothing is left stranded |
 | Decomposition 422 | Model returned malformed/empty elements | Check model availability; try a clearer prompt or another model |
