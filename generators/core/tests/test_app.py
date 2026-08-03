@@ -1,5 +1,6 @@
 import base64
 
+import pytest
 from fastapi.testclient import TestClient
 
 from halcyon_generator import GeneratorConfig, create_app
@@ -57,3 +58,23 @@ def test_config_reads_overrides_from_the_environment(monkeypatch):
 def test_labels_are_sanitised_into_filenames():
     assert _stem("distant thunder / rain") == "distant_thunder_rain"
     assert _stem("///") == "element"
+
+
+def test_the_cli_parses_serve_overrides():
+    from halcyon_generator.cli import build_parser
+
+    args = build_parser().parse_args(
+        ["serve", "--port", "9000", "--device", "cpu", "--duration", "5"]
+    )
+
+    assert args.command == "serve"
+    assert args.port == 9000
+    assert args.device == "cpu"
+    assert args.duration == 5
+
+
+def test_the_cli_requires_a_subcommand():
+    from halcyon_generator.cli import build_parser
+
+    with pytest.raises(SystemExit):
+        build_parser().parse_args([])
