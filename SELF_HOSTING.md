@@ -244,11 +244,18 @@ docker build -t halcyon .
 docker run -d --name halcyon \
   -p 8001:8001 \
   -v halcyon-data:/data \
+  --read-only --tmpfs /tmp \
   -e GENERATOR_URL=http://your-generator:9000 \
   -e DECOMPOSER_PROVIDER=gemini \
   -e DECOMPOSER_API_KEY=... \
   halcyon
 ```
+
+**`/tmp` must be writable.** The mixer's analysis goes through librosa, whose
+numba-compiled helpers refuse to run when they cannot write a cache — the image
+points `NUMBA_CACHE_DIR` at `/tmp/numba-cache` for this. Running `--read-only`
+without a tmpfs at `/tmp` leaves the API healthy but fails every generation at
+the mix stage.
 
 ### The generator container
 
