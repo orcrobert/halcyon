@@ -91,6 +91,62 @@ export interface Settings {
   providers: DecomposerProvider[]
 }
 
+export type GeneratorKind = 'colab' | 'modal' | 'huggingface' | 'local' | 'custom'
+
+export type GeneratorStatus = 'ok' | 'unreachable' | 'error'
+
+export interface GeneratorReport {
+  audiogen_model?: string
+  musicgen_model?: string
+  duration?: number
+  loaded?: boolean
+}
+
+export interface Generator {
+  id: number
+  name: string
+  kind: GeneratorKind
+  url: string
+  is_active: boolean
+  last_status: GeneratorStatus | null
+  last_checked_at: string | null
+  reported: GeneratorReport | null
+}
+
+export interface GeneratorHost {
+  key: GeneratorKind
+  label: string
+  hint: string
+  url_example: string
+  docs_url: string
+}
+
+export interface GeneratorList {
+  generators: Generator[]
+  active_url: string
+  instance_default_url: string
+  kinds: GeneratorHost[]
+}
+
+export interface GeneratorProbe {
+  status: GeneratorStatus
+  detail: string | null
+  reported: GeneratorReport | null
+}
+
+export interface GeneratorCreate {
+  name: string
+  url: string
+  kind: GeneratorKind
+  activate?: boolean
+}
+
+export type GeneratorUpdate = Partial<{
+  name: string
+  url: string
+  kind: GeneratorKind
+}>
+
 export type SettingsUpdate = Partial<{
   generator_url: string
   decomposer_provider: string
