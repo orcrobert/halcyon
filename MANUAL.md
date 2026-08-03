@@ -12,7 +12,7 @@ Two services cooperate:
 | Service   | Port (default) | Command |
 |-----------|----------------|---------|
 | API       | 8001           | `uvicorn api.app.main:app --port 8001` |
-| Generator | 9000 (yours)   | your own; reference: `colab/soundscape_generator.ipynb` |
+| Generator | 9000 (yours)   | your own; ready-made hosts in `generators/` |
 
 The API owns accounts, persistence, generation, audio serving, and — when
 `frontend/dist` exists — the UI itself.
@@ -29,8 +29,9 @@ picture. For a custom dev domain (Herd/Valet), set `VITE_DEV_HOST`. See
 - Python 3.11+ (a virtualenv is recommended)
 - Node.js 20+ and npm
 - A decomposer: an API key for any cloud LLM, **or** Ollama running locally
-- A Google account for Colab (GPU generator) — or any host that exposes the
-  generator `POST /generate` contract
+- A generator: pick a host from [generators/](generators/README.md) — Colab
+  (free, needs a Google account), Modal, or Hugging Face — or any service of
+  your own that exposes the `POST /generate` contract
 
 ---
 
@@ -97,8 +98,9 @@ where the Vite dev server gives you HMR.
 
 
 ```bash
-# 1. Generator: start your own (see SELF_HOSTING.md) or run all cells in
-#    colab/soundscape_generator.ipynb and put its URL in GENERATOR_URL in .env
+# 1. Generator: pick a host from generators/README.md — the quickest is to run
+#    all cells in generators/colab/soundscape_generator.ipynb — and put the URL
+#    it prints in GENERATOR_URL in .env
 
 # 2. API
 source .venv/bin/activate

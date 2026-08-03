@@ -88,8 +88,8 @@ re-enter.
 
 The API delegates all audio synthesis to whatever HTTP service `GENERATOR_URL`
 points at. Implement this one endpoint and you can generate with anything — a
-local AudioCraft server, a cloud GPU box, the bundled Colab notebook, or a stub
-for testing.
+local AudioCraft server, a cloud GPU box, one of the hosts in `generators/`, or
+a stub for testing.
 
 **Request** — `POST {GENERATOR_URL}/generate`
 
@@ -122,8 +122,20 @@ for testing.
   and the generator by default — run the generator on a private network or add
   your own.
 
-`colab/soundscape_generator.ipynb` is a working reference implementation
-(AudioCraft on a Colab GPU, exposed via ngrok).
+### Ready-made hosts
+
+`generators/` contains working implementations of this contract, all built on
+one shared package (`generators/core`), so they behave identically:
+
+| Host | Cost | Setup |
+|------|------|-------|
+| `generators/colab/` | free tier | run the notebook, copy the ngrok URL |
+| `generators/modal/` | per-second GPU, scales to zero | `modal deploy` |
+| `generators/huggingface/` | paid GPU hardware, always on | `git subtree push` |
+
+Modal is the sensible default for real use; Colab is the quickest way to see it
+working. [generators/README.md](generators/README.md) compares them and covers
+the shared package.
 
 ---
 

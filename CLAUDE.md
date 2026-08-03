@@ -77,10 +77,10 @@ The full policy, including commit-message shape and PR-body template, lives in
 | `frontend/`     | React 19, TS, Vite, Tailwind, Web Audio API | UI + the browser audio engine (playback, live mixing, export) |
 | `api/`          | FastAPI, Python 3.11, SQLModel, SQLite | Accounts, persistence, generation pipeline, audio serving, and the built UI |
 | `mixer/`        | Python 3.11, NumPy, librosa | **Core IP.** Standalone package: auto-EQ, volume, spatial placement, looping |
-| `colab/`        | Jupyter notebook          | GPU host for AudioGen/MusicGen, exposed to `api/` via ngrok |
+| `generators/`   | Python package + per-host adapters | GPU audio synthesis. `core/` is the shared FastAPI server; `colab/`, `huggingface/`, `modal/` are thin hosts for it |
 | `experiments/`  | Python, scikit-learn      | All research code: LLM decomposition benchmark, learned spatial model (negative result — see AUDIT) |
 | `scripts/`      | Python CLIs               | Operational utilities for the shipped pipeline |
-| `audiocraft/`   | vendored (gitignored)     | Meta's AudioCraft, used by the Colab notebook — not part of our source |
+| `audiocraft/`   | vendored (gitignored)     | Meta's AudioCraft, used by the generators — not part of our source |
 
 `Dockerfile` + `docker-compose.yml` build and run the whole stack as one
 container (Node stage → `frontend/dist`, Python stage → venv, slim runtime).
@@ -164,9 +164,14 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   lifespan. It is not a separate process. Anything left `generating` when the
   server restarts is reclaimed and marked `failed` on the next boot.
 - **The generator is a bring-your-own HTTP service** (`GENERATOR_URL`, legacy
-  alias `COLAB_URL`). The bundled Colab notebook is one reference implementation
-  and a fragile link — the API times out (300 s) if the generator is down.
-  The contract is documented in [SELF_HOSTING.md](SELF_HOSTING.md#the-generator-contract).
+  alias `COLAB_URL`) and a fragile link — the API times out (300 s) if it is
+  down. The contract is documented in
+  [SELF_HOSTING.md](SELF_HOSTING.md#the-generator-contract).
+- **`generators/` holds three hosts over one package.** Generation logic belongs
+  in `generators/core`; `colab/`, `huggingface/` and `modal/` install it from git
+  and should stay thin. Do not fix a generation bug in one host — fix `core` and
+  they all inherit it. Its tests run without AudioCraft or a GPU
+  (`cd generators/core && pytest`).
 - **The decomposer is any LLM.** `DECOMPOSER_PROVIDER` is `gemini`, `ollama`, or
   `openai` (any OpenAI-compatible endpoint). Providers live in
   `api/app/services/providers.py`; add one there and it appears in the account
