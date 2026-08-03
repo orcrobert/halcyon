@@ -1,9 +1,12 @@
 import os
+from pathlib import Path
 
 import modal
 
-CORE = "halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
 AUDIOCRAFT = "git+https://github.com/facebookresearch/audiocraft.git"
+
+CORE_SRC = Path(__file__).resolve().parents[1] / "core"
+CORE_DST = "/opt/halcyon-core"
 
 CACHE_DIR = "/cache"
 GPU = os.getenv("HALCYON_MODAL_GPU", "A10G")
@@ -37,7 +40,8 @@ image = (
         extra_index_url="https://download.pytorch.org/whl/cu121",
     )
     .run_commands(f"pip install --no-deps {AUDIOCRAFT}")
-    .pip_install(CORE)
+    .add_local_dir(CORE_SRC, CORE_DST, copy=True, ignore=["__pycache__", "*.egg-info"])
+    .run_commands(f"pip install {CORE_DST}")
     .env(
         {
             "HF_HOME": f"{CACHE_DIR}/hf",

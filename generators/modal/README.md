@@ -45,6 +45,15 @@ HALCYON_MODAL_GPU=T4 MUSICGEN_MODEL=facebook/musicgen-medium \
 
 Changing any of them rebuilds the image, so the next deploy is slow.
 
+## Private repository
+
+Nothing to configure. The image copies `generators/core` straight off your
+checkout with `add_local_dir` and installs from that path, so it never clones
+this repository and never needs a token — public or private makes no difference.
+
+It also means you deploy the code you have in front of you. Edit `core`, redeploy,
+and the change is live without pushing anything.
+
 ## How it works
 
 `@modal.enter()` loads AudioGen and MusicGen once per container and
