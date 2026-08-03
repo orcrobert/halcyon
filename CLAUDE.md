@@ -54,9 +54,11 @@ When the user asks for a change:
    git checkout -b <type>/<short-kebab-description>
    ```
    `<type>` is one of `feat`, `fix`, `chore`, `refactor`, `docs`, `test`.
-2. **Commit logically.** One coherent change per commit, present-tense
-   imperative subject (`Add binaural beat presets`, not `added stuff`). No author
-   name, no AI attribution, no co-author trailer.
+2. **Commit logically.** One coherent change per commit, subject in the form
+   `<type>: <imperative summary>` (`feat: Add binaural beat presets`, not
+   `added stuff`). Types are `feat`, `fix`, `chore`, `refactor`, `docs`, `test` —
+   the same set as the branch prefixes, chosen per commit rather than per branch.
+   No author name, no AI attribution, no co-author trailer.
 3. **Push and open a PR when the work is complete and verified:**
    ```
    git push -u origin <branch>

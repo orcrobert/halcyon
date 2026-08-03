@@ -18,18 +18,20 @@ docs, test). It encodes the mandatory Git policy in
    git checkout -b <type>/<short-kebab-description>
    ```
    `<type>` ∈ `feat | fix | chore | refactor | docs | test`.
-   Leave unrelated working-tree changes (e.g. the `colab/` notebook) unstaged.
+   Leave unrelated working-tree changes unstaged.
 
 2. **Implement the change.** Follow
    [`.claude/docs/conventions.md`](../../docs/conventions.md) — most importantly:
    **no comments in code.**
 
-3. **Commit logically.** One coherent change per commit, imperative subject,
-   no body noise. **No author flag, no `Co-Authored-By`, no mention of Claude /
-   AI / Anthropic / "generated with".**
+3. **Commit logically.** One coherent change per commit, subject in the form
+   `<type>: <imperative summary>`, no body noise. Types are the same set as the
+   branch prefixes and are chosen per commit — a `feat/` branch that also fixes
+   a bug it uncovered uses `fix:` on that commit. **No author flag, no
+   `Co-Authored-By`, no mention of Claude / AI / Anthropic / "generated with".**
    ```bash
    git add <intended paths only>
-   git commit -m "<imperative subject>"
+   git commit -m "feat: <imperative summary>"
    ```
 
 4. **Verify before pushing.** Run the checks relevant to what you touched:
@@ -39,7 +41,7 @@ docs, test). It encodes the mandatory Git policy in
 5. **Push and open the PR:**
    ```bash
    git push -u origin <branch>
-   gh pr create --base main --title "<subject>" --body "$(cat <<'EOF'
+   gh pr create --base main --title "<type>: <what the branch delivers>" --body "$(cat <<'EOF'
    ## What
    <what changed>
 
