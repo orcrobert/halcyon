@@ -1,39 +1,67 @@
 # Generators
 
 The GPU half of Halcyon. The API delegates all audio synthesis to whatever HTTP
-service `GENERATOR_URL` points at, so a generator is anything that implements
+service it is pointed at, so a generator is anything implementing
 `POST /generate`. The contract is defined once, in
 [SELF_HOSTING.md](../SELF_HOSTING.md#the-generator-contract).
 
 Nothing in `api/` knows which host is answering.
 
+## Pick one
+
+| Host | Cost | Setup | Best for |
+|------|------|-------|----------|
+| [**Local**](local/README.md) | free | two pip installs | you have a CUDA GPU — **fastest** |
+| [**Colab**](colab/README.md) | free | ngrok token, tab stays open | trying it out — **quickest start** |
+| [**Modal**](modal/README.md) | per-second GPU, scales to zero | `modal deploy` | real use without a GPU — **recommended** |
+| [**Hugging Face**](huggingface/README.md) | paid GPU, always on | `git subtree push` | a public always-on instance |
+
+Free Hugging Face Spaces are CPU-only and cannot generate inside the API's 300 s
+timeout. That route means paid hardware.
+
+## Fastest possible start
+
+Own GPU:
+
+```bash
+pip install "halcyon-generator[audiocraft] @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
+pip install --no-deps git+https://github.com/facebookresearch/audiocraft.git
+halcyon-generator serve --port 9000
+```
+
+No GPU: open [the Colab notebook](https://colab.research.google.com/github/orcrobert/halcyon/blob/main/generators/colab/halcyon_generator.ipynb),
+set a T4 runtime, run all cells.
+
+Either way, paste the printed URL into **Account → Generators → Add**.
+
+## Switching between them
+
+Save as many as you like in the account page and switch with one click — the
+active one is used for your next generation. Each entry keeps its own URL, so
+moving between a Colab session and a Modal deployment does not mean hunting down
+links again.
+
+**Test** probes a generator and shows whether it is reachable and which models it
+is running. Colab entries get an inline URL box, because that URL changes every
+session.
+
+Generators are per-user. The instance's `GENERATOR_URL` is only the fallback for
+users who have not saved one.
+
 ## Layout
 
 | Path | What it is |
 |------|-----------|
-| `core/` | `halcyon-generator` — the FastAPI server and AudioCraft batching, installable from git |
-| `colab/` | notebook: installs `core`, serves it through ngrok |
-| `huggingface/` | Docker Space: installs `core`, serves it on port 7860 |
-| `modal/` | Modal deployment: installs `core`, serves it as an ASGI app (unverified) |
+| `core/` | `halcyon-generator` — the server, the engine, the CLI |
+| `colab/` | notebook, ngrok |
+| `local/` | running `core` on your own machine |
+| `huggingface/` | Docker Space on port 7860 |
+| `modal/` | Modal ASGI deployment |
 
 Every host is a thin adapter over `create_app()`. Fix a generation bug in
-`core/` and all three inherit it.
+`core/` and all of them inherit it — never patch one host in isolation.
 
-## Choosing a host
-
-| | Cost | Setup | Good for |
-|---|------|-------|----------|
-| **Colab** | free tier | ngrok token, keep the tab open | trying it out, demos |
-| **Modal** | per-second GPU, scales to zero | `modal deploy` | intermittent real use — **recommended** |
-| **Hugging Face** | paid GPU hardware, always on | `git subtree push` | an always-available public instance |
-
-Free Hugging Face Spaces are CPU-only and cannot generate inside the API's
-300 s timeout; see [huggingface/README.md](huggingface/README.md).
-
-You do not need any of these. A local box with a CUDA GPU running
-`uvicorn` over `create_app()` is the fastest option if you have one.
-
-## The shared package
+## The package
 
 ```python
 from halcyon_generator import create_app
@@ -41,11 +69,18 @@ from halcyon_generator import create_app
 app = create_app()
 ```
 
-`create_app()` loads AudioGen and MusicGen at import time and exposes `GET /`,
-`GET /health` and `POST /generate`. Pass `eager=False` with a pre-loaded
-`AudioCraftEngine` when the host loads models itself, as `modal/` does.
+`create_app()` loads AudioGen and MusicGen and exposes `GET /`, `GET /health`
+and `POST /generate`. Pass `eager=False` with a pre-loaded `AudioCraftEngine`
+when the host loads models itself, as `modal/` does.
 
-Configuration is environment-only:
+The CLI wraps the same thing:
+
+```bash
+halcyon-generator serve --port 9000 --device cuda
+halcyon-generator check https://your-generator.example.com
+```
+
+Configuration is environment-only, and identical on every host:
 
 | Variable | Default |
 |----------|---------|
@@ -55,15 +90,8 @@ Configuration is environment-only:
 | `GENERATION_DEVICE` | `cuda` |
 | `PORT` | `8000` |
 
-Install it anywhere with:
-
-```
-pip install "halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
-```
-
-`core` depends on FastAPI and Pydantic only. AudioCraft and torch are the host's
-job — they are imported lazily, so the package installs and its tests run
-without a GPU.
+`core` depends on FastAPI and Pydantic only. AudioCraft and torch are imported
+lazily, so the package installs and its tests run without a GPU.
 
 ## Tests
 
@@ -71,5 +99,4 @@ without a GPU.
 cd generators/core && pytest
 ```
 
-The suite covers the contract against a stub engine, so it needs neither
-AudioCraft nor a GPU.
+Covers the contract against a stub engine — no AudioCraft, no GPU.
