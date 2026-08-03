@@ -7,6 +7,21 @@ AUDIOCRAFT = "git+https://github.com/facebookresearch/audiocraft.git"
 
 CORE_SRC = Path(__file__).resolve().parents[1] / "core"
 CORE_DST = "/opt/halcyon-core"
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+
+
+def _load_env_file(path: Path) -> None:
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+_load_env_file(ENV_FILE)
 
 CACHE_DIR = "/cache"
 GPU = os.getenv("HALCYON_MODAL_GPU", "A10G")
