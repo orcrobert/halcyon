@@ -99,7 +99,7 @@ where the Vite dev server gives you HMR.
 
 ```bash
 # 1. Generator: pick a host from generators/README.md — the quickest is to run
-#    all cells in generators/colab/soundscape_generator.ipynb — and put the URL
+#    all cells in generators/colab/halcyon_generator.ipynb — and put the URL
 #    it prints in GENERATOR_URL in .env
 
 # 2. API
