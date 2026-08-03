@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { extractErrors, type ValidationErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
+import { Logo } from './Logo'
 
 type Mode = 'login' | 'register'
 
@@ -118,19 +119,14 @@ export function AuthView() {
     <div className="relative flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
       <div className="flex flex-col gap-10 w-full" style={{ maxWidth: '440px' }}>
 
-        <div className="flex flex-col items-center gap-2 text-center">
-          <span className="text-[10px] uppercase tracking-[0.32em] text-slate-600 font-medium">
-            Atmosphere
-          </span>
-          <p
-            className="text-[15px] text-slate-400 leading-relaxed mx-auto"
-            style={{ maxWidth: '360px', fontWeight: 300, letterSpacing: '-0.005em' }}
-          >
-            {isRegister
+        <Logo
+          size={26}
+          tagline={
+            isRegister
               ? 'Make an account to start composing.'
-              : 'Sign in to return to your atmospheres.'}
-          </p>
-        </div>
+              : 'Sign in to return to your atmospheres.'
+          }
+        />
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <div
