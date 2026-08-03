@@ -1,7 +1,8 @@
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 from api.app.config import settings
-from api.app.models.tables import UserSettings
+from api.app.models.tables import GeneratorProfile, UserSettings
 from api.app.security import decrypt_secret
 
 
@@ -24,16 +25,39 @@ def default_config() -> RunConfig:
     )
 
 
-def resolve_config(preferences: UserSettings | None) -> RunConfig:
+def active_generator_url(
+    preferences: UserSettings | None,
+    generators: Sequence[GeneratorProfile] | None = None,
+) -> str:
+    for profile in generators or ():
+        if profile.is_active and profile.url:
+            return profile.url
+
+    return getattr(preferences, "generator_url", None) or settings.generator_url
+
+
+def resolve_config(
+    preferences: UserSettings | None,
+    generators: Sequence[GeneratorProfile] | None = None,
+) -> RunConfig:
     defaults = default_config()
-    if preferences is None:
+    if preferences is None and not generators:
         return defaults
+
+    if preferences is None:
+        return RunConfig(
+            generator_url=active_generator_url(None, generators),
+            decomposer_provider=defaults.decomposer_provider,
+            decomposer_model=defaults.decomposer_model,
+            decomposer_base_url=defaults.decomposer_base_url,
+            decomposer_api_key=defaults.decomposer_api_key,
+        )
 
     provider = preferences.decomposer_provider or defaults.decomposer_provider
     switched_provider = provider != defaults.decomposer_provider
 
     return RunConfig(
-        generator_url=preferences.generator_url or defaults.generator_url,
+        generator_url=active_generator_url(preferences, generators),
         decomposer_provider=provider,
         decomposer_model=preferences.decomposer_model
         or (None if switched_provider else defaults.decomposer_model),
