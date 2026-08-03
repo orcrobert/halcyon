@@ -10,16 +10,15 @@ import {
 import { extractErrors } from '../api/errors'
 import type {
   Generator,
-  GeneratorKind,
+  GeneratorHost,
   GeneratorList,
   GeneratorProbe,
   GeneratorStatus,
 } from '../types'
 
 const INPUT_CLASS =
-  'w-full bg-[#0b0c15] border border-[#1e2035] rounded-xl text-slate-200 placeholder:text-slate-700 text-[13.5px] outline-none focus:border-indigo-500/45 transition-colors'
-const INPUT_STYLE: React.CSSProperties = { padding: '11px 13px', fontFamily: 'inherit' }
-const LABEL_CLASS = 'text-[10px] uppercase tracking-[0.18em] text-slate-600 font-semibold'
+  'w-full bg-[#0b0c15] border border-[#1e2035] rounded-xl text-slate-200 placeholder:text-slate-700 text-[12.5px] outline-none focus:border-indigo-500/45 transition-colors'
+const INPUT_STYLE: React.CSSProperties = { padding: '9px 12px', fontFamily: 'inherit' }
 
 const STATUS_COLOR: Record<GeneratorStatus, string> = {
   ok: 'rgb(52, 211, 153)',
@@ -33,26 +32,23 @@ const STATUS_LABEL: Record<GeneratorStatus, string> = {
   error: 'Responded with an error',
 }
 
-function describe(generator: Generator): string {
-  const reported = generator.reported
-  if (!reported) return generator.url
+function reportOf(generator: Generator | undefined): string | null {
+  const reported = generator?.reported
+  if (!reported) return null
   const models = [reported.audiogen_model, reported.musicgen_model]
     .filter(Boolean)
     .map((m) => (m as string).split('/').pop())
-  if (!models.length) return generator.url
+  if (!models.length) return null
   return `${models.join(' · ')}${reported.duration ? ` · ${reported.duration}s` : ''}`
 }
 
 export function GeneratorsCard() {
   const [list, setList] = useState<GeneratorList | null>(null)
   const [loading, setLoading] = useState(true)
-  const [busy, setBusy] = useState<number | 'new' | null>(null)
+  const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [probes, setProbes] = useState<Record<number, GeneratorProbe>>({})
-  const [adding, setAdding] = useState(false)
-  const [name, setName] = useState('')
-  const [url, setUrl] = useState('')
-  const [kind, setKind] = useState<GeneratorKind>('colab')
+  const [drafts, setDrafts] = useState<Record<string, string>>({})
 
   useEffect(() => {
     let cancelled = false
@@ -63,9 +59,7 @@ export function GeneratorsCard() {
     return () => { cancelled = true }
   }, [])
 
-  const host = list?.kinds.find((k) => k.key === kind)
-
-  async function run<T>(key: number | 'new', action: () => Promise<T>): Promise<T | null> {
+  async function run<T>(key: string, action: () => Promise<T>): Promise<T | null> {
     setBusy(key)
     setError(null)
     try {
@@ -78,50 +72,61 @@ export function GeneratorsCard() {
     }
   }
 
-  async function handleAdd() {
-    if (!name.trim() || !url.trim()) return
-    const next = await run('new', () =>
-      createGenerator({ name: name.trim(), url: url.trim(), kind }),
+  function saved(host: GeneratorHost): Generator | undefined {
+    return list?.generators.find((g) => g.kind === host.key)
+  }
+
+  function draftFor(host: GeneratorHost): string {
+    return drafts[host.key] ?? saved(host)?.url ?? ''
+  }
+
+  async function handleSaveUrl(host: GeneratorHost) {
+    const url = draftFor(host).trim()
+    const existing = saved(host)
+    if (!url || url === existing?.url) return
+
+    const next = await run(host.key, () =>
+      existing
+        ? updateGenerator(existing.id, { url })
+        : createGenerator({ name: host.label, url, kind: host.key }),
     )
     if (!next) return
     setList(next)
-    setName('')
-    setUrl('')
-    setAdding(false)
+    setDrafts((d) => {
+      const copy = { ...d }
+      delete copy[host.key]
+      return copy
+    })
   }
 
-  async function handleActivate(id: number) {
-    const next = await run(id, () => activateGenerator(id))
+  async function handleSelect(host: GeneratorHost) {
+    const existing = saved(host)
+    if (!existing || existing.is_active) return
+    const next = await run(host.key, () => activateGenerator(existing.id))
     if (next) setList(next)
   }
 
-  async function handleTest(id: number) {
-    const result = await run(id, () => testGenerator(id))
+  async function handleTest(host: GeneratorHost) {
+    const existing = saved(host)
+    if (!existing) return
+    const result = await run(host.key, () => testGenerator(existing.id))
     if (!result) return
-    setProbes((p) => ({ ...p, [id]: result }))
+    setProbes((p) => ({ ...p, [existing.id]: result }))
     const refreshed = await listGenerators().catch(() => null)
     if (refreshed) setList(refreshed)
   }
 
-  async function handleDelete(id: number) {
-    const next = await run(id, () => deleteGenerator(id))
-    if (next) {
-      setList(next)
-      setProbes((p) => {
-        const copy = { ...p }
-        delete copy[id]
-        return copy
-      })
-    }
-  }
-
-  async function handleRepoint(generator: Generator, value: string) {
-    const trimmed = value.trim()
-    if (!trimmed || trimmed === generator.url) return
-    const next = await run(generator.id, () =>
-      updateGenerator(generator.id, { url: trimmed }),
-    )
-    if (next) setList(next)
+  async function handleClear(host: GeneratorHost) {
+    const existing = saved(host)
+    if (!existing) return
+    const next = await run(host.key, () => deleteGenerator(existing.id))
+    if (!next) return
+    setList(next)
+    setDrafts((d) => {
+      const copy = { ...d }
+      delete copy[host.key]
+      return copy
+    })
   }
 
   return (
@@ -129,74 +134,71 @@ export function GeneratorsCard() {
       className="rounded-2xl border border-[#1a1b2a] bg-[#0d0e18] flex flex-col gap-4"
       style={{ padding: '22px', boxShadow: '0 18px 40px rgba(0,0,0,0.30)' }}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-[14px] font-semibold text-slate-200 tracking-tight">Generators</h2>
-          <p className="text-[11.5px] text-slate-600 leading-relaxed" style={{ marginTop: '4px' }}>
-            The GPU services that synthesise your audio. Save as many as you like and switch
-            with one click.
-          </p>
-        </div>
-        {!adding && (
-          <button
-            onClick={() => setAdding(true)}
-            className="shrink-0 text-[11.5px] text-indigo-300 hover:text-indigo-200 transition-colors"
-            style={{ fontFamily: 'inherit' }}
-          >
-            + Add
-          </button>
-        )}
+      <div>
+        <h2 className="text-[14px] font-semibold text-slate-200 tracking-tight">Generator</h2>
+        <p className="text-[11.5px] text-slate-600 leading-relaxed" style={{ marginTop: '4px' }}>
+          Where your audio is synthesised. Save a URL against each host you use and pick one —
+          they are remembered separately, so switching never means finding a link again.
+        </p>
       </div>
 
       {loading && (
-        <div className="rounded-xl animate-pulse" style={{ height: '72px', background: 'rgba(255,255,255,0.022)' }} />
-      )}
-
-      {!loading && list && list.generators.length === 0 && !adding && (
-        <p className="text-[12px] text-slate-600 leading-relaxed">
-          None saved — falling back to this instance's default,{' '}
-          <span className="text-slate-500">{list.instance_default_url}</span>.
-        </p>
-      )}
-
-      {!loading && list && list.generators.length > 0 && (
         <div className="flex flex-col gap-2">
-          {list.generators.map((generator) => {
-            const probe = probes[generator.id]
-            const status = probe?.status ?? generator.last_status
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="rounded-xl animate-pulse" style={{ height: '58px', background: 'rgba(255,255,255,0.022)' }} />
+          ))}
+        </div>
+      )}
+
+      {!loading && list && (
+        <div className="flex flex-col gap-2">
+          {list.kinds.map((host) => {
+            const existing = saved(host)
+            const active = existing?.is_active ?? false
+            const probe = existing ? probes[existing.id] : undefined
+            const status = probe?.status ?? existing?.last_status ?? null
+            const report = reportOf(existing)
+            const draft = draftFor(host)
+            const dirty = draft.trim() !== '' && draft.trim() !== (existing?.url ?? '')
+            const working = busy === host.key
+
             return (
               <div
-                key={generator.id}
+                key={host.key}
                 className="rounded-xl border transition-colors"
                 style={{
                   padding: '13px 14px',
-                  borderColor: generator.is_active ? 'rgba(99,102,241,0.35)' : '#191a27',
-                  background: generator.is_active ? 'rgba(99,102,241,0.06)' : 'rgba(255,255,255,0.014)',
+                  borderColor: active ? 'rgba(99,102,241,0.35)' : '#191a27',
+                  background: active ? 'rgba(99,102,241,0.06)' : 'rgba(255,255,255,0.014)',
                 }}
               >
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => handleActivate(generator.id)}
-                    disabled={generator.is_active || busy !== null}
-                    aria-label={`Use ${generator.name}`}
+                    onClick={() => handleSelect(host)}
+                    disabled={!existing || active || working}
+                    aria-label={`Use ${host.label}`}
+                    title={existing ? `Use ${host.label}` : 'Add a URL first'}
                     className="shrink-0 rounded-full border transition disabled:cursor-default"
                     style={{
                       width: '15px',
                       height: '15px',
-                      borderColor: generator.is_active ? 'rgb(99,102,241)' : '#2a2c3f',
-                      background: generator.is_active
+                      borderColor: active ? 'rgb(99,102,241)' : existing ? '#3a3d55' : '#23253a',
+                      background: active
                         ? 'radial-gradient(circle, rgb(129,140,248) 0%, rgb(79,70,229) 60%, transparent 62%)'
                         : 'transparent',
                     }}
                   />
+
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-[13px] font-medium text-slate-200 truncate">
-                        {generator.name}
+                      <span className={`text-[13px] font-medium ${existing ? 'text-slate-200' : 'text-slate-400'}`}>
+                        {host.label}
                       </span>
-                      <span className="text-[10px] uppercase tracking-[0.14em] text-slate-600">
-                        {list.kinds.find((k) => k.key === generator.kind)?.label ?? generator.kind}
-                      </span>
+                      {active && (
+                        <span className="text-[10px] uppercase tracking-[0.14em] text-indigo-300/80">
+                          In use
+                        </span>
+                      )}
                       {status && (
                         <span
                           className="shrink-0 rounded-full"
@@ -205,42 +207,76 @@ export function GeneratorsCard() {
                         />
                       )}
                     </div>
-                    <p className="text-[11.5px] text-slate-600 truncate" style={{ marginTop: '2px' }}>
-                      {describe(generator)}
+                    <p className="text-[11.5px] text-slate-600 leading-relaxed" style={{ marginTop: '2px' }}>
+                      {report ?? host.hint}
                     </p>
                   </div>
+
                   <div className="flex shrink-0 items-center gap-3">
-                    <button
-                      onClick={() => handleTest(generator.id)}
-                      disabled={busy !== null}
-                      className="text-[11.5px] text-slate-500 hover:text-slate-300 transition disabled:opacity-40"
-                      style={{ fontFamily: 'inherit' }}
+                    {existing && (
+                      <button
+                        onClick={() => handleTest(host)}
+                        disabled={working}
+                        className="text-[11.5px] text-slate-500 hover:text-slate-300 transition disabled:opacity-40"
+                        style={{ fontFamily: 'inherit' }}
+                      >
+                        {working ? '…' : 'Test'}
+                      </button>
+                    )}
+                    {existing && (
+                      <button
+                        onClick={() => handleClear(host)}
+                        disabled={working}
+                        className="text-[11.5px] text-slate-600 hover:text-red-400 transition disabled:opacity-40"
+                        style={{ fontFamily: 'inherit' }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                    <a
+                      href={host.docs_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-[11.5px] text-slate-600 hover:text-indigo-300 transition-colors"
+                      title={`${host.label} setup guide`}
                     >
-                      {busy === generator.id ? '…' : 'Test'}
-                    </button>
-                    <button
-                      onClick={() => handleDelete(generator.id)}
-                      disabled={busy !== null}
-                      className="text-[11.5px] text-slate-600 hover:text-red-400 transition disabled:opacity-40"
-                      style={{ fontFamily: 'inherit' }}
-                    >
-                      Remove
-                    </button>
+                      Guide
+                    </a>
                   </div>
                 </div>
 
-                {generator.kind === 'colab' && (
+                <div className="flex items-center gap-2" style={{ marginTop: '10px' }}>
                   <input
                     type="text"
-                    defaultValue={generator.url}
+                    value={draft}
                     spellCheck={false}
                     autoComplete="off"
-                    onBlur={(e) => handleRepoint(generator, e.target.value)}
-                    placeholder="Paste this session's ngrok URL"
-                    className={`${INPUT_CLASS} text-[12px]`}
-                    style={{ ...INPUT_STYLE, padding: '8px 11px', marginTop: '10px' }}
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-form-type="other"
+                    onChange={(e) => setDrafts((d) => ({ ...d, [host.key]: e.target.value }))}
+                    onBlur={() => handleSaveUrl(host)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleSaveUrl(host) }}
+                    placeholder={host.url_example}
+                    className={INPUT_CLASS}
+                    style={INPUT_STYLE}
                   />
-                )}
+                  {dirty && (
+                    <button
+                      onClick={() => handleSaveUrl(host)}
+                      disabled={working}
+                      className="shrink-0 text-[12px] font-medium text-white rounded-xl transition disabled:opacity-40"
+                      style={{
+                        padding: '8px 14px',
+                        background: 'rgb(79, 70, 229)',
+                        fontFamily: 'inherit',
+                        boxShadow: '0 0 0 1px rgba(99,102,241,0.35)',
+                      }}
+                    >
+                      Save
+                    </button>
+                  )}
+                </div>
 
                 {probe?.detail && (
                   <p className="text-[11.5px] text-red-400/90 leading-relaxed" style={{ marginTop: '8px' }}>
@@ -253,87 +289,11 @@ export function GeneratorsCard() {
         </div>
       )}
 
-      {adding && list && (
-        <div className="flex flex-col gap-3 rounded-xl border border-[#191a27]" style={{ padding: '14px' }}>
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>Host</span>
-            <select
-              value={kind}
-              onChange={(e) => setKind(e.target.value as GeneratorKind)}
-              className={INPUT_CLASS}
-              style={INPUT_STYLE}
-            >
-              {list.kinds.map((k) => (
-                <option key={k.key} value={k.key}>{k.label}</option>
-              ))}
-            </select>
-          </label>
-
-          {host && (
-            <p className="text-[11.5px] text-slate-600 leading-relaxed">
-              {host.hint}{' '}
-              <a
-                href={host.docs_url}
-                target="_blank"
-                rel="noreferrer"
-                className="text-indigo-400/80 hover:text-indigo-300 transition-colors"
-              >
-                Setup guide
-              </a>
-            </p>
-          )}
-
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>Name</span>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder={host?.label ?? 'My generator'}
-              spellCheck={false}
-              autoComplete="off"
-              className={INPUT_CLASS}
-              style={INPUT_STYLE}
-            />
-          </label>
-
-          <label className="flex flex-col gap-2">
-            <span className={LABEL_CLASS}>URL</span>
-            <input
-              type="text"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder={host?.url_example ?? ''}
-              spellCheck={false}
-              autoComplete="off"
-              className={INPUT_CLASS}
-              style={INPUT_STYLE}
-            />
-          </label>
-
-          <div className="flex items-center justify-end gap-3">
-            <button
-              onClick={() => { setAdding(false); setName(''); setUrl('') }}
-              className="text-[12px] text-slate-500 hover:text-slate-300 transition-colors"
-              style={{ fontFamily: 'inherit' }}
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleAdd}
-              disabled={busy !== null || !name.trim() || !url.trim()}
-              className="text-[12.5px] font-medium text-white rounded-xl transition disabled:opacity-40"
-              style={{
-                padding: '8px 16px',
-                background: 'rgb(79, 70, 229)',
-                fontFamily: 'inherit',
-                boxShadow: '0 0 0 1px rgba(99,102,241,0.35)',
-              }}
-            >
-              {busy === 'new' ? 'Saving…' : 'Save'}
-            </button>
-          </div>
-        </div>
+      {!loading && list && !list.generators.some((g) => g.is_active) && (
+        <p className="text-[11.5px] text-slate-600 leading-relaxed">
+          None selected — falling back to this instance's default,{' '}
+          <span className="text-slate-500">{list.instance_default_url}</span>.
+        </p>
       )}
 
       {error && <p className="text-[12px] text-red-400 leading-relaxed">{error}</p>}
