@@ -1,6 +1,6 @@
 import modal
 
-CORE = "halcyon-generator @ git+https://github.com/orcrobert/soundscape-generator@main#subdirectory=generators/core"
+CORE = "halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")

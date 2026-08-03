@@ -58,7 +58,7 @@ Configuration is environment-only:
 Install it anywhere with:
 
 ```
-pip install "halcyon-generator @ git+https://github.com/orcrobert/soundscape-generator@main#subdirectory=generators/core"
+pip install "halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
 ```
 
 `core` depends on FastAPI and Pydantic only. AudioCraft and torch are the host's

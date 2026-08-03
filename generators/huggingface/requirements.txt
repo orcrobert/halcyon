@@ -26,4 +26,4 @@ hydra-core
 hydra-colorlog
 sentencepiece
 huggingface_hub
-halcyon-generator @ git+https://github.com/orcrobert/soundscape-generator@main#subdirectory=generators/core
+halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core

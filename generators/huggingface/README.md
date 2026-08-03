@@ -10,7 +10,7 @@ pinned: false
 
 # Halcyon generator — Hugging Face Space
 
-A Docker Space implementing the [Halcyon generator contract](https://github.com/orcrobert/soundscape-generator/blob/main/SELF_HOSTING.md#the-generator-contract):
+A Docker Space implementing the [Halcyon generator contract](https://github.com/orcrobert/halcyon/blob/main/SELF_HOSTING.md#the-generator-contract):
 `POST /generate` takes typed elements, returns each one with base64 WAV bytes.
 
 The server itself is `halcyon-generator`, installed from the main repository.
