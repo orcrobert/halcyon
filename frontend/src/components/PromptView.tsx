@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
+import { Logo } from './Logo'
 
 interface Props {
   onSubmit: (prompt: string) => void
@@ -193,14 +194,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
 
       <div className="flex flex-col gap-10 w-full" style={{ maxWidth: '640px' }}>
 
-        <div className="flex flex-col items-center gap-2 text-center">
-          <span className="text-[10px] uppercase tracking-[0.32em] text-slate-600 font-medium">
-            Atmosphere
-          </span>
-          <p className="text-[15px] text-slate-400 leading-relaxed mx-auto" style={{ maxWidth: '440px', fontWeight: 300, letterSpacing: '-0.005em' }}>
-            Describe a place. Hear it built, layer by layer.
-          </p>
-        </div>
+        <Logo size={26} tagline="Describe a place. Hear it built, layer by layer." />
 
         <div className="flex flex-col gap-4">
           <div
