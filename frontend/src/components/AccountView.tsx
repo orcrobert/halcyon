@@ -52,6 +52,7 @@ export function AccountView({ onBack }: Props) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  const [revealKey, setRevealKey] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -240,19 +241,40 @@ export function AccountView({ onBack }: Props) {
                     </button>
                   )}
                 </div>
-                <input
-                  type="password"
-                  name="halcyon-decomposer-api-key"
-                  autoComplete="new-password"
-                  data-lpignore="true"
-                  data-1p-ignore
-                  data-form-type="other"
-                  value={draft.decomposer_api_key}
-                  onChange={(e) => set('decomposer_api_key', e.target.value)}
-                  placeholder={settings.decomposer_api_key_set ? 'Stored — type to replace' : 'Not set'}
-                  className={INPUT_CLASS}
-                  style={INPUT_STYLE}
-                />
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="halcyon-decomposer-secret"
+                    autoComplete="off"
+                    spellCheck={false}
+                    autoCorrect="off"
+                    autoCapitalize="off"
+                    data-lpignore="true"
+                    data-1p-ignore
+                    data-bwignore
+                    data-form-type="other"
+                    value={draft.decomposer_api_key}
+                    onChange={(e) => set('decomposer_api_key', e.target.value)}
+                    placeholder={settings.decomposer_api_key_set ? 'Stored — type to replace' : 'Not set'}
+                    className={INPUT_CLASS}
+                    style={{
+                      ...INPUT_STYLE,
+                      paddingRight: '58px',
+                      WebkitTextSecurity: revealKey ? 'none' : 'disc',
+                      textSecurity: revealKey ? 'none' : 'disc',
+                    } as React.CSSProperties}
+                  />
+                  {draft.decomposer_api_key && (
+                    <button
+                      type="button"
+                      onClick={() => setRevealKey((v) => !v)}
+                      className="absolute inset-y-0 right-0 flex items-center text-[11px] text-slate-600 hover:text-slate-300 transition-colors"
+                      style={{ paddingRight: '13px', fontFamily: 'inherit' }}
+                    >
+                      {revealKey ? 'Hide' : 'Show'}
+                    </button>
+                  )}
+                </div>
                 <p className="text-[11.5px] text-slate-600 leading-relaxed">
                   {provider?.requires_api_key
                     ? 'Stored encrypted and never shown again.'
