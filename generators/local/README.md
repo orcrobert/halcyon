@@ -14,6 +14,13 @@ halcyon-generator serve --port 9000
 The second line is separate because AudioCraft is installed from git without its
 dependency set — it pins versions that fight with everything else.
 
+From a checkout of this repository you can skip the git URL entirely, which is
+also what to do while the repository is private:
+
+```bash
+pip install -e "./generators/core[audiocraft]"
+```
+
 `serve` prints the URL to paste into **Account → Generators → Add → Local
 machine**. If Halcyon runs on the same box, `http://localhost:9000` is already
 the instance default and you need no profile at all.

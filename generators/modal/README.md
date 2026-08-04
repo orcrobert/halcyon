@@ -29,11 +29,27 @@ generators/modal/deploy.py` gives you a temporary URL that reloads on save.
 
 ## Configuration
 
-Read from your shell at deploy time and baked into the image:
+Set them in the repo-root `.env` — `deploy.py` reads it — or export them in your
+shell, which wins over the file:
+
+```
+HALCYON_MODAL_GPU=T4
+```
+
+| GPU | Notes |
+|-----|-------|
+| `T4` | 16 GB, cheapest that fits both models, slowest |
+| `L4` | 24 GB, a good middle |
+| `A10G` | 24 GB, the default, roughly twice a T4 |
+| `A100`, `A100-80GB`, `L40S`, `H100` | faster, more expensive |
+
+Both models together need about 8 GB, so a T4 is fine — you are trading
+generation time for cost, not capability.
+
+The model settings are baked into the image instead:
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `HALCYON_MODAL_GPU` | `A10G` | any Modal GPU string — `T4`, `L4`, `A100` |
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` | model for `type: sound` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` | model for `type: music` |
 | `GENERATION_DURATION` | `10` | seconds per element |
@@ -43,7 +59,18 @@ HALCYON_MODAL_GPU=T4 MUSICGEN_MODEL=facebook/musicgen-medium \
   modal deploy generators/modal/deploy.py
 ```
 
-Changing any of them rebuilds the image, so the next deploy is slow.
+Changing a **model** setting rebuilds the image, so that deploy is slow.
+Changing the **GPU** does not — it is a property of the running class, so
+switching to a T4 is a fast redeploy.
+
+## Private repository
+
+Nothing to configure. The image copies `generators/core` straight off your
+checkout with `add_local_dir` and installs from that path, so it never clones
+this repository and never needs a token — public or private makes no difference.
+
+It also means you deploy the code you have in front of you. Edit `core`, redeploy,
+and the change is live without pushing anything.
 
 ## How it works
 

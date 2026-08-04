@@ -1,43 +1,45 @@
 import os
+from pathlib import Path
 
 import modal
 
-CORE = "halcyon-generator @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
 AUDIOCRAFT = "git+https://github.com/facebookresearch/audiocraft.git"
+
+CORE_SRC = Path(__file__).resolve().parents[1] / "core"
+CORE_DST = "/opt/halcyon-core"
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+
+
+def _load_env_file(path: Path) -> None:
+    if not path.is_file():
+        return
+    for line in path.read_text().splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#") or "=" not in stripped:
+            continue
+        key, value = stripped.split("=", 1)
+        os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+_load_env_file(ENV_FILE)
 
 CACHE_DIR = "/cache"
 GPU = os.getenv("HALCYON_MODAL_GPU", "A10G")
+CUDA_INDEX = "https://download.pytorch.org/whl/cu121"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .apt_install("git", "ffmpeg", "libsndfile1")
     .pip_install(
         "torch==2.1.2",
+        "torchvision==0.16.2",
         "torchaudio==2.1.2",
-        "numpy<2",
-        "transformers==4.40.2",
-        "av==12.0.0",
-        "encodec",
-        "lameenc",
-        "num2words",
-        "spacy",
-        "demucs",
-        "cloudpickle",
-        "flashy",
-        "torchmetrics",
-        "torchdiffeq",
-        "julius",
-        "einops",
-        "omegaconf",
-        "hydra-core",
-        "hydra-colorlog",
-        "sentencepiece",
-        "soundfile",
-        "librosa",
-        extra_index_url="https://download.pytorch.org/whl/cu121",
+        "xformers==0.0.23.post1",
+        extra_index_url=CUDA_INDEX,
     )
+    .add_local_dir(CORE_SRC, CORE_DST, copy=True, ignore=["__pycache__", "*.egg-info"])
+    .run_commands(f"pip install '{CORE_DST}[audiocraft]'")
     .run_commands(f"pip install --no-deps {AUDIOCRAFT}")
-    .pip_install(CORE)
     .env(
         {
             "HF_HOME": f"{CACHE_DIR}/hf",

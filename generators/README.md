@@ -21,13 +21,16 @@ timeout. That route means paid hardware.
 
 ## Fastest possible start
 
-Own GPU:
+Own GPU, from a checkout of this repository:
 
 ```bash
-pip install "halcyon-generator[audiocraft] @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
+pip install -e "./generators/core[audiocraft]"
 pip install --no-deps git+https://github.com/facebookresearch/audiocraft.git
 halcyon-generator serve --port 9000
 ```
+
+Without a checkout, swap the first line for the git URL:
+`pip install "halcyon-generator[audiocraft] @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"`
 
 No GPU: open [the Colab notebook](https://colab.research.google.com/github/orcrobert/halcyon/blob/main/generators/colab/halcyon_generator.ipynb),
 set a T4 runtime, run all cells.
@@ -92,6 +95,33 @@ Configuration is environment-only, and identical on every host:
 
 `core` depends on FastAPI and Pydantic only. AudioCraft and torch are imported
 lazily, so the package installs and its tests run without a GPU.
+
+### The dependency list lives in one place
+
+Everything AudioCraft needs at runtime is the `[audiocraft]` extra in
+`generators/core/pyproject.toml`. Modal and the Hugging Face Space install that
+extra rather than restating it; each pins only the four CUDA wheels that have to
+come from PyTorch's index (`torch`, `torchvision`, `torchaudio`, `xformers`).
+
+**Add a runtime dependency there and nowhere else.** When the list was duplicated
+per host it drifted, and the hosts missing `xformers` crashed on the first
+generation — `audiocraft.modules.transformer` imports it at module load, so the
+failure comes at model load, not at install.
+
+### While this repository is private
+
+The git URL above cannot be cloned without credentials, so any build using it
+dies with `exit code: 128`. Each host differs:
+
+| Host | What it needs |
+|------|---------------|
+| Modal | nothing — the image copies `core` off your checkout |
+| Local | nothing — `pip install -e ./generators/core` |
+| Colab | `GITHUB_TOKEN` in the first cell |
+| Hugging Face | a `GH_TOKEN` build secret on the Space |
+
+Making the repository public removes all of it: both tokens become unnecessary
+and every quickstart works exactly as written.
 
 ## Tests
 
