@@ -58,7 +58,7 @@ jobs:
           test "$(docker inspect -f '{{.State.Health.Status}}' halcyon-ci)" = "healthy"
           curl -fsS localhost:8001/health
           curl -fsS localhost:8001/ | grep -q "<!doctype html"
-          docker exec halcyon-ci python -c "from api.app.services.decomposer import _load_prompt; _load_prompt('decomposer')"
+          docker exec halcyon-ci python -c "from api.app.services.prompts import default_decomposer_prompt; default_decomposer_prompt()"
       - name: Check the mixer runs under the read-only rootfs
         run: docker exec -i halcyon-ci python - < .github/scripts/mix_smoke.py
       - if: always()
