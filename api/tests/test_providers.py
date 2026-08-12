@@ -15,6 +15,7 @@ def _config(**overrides) -> RunConfig:
         "decomposer_model": None,
         "decomposer_base_url": None,
         "decomposer_api_key": None,
+        "decomposer_prompt": "system",
     }
     return RunConfig(**{**base, **overrides})
 

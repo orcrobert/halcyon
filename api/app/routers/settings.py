@@ -4,6 +4,7 @@ from api.app.deps import CurrentUser, SessionDep
 from api.app.models.schemas import Envelope, ProviderOut, SettingsOut, SettingsUpdate
 from api.app.models.tables import UserSettings
 from api.app.security import encrypt_secret
+from api.app.services.prompts import default_decomposer_prompt
 from api.app.services.providers import PROVIDERS, get_provider
 from api.app.services.runconfig import default_config
 
@@ -14,6 +15,7 @@ PLAIN_FIELDS = (
     "decomposer_provider",
     "decomposer_model",
     "decomposer_base_url",
+    "decomposer_prompt",
 )
 
 
@@ -27,11 +29,13 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
         decomposer_api_key_set=bool(
             getattr(preferences, "decomposer_api_key_enc", None)
         ),
+        decomposer_prompt=getattr(preferences, "decomposer_prompt", None),
         defaults={
             "generator_url": defaults.generator_url,
             "decomposer_provider": defaults.decomposer_provider,
             "decomposer_model": defaults.decomposer_model,
             "decomposer_base_url": defaults.decomposer_base_url,
+            "decomposer_prompt": default_decomposer_prompt(),
         },
         providers=[
             ProviderOut(

@@ -62,6 +62,7 @@ class SettingsUpdate(BaseModel):
     decomposer_model: str | None = None
     decomposer_base_url: str | None = None
     decomposer_api_key: str | None = None
+    decomposer_prompt: str | None = Field(default=None, max_length=40000)
 
 
 class ProviderOut(BaseModel):
@@ -78,6 +79,7 @@ class SettingsOut(BaseModel):
     decomposer_model: str | None
     decomposer_base_url: str | None
     decomposer_api_key_set: bool
+    decomposer_prompt: str | None
     defaults: dict[str, str | None]
     providers: list[ProviderOut]
 
