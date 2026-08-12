@@ -35,6 +35,26 @@ def test_the_api_surface_is_the_documented_one(client):
     }
 
 
+def test_init_db_backfills_columns_added_after_first_boot(client):
+    from sqlalchemy import inspect, text
+
+    from api.app.db import get_engine, init_db
+
+    engine = get_engine()
+    with engine.begin() as connection:
+        connection.execute(text("ALTER TABLE user_settings DROP COLUMN decomposer_prompt"))
+
+    assert "decomposer_prompt" not in {
+        c["name"] for c in inspect(engine).get_columns("user_settings")
+    }
+
+    init_db()
+
+    assert "decomposer_prompt" in {
+        c["name"] for c in inspect(engine).get_columns("user_settings")
+    }
+
+
 def test_frontend_build_is_served_at_the_root(tmp_path, monkeypatch):
     from api.app.config import settings
     from api.app.main import mount_frontend

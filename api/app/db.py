@@ -1,6 +1,6 @@
 from collections.abc import Iterator
 
-from sqlalchemy import event
+from sqlalchemy import event, inspect, text
 from sqlalchemy.engine import Engine
 from sqlmodel import Session, SQLModel, create_engine
 
@@ -29,10 +29,33 @@ def get_engine() -> Engine:
     return _engine
 
 
+def _add_missing_columns(engine: Engine) -> None:
+    inspector = inspect(engine)
+    existing_tables = set(inspector.get_table_names())
+
+    with engine.begin() as connection:
+        for table in SQLModel.metadata.sorted_tables:
+            if table.name not in existing_tables:
+                continue
+            known = {c["name"] for c in inspector.get_columns(table.name)}
+            for column in table.columns:
+                if column.name in known or not column.nullable:
+                    continue
+                type_sql = column.type.compile(engine.dialect)
+                connection.execute(
+                    text(
+                        f'ALTER TABLE "{table.name}" '
+                        f'ADD COLUMN "{column.name}" {type_sql}'
+                    )
+                )
+
+
 def init_db() -> None:
     import api.app.models.tables  # noqa: F401
 
-    SQLModel.metadata.create_all(get_engine())
+    engine = get_engine()
+    SQLModel.metadata.create_all(engine)
+    _add_missing_columns(engine)
 
 
 def session_scope() -> Session:
