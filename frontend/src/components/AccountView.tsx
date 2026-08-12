@@ -3,6 +3,7 @@ import { getSettings, updateSettings } from '../api/settings'
 import { extractErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
 import { GeneratorsCard } from './GeneratorsCard'
+import { PromptEditorModal } from './PromptEditorModal'
 import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
 interface Props {
@@ -53,6 +54,9 @@ export function AccountView({ onBack }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [revealKey, setRevealKey] = useState(false)
+  const [promptOpen, setPromptOpen] = useState(false)
+  const [promptSaving, setPromptSaving] = useState(false)
+  const [promptError, setPromptError] = useState<string | null>(null)
 
   useEffect(() => {
     let cancelled = false
@@ -71,11 +75,11 @@ export function AccountView({ onBack }: Props) {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onBack()
+      if (e.key === 'Escape' && !promptOpen) onBack()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [onBack])
+  }, [onBack, promptOpen])
 
   const set = useCallback((field: keyof Draft, value: string) => {
     setDraft((d) => ({ ...d, [field]: value }))
@@ -109,6 +113,25 @@ export function AccountView({ onBack }: Props) {
       setError(extractErrors(e).message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function handleSavePrompt(text: string) {
+    if (!settings) return
+    setPromptSaving(true)
+    setPromptError(null)
+
+    const trimmed = text.trim()
+    const isDefault = trimmed === settings.defaults.decomposer_prompt.trim()
+
+    try {
+      const next = await updateSettings({ decomposer_prompt: isDefault ? '' : trimmed })
+      setSettings(next)
+      setPromptOpen(false)
+    } catch (e) {
+      setPromptError(extractErrors(e).message)
+    } finally {
+      setPromptSaving(false)
     }
   }
 
@@ -281,6 +304,27 @@ export function AccountView({ onBack }: Props) {
                     : 'Optional for local servers.'}
                 </p>
               </div>
+
+              <div className="flex flex-col gap-2">
+                <span className={LABEL_CLASS}>System prompt</span>
+                <button
+                  onClick={() => { setPromptError(null); setPromptOpen(true) }}
+                  className="flex items-center justify-between gap-3 rounded-xl border border-[#1e2035] bg-[#0b0c15] hover:border-indigo-500/40 transition-colors text-left"
+                  style={{ padding: '11px 13px', fontFamily: 'inherit' }}
+                >
+                  <span className="flex flex-col gap-1 min-w-0">
+                    <span className="text-[13px] text-slate-300">
+                      {settings.decomposer_prompt ? 'Custom prompt' : 'Default prompt'}
+                    </span>
+                    <span className="text-[11px] text-slate-600 truncate">
+                      {settings.decomposer_prompt
+                        ? 'Your own decomposition rules'
+                        : 'The rules Halcyon ships with'}
+                    </span>
+                  </span>
+                  <span className="text-[11px] text-indigo-300/80 shrink-0">Edit</span>
+                </button>
+              </div>
             </Card>
 
             {error && <p className="text-[12.5px] text-red-400 leading-relaxed">{error}</p>}
@@ -317,6 +361,18 @@ export function AccountView({ onBack }: Props) {
           <p className="text-[13px] text-red-400 leading-relaxed">{error}</p>
         )}
       </div>
+
+      {settings && (
+        <PromptEditorModal
+          open={promptOpen}
+          value={settings.decomposer_prompt ?? settings.defaults.decomposer_prompt}
+          defaultValue={settings.defaults.decomposer_prompt}
+          saving={promptSaving}
+          error={promptError}
+          onSave={handleSavePrompt}
+          onClose={() => setPromptOpen(false)}
+        />
+      )}
     </div>
   )
 }
