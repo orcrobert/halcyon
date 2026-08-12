@@ -33,6 +33,9 @@ Definitive reference for how the system fits together. Skim
 ### `api/` — FastAPI service
 - **`main.py`**: lifespan (create tables, reclaim interrupted runs, start the
   worker), routers, and the SPA mount that serves `frontend/dist` when present.
+- **Schema changes** (`db.py`): `init_db` creates missing tables and adds
+  nullable columns that appeared after a database was first created. Anything
+  beyond an additive column still needs a hand-written migration.
 - **Auth**: opaque bearer tokens, SHA-256 hashed in `auth_tokens`. Passwords are
   argon2 via `pwdlib`. `deps.py` exposes the `CurrentUser` dependency.
 - **Domain** (`models/tables.py`): `User` has many `Atmosphere`, each with many
@@ -50,6 +53,9 @@ Definitive reference for how the system fits together. Skim
 - **Config resolution** (`services/runconfig.py`): merges a user's `UserSettings`
   over the instance `.env` defaults into a frozen `RunConfig`. Switching provider
   drops inherited credentials so one provider's key is never sent to another.
+- **Prompts** (`services/prompts.py`): loads the shipped system prompts from
+  `api/prompts/`. `RunConfig.decomposer_prompt` is a user's override of the
+  decomposer prompt and falls back to the shipped file when unset.
 - **Storage** (`services/storage.py`): audio at
   `DATA_DIR/audio/{atmosphere_id}/{position}_{label}.wav`, with path-escape
   checks on read.
