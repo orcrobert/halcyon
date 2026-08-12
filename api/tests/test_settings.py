@@ -3,7 +3,9 @@ def test_settings_start_empty_and_expose_defaults(client, auth):
 
     assert body["decomposer_provider"] is None
     assert body["decomposer_api_key_set"] is False
+    assert body["decomposer_prompt"] is None
     assert body["defaults"]["decomposer_provider"] == "gemini"
+    assert "audio atmosphere designer" in body["defaults"]["decomposer_prompt"]
     assert {p["key"] for p in body["providers"]} == {"gemini", "ollama", "openai"}
 
 
@@ -63,6 +65,74 @@ def test_api_key_can_be_cleared(client, auth):
     ).json()["data"]
 
     assert body["decomposer_api_key_set"] is False
+
+
+def test_decomposer_prompt_round_trip(client, auth):
+    body = client.put(
+        "/api/settings", headers=auth, json={"decomposer_prompt": "# Mine\n\nBe brief."}
+    ).json()["data"]
+
+    assert body["decomposer_prompt"] == "# Mine\n\nBe brief."
+    assert client.get("/api/settings", headers=auth).json()["data"] == body
+
+
+def test_decomposer_prompt_resets_to_default_when_cleared(client, auth):
+    client.put("/api/settings", headers=auth, json={"decomposer_prompt": "# Mine"})
+    body = client.put(
+        "/api/settings", headers=auth, json={"decomposer_prompt": ""}
+    ).json()["data"]
+
+    assert body["decomposer_prompt"] is None
+
+
+def test_oversized_decomposer_prompt_is_rejected(client, auth):
+    response = client.put(
+        "/api/settings", headers=auth, json={"decomposer_prompt": "x" * 40001}
+    )
+
+    assert response.status_code == 422
+
+
+def test_custom_decomposer_prompt_is_sent_to_the_model(client, auth, monkeypatch):
+    from api.app.services import decomposer
+
+    client.put("/api/settings", headers=auth, json={"decomposer_prompt": "# Mine"})
+
+    seen: list[str] = []
+
+    def fake_complete_json(_config, system, _user):
+        seen.append(system)
+        return '{"atmosphere": "x", "elements": [{"label": "a", "type": "sound", "prompt": "b"}]}'
+
+    monkeypatch.setattr(decomposer, "complete_json", fake_complete_json)
+
+    from sqlmodel import select
+
+    from api.app.db import session_scope
+    from api.app.models.tables import User
+    from api.app.services.runconfig import resolve_config
+
+    with session_scope() as session:
+        user = session.exec(select(User)).first()
+        config = resolve_config(user.preferences)
+
+    decomposer.decompose("a quiet room", config)
+
+    assert seen == ["# Mine"]
+
+
+def test_default_decomposer_prompt_is_used_without_an_override(client, auth):
+    from sqlmodel import select
+
+    from api.app.db import session_scope
+    from api.app.models.tables import User
+    from api.app.services.runconfig import resolve_config
+
+    with session_scope() as session:
+        user = session.exec(select(User)).first()
+        config = resolve_config(user.preferences)
+
+    assert "audio atmosphere designer" in config.decomposer_prompt
 
 
 def test_unknown_provider_is_rejected(client, auth):

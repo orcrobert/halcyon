@@ -66,6 +66,7 @@ class UserSettings(SQLModel, table=True):
     decomposer_model: str | None = None
     decomposer_base_url: str | None = None
     decomposer_api_key_enc: str | None = None
+    decomposer_prompt: str | None = None
 
     user: User = Relationship(back_populates="preferences")
 

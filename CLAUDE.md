@@ -184,6 +184,10 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   `api/app/services/providers.py`; add one there and it appears in the account
   panel automatically. Every setting is a per-user override of the `.env`
   default, resolved by `services/runconfig.py`.
+- **The decomposer system prompt is per-user too.** `api/prompts/decomposer.txt`
+  is the shipped default; `UserSettings.decomposer_prompt` overrides it and the
+  account page edits it. Read it through `RunConfig.decomposer_prompt`, never by
+  loading the file directly.
 - **Per-user API keys are encrypted at rest** and must never be returned by the
   API — expose `decomposer_api_key_set: bool`, never the value.
 - **Mixing params are computed from audio, never from the LLM.** Do not add

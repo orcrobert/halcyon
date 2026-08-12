@@ -1,15 +1,9 @@
 import json
 import re
-from pathlib import Path
 
+from api.app.services.prompts import default_decomposer_prompt
 from api.app.services.providers import complete_json
 from api.app.services.runconfig import RunConfig
-
-PROMPTS_DIR = Path(__file__).resolve().parents[2] / "prompts"
-
-
-def _load_prompt(name: str) -> str:
-    return (PROMPTS_DIR / f"{name}.txt").read_text()
 
 
 def _parse_result(raw: str) -> dict:
@@ -57,5 +51,6 @@ def _parse_result(raw: str) -> dict:
 
 
 def decompose(prompt: str, config: RunConfig) -> dict:
-    raw = complete_json(config, _load_prompt("decomposer"), f"Scene: {prompt}")
+    system = config.decomposer_prompt or default_decomposer_prompt()
+    raw = complete_json(config, system, f"Scene: {prompt}")
     return _parse_result(raw)

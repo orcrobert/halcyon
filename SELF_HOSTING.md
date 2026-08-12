@@ -56,8 +56,12 @@ runtimes rely on.
 | `FRONTEND_ORIGIN` | only for running the dev server against a remote API |
 
 Every decomposer value is an **instance default**. Each user can override the
-provider, model, base URL, and API key from their account page, so one instance
-can serve people using different models.
+provider, model, base URL, API key, and system prompt from their account page,
+so one instance can serve people using different models.
+
+The system prompt shipped in `api/prompts/decomposer.txt` is the default for
+everyone. A user who edits it in the account page stores their own copy;
+clearing the editor restores the shipped prompt, including later changes to it.
 
 `GENERATOR_URL` is a fallback rather than a setting most users will touch. Each
 user saves their own generators in the account page and switches between them

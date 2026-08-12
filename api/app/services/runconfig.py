@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from api.app.config import settings
 from api.app.models.tables import GeneratorProfile, UserSettings
 from api.app.security import decrypt_secret
+from api.app.services.prompts import default_decomposer_prompt
 
 
 @dataclass(frozen=True)
@@ -13,6 +14,7 @@ class RunConfig:
     decomposer_model: str | None
     decomposer_base_url: str | None
     decomposer_api_key: str | None
+    decomposer_prompt: str
 
 
 def default_config() -> RunConfig:
@@ -22,6 +24,7 @@ def default_config() -> RunConfig:
         decomposer_model=settings.decomposer_model,
         decomposer_base_url=settings.decomposer_base_url,
         decomposer_api_key=settings.decomposer_api_key,
+        decomposer_prompt=default_decomposer_prompt(),
     )
 
 
@@ -51,6 +54,7 @@ def resolve_config(
             decomposer_model=defaults.decomposer_model,
             decomposer_base_url=defaults.decomposer_base_url,
             decomposer_api_key=defaults.decomposer_api_key,
+            decomposer_prompt=defaults.decomposer_prompt,
         )
 
     provider = preferences.decomposer_provider or defaults.decomposer_provider
@@ -65,4 +69,5 @@ def resolve_config(
         or (None if switched_provider else defaults.decomposer_base_url),
         decomposer_api_key=decrypt_secret(preferences.decomposer_api_key_enc)
         or (None if switched_provider else defaults.decomposer_api_key),
+        decomposer_prompt=preferences.decomposer_prompt or defaults.decomposer_prompt,
     )
