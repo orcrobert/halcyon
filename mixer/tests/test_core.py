@@ -54,6 +54,36 @@ def test_analyze_annotates_every_element(elements):
         assert 0.0 <= el["depth"] <= 0.8
 
 
+def test_analyze_loops_clips_by_default(tmp_path):
+    sr = 22050
+    path = os.path.join(tmp_path, "long.wav")
+    sf.write(path, _noise(sr, 8.0, seed=3), sr)
+    element = {"label": "long", "type": "sound", "prompt": "long", "file": path}
+
+    _, wavs, _ = analyze([element])
+
+    assert wavs[0].shape[-1] < int(sr * 8.0)
+
+
+def test_analyze_leaves_already_looped_clips_at_their_length(tmp_path, elements):
+    sr = 22050
+    path = os.path.join(tmp_path, "long.wav")
+    sf.write(path, _noise(sr, 8.0, seed=3), sr)
+    elements.append({"label": "long", "type": "sound", "prompt": "long", "file": path})
+    for element in elements:
+        element["looped"] = True
+
+    valid, wavs, _ = analyze(elements)
+
+    for element, wav in zip(elements, wavs):
+        original, _ = sf.read(element["file"], always_2d=True)
+        assert wav.shape[-1] == original.shape[0]
+
+    for element in valid:
+        assert isinstance(element["eq_json"], list)
+        assert 0.15 <= element["volume"] <= 1.0
+
+
 def test_analyze_skips_missing_files(elements):
     elements.append({"label": "ghost", "type": "sound", "prompt": "x", "file": "/no/such.wav"})
     valid, _, _ = analyze(elements)

@@ -44,7 +44,8 @@ def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[in
             continue
         wav, sr = sf.read(path, always_2d=True)
         wav = wav.T
-        wav = make_loopable(wav, sr)
+        if not element.get("looped"):
+            wav = make_loopable(wav, sr)
         wavs.append(wav)
         srs.append(sr)
         valid.append(element)
