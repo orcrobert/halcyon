@@ -28,5 +28,13 @@ def resolve_audio(relative_path: str) -> Path:
     return full
 
 
+def delete_element_audio(relative_path: str) -> None:
+    try:
+        path = resolve_audio(relative_path)
+    except ValueError:
+        return
+    path.unlink(missing_ok=True)
+
+
 def delete_atmosphere_audio(atmosphere_id: int) -> None:
     shutil.rmtree(atmosphere_dir(atmosphere_id), ignore_errors=True)

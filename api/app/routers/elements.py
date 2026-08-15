@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, Response, status
 from fastapi.responses import FileResponse
 from sqlmodel import Session
 
@@ -88,6 +88,28 @@ def reset(
     session.refresh(element)
 
     return Envelope(data=serialize_element(element))
+
+
+@router.delete("/{element_id}", status_code=status.HTTP_204_NO_CONTENT)
+def destroy(element_id: int, user: CurrentUser, session: SessionDep) -> Response:
+    element = owned_element(session, user, element_id)
+    atmosphere = element.atmosphere
+
+    if len(atmosphere.elements) <= 1:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="An atmosphere needs at least one layer.",
+        )
+
+    audio_path = element.audio_path
+    session.delete(element)
+    atmosphere.updated_at = utcnow()
+    session.add(atmosphere)
+    session.commit()
+
+    storage.delete_element_audio(audio_path)
+
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/{element_id}/audio")

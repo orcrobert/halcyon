@@ -118,3 +118,45 @@ def test_audio_path_cannot_escape_the_storage_root():
 
     with pytest.raises(ValueError):
         storage.resolve_audio("../../etc/passwd")
+
+
+def test_delete_removes_the_element_and_its_audio(client, auth, ready_atmosphere, element):
+    from api.app.services import storage
+
+    path = storage.resolve_audio(_audio_path(element["id"]))
+    assert path.is_file()
+
+    response = client.delete(f"/api/elements/{element['id']}", headers=auth)
+
+    assert response.status_code == 204
+    assert not path.exists()
+
+    remaining = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()[
+        "data"
+    ]["elements"]
+    assert [e["id"] for e in remaining] == [element["id"] + 1]
+
+
+def test_delete_refuses_to_empty_an_atmosphere(client, auth, ready_atmosphere):
+    elements = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()[
+        "data"
+    ]["elements"]
+
+    assert client.delete(f"/api/elements/{elements[0]['id']}", headers=auth).status_code == 204
+    response = client.delete(f"/api/elements/{elements[1]['id']}", headers=auth)
+
+    assert response.status_code == 409
+    assert "at least one" in response.json()["detail"]
+
+
+def test_delete_is_scoped_to_the_owner(client, auth, other, element):
+    assert client.delete(f"/api/elements/{element['id']}", headers=other).status_code == 404
+    assert client.get(f"/api/elements/{element['id']}/audio", headers=auth).status_code == 200
+
+
+def _audio_path(element_id: int) -> str:
+    from api.app.db import session_scope
+    from api.app.models.tables import Element
+
+    with session_scope() as session:
+        return session.get(Element, element_id).audio_path
