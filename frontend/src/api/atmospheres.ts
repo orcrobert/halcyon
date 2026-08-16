@@ -13,6 +13,7 @@ export async function listAtmospheres(): Promise<PaginatedResponse<Atmosphere>> 
 export async function createAtmosphere(payload: {
   prompt: string
   title?: string
+  duration_s?: number
 }): Promise<Atmosphere> {
   const { data } = await api.post<AtmosphereResponse>('/api/atmospheres', payload)
   return data.data

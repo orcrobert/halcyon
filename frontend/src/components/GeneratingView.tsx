@@ -178,6 +178,8 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
           </div>
           <span className="text-slate-700">·</span>
           <span className="text-indigo-400/80 tabular-nums">{formatElapsed(elapsed)}</span>
+          <span className="text-slate-700">·</span>
+          <span className="text-slate-600 tabular-nums">{atmosphere.duration_s}s layers</span>
         </div>
 
         <div className="flex justify-center">
