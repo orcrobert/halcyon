@@ -39,7 +39,8 @@ Definitive reference for how the system fits together. Skim
 - **Auth**: opaque bearer tokens, SHA-256 hashed in `auth_tokens`. Passwords are
   argon2 via `pwdlib`. `deps.py` exposes the `CurrentUser` dependency.
 - **Domain** (`models/tables.py`): `User` has many `Atmosphere`, each with many
-  `Element` ordered by `position`. Status, progress and current stage live on the
+  `Element` ordered by `position`. Status, progress, current stage and the
+  requested `duration_s` (the loop length asked of the generator) live on the
   atmosphere itself. `original_*` columns on `Element` store the mixer's computed
   defaults so the UI can reset. `UserSettings` holds per-user provider config.
 - **Routers**: `auth.py`, `settings.py`, `atmospheres.py`, `elements.py`. Every

@@ -103,6 +103,7 @@ a stub for testing.
 
 ```json
 {
+  "duration": 10,
   "elements": [
     { "label": "wind", "type": "sound", "prompt": "low desert wind, distant, soft" },
     { "label": "drone", "type": "music", "prompt": "ambient drone, warm low sustained tone" }
@@ -112,6 +113,9 @@ a stub for testing.
 
 - `type` is `"sound"` (synthesize with AudioGen) or `"music"` (MusicGen).
 - `prompt` is the text to generate from.
+- `duration` is the seconds of audio to generate per element, chosen by the user
+  next to the prompt box (5–120). A generator that ignores it still works — it
+  just always produces its own configured length.
 
 **Response** — echo each element back with base64-encoded WAV bytes added:
 
@@ -126,9 +130,10 @@ a stub for testing.
 
 - `audio_b64` must be the base64 encoding of a complete WAV file.
 - Keep the other element fields; the API reads them back.
-- The API waits up to **300 s** per request. There is no auth between the API
-  and the generator by default — run the generator on a private network or add
-  your own.
+- The API waits up to **300 s** per request, so a generator that honours long
+  durations should still fit a whole batch inside that budget.
+- There is no auth between the API and the generator by default — run the
+  generator on a private network or add your own.
 
 ### Ready-made hosts
 
