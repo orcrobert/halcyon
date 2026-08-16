@@ -3,6 +3,7 @@ import math
 from fastapi import APIRouter, HTTPException, Query, Request, Response, status
 from sqlmodel import Session, func, select
 
+from api.app.config import DEFAULT_DURATION_S
 from api.app.deps import CurrentUser, SessionDep
 from api.app.models.schemas import (
     AtmosphereCreate,
@@ -38,6 +39,7 @@ def serialize_atmosphere(
         id=atmosphere.id,
         title=atmosphere.title,
         prompt=atmosphere.prompt,
+        duration_s=atmosphere.duration_s or DEFAULT_DURATION_S,
         status=atmosphere.status,
         progress=atmosphere.progress,
         current_stage=atmosphere.current_stage,
@@ -93,6 +95,7 @@ def store(
         user_id=user.id,
         prompt=payload.prompt.strip(),
         title=payload.title.strip() if payload.title else None,
+        duration_s=payload.duration_s,
         status="pending",
     )
     session.add(atmosphere)

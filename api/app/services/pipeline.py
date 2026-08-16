@@ -6,6 +6,7 @@ from pathlib import Path
 import soundfile as sf
 from sqlmodel import Session
 
+from api.app.config import DEFAULT_DURATION_S
 from api.app.db import session_scope
 from api.app.models.tables import Atmosphere, Element, utcnow
 from api.app.services import storage
@@ -109,7 +110,9 @@ def run_generation(atmosphere_id: int) -> None:
             decomposed = decompose(atmosphere.prompt, config)
 
             _set_stage(session, atmosphere, "generating")
-            elements = generate(decomposed, config)
+            elements = generate(
+                decomposed, config, atmosphere.duration_s or DEFAULT_DURATION_S
+            )
 
             _set_stage(session, atmosphere, "mixing")
             with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:

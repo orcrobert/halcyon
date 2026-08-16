@@ -30,16 +30,22 @@ def probe(url: str) -> tuple[str, str | None, dict | None]:
 
     reported = {
         key: payload[key]
-        for key in ("audiogen_model", "musicgen_model", "duration", "loaded")
+        for key in (
+            "audiogen_model",
+            "musicgen_model",
+            "duration",
+            "max_duration",
+            "loaded",
+        )
         if key in payload
     }
     return "ok", None, reported or None
 
 
-def generate(decomposed: dict, config: RunConfig) -> list[dict]:
+def generate(decomposed: dict, config: RunConfig, duration_s: int) -> list[dict]:
     response = requests.post(
         f"{config.generator_url.rstrip('/')}/generate",
-        json={"elements": decomposed["elements"]},
+        json={"elements": decomposed["elements"], "duration": duration_s},
         timeout=GENERATOR_TIMEOUT_S,
     )
     response.raise_for_status()

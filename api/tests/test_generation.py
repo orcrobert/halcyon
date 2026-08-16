@@ -16,6 +16,64 @@ def test_create_rejects_an_empty_prompt(client, auth):
     assert response.status_code == 422
 
 
+def test_create_defaults_to_the_shipped_length(client, auth):
+    from api.app.config import DEFAULT_DURATION_S
+
+    response = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
+    )
+
+    assert response.json()["data"]["duration_s"] == DEFAULT_DURATION_S
+
+
+def test_create_keeps_the_requested_length(client, auth):
+    response = client.post(
+        "/api/atmospheres",
+        headers=auth,
+        json={"prompt": "a rainy library", "duration_s": 60},
+    )
+    atmosphere_id = response.json()["data"]["id"]
+
+    assert response.json()["data"]["duration_s"] == 60
+    body = client.get(f"/api/atmospheres/{atmosphere_id}", headers=auth).json()["data"]
+    assert body["duration_s"] == 60
+
+
+def test_create_rejects_a_length_outside_the_allowed_range(client, auth):
+    from api.app.config import MAX_DURATION_S, MIN_DURATION_S
+
+    for duration in (MIN_DURATION_S - 1, MAX_DURATION_S + 1):
+        response = client.post(
+            "/api/atmospheres",
+            headers=auth,
+            json={"prompt": "a rainy library", "duration_s": duration},
+        )
+        assert response.status_code == 422
+
+
+def test_the_requested_length_reaches_the_generator(client, auth, stub_pipeline, monkeypatch):
+    import api.app.services.generator as generator_module
+    from api.app.services.pipeline import run_generation
+
+    sent = {}
+    original_post = generator_module.requests.post
+
+    def capture(url, **kwargs):
+        sent.update(kwargs["json"])
+        return original_post(url, **kwargs)
+
+    monkeypatch.setattr(generator_module.requests, "post", capture)
+
+    atmosphere_id = client.post(
+        "/api/atmospheres",
+        headers=auth,
+        json={"prompt": "a rainy library", "duration_s": 30},
+    ).json()["data"]["id"]
+    run_generation(atmosphere_id)
+
+    assert sent["duration"] == 30
+
+
 def test_generation_produces_playable_elements(client, auth, ready_atmosphere):
     body = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()["data"]
 

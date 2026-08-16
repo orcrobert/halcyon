@@ -3,6 +3,8 @@ from typing import Annotated, Any, Generic, Literal, TypeVar
 
 from pydantic import BaseModel, Field, StringConstraints
 
+from api.app.config import DEFAULT_DURATION_S, MAX_DURATION_S, MIN_DURATION_S
+
 T = TypeVar("T")
 
 Email = Annotated[
@@ -178,12 +180,16 @@ class ElementMixUpdate(BaseModel):
 class AtmosphereCreate(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
     title: str | None = Field(default=None, max_length=255)
+    duration_s: int = Field(
+        default=DEFAULT_DURATION_S, ge=MIN_DURATION_S, le=MAX_DURATION_S
+    )
 
 
 class AtmosphereOut(BaseModel):
     id: int
     title: str | None
     prompt: str
+    duration_s: int
     status: str
     progress: int
     current_stage: str | None
