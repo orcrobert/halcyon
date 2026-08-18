@@ -1,7 +1,7 @@
 import json
 import re
 
-from api.app.services.prompts import default_decomposer_prompt
+from api.app.services.prompts import default_decomposer_prompt, refiner_prompt
 from api.app.services.providers import complete_json
 from api.app.services.runconfig import RunConfig
 
@@ -54,3 +54,27 @@ def decompose(prompt: str, config: RunConfig) -> dict:
     system = config.decomposer_prompt or default_decomposer_prompt()
     raw = complete_json(config, system, f"Scene: {prompt}")
     return _parse_result(raw)
+
+
+def refine_element(
+    element: dict,
+    feedback: str,
+    scene: str,
+    siblings: list[str],
+    config: RunConfig,
+) -> dict:
+    request = json.dumps(
+        {
+            "scene": scene,
+            "other_layers": siblings,
+            "layer": {
+                "label": element["label"],
+                "type": element["type"],
+                "prompt": element["prompt"],
+            },
+            "complaint": feedback,
+        },
+        ensure_ascii=False,
+    )
+    raw = complete_json(config, refiner_prompt(), request)
+    return _parse_result(raw)["elements"][0]

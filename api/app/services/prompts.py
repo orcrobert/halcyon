@@ -13,3 +13,7 @@ def load_prompt(name: str) -> str:
 
 def default_decomposer_prompt() -> str:
     return load_prompt("decomposer")
+
+
+def refiner_prompt() -> str:
+    return load_prompt("refiner")
