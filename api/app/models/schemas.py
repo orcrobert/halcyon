@@ -159,6 +159,9 @@ class ElementOut(BaseModel):
     type: str
     prompt: str
     duration_s: float | None
+    status: str
+    error: str | None
+    version: int
     position: int
     volume: float
     pan: float
@@ -175,6 +178,10 @@ class ElementMixUpdate(BaseModel):
     depth: float | None = Field(default=None, ge=0, le=1)
     tuning_hz: float | None = Field(default=None, ge=200, le=800)
     eq_json: list[EQBand] | None = None
+
+
+class ElementRegenerate(BaseModel):
+    feedback: str | None = Field(default=None, max_length=2000)
 
 
 class AtmosphereCreate(BaseModel):

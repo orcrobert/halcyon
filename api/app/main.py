@@ -10,7 +10,7 @@ from api.app.config import settings
 from api.app.db import init_db
 from api.app.routers import atmospheres, auth, elements, generators
 from api.app.routers import settings as settings_router
-from api.app.services.pipeline import run_generation
+from api.app.services.pipeline import regenerate_element, run_generation
 from api.app.worker import GenerationWorker, reclaim_interrupted
 
 logger = logging.getLogger(__name__)
@@ -22,9 +22,9 @@ async def lifespan(app: FastAPI):
 
     reclaimed = reclaim_interrupted()
     if reclaimed:
-        logger.warning("Marked %s interrupted atmosphere(s) as failed", reclaimed)
+        logger.warning("Marked %s interrupted job(s) as failed", reclaimed)
 
-    worker = GenerationWorker(run_generation)
+    worker = GenerationWorker(run_generation, regenerate_element)
     worker.start()
     app.state.worker = worker
 

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Response, status
+from fastapi import APIRouter, HTTPException, Request, Response, status
 from fastapi.responses import FileResponse
 from sqlmodel import Session
 
@@ -7,6 +7,7 @@ from api.app.models.schemas import (
     ElementMixUpdate,
     ElementOriginal,
     ElementOut,
+    ElementRegenerate,
     Envelope,
 )
 from api.app.models.tables import Element, User, utcnow
@@ -22,6 +23,9 @@ def serialize_element(element: Element) -> ElementOut:
         type=element.type,
         prompt=element.prompt,
         duration_s=element.duration_s,
+        status=element.status or "ready",
+        error=element.error,
+        version=element.version or 1,
         position=element.position,
         volume=element.volume,
         pan=element.pan,
@@ -34,7 +38,7 @@ def serialize_element(element: Element) -> ElementOut:
             depth=element.original_depth,
             eq_json=element.original_eq_json,
         ),
-        audio_url=f"/api/elements/{element.id}/audio",
+        audio_url=f"/api/elements/{element.id}/audio?v={element.version or 1}",
     )
 
 
@@ -86,6 +90,35 @@ def reset(
     session.add(element)
     session.commit()
     session.refresh(element)
+
+    return Envelope(data=serialize_element(element))
+
+
+@router.post("/{element_id}/regenerate", status_code=status.HTTP_202_ACCEPTED)
+def regenerate(
+    element_id: int,
+    payload: ElementRegenerate,
+    user: CurrentUser,
+    session: SessionDep,
+    request: Request,
+) -> Envelope[ElementOut]:
+    element = owned_element(session, user, element_id)
+
+    if element.status == "regenerating":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This layer is already being regenerated.",
+        )
+
+    element.status = "regenerating"
+    element.error = None
+    element.atmosphere.updated_at = utcnow()
+    session.add(element)
+    session.commit()
+    session.refresh(element)
+
+    feedback = (payload.feedback or "").strip() or None
+    request.app.state.worker.submit_element(element_id, feedback)
 
     return Envelope(data=serialize_element(element))
 
