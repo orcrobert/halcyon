@@ -257,7 +257,9 @@ def run_generation(atmosphere_id: int) -> None:
 
         try:
             _set_stage(session, atmosphere, "decomposing")
-            decomposed = decompose(atmosphere.prompt, config)
+            decomposed = atmosphere.decomposed_json or decompose(
+                atmosphere.prompt, config
+            )
 
             _set_stage(session, atmosphere, "generating")
             elements = generate(

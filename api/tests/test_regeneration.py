@@ -213,3 +213,86 @@ def test_restart_reclaims_a_stranded_regeneration(client, auth, elements):
 
     assert after.status == "failed"
     assert "restart" in after.error
+
+
+def test_regenerating_a_scene_creates_a_second_atmosphere(
+    client, auth, ready_atmosphere, elements
+):
+    response = client.post(
+        f"/api/atmospheres/{ready_atmosphere}/regenerate", headers=auth
+    )
+
+    assert response.status_code == 202
+    fresh = response.json()["data"]
+    assert fresh["id"] != ready_atmosphere
+    assert fresh["status"] == "pending"
+    assert fresh["prompt"] == "a rainy library at dusk"
+    assert fresh["title"] == "Rainy Library"
+    assert client.app.state.worker.submitted == [ready_atmosphere, fresh["id"]]
+
+    original = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()[
+        "data"
+    ]
+    assert original["status"] == "ready"
+    assert [e["id"] for e in original["elements"]] == [e["id"] for e in elements]
+
+
+def test_a_regenerated_scene_reuses_the_saved_decomposition(
+    client, auth, ready_atmosphere, stub_pipeline, monkeypatch
+):
+    from api.app.services.pipeline import run_generation
+
+    def explode(*_args, **_kwargs):
+        raise AssertionError("the decomposer should not run for a saved scene")
+
+    monkeypatch.setattr("api.app.services.decomposer.complete_json", explode)
+
+    fresh_id = client.post(
+        f"/api/atmospheres/{ready_atmosphere}/regenerate", headers=auth
+    ).json()["data"]["id"]
+    run_generation(fresh_id)
+
+    body = client.get(f"/api/atmospheres/{fresh_id}", headers=auth).json()["data"]
+
+    assert body["status"] == "ready"
+    assert [e["label"] for e in body["elements"]] == ["Rain on glass", "Warm drone"]
+    assert body["elements"][0]["audio_url"] != ""
+
+
+def test_a_regenerated_scene_keeps_the_original_audio(
+    client, auth, ready_atmosphere, elements, stub_pipeline
+):
+    from api.app.services.pipeline import run_generation
+
+    fresh_id = client.post(
+        f"/api/atmospheres/{ready_atmosphere}/regenerate", headers=auth
+    ).json()["data"]["id"]
+    run_generation(fresh_id)
+
+    for element in elements:
+        assert (
+            client.get(element["audio_url"], headers=auth).status_code == 200
+        )
+    assert storage.atmosphere_dir(ready_atmosphere).is_dir()
+    assert storage.atmosphere_dir(fresh_id).is_dir()
+
+
+def test_regenerating_a_scene_without_a_decomposition_is_refused(client, auth):
+    atmosphere_id = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
+    ).json()["data"]["id"]
+
+    response = client.post(f"/api/atmospheres/{atmosphere_id}/regenerate", headers=auth)
+
+    assert response.status_code == 409
+    assert "no saved decomposition" in response.json()["detail"]
+
+
+def test_regenerating_a_scene_is_scoped_to_the_owner(client, register, ready_atmosphere):
+    other = {"Authorization": f"Bearer {register(email='other@halcyon.test')}"}
+
+    response = client.post(
+        f"/api/atmospheres/{ready_atmosphere}/regenerate", headers=other
+    )
+
+    assert response.status_code == 404

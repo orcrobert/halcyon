@@ -107,6 +107,50 @@ def store(
     return Envelope(data=serialize_atmosphere(atmosphere, include_elements=True))
 
 
+@router.post("/{atmosphere_id}/regenerate", status_code=status.HTTP_202_ACCEPTED)
+def regenerate(
+    atmosphere_id: int,
+    user: CurrentUser,
+    session: SessionDep,
+    request: Request,
+) -> Envelope[AtmosphereOut]:
+    source = owned_atmosphere(session, user, atmosphere_id)
+    decomposed = source.decomposed_json or {}
+
+    elements = [
+        {"label": element["label"], "type": element["type"], "prompt": element["prompt"]}
+        for element in decomposed.get("elements", [])
+        if isinstance(element, dict)
+        and element.get("label")
+        and element.get("type")
+        and element.get("prompt")
+    ]
+
+    if not elements:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This atmosphere has no saved decomposition to regenerate from.",
+        )
+
+    fresh = Atmosphere(
+        user_id=user.id,
+        prompt=source.prompt,
+        title=source.title,
+        status="pending",
+        decomposed_json={
+            "atmosphere": decomposed.get("atmosphere"),
+            "elements": elements,
+        },
+    )
+    session.add(fresh)
+    session.commit()
+    session.refresh(fresh)
+
+    request.app.state.worker.submit(fresh.id)
+
+    return Envelope(data=serialize_atmosphere(fresh, include_elements=True))
+
+
 @router.get("/{atmosphere_id}")
 def show(
     atmosphere_id: int, user: CurrentUser, session: SessionDep
