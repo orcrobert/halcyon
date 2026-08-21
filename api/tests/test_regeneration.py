@@ -277,6 +277,41 @@ def test_a_regenerated_scene_keeps_the_original_audio(
     assert storage.atmosphere_dir(fresh_id).is_dir()
 
 
+def test_a_new_take_follows_the_layers_that_are_there_now(
+    client, auth, ready_atmosphere, elements, stub_pipeline, refiner
+):
+    from api.app.services.pipeline import regenerate_element, run_generation
+
+    regenerate_element(elements[0]["id"], "too harsh")
+
+    fresh_id = client.post(
+        f"/api/atmospheres/{ready_atmosphere}/regenerate", headers=auth
+    ).json()["data"]["id"]
+    run_generation(fresh_id)
+
+    body = client.get(f"/api/atmospheres/{fresh_id}", headers=auth).json()["data"]
+
+    assert [e["label"] for e in body["elements"]] == ["Softer rain", "Warm drone"]
+    assert body["elements"][0]["prompt"] == REFINED["elements"][0]["prompt"]
+
+
+def test_a_new_take_leaves_out_a_deleted_layer(
+    client, auth, ready_atmosphere, elements, stub_pipeline
+):
+    from api.app.services.pipeline import run_generation
+
+    client.delete(f"/api/elements/{elements[0]['id']}", headers=auth)
+
+    fresh_id = client.post(
+        f"/api/atmospheres/{ready_atmosphere}/regenerate", headers=auth
+    ).json()["data"]["id"]
+    run_generation(fresh_id)
+
+    body = client.get(f"/api/atmospheres/{fresh_id}", headers=auth).json()["data"]
+
+    assert [e["label"] for e in body["elements"]] == [elements[1]["label"]]
+
+
 def test_regenerating_a_scene_without_a_decomposition_is_refused(client, auth):
     atmosphere_id = client.post(
         "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}

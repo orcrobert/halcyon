@@ -118,6 +118,9 @@ def regenerate(
     decomposed = source.decomposed_json or {}
 
     elements = [
+        {"label": element.label, "type": element.type, "prompt": element.prompt}
+        for element in source.elements
+    ] or [
         {"label": element["label"], "type": element["type"], "prompt": element["prompt"]}
         for element in decomposed.get("elements", [])
         if isinstance(element, dict)
