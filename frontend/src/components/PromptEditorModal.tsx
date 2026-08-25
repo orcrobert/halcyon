@@ -217,7 +217,7 @@ export function PromptEditorModal({
                     border: '1px solid color-mix(in srgb, var(--color-wash) 6%, transparent)',
                     background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
                     color: 'var(--color-ink-muted)', fontSize: 10, cursor: 'pointer',
-                    fontFamily: action.key === 'code' ? 'ui-monospace, monospace' : 'inherit',
+                    fontFamily: action.key === 'code' ? 'var(--font-mono)' : 'inherit',
                     fontWeight: action.key === 'bold' ? 700 : 400,
                     fontStyle: action.key === 'italic' ? 'italic' : 'normal',
                     transition: 'all 0.15s',
@@ -241,7 +241,7 @@ export function PromptEditorModal({
                   flex: 1, resize: 'none', outline: 'none', border: 'none',
                   background: 'transparent', color: 'var(--color-ink-soft)',
                   padding: '20px 26px',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                  fontFamily: 'var(--font-mono)',
                   fontSize: 12.5, lineHeight: 1.75, tabSize: 2,
                 }}
               />
@@ -351,7 +351,7 @@ function MarkdownPreview({ source }: { source: string }) {
           ),
           code: ({ children }) => (
             <code style={{
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+              fontFamily: 'var(--font-mono)',
               fontSize: 12, padding: '1px 5px', borderRadius: 5,
               background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)', color: 'var(--color-accent-pale)',
             }}>
@@ -362,7 +362,7 @@ function MarkdownPreview({ source }: { source: string }) {
             <pre style={{
               margin: '12px 0', padding: 14, borderRadius: 12, overflowX: 'auto',
               background: 'color-mix(in srgb, var(--color-shade) 35%, transparent)', border: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12,
+              fontFamily: 'var(--font-mono)', fontSize: 12,
               color: 'var(--color-ink-soft)',
             }}>
               {children}

@@ -31,9 +31,10 @@ export function Logo({ size = 22, tagline }: { size?: number; tagline?: string }
         <span
           className="text-wash/90"
           style={{
+            fontFamily: 'var(--font-display)',
             fontSize: `${size * 0.86}px`,
-            fontWeight: 300,
-            letterSpacing: '0.14em',
+            fontWeight: 'var(--font-weight-brand)',
+            letterSpacing: 'var(--tracking-brand)',
             textTransform: 'uppercase',
             paddingLeft: '1px',
           }}

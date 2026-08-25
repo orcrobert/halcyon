@@ -41,6 +41,8 @@
   --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
   --font-display: var(--font-sans);
+  --font-weight-brand: 300;
+  --tracking-brand: 0.14em;
 
   --color-bg: var(--surface-0);
   --color-surface-sunken: var(--surface-1);
