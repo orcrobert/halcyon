@@ -155,6 +155,10 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   Scope every atmosphere/element query to the current user.
 - **TypeScript**: functional components, hooks, `type`-only imports where
   possible. Audio-graph logic lives in `hooks/`, presentation in `components/`.
+- **Colour and type come from `frontend/src/theme.css`.** No hex literals,
+  no `rgb()`/`rgba()`, no Tailwind palette classes anywhere in `frontend/src/`
+  — use a token (`bg-surface`, `text-ink-dim`, `var(--color-accent)`). See
+  [`.claude/docs/design-tokens.md`](.claude/docs/design-tokens.md).
 - Details per language in
   [`.claude/docs/conventions.md`](.claude/docs/conventions.md).
 
@@ -228,6 +232,7 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
 - [SELF_HOSTING.md](SELF_HOSTING.md) — self-host config, generator contract, containerization map.
 - [`.claude/docs/architecture.md`](.claude/docs/architecture.md) — deep architecture.
 - [`.claude/docs/conventions.md`](.claude/docs/conventions.md) — coding standards.
+- [`.claude/docs/design-tokens.md`](.claude/docs/design-tokens.md) — the frontend colour and type tokens.
 - [`.claude/docs/git-workflow.md`](.claude/docs/git-workflow.md) — branch/commit/PR policy.
 - [`.claude/AUDIT.md`](.claude/AUDIT.md) — known issues and refactor backlog.
 - [`.claude/skills/`](.claude/skills/) — automatable workflows for this repo.

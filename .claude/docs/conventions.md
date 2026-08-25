@@ -58,6 +58,12 @@ file you are editing.** These are the defaults when there is no local precedent.
 - Keep magic audio constants named and centralized rather than scattered
   (current code has duplicated literals like the `* 0.5` gain scale — new code
   should not add more).
+- **No raw colours.** Every colour and typeface comes from `src/theme.css`, via
+  a Tailwind utility (`bg-surface`, `text-ink-dim`), a `var(--color-*)`
+  reference, or the `alpha()` helper in `src/theme.ts`. Hex literals,
+  `rgb()`/`rgba()`, and Tailwind palette classes (`text-slate-400`) do not
+  belong in `frontend/src/`. SVG attributes and canvas contexts cannot resolve
+  `var()` — see [design-tokens.md](design-tokens.md) for what to do instead.
 - Lint clean: `npm run lint` before pushing.
 
 ---
