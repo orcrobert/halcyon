@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "./theme.css";
 
 * {
   box-sizing: border-box;
@@ -11,17 +12,17 @@ html, body, #root {
 }
 
 body {
-  background: #09090f;
-  color: #e2e8f0;
-  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
 }
 
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
-  -webkit-text-fill-color: #e2e8f0;
-  caret-color: #e2e8f0;
+  -webkit-text-fill-color: var(--color-ink);
+  caret-color: var(--color-ink);
   transition: background-color 600000s 0s, color 600000s 0s;
 }
 
@@ -29,8 +30,8 @@ input:autofill,
 input:autofill:hover,
 input:autofill:focus,
 input:autofill:active {
-  -webkit-text-fill-color: #e2e8f0;
-  caret-color: #e2e8f0;
+  -webkit-text-fill-color: var(--color-ink);
+  caret-color: var(--color-ink);
   transition: background-color 600000s 0s, color 600000s 0s;
 }
 
@@ -47,7 +48,7 @@ input[type="range"].fader {
 
 input[type="range"].fader::-webkit-slider-runnable-track {
   width: 4px;
-  background: #1e2035;
+  background: var(--color-line);
   border-radius: 2px;
 }
 
@@ -56,15 +57,15 @@ input[type="range"].fader::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: #6366f1;
-  border: 2px solid #08090e;
+  background: var(--color-accent);
+  border: 2px solid var(--color-bg);
   cursor: grab;
   margin-left: -8px;
 }
 
 input[type="range"].fader:active::-webkit-slider-thumb {
   cursor: grabbing;
-  background: #818cf8;
+  background: var(--color-accent-bright);
 }
 
 /* EQ band sliders (rotated horizontal range) */
@@ -86,23 +87,23 @@ input[type="range"].eq-slider::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #6366f1;
-  border: 2px solid #0d0e18;
+  background: var(--color-accent);
+  border: 2px solid var(--color-surface);
   cursor: grab;
   margin-top: -6px;
 }
 
 input[type="range"].eq-slider:active::-webkit-slider-thumb {
   cursor: grabbing;
-  background: #818cf8;
+  background: var(--color-accent-bright);
 }
 
 input[type="range"].eq-slider::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: #6366f1;
-  border: 2px solid #0d0e18;
+  background: var(--color-accent);
+  border: 2px solid var(--color-surface);
   cursor: grab;
 }
 
