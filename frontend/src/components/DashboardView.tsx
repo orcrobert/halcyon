@@ -130,22 +130,22 @@ export function DashboardView({
   }, [animating, onStartAnimate, onStopAnimate])
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#08090e]">
+    <div className="min-h-screen flex flex-col bg-bg">
       <TuningControl
         onTuningChange={onTuningChange}
         initialFreq={session.elements?.[0]?.tuning_hz ?? 440}
       />
 
       {/* Top bar */}
-      <header className="flex items-center justify-between border-b border-[#13141f]" style={{ padding: '18px 32px' }}>
+      <header className="flex items-center justify-between border-b border-line-soft" style={{ padding: '18px 32px' }}>
         {/* Live indicator */}
         <div className={`flex items-center gap-2 border rounded-xl px-4 py-2 transition-all duration-150 ${
           playing
-            ? 'border-indigo-500/30 bg-indigo-500/5'
-            : 'border-[#1d1e2e]'
+            ? 'border-accent/30 bg-accent/5'
+            : 'border-line'
         }`}>
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${playing ? 'bg-indigo-500 animate-pulse' : 'bg-slate-700'}`} />
-          <span className={`text-[12px] font-medium uppercase tracking-[0.12em] hidden sm:block ${playing ? 'text-indigo-400' : 'text-slate-600'}`}>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${playing ? 'bg-accent animate-pulse' : 'bg-ink-ghost'}`} />
+          <span className={`text-[12px] font-medium uppercase tracking-[0.12em] hidden sm:block ${playing ? 'text-accent-bright' : 'text-ink-faint'}`}>
             {playing ? 'Live' : 'Paused'}
           </span>
         </div>
@@ -173,7 +173,7 @@ export function DashboardView({
 
           <button
             onClick={onExport}
-            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150"
+            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150"
             style={{ fontFamily: 'inherit' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -188,7 +188,7 @@ export function DashboardView({
             onClick={handleRegenerateScene}
             disabled={sceneRegenerating}
             title="Generate this scene again as a new atmosphere"
-            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ fontFamily: 'inherit' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -200,7 +200,7 @@ export function DashboardView({
 
           <button
             onClick={onReset}
-            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150"
+            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150"
             style={{ fontFamily: 'inherit' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -221,9 +221,9 @@ export function DashboardView({
 
           {/* Title */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-700 mb-3">Now playing</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-ink-ghost mb-3">Now playing</p>
             <div className="flex items-center justify-center gap-3">
-              <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.02em' }}>
+              <h1 className="text-3xl font-bold text-wash" style={{ letterSpacing: '-0.02em' }}>
                 {session.title ?? session.prompt}
               </h1>
               <button
@@ -264,15 +264,15 @@ export function DashboardView({
           {/* Play/Pause */}
           <button
             onClick={onPlayPause}
-            className="flex items-center justify-center w-12 h-12 rounded-full border border-[#1d1e2e] bg-[#111218] hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all duration-200"
+            className="flex items-center justify-center w-12 h-12 rounded-full border border-line bg-surface-raised hover:border-accent/40 hover:bg-accent/5 transition-all duration-200"
           >
             {playing ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-ink-soft">
                 <rect x="6" y="4" width="4" height="16" rx="1" />
                 <rect x="14" y="4" width="4" height="16" rx="1" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-indigo-400">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-accent-bright">
                 <polygon points="5,3 19,12 5,21" />
               </svg>
             )}
@@ -386,7 +386,7 @@ export function DashboardView({
 
       {/* Footer */}
       <footer className="py-6 text-center">
-        <p className="text-[11px] text-slate-800 uppercase tracking-widest">
+        <p className="text-[11px] text-ink-whisper uppercase tracking-widest">
           Drag faders · Space to play/pause
         </p>
       </footer>

@@ -151,15 +151,15 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
       <div className="flex flex-col gap-10 w-full" style={{ maxWidth: '880px' }}>
 
         <div className="flex flex-col items-center gap-2 text-center">
-          <span className="text-[10px] uppercase tracking-[0.32em] text-indigo-400/70 font-medium">
+          <span className="text-[10px] uppercase tracking-[0.32em] text-accent-bright/70 font-medium">
             Composing
           </span>
           {atmosphere.title && (
-            <h1 className="text-[20px] text-slate-200 leading-tight" style={{ fontWeight: 400, letterSpacing: '-0.01em' }}>
+            <h1 className="text-[20px] text-ink leading-tight" style={{ fontWeight: 400, letterSpacing: '-0.01em' }}>
               {atmosphere.title}
             </h1>
           )}
-          <p className="text-[13px] text-slate-500 leading-relaxed mx-auto line-clamp-3 italic" style={{ maxWidth: '560px', fontWeight: 300 }}>
+          <p className="text-[13px] text-ink-muted leading-relaxed mx-auto line-clamp-3 italic" style={{ maxWidth: '560px', fontWeight: 300 }}>
             &ldquo;{atmosphere.prompt}&rdquo;
           </p>
         </div>
@@ -171,21 +171,21 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
-                className="w-1 h-1 rounded-full bg-indigo-400/80 animate-pulse"
+                className="w-1 h-1 rounded-full bg-accent-bright/80 animate-pulse"
                 style={{ animationDelay: `${i * 0.18}s`, animationDuration: '1.4s' }}
               />
             ))}
           </div>
-          <span className="text-slate-700">·</span>
-          <span className="text-indigo-400/80 tabular-nums">{formatElapsed(elapsed)}</span>
-          <span className="text-slate-700">·</span>
-          <span className="text-slate-600 tabular-nums">{atmosphere.duration_s}s layers</span>
+          <span className="text-ink-ghost">·</span>
+          <span className="text-accent-bright/80 tabular-nums">{formatElapsed(elapsed)}</span>
+          <span className="text-ink-ghost">·</span>
+          <span className="text-ink-faint tabular-nums">{atmosphere.duration_s}s layers</span>
         </div>
 
         <div className="flex justify-center">
           <button
             onClick={onCancel}
-            className="text-[11px] text-slate-600 hover:text-slate-300 transition tracking-wide"
+            className="text-[11px] text-ink-faint hover:text-ink-soft transition tracking-wide"
           >
             ← back to prompt (job keeps running)
           </button>

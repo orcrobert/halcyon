@@ -29,7 +29,7 @@ export function Logo({ size = 22, tagline }: { size?: number; tagline?: string }
       <div className="flex items-center gap-2.5">
         <Mark size={size} />
         <span
-          className="text-white/90"
+          className="text-wash/90"
           style={{
             fontSize: `${size * 0.86}px`,
             fontWeight: 300,
@@ -43,7 +43,7 @@ export function Logo({ size = 22, tagline }: { size?: number; tagline?: string }
       </div>
       {tagline && (
         <p
-          className="text-[15px] text-slate-400 leading-relaxed mx-auto"
+          className="text-[15px] text-ink-dim leading-relaxed mx-auto"
           style={{ maxWidth: '400px', fontWeight: 300, letterSpacing: '-0.005em' }}
         >
           {tagline}

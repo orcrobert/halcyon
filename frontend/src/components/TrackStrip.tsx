@@ -138,10 +138,10 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         onMouseLeave={() => setHovered(false)}
         className={`relative flex flex-col items-center rounded-2xl border transition-all duration-300 overflow-hidden ${
           failed
-            ? 'border-red-500/40'
+            ? 'border-danger/40'
             : muted
-              ? 'bg-[#0d0e14] border-[#0f1018]'
-              : 'border-[#1d1e2e] hover:border-[#2a2b40]'
+              ? 'bg-surface border-line-faint'
+              : 'border-line hover:border-line-active'
         }`}
         style={{
           width: '100px',
@@ -194,10 +194,10 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           aria-expanded={menuOpen}
           className={`absolute flex items-center justify-center rounded-full transition-all duration-150 border ${
             failed
-              ? 'bg-red-500/15 text-red-400 border-red-500/40'
+              ? 'bg-danger/15 text-danger-bright border-danger/40'
               : menuOpen
-                ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40'
-                : 'bg-white/[0.02] text-slate-700 hover:text-slate-300 border-white/[0.06] hover:border-[#2a2b40]'
+                ? 'bg-accent/15 text-accent-soft border-accent/40'
+                : 'bg-wash/[0.02] text-ink-ghost hover:text-ink-soft border-wash/[0.06] hover:border-line-active'
           }`}
           style={{ top: 8, right: 8, width: 22, height: 22, zIndex: 2, padding: 0 }}
         >
@@ -239,7 +239,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         >
 
         {/* Volume % */}
-        <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-slate-800' : 'text-slate-700'}`}>
+        <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-ink-whisper' : 'text-ink-ghost'}`}>
           {muted ? '—' : `${Math.round(dispVolume * 100)}`}
         </span>
 
@@ -284,12 +284,12 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         </button>
 
         {/* Divider */}
-        <div className={`w-full h-px ${muted ? 'bg-[#111318]' : 'bg-[#1d1e2e]'}`} />
+        <div className={`w-full h-px ${muted ? 'bg-surface-raised' : 'bg-line'}`} />
 
         {/* Type badge */}
         <span
           className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
-            muted ? 'bg-slate-900 text-slate-800' : isMusic ? 'bg-violet-500/10 text-violet-500' : 'bg-sky-500/10 text-sky-500'
+            muted ? 'bg-surface-raised text-ink-whisper' : isMusic ? 'bg-tag-music/10 text-tag-music' : 'bg-tag-sound/10 text-tag-sound'
           }`}
           style={{ padding: '4px 10px' }}
         >
@@ -303,8 +303,8 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             title="Mute"
             className={`w-8 h-8 rounded-full text-xs font-bold transition-all duration-150 border ${
               muted
-                ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                : 'bg-transparent text-slate-600 hover:text-slate-300 border-[#1d1e2e] hover:border-[#2a2b40]'
+                ? 'bg-danger/20 text-danger-bright border-danger/40'
+                : 'bg-transparent text-ink-faint hover:text-ink-soft border-line hover:border-line-active'
             }`}
             style={{ fontFamily: 'inherit' }}
           >
@@ -317,8 +317,8 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             title="EQ"
             className={`w-8 h-8 rounded-full text-[9px] font-bold transition-all duration-150 border ${
               eqOpen
-                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40'
-                : 'bg-transparent text-slate-600 hover:text-slate-300 border-[#1d1e2e] hover:border-[#2a2b40]'
+                ? 'bg-accent/20 text-accent-bright border-accent/40'
+                : 'bg-transparent text-ink-faint hover:text-ink-soft border-line hover:border-line-active'
             }`}
             style={{ fontFamily: 'inherit', letterSpacing: '0.04em' }}
           >

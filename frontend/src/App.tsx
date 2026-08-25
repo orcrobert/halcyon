@@ -445,7 +445,7 @@ function AuthedApp() {
 function FullScreenStatus({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#08090e' }}>
-      <div className="text-white/30 text-sm">{children}</div>
+      <div className="text-wash/30 text-sm">{children}</div>
     </div>
   )
 }
