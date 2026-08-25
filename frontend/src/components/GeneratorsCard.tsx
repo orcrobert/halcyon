@@ -21,9 +21,9 @@ const INPUT_CLASS =
 const INPUT_STYLE: React.CSSProperties = { padding: '9px 12px', fontFamily: 'inherit' }
 
 const STATUS_COLOR: Record<GeneratorStatus, string> = {
-  ok: 'rgb(52, 211, 153)',
-  unreachable: 'rgb(248, 113, 113)',
-  error: 'rgb(251, 191, 36)',
+  ok: 'var(--color-success)',
+  unreachable: 'var(--color-danger-bright)',
+  error: 'var(--color-warn)',
 }
 
 const STATUS_LABEL: Record<GeneratorStatus, string> = {
@@ -132,7 +132,7 @@ export function GeneratorsCard() {
   return (
     <section
       className="rounded-2xl border border-surface-hover bg-surface flex flex-col gap-4"
-      style={{ padding: '22px', boxShadow: '0 18px 40px rgba(0,0,0,0.30)' }}
+      style={{ padding: '22px', boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 30%, transparent)' }}
     >
       <div>
         <h2 className="text-[14px] font-semibold text-ink tracking-tight">Generator</h2>
@@ -145,7 +145,7 @@ export function GeneratorsCard() {
       {loading && (
         <div className="flex flex-col gap-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="rounded-xl animate-pulse" style={{ height: '58px', background: 'rgba(255,255,255,0.022)' }} />
+            <div key={i} className="rounded-xl animate-pulse" style={{ height: '58px', background: 'color-mix(in srgb, var(--color-wash) 2.2%, transparent)' }} />
           ))}
         </div>
       )}
@@ -168,8 +168,8 @@ export function GeneratorsCard() {
                 className="rounded-xl border transition-colors"
                 style={{
                   padding: '13px 14px',
-                  borderColor: active ? 'rgba(99,102,241,0.35)' : '#191a27',
-                  background: active ? 'rgba(99,102,241,0.06)' : 'rgba(255,255,255,0.014)',
+                  borderColor: active ? 'color-mix(in srgb, var(--color-accent) 35%, transparent)' : 'var(--color-surface-hover)',
+                  background: active ? 'color-mix(in srgb, var(--color-accent) 6%, transparent)' : 'color-mix(in srgb, var(--color-wash) 1.4%, transparent)',
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -182,9 +182,9 @@ export function GeneratorsCard() {
                     style={{
                       width: '15px',
                       height: '15px',
-                      borderColor: active ? 'rgb(99,102,241)' : existing ? '#3a3d55' : '#23253a',
+                      borderColor: active ? 'var(--color-accent)' : existing ? 'var(--color-line-strong)' : 'var(--color-line-hover)',
                       background: active
-                        ? 'radial-gradient(circle, rgb(129,140,248) 0%, rgb(79,70,229) 60%, transparent 62%)'
+                        ? 'radial-gradient(circle, var(--color-accent-bright) 0%, var(--color-accent-deep) 60%, transparent 62%)'
                         : 'transparent',
                     }}
                   />
@@ -268,9 +268,9 @@ export function GeneratorsCard() {
                       className="shrink-0 text-[12px] font-medium text-wash rounded-xl transition disabled:opacity-40"
                       style={{
                         padding: '8px 14px',
-                        background: 'rgb(79, 70, 229)',
+                        background: 'var(--color-accent-deep)',
                         fontFamily: 'inherit',
-                        boxShadow: '0 0 0 1px rgba(99,102,241,0.35)',
+                        boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent)',
                       }}
                     >
                       Save

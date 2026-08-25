@@ -73,7 +73,7 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
         <div
           role="listbox"
           className="absolute left-0 bottom-full mb-2 rounded-xl border border-line-hover bg-surface-high z-20"
-          style={{ width: 232, padding: 6, boxShadow: '0 18px 40px rgba(0,0,0,0.55)' }}
+          style={{ width: 232, padding: 6, boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)' }}
         >
           <p className="text-[10px] uppercase tracking-wider text-ink-faint" style={{ padding: '6px 10px 8px 10px' }}>
             Soundscape length
@@ -98,7 +98,7 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
                 <span className="text-[10.5px] text-ink-faint">{choice.hint}</span>
               </span>
               {choice.seconds === value && (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="stroke-accent-bright" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               )}
@@ -232,9 +232,9 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
       <svg width="720" height="80" viewBox="0 0 720 80" style={{ overflow: 'visible', maxWidth: '100%' }}>
         <defs>
           <linearGradient id="bw-grad" x1="0" y1="0" x2="720" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
-            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+            <stop offset="0%" style={{ stopColor: 'var(--color-accent)' }} stopOpacity="0" />
+            <stop offset="50%" style={{ stopColor: 'var(--color-accent-bright)' }} stopOpacity="0.9" />
+            <stop offset="100%" style={{ stopColor: 'var(--color-accent)' }} stopOpacity="0" />
           </linearGradient>
           <filter id="bw-glow" x="-20%" y="-200%" width="140%" height="500%">
             <feGaussianBlur stdDeviation="6" result="b1" />
@@ -244,7 +244,7 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
         </defs>
         <path d={path} stroke="url(#bw-grad)" strokeWidth="10" fill="none" strokeLinecap="round" filter="url(#bw-glow)" opacity="0.18" />
         <path d={path} stroke="url(#bw-grad)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        <path d={path} stroke="rgba(255,255,255,0.6)" strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" />
+        <path d={path} strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 60%, transparent)' }} />
       </svg>
     </div>
   )
@@ -308,7 +308,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
         <div className="flex flex-col gap-4">
           <div
             className="rounded-2xl border border-line bg-surface transition-opacity"
-            style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.4)', opacity: loading ? 0.6 : 1 }}
+            style={{ boxShadow: '0 25px 50px color-mix(in srgb, var(--color-shade) 40%, transparent)', opacity: loading ? 0.6 : 1 }}
           >
             <textarea
               value={prompt}
@@ -331,7 +331,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
                 className="flex items-center gap-2 text-wash text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 style={{
                   padding: '12px 24px',
-                  background: loading || !prompt.trim() ? 'rgba(99,102,241,0.25)' : '#6366f1',
+                  background: loading || !prompt.trim() ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'var(--color-accent)',
                   fontFamily: 'inherit',
                 }}
               >

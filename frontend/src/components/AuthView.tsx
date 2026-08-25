@@ -49,9 +49,9 @@ function BreathingWave() {
       <svg width="720" height="80" viewBox="0 0 720 80" style={{ overflow: 'visible', maxWidth: '100%' }}>
         <defs>
           <linearGradient id="auth-bw-grad" x1="0" y1="0" x2="720" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="rgba(99,102,241,0)" />
-            <stop offset="50%" stopColor="rgba(129,140,248,0.9)" />
-            <stop offset="100%" stopColor="rgba(99,102,241,0)" />
+            <stop offset="0%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 0%, transparent)' }} />
+            <stop offset="50%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent-bright) 90%, transparent)' }} />
+            <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 0%, transparent)' }} />
           </linearGradient>
           <filter id="auth-bw-glow" x="-20%" y="-200%" width="140%" height="500%">
             <feGaussianBlur stdDeviation="6" result="b1" />
@@ -61,7 +61,7 @@ function BreathingWave() {
         </defs>
         <path d={path} stroke="url(#auth-bw-grad)" strokeWidth="10" fill="none" strokeLinecap="round" filter="url(#auth-bw-glow)" opacity="0.18" />
         <path d={path} stroke="url(#auth-bw-grad)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        <path d={path} stroke="rgba(255,255,255,0.6)" strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" />
+        <path d={path} strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 60%, transparent)' }} />
       </svg>
     </div>
   )
@@ -131,7 +131,7 @@ export function AuthView() {
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <div
             className="rounded-2xl border border-line bg-surface transition-opacity"
-            style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.4)', opacity: submitting ? 0.6 : 1 }}
+            style={{ boxShadow: '0 25px 50px color-mix(in srgb, var(--color-shade) 40%, transparent)', opacity: submitting ? 0.6 : 1 }}
           >
             <div className="flex flex-col gap-5" style={{ padding: '28px 28px 24px 28px' }}>
               {isRegister && (
@@ -196,7 +196,7 @@ export function AuthView() {
                 className="flex items-center gap-2 text-wash text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 style={{
                   padding: '12px 24px',
-                  background: submitting ? 'rgba(99,102,241,0.25)' : '#6366f1',
+                  background: submitting ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'var(--color-accent)',
                   fontFamily: 'inherit',
                 }}
               >

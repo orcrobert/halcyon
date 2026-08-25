@@ -153,7 +153,7 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
         onClick={onClose}
         className="fixed inset-0 z-40 transition-opacity duration-200"
         style={{
-          background: 'rgba(0,0,0,0.55)',
+          background: 'color-mix(in srgb, var(--color-shade) 55%, transparent)',
           backdropFilter: 'blur(3px)',
           WebkitBackdropFilter: 'blur(3px)',
           opacity: visible ? 1 : 0,
@@ -164,7 +164,7 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
         style={{
           ...panelStyle,
           transition: 'transform 0.26s cubic-bezier(0.32, 0.72, 0, 1)',
-          boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.04)',
+          boxShadow: '0 30px 80px color-mix(in srgb, var(--color-shade) 60%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 4%, transparent)',
         }}
       >
         {/* Header */}
@@ -214,12 +214,12 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
         {/* List */}
         <div
           className="flex-1 overflow-y-auto"
-          style={{ scrollbarWidth: 'thin', scrollbarColor: '#1e2035 transparent', padding: '4px 14px 14px 14px' }}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--color-line) transparent', padding: '4px 14px 14px 14px' }}
         >
           {loading && (
             <div className="flex flex-col gap-2.5 px-2 pt-2">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-[60px] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.025)' }} />
+                <div key={i} className="h-[60px] rounded-xl animate-pulse" style={{ background: 'color-mix(in srgb, var(--color-wash) 2.5%, transparent)' }} />
               ))}
             </div>
           )}
@@ -305,16 +305,16 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
       <div
         className="relative rounded-xl overflow-hidden"
         style={{
-          background: 'rgba(239,68,68,0.06)',
-          border: '1px solid rgba(239,68,68,0.18)',
+          background: 'color-mix(in srgb, var(--color-danger) 6%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--color-danger) 18%, transparent)',
         }}
       >
         <div className="flex items-center gap-3" style={{ padding: '10px 12px' }}>
           <div
             className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
             style={{
-              background: 'rgba(239,68,68,0.10)',
-              border: '1px solid rgba(239,68,68,0.22)',
+              background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-danger) 22%, transparent)',
             }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-danger-bright">
@@ -346,12 +346,12 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
               className="text-[11px] font-semibold text-wash rounded-lg transition"
               style={{
                 padding: '6px 14px',
-                background: 'rgb(220, 38, 38)',
+                background: 'var(--color-danger-deep)',
                 fontFamily: 'inherit',
-                boxShadow: '0 0 0 1px rgba(239,68,68,0.35), 0 4px 12px rgba(239,68,68,0.18)',
+                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-danger) 35%, transparent), 0 4px 12px color-mix(in srgb, var(--color-danger) 18%, transparent)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgb(239,68,68)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgb(220, 38, 38)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-danger)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--color-danger-deep)' }}
             >
               Delete
             </button>
@@ -365,7 +365,7 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
     <div
       className="group relative rounded-xl transition-colors"
       style={{ padding: '10px 12px', background: 'transparent' }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-wash) 3%, transparent)' }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >
       <button
@@ -376,8 +376,8 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
         <div
           className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mt-0.5"
           style={{
-            background: isReady ? 'rgba(99,102,241,0.08)' : isFailed ? 'rgba(239,68,68,0.06)' : 'rgba(245,158,11,0.06)',
-            border: `1px solid ${isReady ? 'rgba(99,102,241,0.15)' : isFailed ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)'}`,
+            background: isReady ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : isFailed ? 'color-mix(in srgb, var(--color-danger) 6%, transparent)' : 'color-mix(in srgb, var(--color-band-gamma) 6%, transparent)',
+            border: `1px solid ${isReady ? 'color-mix(in srgb, var(--color-accent) 15%, transparent)' : isFailed ? 'color-mix(in srgb, var(--color-danger) 15%, transparent)' : 'color-mix(in srgb, var(--color-band-gamma) 15%, transparent)'}`,
           }}
         >
           {isWorking ? (

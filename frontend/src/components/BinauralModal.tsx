@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
+import { alpha } from '../theme'
 
 const PRESETS = [
   { hz: 1,  band: 'Delta', label: 'Lethargic' },
@@ -15,11 +16,11 @@ const PRESETS = [
 ]
 
 const BAND_COLOR: Record<string, string> = {
-  Delta: '#6366f1',
-  Theta: '#8b5cf6',
-  Alpha: '#06b6d4',
-  Beta:  '#10b981',
-  Gamma: '#f59e0b',
+  Delta: 'var(--color-accent)',
+  Theta: 'var(--color-band-theta)',
+  Alpha: 'var(--color-band-alpha)',
+  Beta:  'var(--color-band-beta)',
+  Gamma: 'var(--color-band-gamma)',
 }
 
 const MODAL_W = 740
@@ -58,7 +59,7 @@ function FreqSlider({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, width: '100%' }}>
       <span style={{
-        fontSize: 9, color: '#334155', letterSpacing: '0.15em',
+        fontSize: 9, color: 'var(--color-ink-ghost)', letterSpacing: '0.15em',
         textTransform: 'uppercase', fontFamily: 'inherit',
       }}>
         {label}
@@ -69,15 +70,15 @@ function FreqSlider({
         color, letterSpacing: '-0.02em', lineHeight: 1,
       }}>
         {value}
-        <span style={{ fontSize: 11, color: '#334155', marginLeft: 4 }}>Hz</span>
+        <span style={{ fontSize: 11, color: 'var(--color-ink-ghost)', marginLeft: 4 }}>Hz</span>
       </div>
 
       <div style={{ width: '100%', padding: '0 4px' }}>
-        <div style={{ position: 'relative', height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.05)' }}>
+        <div style={{ position: 'relative', height: 4, borderRadius: 2, background: 'color-mix(in srgb, var(--color-wash) 5%, transparent)' }}>
           <div style={{
             position: 'absolute', left: 0, top: 0, height: '100%',
             width: `${pct}%`, borderRadius: 2,
-            background: `linear-gradient(90deg, ${color}44, ${color})`,
+            background: `linear-gradient(90deg, ${alpha(color, 27)}, ${color})`,
           }} />
         </div>
         <input
@@ -100,9 +101,9 @@ function FreqSlider({
             key={lbl}
             onClick={() => onChange(Math.max(MIN, Math.min(MAX, value + (step as number))))}
             style={{
-              width: 36, height: 22, background: 'rgba(255,255,255,0.03)',
-              border: '1px solid rgba(255,255,255,0.07)', borderRadius: 6,
-              color: '#475569', fontSize: 9, cursor: 'pointer', fontFamily: 'inherit',
+              width: 36, height: 22, background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)', borderRadius: 6,
+              color: 'var(--color-ink-faint)', fontSize: 9, cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
             {lbl}
@@ -177,7 +178,7 @@ export function BinauralModal({
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0, zIndex: 9998,
-          background: 'rgba(0,0,0,0.45)',
+          background: 'color-mix(in srgb, var(--color-shade) 45%, transparent)',
           opacity: visible ? 1 : 0,
           transition: 'opacity 0.2s ease',
           backdropFilter: 'blur(4px)',
@@ -196,13 +197,13 @@ export function BinauralModal({
       }}>
         <div ref={containerRef} style={{
           width: '100%', height: '100%',
-          background: 'rgba(10,11,20,0.82)',
+          background: 'color-mix(in srgb, var(--color-surface-sunken) 82%, transparent)',
           backdropFilter: 'blur(48px) saturate(180%)',
           WebkitBackdropFilter: 'blur(48px) saturate(180%)',
-          border: '1px solid rgba(255,255,255,0.09)',
+          border: '1px solid color-mix(in srgb, var(--color-wash) 9%, transparent)',
           borderRadius: 20,
           overflow: 'hidden',
-          boxShadow: '0 60px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
+          boxShadow: '0 60px 120px color-mix(in srgb, var(--color-shade) 80%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 10%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 6%, transparent)',
           display: 'flex', flexDirection: 'column',
         }}>
 
@@ -210,12 +211,12 @@ export function BinauralModal({
           <div style={{
             padding: '16px 22px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
             flexShrink: 0,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{
-                fontSize: 9, color: '#253047', fontFamily: 'inherit',
+                fontSize: 9, color: 'var(--color-ink-trace)', fontFamily: 'inherit',
                 letterSpacing: '0.14em', textTransform: 'uppercase',
               }}>
                 Binaural Beats
@@ -224,8 +225,8 @@ export function BinauralModal({
                 <span style={{
                   fontSize: 9, fontFamily: 'inherit', letterSpacing: '0.08em',
                   padding: '2px 8px', borderRadius: 6,
-                  background: `${activeColor}14`,
-                  border: `1px solid ${activeColor}30`,
+                  background: alpha(activeColor, 8),
+                  border: `1px solid ${alpha(activeColor, 19)}`,
                   color: activeColor,
                 }}>
                   {PRESETS.find(p => p.hz === selectedPreset)?.band} · {selectedPreset} Hz
@@ -233,7 +234,7 @@ export function BinauralModal({
               )}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 9, color: '#1e2d42', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
+              <span style={{ fontSize: 9, color: 'var(--color-ink-whisper)', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
                 use headphones
               </span>
               <button
@@ -241,11 +242,11 @@ export function BinauralModal({
                 style={{
                   fontSize: 9, fontFamily: 'inherit', letterSpacing: '0.1em',
                   padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
-                  border: active ? `1px solid ${activeColor}55` : '1px solid rgba(255,255,255,0.1)',
-                  background: active ? `${activeColor}18` : 'rgba(255,255,255,0.03)',
-                  color: active ? activeColor : '#334155',
+                  border: active ? `1px solid ${alpha(activeColor, 33)}` : '1px solid color-mix(in srgb, var(--color-wash) 10%, transparent)',
+                  background: active ? alpha(activeColor, 9) : 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+                  color: active ? activeColor : 'var(--color-ink-ghost)',
                   transition: 'all 0.2s',
-                  boxShadow: active ? `0 0 16px ${activeColor}20` : 'none',
+                  boxShadow: active ? `0 0 16px ${alpha(activeColor, 13)}` : 'none',
                 }}
               >
                 {active ? 'ON' : 'OFF'}
@@ -254,9 +255,9 @@ export function BinauralModal({
                 onClick={onClose}
                 style={{
                   width: 26, height: 26, borderRadius: '50%', cursor: 'pointer',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  background: 'rgba(255,255,255,0.03)',
-                  color: '#334155', fontSize: 12, display: 'flex',
+                  border: '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)',
+                  background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+                  color: 'var(--color-ink-ghost)', fontSize: 12, display: 'flex',
                   alignItems: 'center', justifyContent: 'center',
                   fontFamily: 'inherit',
                 }}
@@ -272,20 +273,20 @@ export function BinauralModal({
             {/* Left ear */}
             <div style={{
               padding: '32px 28px',
-              borderRight: '1px solid rgba(255,255,255,0.04)',
+              borderRight: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <FreqSlider
                 label="Left ear"
                 value={leftHz}
                 onChange={handleLeftHz}
-                color="#818cf8"
+                color="var(--color-accent-bright)"
               />
             </div>
 
             {/* Presets */}
             <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 3, overflowY: 'auto' }}>
-              <p style={{ fontSize: 9, color: '#253047', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'inherit', marginBottom: 6 }}>
+              <p style={{ fontSize: 9, color: 'var(--color-ink-trace)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'inherit', marginBottom: 6 }}>
                 Presets
               </p>
               {PRESETS.map(p => {
@@ -298,32 +299,32 @@ export function BinauralModal({
                     style={{
                       display: 'flex', alignItems: 'center', gap: 10,
                       padding: '8px 12px', borderRadius: 10, cursor: 'pointer',
-                      border: sel ? `1px solid ${color}44` : '1px solid transparent',
-                      background: sel ? `${color}12` : 'transparent',
+                      border: sel ? `1px solid ${alpha(color, 27)}` : '1px solid transparent',
+                      background: sel ? alpha(color, 7) : 'transparent',
                       transition: 'all 0.15s', textAlign: 'left',
                     }}
                   >
                     <div style={{
                       width: 6, height: 6, borderRadius: '50%', flexShrink: 0,
-                      background: sel ? color : 'rgba(255,255,255,0.08)',
+                      background: sel ? color : 'color-mix(in srgb, var(--color-wash) 8%, transparent)',
                       boxShadow: sel ? `0 0 8px ${color}` : 'none',
                       transition: 'all 0.15s',
                     }} />
                     <span style={{
                       fontSize: 11, fontVariantNumeric: 'tabular-nums', fontFamily: 'inherit',
-                      color: sel ? color : '#475569', minWidth: 26, transition: 'color 0.15s',
+                      color: sel ? color : 'var(--color-ink-faint)', minWidth: 26, transition: 'color 0.15s',
                     }}>
                       {p.hz} Hz
                     </span>
                     <span style={{
-                      fontSize: 9, color: sel ? color + 'cc' : '#253047',
+                      fontSize: 9, color: sel ? alpha(color, 80) : 'var(--color-ink-trace)',
                       fontFamily: 'inherit', letterSpacing: '0.08em',
                       minWidth: 36, transition: 'color 0.15s',
                     }}>
                       {p.band}
                     </span>
                     <span style={{
-                      fontSize: 10, color: sel ? '#94a3b8' : '#1e2d42',
+                      fontSize: 10, color: sel ? 'var(--color-ink-dim)' : 'var(--color-ink-whisper)',
                       fontFamily: 'inherit', transition: 'color 0.15s',
                     }}>
                       {p.label}
@@ -336,14 +337,14 @@ export function BinauralModal({
             {/* Right ear */}
             <div style={{
               padding: '32px 28px',
-              borderLeft: '1px solid rgba(255,255,255,0.04)',
+              borderLeft: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
             }}>
               <FreqSlider
                 label="Right ear"
                 value={rightHz}
                 onChange={handleRightHz}
-                color="#818cf8"
+                color="var(--color-accent-bright)"
               />
             </div>
           </div>
@@ -351,14 +352,14 @@ export function BinauralModal({
           {/* Footer */}
           <div style={{
             padding: '10px 22px',
-            borderTop: '1px solid rgba(255,255,255,0.04)',
+            borderTop: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             flexShrink: 0,
           }}>
-            <span style={{ fontSize: 9, color: '#1e2d42', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
+            <span style={{ fontSize: 9, color: 'var(--color-ink-whisper)', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
               L {leftHz} Hz · R {rightHz} Hz · beat {Math.abs(rightHz - leftHz)} Hz
             </span>
-            <span style={{ fontSize: 9, color: '#1e2d42', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
+            <span style={{ fontSize: 9, color: 'var(--color-ink-whisper)', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
               carrier: {leftHz} Hz · optimal range 100–400 Hz
             </span>
           </div>

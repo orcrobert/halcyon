@@ -94,10 +94,9 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
         <path
           d={trackPath}
           fill="none"
-          stroke={hovered ? '#2a2b40' : '#1d1e2e'}
           strokeWidth="2.5"
           strokeLinecap="round"
-          style={{ transition: 'stroke 0.15s' }}
+          style={{ stroke: hovered ? 'var(--color-line-active)' : 'var(--color-line)', transition: 'stroke 0.15s' }}
         />
 
         {/* Fill arc (center → value) */}
@@ -105,9 +104,9 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
           <path
             d={fillPath}
             fill="none"
-            stroke={isDetuned ? '#6366f1' : '#334155'}
             strokeWidth="2.5"
             strokeLinecap="round"
+            style={{ stroke: isDetuned ? 'var(--color-accent)' : 'var(--color-ink-ghost)' }}
           />
         )}
 
@@ -115,22 +114,23 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
         <line
           x1={CX} y1={CY - R + 4}
           x2={CX} y2={CY - R + 7}
-          stroke="#2a2b40"
           strokeWidth="1"
-          style={{ transform: `rotate(${centerAngle - 0}deg)`, transformOrigin: `${CX}px ${CY}px` }}
+          style={{ stroke: 'var(--color-line-active)', transform: `rotate(${centerAngle - 0}deg)`, transformOrigin: `${CX}px ${CY}px` }}
         />
 
         {/* Knob body */}
         <circle
           cx={CX} cy={CY} r="7"
-          fill={hovered ? '#1a1b28' : '#161720'}
-          stroke={isDetuned ? '#6366f1' : '#2a2b40'}
           strokeWidth="1"
-          style={{ transition: 'fill 0.15s, stroke 0.15s' }}
+          style={{
+            fill: hovered ? 'var(--color-surface-hover)' : 'var(--color-surface-high)',
+            stroke: isDetuned ? 'var(--color-accent)' : 'var(--color-line-active)',
+            transition: 'fill 0.15s, stroke 0.15s',
+          }}
         />
 
         {/* Pointer dot on knob */}
-        <circle cx={dotPos.x} cy={dotPos.y} r="1.5" fill={isDetuned ? '#6366f1' : '#475569'} />
+        <circle cx={dotPos.x} cy={dotPos.y} r="1.5" style={{ fill: isDetuned ? 'var(--color-accent)' : 'var(--color-ink-faint)' }} />
       </svg>
 
       {/* Pan label */}
@@ -138,7 +138,7 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
         fontSize: '9px',
         fontFamily: 'inherit',
         fontVariantNumeric: 'tabular-nums',
-        color: isDetuned ? '#6366f1' : '#475569',
+        color: isDetuned ? 'var(--color-accent)' : 'var(--color-ink-faint)',
         letterSpacing: '0.04em',
         transition: 'color 0.15s',
       }}>

@@ -38,7 +38,7 @@ export default function App() {
 
   if (state.status === 'guest') {
     return (
-      <div className="min-h-screen" style={{ background: '#08090e' }}>
+      <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
         <AuthView />
       </div>
     )
@@ -383,7 +383,7 @@ function AuthedApp() {
   }, [view, atmosphere, handlePlayPause])
 
   return (
-    <div className="min-h-screen" style={{ background: '#08090e' }}>
+    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
       {view === 'prompt' && (
         <PromptView
           onSubmit={handleGenerate}
@@ -444,7 +444,7 @@ function AuthedApp() {
 
 function FullScreenStatus({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#08090e' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg)' }}>
       <div className="text-wash/30 text-sm">{children}</div>
     </div>
   )

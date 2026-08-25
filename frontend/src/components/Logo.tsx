@@ -9,13 +9,13 @@ export function Mark({ size = 22 }: { size?: number }) {
       viewBox="0 0 48 46"
       fill="none"
       aria-hidden="true"
-      style={{ display: 'block', filter: 'drop-shadow(0 0 14px rgba(124,86,255,0.35))' }}
+      style={{ display: 'block', filter: 'drop-shadow(0 0 14px color-mix(in srgb, var(--color-brand) 35%, transparent))' }}
     >
       <defs>
         <linearGradient id="halcyon-mark" x1="0" y1="0" x2="48" y2="46" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="55%" stopColor="#7c56ff" />
-          <stop offset="100%" stopColor="#4f46e5" />
+          <stop offset="0%" style={{ stopColor: 'var(--color-brand-light)' }} />
+          <stop offset="55%" style={{ stopColor: 'var(--color-brand)' }} />
+          <stop offset="100%" style={{ stopColor: 'var(--color-brand-deep)' }} />
         </linearGradient>
       </defs>
       <path d={MARK_PATH} fill="url(#halcyon-mark)" />

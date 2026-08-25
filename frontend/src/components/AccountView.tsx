@@ -159,7 +159,7 @@ export function AccountView({ onBack }: Props) {
         style={{
           height: '460px',
           background:
-            'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(99,102,241,0.09), rgba(99,102,241,0) 72%)',
+            'radial-gradient(ellipse 60% 100% at 50% 0%, color-mix(in srgb, var(--color-accent) 9%, transparent), color-mix(in srgb, var(--color-accent) 0%, transparent) 72%)',
         }}
       />
 
@@ -186,8 +186,8 @@ export function AccountView({ onBack }: Props) {
               width: '52px',
               height: '52px',
               marginBottom: '16px',
-              background: 'linear-gradient(150deg, rgba(99,102,241,0.20), rgba(99,102,241,0.05))',
-              border: '1px solid rgba(99,102,241,0.25)',
+              background: 'linear-gradient(150deg, color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 5%, transparent))',
+              border: '1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)',
             }}
           >
             {user ? initials(user.name, user.email) : '·'}
@@ -203,7 +203,7 @@ export function AccountView({ onBack }: Props) {
         {loading && (
           <div className="flex flex-col gap-4">
             {[0, 1].map((i) => (
-              <div key={i} className="rounded-2xl animate-pulse" style={{ height: '150px', background: 'rgba(255,255,255,0.022)' }} />
+              <div key={i} className="rounded-2xl animate-pulse" style={{ height: '150px', background: 'color-mix(in srgb, var(--color-wash) 2.2%, transparent)' }} />
             ))}
           </div>
         )}
@@ -331,7 +331,7 @@ export function AccountView({ onBack }: Props) {
 
             <div
               className="flex items-center justify-between gap-3"
-              style={{ marginTop: '6px', paddingTop: '18px', borderTop: '1px solid #15161f' }}
+              style={{ marginTop: '6px', paddingTop: '18px', borderTop: '1px solid var(--color-line-soft)' }}
             >
               <button
                 onClick={logout}
@@ -346,9 +346,9 @@ export function AccountView({ onBack }: Props) {
                 className="text-[13px] font-medium text-wash rounded-xl transition disabled:opacity-50"
                 style={{
                   padding: '11px 22px',
-                  background: 'rgb(79, 70, 229)',
+                  background: 'var(--color-accent-deep)',
                   fontFamily: 'inherit',
-                  boxShadow: '0 0 0 1px rgba(99,102,241,0.35), 0 6px 18px rgba(99,102,241,0.20)',
+                  boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent), 0 6px 18px color-mix(in srgb, var(--color-accent) 20%, transparent)',
                 }}
               >
                 {saving ? 'Saving…' : saved ? 'Saved' : 'Save changes'}
@@ -381,7 +381,7 @@ function Card({ title, hint, children }: { title: string; hint: string; children
   return (
     <section
       className="rounded-2xl border border-surface-hover bg-surface flex flex-col gap-4"
-      style={{ padding: '22px', boxShadow: '0 18px 40px rgba(0,0,0,0.30)' }}
+      style={{ padding: '22px', boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 30%, transparent)' }}
     >
       <div>
         <h2 className="text-[14px] font-semibold text-ink tracking-tight">{title}</h2>

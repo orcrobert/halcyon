@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState } from 'react'
+import { alpha } from '../theme'
 
 interface Props {
   pan: number          // -1.0 to +1.0  (X axis, left/right)
@@ -81,8 +82,8 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
 
       {/* Axis labels */}
       <div style={{ width: PAD, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '8px', color: '#334155', fontFamily: 'inherit', letterSpacing: '0.06em' }}>L</span>
-        <span style={{ fontSize: '8px', color: '#334155', fontFamily: 'inherit', letterSpacing: '0.06em' }}>R</span>
+        <span style={{ fontSize: '8px', color: 'var(--color-ink-ghost)', fontFamily: 'inherit', letterSpacing: '0.06em' }}>L</span>
+        <span style={{ fontSize: '8px', color: 'var(--color-ink-ghost)', fontFamily: 'inherit', letterSpacing: '0.06em' }}>R</span>
       </div>
 
       {/* 2D Pad */}
@@ -100,9 +101,9 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
           height: PAD,
           borderRadius: '12px',
           background: active
-            ? '#0f1022'
-            : hovered ? '#0d0f1e' : '#0a0b15',
-          border: `1px solid ${isOffCenter ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.05)'}`,
+            ? 'var(--color-surface-raised)'
+            : hovered ? 'var(--color-surface)' : 'var(--color-surface-sunken)',
+          border: `1px solid ${isOffCenter ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'color-mix(in srgb, var(--color-wash) 5%, transparent)'}`,
           cursor: 'crosshair',
           touchAction: 'none',
           userSelect: 'none',
@@ -114,20 +115,20 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
         <svg width={PAD} height={PAD} style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
           <defs>
             <pattern id={`grid-${label}`} x="0" y="0" width="11" height="11" patternUnits="userSpaceOnUse">
-              <circle cx="0.5" cy="0.5" r="0.5" fill="rgba(255,255,255,0.07)" />
+              <circle cx="0.5" cy="0.5" r="0.5" style={{ fill: 'color-mix(in srgb, var(--color-wash) 7%, transparent)' }} />
             </pattern>
           </defs>
           <rect width={PAD} height={PAD} fill={`url(#grid-${label})`} />
 
           {/* Crosshair center lines */}
-          <line x1={HALF} y1={4} x2={HALF} y2={PAD - 4} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="2 4" />
-          <line x1={4} y1={HALF} x2={PAD - 4} y2={HALF} stroke="rgba(255,255,255,0.05)" strokeWidth="1" strokeDasharray="2 4" />
+          <line x1={HALF} y1={4} x2={HALF} y2={PAD - 4} strokeWidth="1" strokeDasharray="2 4" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 5%, transparent)' }} />
+          <line x1={4} y1={HALF} x2={PAD - 4} y2={HALF} strokeWidth="1" strokeDasharray="2 4" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 5%, transparent)' }} />
 
           {/* Depth gradient ring — shows "distance" from top to bottom */}
           <defs>
             <radialGradient id={`depth-glow-${label}`} cx={dotX / PAD} cy={dotY / PAD} r="0.5">
-              <stop offset="0%" stopColor="rgba(99,102,241,0.18)" />
-              <stop offset="100%" stopColor="rgba(99,102,241,0)" />
+              <stop offset="0%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 18%, transparent)' }} />
+              <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 0%, transparent)' }} />
             </radialGradient>
           </defs>
           {isOffCenter && (
@@ -139,9 +140,9 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
             <line
               x1={HALF} y1={HALF}
               x2={dotX} y2={dotY}
-              stroke="rgba(99,102,241,0.2)"
               strokeWidth="1"
               strokeLinecap="round"
+              style={{ stroke: alpha('var(--color-accent)', 20) }}
             />
           )}
 
@@ -150,10 +151,12 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
             cx={dotX}
             cy={dotY}
             r={DOT}
-            fill={active ? 'rgba(99,102,241,0.15)' : 'rgba(20,21,35,0.9)'}
-            stroke={isOffCenter ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.3)'}
             strokeWidth="1.5"
-            style={{ transition: 'fill 0.1s, stroke 0.15s' }}
+            style={{
+              fill: active ? alpha('var(--color-accent)', 15) : alpha('var(--color-surface-high)', 90),
+              stroke: isOffCenter ? alpha('var(--color-accent)', 90) : alpha('var(--color-wash)', 30),
+              transition: 'fill 0.1s, stroke 0.15s',
+            }}
           />
 
           {/* Inner dot pulse */}
@@ -161,7 +164,7 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
             cx={dotX}
             cy={dotY}
             r="2.5"
-            fill={isOffCenter ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.4)'}
+            style={{ fill: isOffCenter ? alpha('var(--color-accent)', 90) : alpha('var(--color-wash)', 40) }}
           />
         </svg>
       </div>
@@ -170,7 +173,7 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
       <div style={{ width: PAD, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{
           fontSize: '9px',
-          color: isOffCenter ? '#6366f1' : '#334155',
+          color: isOffCenter ? 'var(--color-accent)' : 'var(--color-ink-ghost)',
           fontFamily: 'inherit',
           letterSpacing: '0.04em',
           fontVariantNumeric: 'tabular-nums',
@@ -180,7 +183,7 @@ export function SpatialPad({ pan, depth, defaultPan, defaultDepth, label, onPanC
         </span>
         <span style={{
           fontSize: '9px',
-          color: depth > 0.04 ? '#818cf8' : '#334155',
+          color: depth > 0.04 ? 'var(--color-accent-bright)' : 'var(--color-ink-ghost)',
           fontFamily: 'inherit',
           letterSpacing: '0.04em',
           transition: 'color 0.15s',

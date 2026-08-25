@@ -55,7 +55,7 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
         fontFamily: 'inherit',
         fontVariantNumeric: 'tabular-nums',
         fontWeight: 700,
-        color: isActive ? '#a5b4fc' : '#475569',
+        color: isActive ? 'var(--color-accent-soft)' : 'var(--color-ink-faint)',
         minHeight: '18px',
         transition: 'color 0.15s ease',
       }}>
@@ -69,7 +69,7 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
           width: '3px', height: `${trackHeight}px`,
-          background: 'rgba(255,255,255,0.05)',
+          background: 'color-mix(in srgb, var(--color-wash) 5%, transparent)',
           borderRadius: '4px',
         }} />
 
@@ -80,7 +80,7 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
           width: '3px',
           bottom: `${fillBottom}px`,
           height: `${fillHeight}px`,
-          background: isActive ? '#6366f1' : 'rgba(255,255,255,0.08)',
+          background: isActive ? 'var(--color-accent)' : 'color-mix(in srgb, var(--color-wash) 8%, transparent)',
           borderRadius: '4px',
           transition: 'background 0.15s ease',
         }} />
@@ -90,7 +90,7 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
           width: '12px', height: '1px',
-          background: 'rgba(255,255,255,0.12)',
+          background: 'color-mix(in srgb, var(--color-wash) 12%, transparent)',
           top: `${trackHeight / 2}px`,
         }} />
 
@@ -114,10 +114,10 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
 
       {/* Label */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
-        <span style={{ fontSize: '12px', fontWeight: 700, color: isActive ? '#6366f1' : '#475569', letterSpacing: '0.1em', fontFamily: 'inherit', transition: 'color 0.15s ease' }}>
+        <span style={{ fontSize: '12px', fontWeight: 700, color: isActive ? 'var(--color-accent)' : 'var(--color-ink-faint)', letterSpacing: '0.1em', fontFamily: 'inherit', transition: 'color 0.15s ease' }}>
           {label}
         </span>
-        <span style={{ fontSize: '10px', color: '#334155', fontFamily: 'inherit' }}>
+        <span style={{ fontSize: '10px', color: 'var(--color-ink-ghost)', fontFamily: 'inherit' }}>
           {freq}
         </span>
       </div>
@@ -228,29 +228,29 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
     >
       {/* Panel body */}
       <div style={{
-        background: 'rgba(8, 9, 18, 0.55)',
+        background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
         backdropFilter: 'blur(40px) saturate(180%) brightness(1.1)',
         WebkitBackdropFilter: 'blur(40px) saturate(180%) brightness(1.1)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid color-mix(in srgb, var(--color-wash) 10%, transparent)',
         borderRadius: '24px',
         padding: '28px 28px 22px',
-        boxShadow: '0 40px 100px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.1), inset 0 1px 0 rgba(255,255,255,0.08)',
+        boxShadow: '0 40px 100px color-mix(in srgb, var(--color-shade) 60%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 10%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 8%, transparent)',
       }}>
 
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <div>
-            <p style={{ fontSize: '11px', color: '#334155', fontFamily: 'inherit', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
+            <p style={{ fontSize: '11px', color: 'var(--color-ink-ghost)', fontFamily: 'inherit', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
               EQ — {label}
             </p>
           </div>
           <button
             onClick={handleReset}
             style={{
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.07)',
+              background: 'color-mix(in srgb, var(--color-wash) 4%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)',
               borderRadius: '8px',
-              color: '#475569',
+              color: 'var(--color-ink-faint)',
               fontSize: '10px',
               fontFamily: 'inherit',
               letterSpacing: '0.08em',
@@ -260,12 +260,12 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
               transition: 'color 0.15s, border-color 0.15s',
             }}
             onMouseEnter={e => {
-              e.currentTarget.style.color = '#94a3b8'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'
+              e.currentTarget.style.color = 'var(--color-ink-dim)'
+              e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-wash) 14%, transparent)'
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.color = '#475569'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+              e.currentTarget.style.color = 'var(--color-ink-faint)'
+              e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-wash) 7%, transparent)'
             }}
           >
             Reset
@@ -277,20 +277,20 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
           <BandSlider label="LOW" freq="200 Hz" value={eq.low} onChange={v => handleChange('low', v)} />
 
           {/* Divider */}
-          <div style={{ width: '1px', background: 'rgba(255,255,255,0.04)', alignSelf: 'stretch', margin: '0 4px' }} />
+          <div style={{ width: '1px', background: 'color-mix(in srgb, var(--color-wash) 4%, transparent)', alignSelf: 'stretch', margin: '0 4px' }} />
 
           <BandSlider label="MID" freq="1 kHz" value={eq.mid} onChange={v => handleChange('mid', v)} />
 
-          <div style={{ width: '1px', background: 'rgba(255,255,255,0.04)', alignSelf: 'stretch', margin: '0 4px' }} />
+          <div style={{ width: '1px', background: 'color-mix(in srgb, var(--color-wash) 4%, transparent)', alignSelf: 'stretch', margin: '0 4px' }} />
 
           <BandSlider label="HIGH" freq="8 kHz" value={eq.high} onChange={v => handleChange('high', v)} />
         </div>
 
         {/* dB scale hint */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
-          <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>−8 dB</span>
-          <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>0</span>
-          <span style={{ fontSize: '9px', color: '#1e2030', fontFamily: 'inherit' }}>+8 dB</span>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)' }}>
+          <span style={{ fontSize: '9px', color: 'var(--color-ink-whisper)', fontFamily: 'inherit' }}>−8 dB</span>
+          <span style={{ fontSize: '9px', color: 'var(--color-ink-whisper)', fontFamily: 'inherit' }}>0</span>
+          <span style={{ fontSize: '9px', color: 'var(--color-ink-whisper)', fontFamily: 'inherit' }}>+8 dB</span>
         </div>
       </div>
 
@@ -302,10 +302,10 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
         transform: 'translateX(-50%) rotate(45deg)',
         width: '13px',
         height: '13px',
-        background: 'rgba(8, 9, 18, 0.55)',
+        background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
         backdropFilter: 'blur(40px)',
         WebkitBackdropFilter: 'blur(40px)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid color-mix(in srgb, var(--color-wash) 10%, transparent)',
         borderTop: 'none',
         borderLeft: 'none',
         pointerEvents: 'none',
