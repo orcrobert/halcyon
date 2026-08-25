@@ -3,5 +3,10 @@ export function alpha(color: string, percent: number): string {
 }
 
 export function token(name: string): string {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  const probe = document.createElement('span')
+  probe.style.cssText = `color: var(${name}); position: absolute; visibility: hidden`
+  document.body.appendChild(probe)
+  const resolved = getComputedStyle(probe).color
+  probe.remove()
+  return resolved
 }

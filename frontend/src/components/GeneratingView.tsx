@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Atmosphere } from '../types'
+import { alpha, token } from '../theme'
 
 interface Props {
   atmosphere: Atmosphere
@@ -37,6 +38,9 @@ function GenerationCanvas() {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+
+    const accent = token('--color-accent')
+    const accentPale = token('--color-accent-pale')
 
     startRef.current = performance.now()
     layersRef.current = [spawnLayer(0, 0)]
@@ -92,9 +96,9 @@ function GenerationCanvas() {
         }
 
         ctx.save()
-        ctx.shadowColor = `rgba(99,102,241,${0.6 * fadeIn})`
+        ctx.shadowColor = alpha(accent, 60 * fadeIn)
         ctx.shadowBlur = 28
-        ctx.strokeStyle = `rgba(99,102,241,${0.55 * fadeIn})`
+        ctx.strokeStyle = alpha(accent, 55 * fadeIn)
         ctx.lineWidth = 4.8
         ctx.lineCap = 'round'
         ctx.lineJoin = 'round'
@@ -110,7 +114,7 @@ function GenerationCanvas() {
         ctx.stroke()
         ctx.restore()
 
-        ctx.strokeStyle = `rgba(199,210,254,${0.5 * fadeIn})`
+        ctx.strokeStyle = alpha(accentPale, 50 * fadeIn)
         ctx.lineWidth = 1.8
         ctx.beginPath()
         ctx.moveTo(points[0].x, points[0].y)
