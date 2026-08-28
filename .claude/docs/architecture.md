@@ -41,13 +41,16 @@ Definitive reference for how the system fits together. Skim
 - **Domain** (`models/tables.py`): `User` has many `Atmosphere`, each with many
   `Element` ordered by `position`. Status, progress, current stage and the
   requested `duration_s` (the loop length asked of the generator) live on the
-  atmosphere itself. `original_*` columns on `Element` store the mixer's computed
+  atmosphere itself; `Element.status`/`error`/`version` track a single layer
+  being regenerated. `original_*` columns on `Element` store the mixer's computed
   defaults so the UI can reset. `UserSettings` holds per-user provider config.
 - **Routers**: `auth.py`, `settings.py`, `atmospheres.py`, `elements.py`. Every
   query is scoped to the current user; a foreign id returns 404, not 403.
 - **Generation**: `AtmosphereController`-equivalent `store` creates the row and
   hands the id to `worker.GenerationWorker`, a single daemon thread consuming a
-  `queue.Queue`. `services/pipeline.py` is the job body.
+  `queue.Queue`. `services/pipeline.py` is the job body — `run_generation` for a
+  whole atmosphere, `regenerate_element` for one layer, both serialized on that
+  one thread.
 - **Providers** (`services/providers.py`): a registry of LLM backends — `gemini`
   (native), `ollama` (native), `openai` (any OpenAI-compatible endpoint). Adding
   an entry surfaces it in the account panel with no frontend change.
@@ -56,7 +59,8 @@ Definitive reference for how the system fits together. Skim
   drops inherited credentials so one provider's key is never sent to another.
 - **Prompts** (`services/prompts.py`): loads the shipped system prompts from
   `api/prompts/`. `RunConfig.decomposer_prompt` is a user's override of the
-  decomposer prompt and falls back to the shipped file when unset.
+  decomposer prompt and falls back to the shipped file when unset. The refiner
+  prompt behind per-layer regeneration is shipped only, not user-editable.
 - **Storage** (`services/storage.py`): audio at
   `DATA_DIR/audio/{atmosphere_id}/{position}_{label}.wav`, with path-escape
   checks on read.

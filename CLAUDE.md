@@ -195,6 +195,23 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   `duration` in the `POST /generate` body. It is the loop length of every
   generated layer, not a playback length — playback is still infinite. A
   generator that ignores the field falls back to its own configured duration.
+- **Layers can be deleted and regenerated after the fact.** `DELETE
+  /api/elements/{id}` is permanent — row plus WAV — and refuses the last layer.
+  `POST /api/elements/{id}/regenerate` queues a background job on the same
+  worker thread: with feedback the layer goes through `refine_element` (the
+  shipped `api/prompts/refiner.txt`) first, without it the stored prompt is
+  regenerated as-is and no LLM is called. `Element.status` drives the UI, and
+  `Element.version` busts the browser's audio cache.
+- **Regeneration re-runs the whole mix.** `analyze()` runs over every layer so
+  the new clip is placed against its neighbours. Stored clips go back in marked
+  `looped` so only the new one is trimmed to a loop point. Recomputed values
+  always become `original_*`; live values follow only where the user had not
+  moved that control by hand.
+- **A new take follows the current layers, not the original decomposition.**
+  `POST /api/atmospheres/{id}/regenerate` copies today's element rows onto a
+  fresh atmosphere, so deleted and rewritten layers stay that way. Generation
+  reuses a decomposition the atmosphere already carries instead of calling the
+  LLM again. A new take keeps the source atmosphere's `duration_s`.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and
