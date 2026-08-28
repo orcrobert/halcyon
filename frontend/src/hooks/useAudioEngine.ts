@@ -493,6 +493,23 @@ export function useAudioEngine() {
     analyserRef.current = null
   }, [stopBinaural])
 
+  const forget = useCallback((labels: string[]) => {
+    for (const label of labels) {
+      const track = tracksRef.current.get(label)
+      if (track) {
+        try { track.source.stop() } catch { /* already stopped */ }
+        tracksRef.current.delete(label)
+      }
+      decodedRef.current = decodedRef.current.filter((d) => d.el.label !== label)
+      volumeStateRef.current.delete(label)
+      eqStateRef.current.delete(label)
+      panStateRef.current.delete(label)
+      depthStateRef.current.delete(label)
+      animateSnapshotRef.current.delete(label)
+      animateStateRef.current.delete(label)
+    }
+  }, [])
+
   const getAnalyser = useCallback(() => analyserRef.current, [])
 
   const exportMix = useCallback(async (filename: string) => {
@@ -557,5 +574,5 @@ export function useAudioEngine() {
     animateMutedRef.current = muted
   }, [])
 
-  return { load, start, pause, setVolume, setEQ, setPan, setDepth, setTuning, stop, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
+  return { load, start, pause, setVolume, setEQ, setPan, setDepth, setTuning, stop, forget, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
 }

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import type { Element } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
@@ -16,6 +16,9 @@ interface Props {
   onEQChange: (label: string, eq: EQState) => void
   onPanChange: (label: string, pan: number) => void
   onDepthChange: (label: string, depth: number) => void
+  onRegenerate: (element: Element) => void
+  onDelete: (element: Element) => void
+  deletable: boolean
 }
 
 function hashLabel(label: string): number {
@@ -27,7 +30,7 @@ function hashLabel(label: string): number {
   return h >>> 0
 }
 
-export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange }: Props) {
+export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onRegenerate, onDelete, deletable }: Props) {
   const blobSeed = hashLabel(element.label)
   const blobX = 20 + (blobSeed % 60)
   const blobY = 15 + ((blobSeed >> 8) % 70)
@@ -42,6 +45,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [spatialOpen, setSpatialOpen] = useState(false)
+  const [confirmingDelete, setConfirmingDelete] = useState(false)
   const eqBtnRef = useRef<HTMLButtonElement>(null)
   const spatialBtnRef = useRef<HTMLButtonElement>(null)
 
@@ -77,6 +81,23 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   }
 
   const isMusic = element.type === 'music'
+  const regenerating = element.status === 'regenerating'
+  const failed = element.status === 'failed'
+
+  useEffect(() => {
+    if (!confirmingDelete) return
+    const id = setTimeout(() => setConfirmingDelete(false), 4000)
+    return () => clearTimeout(id)
+  }, [confirmingDelete])
+
+  function handleDelete() {
+    if (!confirmingDelete) {
+      setConfirmingDelete(true)
+      return
+    }
+    setConfirmingDelete(false)
+    onDelete(element)
+  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -105,6 +126,11 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         <p style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.6', margin: 0, fontFamily: 'inherit' }}>
           {element.prompt}
         </p>
+        {failed && element.error && (
+          <p style={{ fontSize: '10px', color: '#f87171', lineHeight: '1.5', margin: '8px 0 0 0', fontFamily: 'inherit' }}>
+            {element.error}
+          </p>
+        )}
         <div style={{
           position: 'absolute',
           bottom: '-5px',
@@ -123,9 +149,11 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className={`relative flex flex-col items-center rounded-2xl border transition-all duration-300 overflow-hidden ${
-          muted
-            ? 'bg-[#0d0e14] border-[#0f1018]'
-            : 'border-[#1d1e2e] hover:border-[#2a2b40]'
+          failed
+            ? 'border-red-500/40'
+            : muted
+              ? 'bg-[#0d0e14] border-[#0f1018]'
+              : 'border-[#1d1e2e] hover:border-[#2a2b40]'
         }`}
         style={{
           width: '100px',
@@ -169,7 +197,36 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           />
         )}
 
-        <div className="relative w-full flex flex-col items-center" style={{ zIndex: 1, gap: '16px' }}>
+        {regenerating && (
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 5,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 10,
+              background: 'rgba(10,11,20,0.72)',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+            }}
+          >
+            <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M21 12a9 9 0 1 1-6.22-8.56" />
+            </svg>
+            <span style={{ fontSize: 9, letterSpacing: '0.16em', color: '#6366f1', fontFamily: 'inherit', textTransform: 'uppercase' }}>
+              redoing
+            </span>
+          </div>
+        )}
+
+        <div
+          className="relative w-full flex flex-col items-center"
+          style={{
+            zIndex: 1,
+            gap: '16px',
+            opacity: regenerating ? 0.25 : 1,
+            pointerEvents: regenerating ? 'none' : 'auto',
+            transition: 'opacity 0.3s ease',
+          }}
+        >
 
         {/* Volume % */}
         <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-slate-800' : 'text-slate-700'}`}>
@@ -230,7 +287,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         </span>
 
         {/* Bottom buttons row */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
           <button
             onClick={handleMute}
             title="Mute"
@@ -256,6 +313,50 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             style={{ fontFamily: 'inherit', letterSpacing: '0.04em' }}
           >
             EQ
+          </button>
+
+          <button
+            onClick={() => onRegenerate(element)}
+            title={failed ? 'Regeneration failed — try again' : 'Regenerate this layer'}
+            aria-label="Regenerate this layer"
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 border ${
+              failed
+                ? 'bg-red-500/15 text-red-400 border-red-500/40'
+                : 'bg-transparent text-slate-600 hover:text-indigo-300 border-[#1d1e2e] hover:border-indigo-500/40'
+            }`}
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+          </button>
+
+          <button
+            onClick={handleDelete}
+            onBlur={() => setConfirmingDelete(false)}
+            disabled={!deletable}
+            title={
+              !deletable
+                ? 'An atmosphere needs at least one layer'
+                : confirmingDelete
+                  ? 'Click again to delete permanently'
+                  : 'Delete this layer permanently'
+            }
+            aria-label="Delete this layer permanently"
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 border disabled:opacity-30 disabled:cursor-not-allowed ${
+              confirmingDelete
+                ? 'bg-red-500/25 text-red-300 border-red-500/60'
+                : 'bg-transparent text-slate-600 hover:text-red-400 border-[#1d1e2e] hover:border-red-500/40'
+            }`}
+          >
+            {confirmingDelete ? (
+              <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'inherit', lineHeight: 1 }}>!</span>
+            ) : (
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+            )}
           </button>
         </div>
         </div>

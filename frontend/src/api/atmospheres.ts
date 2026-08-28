@@ -24,6 +24,13 @@ export async function getAtmosphere(id: number): Promise<Atmosphere> {
   return data.data
 }
 
+export async function regenerateAtmosphere(id: number): Promise<Atmosphere> {
+  const { data } = await api.post<AtmosphereResponse>(
+    `/api/atmospheres/${id}/regenerate`,
+  )
+  return data.data
+}
+
 export async function deleteAtmosphere(id: number): Promise<void> {
   await api.delete(`/api/atmospheres/${id}`)
 }
