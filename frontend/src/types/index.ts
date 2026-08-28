@@ -89,6 +89,7 @@ export interface Settings {
   decomposer_base_url: string | null
   decomposer_api_key_set: boolean
   decomposer_prompt: string | null
+  theme: string | null
   defaults: {
     generator_url: string | null
     decomposer_provider: string | null
@@ -163,4 +164,5 @@ export type SettingsUpdate = Partial<{
   decomposer_base_url: string
   decomposer_api_key: string
   decomposer_prompt: string
+  theme: string
 }>

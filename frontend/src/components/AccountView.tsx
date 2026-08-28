@@ -4,6 +4,8 @@ import { extractErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
 import { GeneratorsCard } from './GeneratorsCard'
 import { PromptEditorModal } from './PromptEditorModal'
+import { ThemeCard } from './ThemeCard'
+import { DEFAULT_THEME, applyTheme, storeTheme, storedTheme } from '../themes'
 import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
 interface Props {
@@ -57,6 +59,7 @@ export function AccountView({ onBack }: Props) {
   const [promptOpen, setPromptOpen] = useState(false)
   const [promptSaving, setPromptSaving] = useState(false)
   const [promptError, setPromptError] = useState<string | null>(null)
+  const [theme, setTheme] = useState<string>(storedTheme)
 
   useEffect(() => {
     let cancelled = false
@@ -67,6 +70,10 @@ export function AccountView({ onBack }: Props) {
         if (cancelled) return
         setSettings(res)
         setDraft(toDraft(res))
+        const active = res.theme ?? DEFAULT_THEME
+        setTheme(active)
+        applyTheme(active)
+        storeTheme(active)
       })
       .catch((e) => { if (!cancelled) setError(extractErrors(e).message) })
       .finally(() => { if (!cancelled) setLoading(false) })
@@ -89,6 +96,18 @@ export function AccountView({ onBack }: Props) {
   const provider: DecomposerProvider | undefined = settings?.providers.find(
     (p) => p.key === draft.decomposer_provider,
   )
+
+  async function handleTheme(id: string) {
+    setTheme(id)
+    applyTheme(id)
+    storeTheme(id)
+    setError(null)
+    try {
+      setSettings(await updateSettings({ theme: id }))
+    } catch (e) {
+      setError(extractErrors(e).message)
+    }
+  }
 
   async function handleSave() {
     if (!settings) return
@@ -211,6 +230,8 @@ export function AccountView({ onBack }: Props) {
         {!loading && settings && (
           <div className="flex flex-col gap-4">
             <GeneratorsCard />
+
+            <ThemeCard value={theme} onChange={handleTheme} />
 
             <Card
               title="Decomposer"
