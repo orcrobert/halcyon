@@ -139,6 +139,7 @@ def regenerate(
         user_id=user.id,
         prompt=source.prompt,
         title=source.title,
+        duration_s=source.duration_s,
         status="pending",
         decomposed_json={
             "atmosphere": decomposed.get("atmosphere"),

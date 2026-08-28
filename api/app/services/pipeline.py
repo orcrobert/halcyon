@@ -183,7 +183,11 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                     config,
                 )
 
-            generated = generate({"elements": [spec]}, config)
+            generated = generate(
+                {"elements": [spec]},
+                config,
+                atmosphere.duration_s or DEFAULT_DURATION_S,
+            )
 
             with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:
                 fresh = Path(scratch) / "fresh.wav"

@@ -312,6 +312,56 @@ def test_a_new_take_leaves_out_a_deleted_layer(
     assert [e["label"] for e in body["elements"]] == [elements[1]["label"]]
 
 
+def test_regenerating_a_layer_keeps_the_atmosphere_length(
+    client, auth, stub_pipeline, monkeypatch
+):
+    from api.app.services.pipeline import regenerate_element, run_generation
+
+    sent: list[int] = []
+    import api.app.services.generator as generator_module
+
+    original_post = generator_module.requests.post
+
+    def capture(url, **kwargs):
+        sent.append(kwargs["json"]["duration"])
+        return original_post(url, **kwargs)
+
+    atmosphere_id = client.post(
+        "/api/atmospheres",
+        headers=auth,
+        json={"prompt": "a rainy library at dusk", "duration_s": 30},
+    ).json()["data"]["id"]
+    run_generation(atmosphere_id)
+
+    element_id = client.get(f"/api/atmospheres/{atmosphere_id}", headers=auth).json()[
+        "data"
+    ]["elements"][0]["id"]
+
+    monkeypatch.setattr(generator_module.requests, "post", capture)
+    regenerate_element(element_id, None)
+
+    assert sent == [30]
+
+
+def test_a_new_take_keeps_the_length_of_the_scene_it_came_from(
+    client, auth, stub_pipeline
+):
+    from api.app.services.pipeline import run_generation
+
+    atmosphere_id = client.post(
+        "/api/atmospheres",
+        headers=auth,
+        json={"prompt": "a rainy library at dusk", "duration_s": 60},
+    ).json()["data"]["id"]
+    run_generation(atmosphere_id)
+
+    fresh = client.post(
+        f"/api/atmospheres/{atmosphere_id}/regenerate", headers=auth
+    ).json()["data"]
+
+    assert fresh["duration_s"] == 60
+
+
 def test_regenerating_a_scene_without_a_decomposition_is_refused(client, auth):
     atmosphere_id = client.post(
         "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
