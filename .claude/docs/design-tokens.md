@@ -76,6 +76,44 @@ styles it cannot scan.
 
 ---
 
+## Theme presets
+
+[`frontend/src/themes.ts`](../../frontend/src/themes.ts) holds twenty presets —
+ten Halcyon-original combinations and ten ports of well-known editor themes.
+A preset is not a full token dump. It is a compact spec:
+
+```ts
+{ id, name, blurb, family, bg, line, text, muted,
+  accent, brand, danger, success, warn, music, sound, bands }
+```
+
+`themeVariables()` expands that into the whole primitive layer by interpolating
+in **OKLab**, so the ramps stay perceptually even whatever the hue:
+
+- `--surface-0…9` — `bg` → `line`, at the stop positions the original design uses
+- `--ink-0…9` — a darkened `muted` → `muted` → `text`, so the theme's own
+  comment colour lands on `--ink-5`, where most secondary text sits
+- `--accent-*`, `--brand-*`, `--danger-*` — the seed, one deepened step
+  (lower lightness, slightly boosted chroma — mixing toward black goes muddy),
+  and the rest mixed toward white
+
+Adding a theme means adding one spec. Do not hand-write ramps.
+
+`applyTheme(id)` writes the expanded variables as inline custom properties on
+`<html>` and stamps `data-theme`. Switching first removes the previous theme's
+properties, so nothing leaks between presets. The default (`midnight`) is a
+special case: it clears everything and falls back to `theme.css`, which is why
+the shipped default never drifts from what the stylesheet says.
+
+All twenty are dark. The `--color-wash` / `--color-shade` elevation overlays
+assume a dark ground, so a light preset would need those inverted too.
+
+The choice is stored per user (`UserSettings.theme`, `PUT /api/settings`) and
+mirrored into `localStorage` so it applies at boot before React renders,
+avoiding a flash of the default.
+
+---
+
 ## Two constraints worth knowing
 
 **SVG presentation attributes cannot take `var()`.** `fill="var(--color-accent)"`

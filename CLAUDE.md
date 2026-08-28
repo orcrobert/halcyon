@@ -216,6 +216,10 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   fresh atmosphere, so deleted and rewritten layers stay that way. Generation
   reuses a decomposition the atmosphere already carries instead of calling the
   LLM again. A new take keeps the source atmosphere's `duration_s`.
+- **Themes are presets over the token ramps.** `frontend/src/themes.ts` holds
+  twenty specs; `themeVariables()` expands each into the primitive layer in
+  OKLab. Add a spec, never a hand-written ramp. The choice lives on
+  `UserSettings.theme` and is mirrored to `localStorage` for first paint.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and
