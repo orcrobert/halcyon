@@ -126,6 +126,49 @@ def test_regenerating_replaces_previous_audio(client, auth, ready_atmosphere):
     assert before == after
 
 
+def _element_rows(atmosphere_id: int):
+    from sqlmodel import select
+
+    from api.app.db import session_scope
+    from api.app.models.tables import Element
+
+    with session_scope() as session:
+        return session.exec(
+            select(Element).where(Element.atmosphere_id == atmosphere_id)
+        ).all()
+
+
+def test_regenerating_replaces_the_previous_elements(client, auth, ready_atmosphere):
+    from api.app.services.pipeline import run_generation
+
+    before = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()[
+        "data"
+    ]["elements"]
+
+    run_generation(ready_atmosphere)
+    body = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()["data"]
+
+    assert body["status"] == "ready"
+    assert body["error"] is None
+    assert [e["label"] for e in body["elements"]] == [e["label"] for e in before]
+
+    for element in body["elements"]:
+        assert client.get(element["audio_url"], headers=auth).status_code == 200
+
+
+def test_regenerating_does_not_accumulate_element_rows(client, auth, ready_atmosphere):
+    from api.app.services.pipeline import run_generation
+
+    run_generation(ready_atmosphere)
+    run_generation(ready_atmosphere)
+
+    rows = _element_rows(ready_atmosphere)
+
+    assert len(rows) == 2
+    assert sorted(row.position for row in rows) == [0, 1]
+    assert all(row.status == "ready" for row in rows)
+
+
 def test_generation_failure_is_recorded(client, auth, monkeypatch):
     from api.app.services.pipeline import run_generation
 

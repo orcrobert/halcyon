@@ -50,6 +50,9 @@ def _persist(
     wavs: list,
     srs: list[int],
 ) -> None:
+    atmosphere.elements.clear()
+    session.flush()
+
     storage.delete_atmosphere_audio(atmosphere.id)
 
     for position, (element, wav, sr) in enumerate(zip(valid, wavs, srs)):
