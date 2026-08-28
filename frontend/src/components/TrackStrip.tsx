@@ -1,9 +1,10 @@
-import { useEffect, useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import type { Element } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
 import { EQPanel } from './EQPanel'
 import { SpatialModal } from './SpatialModal'
+import { LayerMenu } from './LayerMenu'
 
 interface Props {
   element: Element
@@ -45,9 +46,10 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [spatialOpen, setSpatialOpen] = useState(false)
-  const [confirmingDelete, setConfirmingDelete] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const eqBtnRef = useRef<HTMLButtonElement>(null)
   const spatialBtnRef = useRef<HTMLButtonElement>(null)
+  const menuBtnRef = useRef<HTMLButtonElement>(null)
 
   const dispVolume = animatedVolume ?? volume
   const dispPan    = animatedPan    ?? pan
@@ -84,20 +86,6 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   const regenerating = element.status === 'regenerating'
   const failed = element.status === 'failed'
 
-  useEffect(() => {
-    if (!confirmingDelete) return
-    const id = setTimeout(() => setConfirmingDelete(false), 4000)
-    return () => clearTimeout(id)
-  }, [confirmingDelete])
-
-  function handleDelete() {
-    if (!confirmingDelete) {
-      setConfirmingDelete(true)
-      return
-    }
-    setConfirmingDelete(false)
-    onDelete(element)
-  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -197,6 +185,28 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           />
         )}
 
+        <button
+          ref={menuBtnRef}
+          onClick={() => setMenuOpen(o => !o)}
+          title={failed ? 'Regeneration failed — open layer options' : 'Layer options'}
+          aria-label="Layer options"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          className={`absolute flex items-center justify-center rounded-full transition-all duration-150 border ${
+            failed
+              ? 'bg-red-500/15 text-red-400 border-red-500/40'
+              : menuOpen
+                ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40'
+                : 'bg-white/[0.02] text-slate-700 hover:text-slate-300 border-white/[0.06] hover:border-[#2a2b40]'
+          }`}
+          style={{ top: 8, right: 8, width: 22, height: 22, zIndex: 2, padding: 0 }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+
         {regenerating && (
           <div
             style={{
@@ -287,7 +297,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         </span>
 
         {/* Bottom buttons row */}
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           <button
             onClick={handleMute}
             title="Mute"
@@ -315,49 +325,6 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             EQ
           </button>
 
-          <button
-            onClick={() => onRegenerate(element)}
-            title={failed ? 'Regeneration failed — try again' : 'Regenerate this layer'}
-            aria-label="Regenerate this layer"
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 border ${
-              failed
-                ? 'bg-red-500/15 text-red-400 border-red-500/40'
-                : 'bg-transparent text-slate-600 hover:text-indigo-300 border-[#1d1e2e] hover:border-indigo-500/40'
-            }`}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-          </button>
-
-          <button
-            onClick={handleDelete}
-            onBlur={() => setConfirmingDelete(false)}
-            disabled={!deletable}
-            title={
-              !deletable
-                ? 'An atmosphere needs at least one layer'
-                : confirmingDelete
-                  ? 'Click again to delete permanently'
-                  : 'Delete this layer permanently'
-            }
-            aria-label="Delete this layer permanently"
-            className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-150 border disabled:opacity-30 disabled:cursor-not-allowed ${
-              confirmingDelete
-                ? 'bg-red-500/25 text-red-300 border-red-500/60'
-                : 'bg-transparent text-slate-600 hover:text-red-400 border-[#1d1e2e] hover:border-red-500/40'
-            }`}
-          >
-            {confirmingDelete ? (
-              <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'inherit', lineHeight: 1 }}>!</span>
-            ) : (
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="3 6 5 6 21 6" />
-                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-              </svg>
-            )}
-          </button>
         </div>
         </div>
       </div>
@@ -369,6 +336,15 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         anchorRef={eqBtnRef}
         onEQChange={onEQChange}
         onClose={() => setEqOpen(false)}
+      />
+
+      <LayerMenu
+        open={menuOpen}
+        anchorRef={menuBtnRef}
+        deletable={deletable}
+        onRegenerate={() => onRegenerate(element)}
+        onDelete={() => onDelete(element)}
+        onClose={() => setMenuOpen(false)}
       />
 
       <SpatialModal
