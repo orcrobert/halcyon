@@ -157,11 +157,11 @@ function AuthedApp() {
     }
   }, [activatePollFor])
 
-  const handleGenerate = useCallback(async (prompt: string) => {
+  const handleGenerate = useCallback(async (prompt: string, durationS: number) => {
     setSubmitting(true)
     setError(null)
     try {
-      const created = await createAtmosphere({ prompt })
+      const created = await createAtmosphere({ prompt, duration_s: durationS })
       localStorage.setItem(PENDING_KEY, String(created.id))
       setAtmosphere(created)
       setView('generating')

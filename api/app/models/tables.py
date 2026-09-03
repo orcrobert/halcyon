@@ -4,6 +4,8 @@ from typing import Any, Optional
 from sqlalchemy import JSON, Column, DateTime, UniqueConstraint
 from sqlmodel import Field, Relationship, SQLModel
 
+from api.app.config import DEFAULT_DURATION_S
+
 
 def utcnow() -> datetime:
     return datetime.now(timezone.utc)
@@ -101,6 +103,7 @@ class Atmosphere(SQLModel, table=True):
     user_id: int = Field(foreign_key="users.id", index=True, ondelete="CASCADE")
     title: str | None = None
     prompt: str
+    duration_s: int | None = DEFAULT_DURATION_S
     status: str = Field(default="pending", index=True)
     progress: int = 0
     current_stage: str | None = None

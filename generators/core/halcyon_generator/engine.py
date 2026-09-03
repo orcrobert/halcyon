@@ -6,6 +6,9 @@ from typing import Any
 
 from .config import GeneratorConfig
 
+MIN_DURATION_S = 1
+MAX_DURATION_S = 120
+
 _UNSAFE = re.compile(r"[^A-Za-z0-9_-]+")
 
 
@@ -37,23 +40,35 @@ class AudioCraftEngine:
     def loaded(self) -> bool:
         return self._audiogen is not None and self._musicgen is not None
 
-    def generate(self, elements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def resolve_duration(self, requested: int | None) -> int:
+        if not requested:
+            return self.config.duration
+        return max(MIN_DURATION_S, min(MAX_DURATION_S, int(requested)))
+
+    def generate(
+        self, elements: list[dict[str, Any]], duration: int | None = None
+    ) -> list[dict[str, Any]]:
         if not self.loaded:
             self.load()
+
+        seconds = self.resolve_duration(duration)
 
         sounds = [e for e in elements if e.get("type") == "sound"]
         music = [e for e in elements if e.get("type") == "music"]
 
         results: list[dict[str, Any]] = []
         if sounds:
-            results.extend(self._generate_batch(self._audiogen, sounds))
+            results.extend(self._generate_batch(self._audiogen, sounds, seconds))
         if music:
-            results.extend(self._generate_batch(self._musicgen, music))
+            results.extend(self._generate_batch(self._musicgen, music, seconds))
         return results
 
-    def _generate_batch(self, model, elements: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    def _generate_batch(
+        self, model, elements: list[dict[str, Any]], seconds: int
+    ) -> list[dict[str, Any]]:
         from audiocraft.data.audio import audio_write
 
+        model.set_generation_params(duration=seconds)
         wavs = model.generate([e["prompt"] for e in elements])
         results = []
         with tempfile.TemporaryDirectory() as tmp:

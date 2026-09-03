@@ -190,6 +190,11 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   loading the file directly.
 - **Per-user API keys are encrypted at rest** and must never be returned by the
   API — expose `decomposer_api_key_set: bool`, never the value.
+- **Soundscape length is per atmosphere.** `Atmosphere.duration_s` is chosen in
+  the prompt view (5–120 s, default 10) and travels to the generator as
+  `duration` in the `POST /generate` body. It is the loop length of every
+  generated layer, not a playback length — playback is still infinite. A
+  generator that ignores the field falls back to its own configured duration.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and

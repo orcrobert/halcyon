@@ -4,23 +4,25 @@ import pytest
 from fastapi.testclient import TestClient
 
 from halcyon_generator import GeneratorConfig, create_app
-from halcyon_generator.engine import _stem
+from halcyon_generator.engine import MAX_DURATION_S, AudioCraftEngine, _stem
 
 
 class StubEngine:
     def __init__(self):
         self.config = GeneratorConfig()
         self.loaded = True
+        self.durations = []
 
     def load(self):
         self.loaded = True
 
-    def generate(self, elements):
+    def generate(self, elements, duration=None):
+        self.durations.append(duration)
         return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
 
 
-def client():
-    return TestClient(create_app(engine=StubEngine(), eager=False))
+def client(engine=None):
+    return TestClient(create_app(engine=engine or StubEngine(), eager=False))
 
 
 def test_home_reports_the_configured_models():
@@ -28,6 +30,7 @@ def test_home_reports_the_configured_models():
     assert body["status"] == "ok"
     assert body["audiogen_model"] == "facebook/audiogen-medium"
     assert body["duration"] == 10
+    assert body["max_duration"] == MAX_DURATION_S
 
 
 def test_generate_echoes_elements_with_audio():
@@ -41,6 +44,31 @@ def test_generate_echoes_elements_with_audio():
     for original, returned in zip(elements, body["elements"]):
         assert returned["prompt"] == original["prompt"]
         assert base64.b64decode(returned["audio_b64"]) == b"RIFF"
+
+
+def test_generate_passes_the_requested_duration_to_the_engine():
+    engine = StubEngine()
+    elements = [{"label": "wind", "type": "sound", "prompt": "low desert wind"}]
+
+    client(engine).post("/generate", json={"elements": elements, "duration": 45})
+    client(engine).post("/generate", json={"elements": elements})
+
+    assert engine.durations == [45, None]
+
+
+def test_the_engine_falls_back_to_its_configured_duration():
+    engine = AudioCraftEngine(GeneratorConfig(duration=10))
+
+    assert engine.resolve_duration(None) == 10
+    assert engine.resolve_duration(0) == 10
+    assert engine.resolve_duration(30) == 30
+
+
+def test_the_engine_clamps_absurd_durations():
+    engine = AudioCraftEngine(GeneratorConfig(duration=10))
+
+    assert engine.resolve_duration(100_000) == MAX_DURATION_S
+    assert engine.resolve_duration(-5) == 1
 
 
 def test_config_reads_overrides_from_the_environment(monkeypatch):

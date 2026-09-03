@@ -8,6 +8,10 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 
 LEGACY_PROVIDER_NAMES = {"gemini": "gemini", "llama": "ollama", "mistral": "ollama"}
 
+DEFAULT_DURATION_S = 10
+MIN_DURATION_S = 5
+MAX_DURATION_S = 120
+
 logger = logging.getLogger(__name__)
 
 

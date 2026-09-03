@@ -40,6 +40,7 @@ export interface Atmosphere {
   id: number
   title: string | null
   prompt: string
+  duration_s: number
   status: AtmosphereStatus
   progress: number
   current_stage: string | null
@@ -101,6 +102,7 @@ export interface GeneratorReport {
   audiogen_model?: string
   musicgen_model?: string
   duration?: number
+  max_duration?: number
   loaded?: boolean
 }
 

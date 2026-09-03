@@ -1,12 +1,116 @@
 import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
 import { Logo } from './Logo'
 
+export const DEFAULT_DURATION_S = 10
+
+const DURATION_CHOICES: { seconds: number; hint: string }[] = [
+  { seconds: 10, hint: 'Quickest to generate' },
+  { seconds: 20, hint: 'A little more movement' },
+  { seconds: 30, hint: 'Fuller, less repetitive' },
+  { seconds: 60, hint: 'Richest, slowest to generate' },
+]
+
 interface Props {
-  onSubmit: (prompt: string) => void
+  onSubmit: (prompt: string, durationS: number) => void
   loading: boolean
   error: string | null
   onOpenAccount?: () => void
   onOpenHistory?: () => void
+}
+
+interface LengthMenuProps {
+  value: number
+  onChange: (seconds: number) => void
+  disabled: boolean
+}
+
+function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+  const expanded = open && !disabled
+
+  useEffect(() => {
+    if (!expanded) return
+
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    function onKeyDown(event: globalThis.KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [expanded])
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        disabled={disabled}
+        aria-haspopup="listbox"
+        aria-expanded={expanded}
+        title="Loop length of each generated layer"
+        className="flex items-center gap-1.5 rounded-lg border border-[#232640] text-[11px] text-slate-400 hover:text-slate-200 hover:border-[#32365a] transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ padding: '5px 9px', fontFamily: 'inherit' }}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9" />
+          <polyline points="12 7 12 12 15.5 14" />
+        </svg>
+        {value}s
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
+          <polyline points="6 15 12 9 18 15" />
+        </svg>
+      </button>
+
+      {expanded && (
+        <div
+          role="listbox"
+          className="absolute left-0 bottom-full mb-2 rounded-xl border border-[#232640] bg-[#12131f] z-20"
+          style={{ width: 232, padding: 6, boxShadow: '0 18px 40px rgba(0,0,0,0.55)' }}
+        >
+          <p className="text-[10px] uppercase tracking-wider text-slate-600" style={{ padding: '6px 10px 8px 10px' }}>
+            Soundscape length
+          </p>
+          {DURATION_CHOICES.map((choice) => (
+            <button
+              key={choice.seconds}
+              type="button"
+              role="option"
+              aria-selected={choice.seconds === value}
+              onClick={() => {
+                onChange(choice.seconds)
+                setOpen(false)
+              }}
+              className="w-full flex items-center justify-between gap-3 rounded-lg text-left hover:bg-white/[0.04] transition"
+              style={{ padding: '8px 10px', fontFamily: 'inherit' }}
+            >
+              <span className="flex flex-col">
+                <span className={`text-[13px] ${choice.seconds === value ? 'text-slate-100' : 'text-slate-300'}`}>
+                  {choice.seconds} seconds
+                </span>
+                <span className="text-[10.5px] text-slate-600">{choice.hint}</span>
+              </span>
+              {choice.seconds === value && (
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+            </button>
+          ))}
+          <p className="text-[10.5px] text-slate-600 leading-snug" style={{ padding: '8px 10px 6px 10px' }}>
+            Every layer loops forever — this sets how much audio plays before it repeats.
+          </p>
+        </div>
+      )}
+    </div>
+  )
 }
 
 interface Ripple {
@@ -148,12 +252,17 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
 
 export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHistory }: Props) {
   const [prompt, setPrompt] = useState('')
+  const [durationS, setDurationS] = useState(DEFAULT_DURATION_S)
   const [pulse, setPulse] = useState({ key: '', seq: 0 })
+
+  function submit() {
+    if (prompt.trim() && !loading) onSubmit(prompt.trim(), durationS)
+  }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (prompt.trim() && !loading) onSubmit(prompt.trim())
+      submit()
       return
     }
     if (e.key.length === 1 || e.key === 'Backspace' || e.key === ' ') {
@@ -211,10 +320,13 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
               className="w-full bg-transparent text-slate-200 resize-none border-none outline-none placeholder:text-slate-600 text-[15px] leading-relaxed"
               style={{ padding: '24px 28px 12px 28px', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
-            <div className="flex items-center justify-between" style={{ padding: '0 28px 20px 28px' }}>
-              <span className="text-[11px] text-slate-700">Shift + Enter for new line</span>
+            <div className="flex items-center justify-between gap-4" style={{ padding: '0 28px 20px 28px' }}>
+              <div className="flex items-center gap-3 min-w-0">
+                <LengthMenu value={durationS} onChange={setDurationS} disabled={loading} />
+                <span className="text-[11px] text-slate-700 truncate">Shift + Enter for new line</span>
+              </div>
               <button
-                onClick={() => prompt.trim() && !loading && onSubmit(prompt.trim())}
+                onClick={submit}
                 disabled={loading || !prompt.trim()}
                 className="flex items-center gap-2 text-white text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 style={{
