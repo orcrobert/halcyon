@@ -13,12 +13,17 @@ export interface EQBand {
   q: number
 }
 
+export type ElementStatus = 'ready' | 'regenerating' | 'failed'
+
 export interface Element {
   id: number
   label: string
   type: 'sound' | 'music'
   prompt: string
   duration_s: number | null
+  status: ElementStatus
+  error: string | null
+  version: number
   position: number
   volume: number
   pan: number

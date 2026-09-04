@@ -139,6 +139,9 @@ class Element(SQLModel, table=True):
     prompt: str
     audio_path: str
     duration_s: float | None = None
+    status: str | None = "ready"
+    error: str | None = None
+    version: int | None = 1
 
     volume: float = 0.8
     pan: float = 0.0

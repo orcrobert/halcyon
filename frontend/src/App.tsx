@@ -12,8 +12,10 @@ import {
   createAtmosphere,
   getAtmosphere,
   pollAtmosphere,
+  regenerateAtmosphere,
 } from './api/atmospheres'
-import type { Atmosphere, EQBand } from './types'
+import { deleteElement, regenerateElement } from './api/elements'
+import type { Atmosphere, EQBand, Element } from './types'
 
 const PENDING_KEY = 'halcyon_pending_atmosphere_id'
 
@@ -57,12 +59,15 @@ function AuthedApp() {
   const [binauralBeatHz, setBinauralBeatHz] = useState(8)
   const [binauralLeftHz, setBinauralLeftHz] = useState(200)
   const [binauralRightHz, setBinauralRightHz] = useState(208)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   const pollAbortRef = useRef<AbortController | null>(null)
+  const regenAbortRef = useRef<AbortController | null>(null)
+  const playingRef = useRef(false)
 
   const {
     load, start, pause, setVolume, setEQ, setPan, setDepth,
-    setTuning, stop, exportMix, getAnalyser,
+    setTuning, stop, forget, exportMix, getAnalyser,
     startAnimate, stopAnimate, setAnimateMuted,
     startBinaural, stopBinaural, setBinauralFreqs,
   } = useAudioEngine()
@@ -82,6 +87,10 @@ function AuthedApp() {
     () => (atmosphere?.elements ?? []).map((e) => e.id),
     [atmosphere],
   )
+
+  useEffect(() => {
+    playingRef.current = playing
+  }, [playing])
 
   const loadAtmosphereIntoEngine = useCallback(async (a: Atmosphere) => {
     if (!a.elements) return
@@ -173,6 +182,91 @@ function AuthedApp() {
     }
   }, [activatePollFor])
 
+  const watchRegeneration = useCallback(async (atmosphereId: number) => {
+    regenAbortRef.current?.abort()
+    const controller = new AbortController()
+    regenAbortRef.current = controller
+
+    try {
+      for (;;) {
+        await new Promise((r) => setTimeout(r, 1500))
+        if (controller.signal.aborted) return
+
+        const latest = await getAtmosphere(atmosphereId)
+        if (controller.signal.aborted) return
+        setAtmosphere(latest)
+
+        const busy = (latest.elements ?? []).some((e) => e.status === 'regenerating')
+        if (busy) continue
+
+        const failed = (latest.elements ?? []).find((e) => e.status === 'failed')
+        if (failed) setActionError(failed.error ?? 'Regenerating that layer failed.')
+
+        await loadAtmosphereIntoEngine(latest)
+        if (!playingRef.current) await pause()
+        return
+      }
+    } catch (err) {
+      if (controller.signal.aborted) return
+      setActionError(err instanceof Error ? err.message : 'Regeneration failed.')
+    }
+  }, [loadAtmosphereIntoEngine, pause])
+
+  const handleRegenerateElement = useCallback(async (element: Element, feedback: string) => {
+    if (!atmosphere) return
+    setActionError(null)
+    try {
+      const updated = await regenerateElement(element.id, feedback)
+      forget([element.label])
+      setAtmosphere((prev) =>
+        prev
+          ? {
+              ...prev,
+              elements: (prev.elements ?? []).map((e) =>
+                e.id === updated.id ? updated : e,
+              ),
+            }
+          : prev,
+      )
+      watchRegeneration(atmosphere.id)
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Could not start regeneration.')
+    }
+  }, [atmosphere, forget, watchRegeneration])
+
+  const handleDeleteElement = useCallback(async (element: Element) => {
+    setActionError(null)
+    try {
+      await deleteElement(element.id)
+      forget([element.label])
+      setAtmosphere((prev) =>
+        prev
+          ? { ...prev, elements: (prev.elements ?? []).filter((e) => e.id !== element.id) }
+          : prev,
+      )
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Could not delete that layer.')
+    }
+  }, [forget])
+
+  const handleRegenerateScene = useCallback(async () => {
+    if (!atmosphere) return
+    setActionError(null)
+    try {
+      const created = await regenerateAtmosphere(atmosphere.id)
+      regenAbortRef.current?.abort()
+      await flushAll()
+      stop()
+      setPlaying(false)
+      localStorage.setItem(PENDING_KEY, String(created.id))
+      setAtmosphere(created)
+      setView('generating')
+      activatePollFor(created.id)
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Could not start a new take.')
+    }
+  }, [atmosphere, flushAll, stop, activatePollFor])
+
   const handleCancelGenerating = useCallback(() => {
     pollAbortRef.current?.abort()
     setView('prompt')
@@ -190,6 +284,7 @@ function AuthedApp() {
 
   const handleNewAtmosphere = useCallback(async () => {
     pollAbortRef.current?.abort()
+    regenAbortRef.current?.abort()
     await flushAll()
     stop()
     setPlaying(false)
@@ -198,6 +293,7 @@ function AuthedApp() {
   }, [stop, flushAll])
 
   const handleOpenFromHistory = useCallback(async (id: number) => {
+    regenAbortRef.current?.abort()
     await flushAll()
     stop()
     setPlaying(false)
@@ -319,6 +415,11 @@ function AuthedApp() {
           onTuningChange={handleTuningChange}
           onExport={() => exportMix(atmosphere.title ?? `atmosphere-${atmosphere.id}`)}
           onReset={handleNewAtmosphere}
+          onRegenerateElement={handleRegenerateElement}
+          onDeleteElement={handleDeleteElement}
+          onRegenerateScene={handleRegenerateScene}
+          actionError={actionError}
+          onDismissActionError={() => setActionError(null)}
           onStartAnimate={startAnimate}
           onStopAnimate={stopAnimate}
           onSetAnimateMuted={setAnimateMuted}

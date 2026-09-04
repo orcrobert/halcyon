@@ -4,6 +4,7 @@ import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
 import { EQPanel } from './EQPanel'
 import { SpatialModal } from './SpatialModal'
+import { LayerMenu } from './LayerMenu'
 
 interface Props {
   element: Element
@@ -16,6 +17,9 @@ interface Props {
   onEQChange: (label: string, eq: EQState) => void
   onPanChange: (label: string, pan: number) => void
   onDepthChange: (label: string, depth: number) => void
+  onRegenerate: (element: Element) => void
+  onDelete: (element: Element) => void
+  deletable: boolean
 }
 
 function hashLabel(label: string): number {
@@ -27,7 +31,7 @@ function hashLabel(label: string): number {
   return h >>> 0
 }
 
-export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange }: Props) {
+export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onRegenerate, onDelete, deletable }: Props) {
   const blobSeed = hashLabel(element.label)
   const blobX = 20 + (blobSeed % 60)
   const blobY = 15 + ((blobSeed >> 8) % 70)
@@ -42,8 +46,10 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [spatialOpen, setSpatialOpen] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const eqBtnRef = useRef<HTMLButtonElement>(null)
   const spatialBtnRef = useRef<HTMLButtonElement>(null)
+  const menuBtnRef = useRef<HTMLButtonElement>(null)
 
   const dispVolume = animatedVolume ?? volume
   const dispPan    = animatedPan    ?? pan
@@ -77,6 +83,9 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   }
 
   const isMusic = element.type === 'music'
+  const regenerating = element.status === 'regenerating'
+  const failed = element.status === 'failed'
+
 
   return (
     <div style={{ position: 'relative' }}>
@@ -105,6 +114,11 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         <p style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.6', margin: 0, fontFamily: 'inherit' }}>
           {element.prompt}
         </p>
+        {failed && element.error && (
+          <p style={{ fontSize: '10px', color: '#f87171', lineHeight: '1.5', margin: '8px 0 0 0', fontFamily: 'inherit' }}>
+            {element.error}
+          </p>
+        )}
         <div style={{
           position: 'absolute',
           bottom: '-5px',
@@ -123,9 +137,11 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
         className={`relative flex flex-col items-center rounded-2xl border transition-all duration-300 overflow-hidden ${
-          muted
-            ? 'bg-[#0d0e14] border-[#0f1018]'
-            : 'border-[#1d1e2e] hover:border-[#2a2b40]'
+          failed
+            ? 'border-red-500/40'
+            : muted
+              ? 'bg-[#0d0e14] border-[#0f1018]'
+              : 'border-[#1d1e2e] hover:border-[#2a2b40]'
         }`}
         style={{
           width: '100px',
@@ -169,7 +185,58 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           />
         )}
 
-        <div className="relative w-full flex flex-col items-center" style={{ zIndex: 1, gap: '16px' }}>
+        <button
+          ref={menuBtnRef}
+          onClick={() => setMenuOpen(o => !o)}
+          title={failed ? 'Regeneration failed — open layer options' : 'Layer options'}
+          aria-label="Layer options"
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+          className={`absolute flex items-center justify-center rounded-full transition-all duration-150 border ${
+            failed
+              ? 'bg-red-500/15 text-red-400 border-red-500/40'
+              : menuOpen
+                ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40'
+                : 'bg-white/[0.02] text-slate-700 hover:text-slate-300 border-white/[0.06] hover:border-[#2a2b40]'
+          }`}
+          style={{ top: 8, right: 8, width: 22, height: 22, zIndex: 2, padding: 0 }}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+
+        {regenerating && (
+          <div
+            style={{
+              position: 'absolute', inset: 0, zIndex: 5,
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: 10,
+              background: 'rgba(10,11,20,0.72)',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+            }}
+          >
+            <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M21 12a9 9 0 1 1-6.22-8.56" />
+            </svg>
+            <span style={{ fontSize: 9, letterSpacing: '0.16em', color: '#6366f1', fontFamily: 'inherit', textTransform: 'uppercase' }}>
+              redoing
+            </span>
+          </div>
+        )}
+
+        <div
+          className="relative w-full flex flex-col items-center"
+          style={{
+            zIndex: 1,
+            gap: '16px',
+            opacity: regenerating ? 0.25 : 1,
+            pointerEvents: regenerating ? 'none' : 'auto',
+            transition: 'opacity 0.3s ease',
+          }}
+        >
 
         {/* Volume % */}
         <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-slate-800' : 'text-slate-700'}`}>
@@ -257,6 +324,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           >
             EQ
           </button>
+
         </div>
         </div>
       </div>
@@ -268,6 +336,15 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         anchorRef={eqBtnRef}
         onEQChange={onEQChange}
         onClose={() => setEqOpen(false)}
+      />
+
+      <LayerMenu
+        open={menuOpen}
+        anchorRef={menuBtnRef}
+        deletable={deletable}
+        onRegenerate={() => onRegenerate(element)}
+        onDelete={() => onDelete(element)}
+        onClose={() => setMenuOpen(false)}
       />
 
       <SpatialModal

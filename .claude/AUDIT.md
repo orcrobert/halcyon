@@ -97,6 +97,11 @@ Kept as a record of what the earlier audits called for.
   any working directory.
 
 **Correctness**
+- ✅ Re-running `run_generation` on an atmosphere that already had elements hit
+  the `(atmosphere_id, position)` unique constraint and failed into the error
+  field — after the new WAVs had already been written over the old ones, leaving
+  old rows describing new audio. `_persist` now clears the previous elements
+  before it writes, so a re-run replaces the atmosphere's layers.
 - ✅ Play/pause resumed from sample 0. `unpause` rebuilt the whole graph on
   every resume; the resume path is now `start()` alone, which only builds when
   there are no live tracks.

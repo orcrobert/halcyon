@@ -138,6 +138,14 @@ uvicorn api.app.main:app --port 8001
    - **Binaural beats** — overlaid sine pair (defaults 200/208 Hz, 10 presets).
    - **Animate** — slow autonomous drift of pan/volume/depth for a living mix.
    - **Export** — offline render of the current mix to a downloadable WAV.
+   - **Regenerate a layer** (↻ on a strip) — say what you did not like and the
+     layer is rewritten and generated again; leave the box empty to just roll
+     the same prompt again. It runs in the background and the strip comes back
+     when it is done.
+   - **Delete a layer** (trash on a strip, click twice) — permanent: the row and
+     its WAV are gone. The last remaining layer cannot be deleted.
+   - **Take another** — generates the scene again as a *new* atmosphere from the
+     layers you have now, leaving the current one untouched.
 5. **History** — reopen any previous atmosphere; edits persist server-side.
 6. **Account** — save your generators and switch between them, and pick your LLM.
 

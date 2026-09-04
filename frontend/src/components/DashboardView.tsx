@@ -1,11 +1,12 @@
 import { useRef, useState, useCallback } from 'react'
-import type { Atmosphere } from '../types'
+import type { Atmosphere, Element } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
 import { Visualizer } from './Visualizer'
 import { TuningControl } from './TuningControl'
 import { BinauralModal } from './BinauralModal'
 import { PromptModal } from './PromptModal'
+import { RegenerateModal } from './RegenerateModal'
 
 export interface AnimatedValues { vol: number; pan: number; depth: number }
 
@@ -21,6 +22,11 @@ interface Props {
   onTuningChange: (freqHz: number) => void
   onExport: () => Promise<void>
   onReset: () => void
+  onRegenerateElement: (element: Element, feedback: string) => Promise<void>
+  onDeleteElement: (element: Element) => Promise<void>
+  onRegenerateScene: () => Promise<void>
+  actionError: string | null
+  onDismissActionError: () => void
   onStartAnimate: (cb: (values: Map<string, AnimatedValues>) => void) => void
   onStopAnimate: () => void
   onSetAnimateMuted: (muted: Set<string>) => void
@@ -37,13 +43,18 @@ interface Props {
 export function DashboardView({
   session, playing, getAnalyser, onPlayPause,
   onVolumeChange, onEQChange, onPanChange, onDepthChange, onTuningChange,
-  onExport, onReset, onStartAnimate, onStopAnimate, onSetAnimateMuted,
+  onExport, onReset, onRegenerateElement, onDeleteElement, onRegenerateScene,
+  actionError, onDismissActionError,
+  onStartAnimate, onStopAnimate, onSetAnimateMuted,
   onBinauralToggle, onBinauralPreset, onBinauralLeftHz, onBinauralRightHz,
   binauralActive, binauralBeatHz, binauralLeftHz, binauralRightHz,
 }: Props) {
   const [binauralOpen, setBinauralOpen] = useState(false)
   const binauralBtnRef = useRef<HTMLButtonElement>(null)
   const [promptOpen, setPromptOpen] = useState(false)
+  const [regenerating, setRegenerating] = useState<Element | null>(null)
+  const [submittingRegen, setSubmittingRegen] = useState(false)
+  const [sceneRegenerating, setSceneRegenerating] = useState(false)
   const [mutedTracks, setMutedTracks] = useState<Set<string>>(new Set())
   const [animating, setAnimating] = useState(false)
   const [animatedValues, setAnimatedValues] = useState<Map<string, AnimatedValues>>(new Map())
@@ -84,6 +95,26 @@ export function DashboardView({
       for (const label of labels) onVolumeChange(label, 0)
     }
   }
+
+  const handleRegenerateSubmit = useCallback(async (feedback: string) => {
+    if (!regenerating) return
+    setSubmittingRegen(true)
+    try {
+      await onRegenerateElement(regenerating, feedback)
+      setRegenerating(null)
+    } finally {
+      setSubmittingRegen(false)
+    }
+  }, [regenerating, onRegenerateElement])
+
+  const handleRegenerateScene = useCallback(async () => {
+    setSceneRegenerating(true)
+    try {
+      await onRegenerateScene()
+    } finally {
+      setSceneRegenerating(false)
+    }
+  }, [onRegenerateScene])
 
   const handleToggleAnimate = useCallback(() => {
     if (animating) {
@@ -151,6 +182,20 @@ export function DashboardView({
               <line x1="12" y1="15" x2="12" y2="3" />
             </svg>
             <span className="hidden sm:block">Export</span>
+          </button>
+
+          <button
+            onClick={handleRegenerateScene}
+            disabled={sceneRegenerating}
+            title="Generate this scene again as a new atmosphere"
+            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ fontFamily: 'inherit' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+              <polyline points="23 4 23 10 17 10" />
+              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+            </svg>
+            <span className="hidden sm:block">Take another</span>
           </button>
 
           <button
@@ -279,8 +324,11 @@ export function DashboardView({
             const anim = animatedValues.get(el.label)
             return (
               <TrackStrip
-                key={el.label}
+                key={`${el.id}:${el.version}`}
                 element={el}
+                deletable={(session.elements ?? []).length > 1}
+                onRegenerate={setRegenerating}
+                onDelete={onDeleteElement}
                 muted={mutedTracks.has(el.label)}
                 animatedVolume={anim?.vol}
                 animatedPan={anim?.pan}
@@ -297,12 +345,59 @@ export function DashboardView({
 
       </main>
 
+      {actionError && (
+        <div
+          style={{
+            position: 'fixed',
+            left: '50%',
+            bottom: 28,
+            transform: 'translateX(-50%)',
+            zIndex: 9997,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 12,
+            maxWidth: 'calc(100vw - 32px)',
+            padding: '10px 14px',
+            borderRadius: 12,
+            border: '1px solid rgba(239,68,68,0.35)',
+            background: 'rgba(24,10,12,0.92)',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.55)',
+          }}
+        >
+          <span style={{ fontSize: 12, color: '#fca5a5', fontFamily: 'inherit' }}>
+            {actionError}
+          </span>
+          <button
+            onClick={onDismissActionError}
+            aria-label="Dismiss"
+            style={{
+              width: 20, height: 20, borderRadius: '50%', cursor: 'pointer',
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.03)',
+              color: '#f87171', fontSize: 11, lineHeight: 1,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontFamily: 'inherit', flexShrink: 0,
+            }}
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Footer */}
       <footer className="py-6 text-center">
         <p className="text-[11px] text-slate-800 uppercase tracking-widest">
           Drag faders · Space to play/pause
         </p>
       </footer>
+
+      <RegenerateModal
+        open={regenerating !== null}
+        element={regenerating}
+        submitting={submittingRegen}
+        onSubmit={handleRegenerateSubmit}
+        onClose={() => setRegenerating(null)}
+      />
 
       <BinauralModal
         open={binauralOpen}

@@ -27,9 +27,13 @@ DECOMPOSED = {
 class RecordingWorker:
     def __init__(self) -> None:
         self.submitted: list[int] = []
+        self.elements: list[tuple[int, str | None]] = []
 
     def submit(self, atmosphere_id: int) -> None:
         self.submitted.append(atmosphere_id)
+
+    def submit_element(self, element_id: int, feedback: str | None) -> None:
+        self.elements.append((element_id, feedback))
 
 
 class FakeResponse:
