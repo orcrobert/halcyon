@@ -203,3 +203,40 @@ def test_make_loopable_seam_is_continuous():
     sr = 16000
     looped = make_loopable(_correlated_pad(sr, 10.0)[np.newaxis, :], sr)[0]
     assert abs(looped[0] - looped[-1]) < 0.05
+
+
+def test_find_loop_point_scales_the_window_with_length():
+    from mixer.effects.looping import find_loop_point
+
+    sr = 16000
+    long_clip = _correlated_pad(sr, 10.0)[np.newaxis, :]
+    short_clip = _correlated_pad(sr, 4.0)[np.newaxis, :]
+
+    assert int(5.5 * sr) <= find_loop_point(long_clip, sr) <= int(8.5 * sr)
+    assert int(2.0 * sr) <= find_loop_point(short_clip, sr) <= int(3.2 * sr)
+
+
+def test_make_loopable_keeps_most_of_a_short_bed():
+    sr = 16000
+    looped = make_loopable(_correlated_pad(sr, 4.0)[np.newaxis, :], sr)[0]
+
+    assert len(looped) >= 2 * sr
+    assert np.abs(looped).max() <= 1.0
+    assert abs(looped[0] - looped[-1]) < 0.05
+
+
+def test_analyze_leaves_one_shots_untrimmed(tmp_path):
+    sr = 22050
+    path = os.path.join(tmp_path, "bark.wav")
+    sf.write(path, _noise(sr, 2.0, seed=5), sr)
+
+    element = {
+        "label": "bark",
+        "type": "sound",
+        "prompt": "bark",
+        "playback": "oneshot",
+        "file": path,
+    }
+    _, wavs, _ = analyze([element])
+
+    assert wavs[0].shape[-1] == int(sr * 2.0)
