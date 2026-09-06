@@ -1,6 +1,24 @@
 import { useRef, useCallback } from 'react'
 import { SoundTouchNode } from '@soundtouchjs/audio-worklet'
 import { apiUrl, authHeaders } from '../api/client'
+import {
+  DEFAULT_INTERVAL_MAX_S,
+  DEFAULT_INTERVAL_MIN_S,
+  EVENT_BACKLOG_RESET_S,
+  EVENT_MAX_VOICES,
+  EXPORT_SEED,
+  LOOKAHEAD_HIDDEN_S,
+  LOOKAHEAD_S,
+  SCHEDULER_TICK_MS,
+  clampPan,
+  dbToGain,
+  firstTriggerDelay,
+  mulberry32,
+  nextInterval,
+  nextShape,
+  planTriggers,
+  type TriggerShape,
+} from './eventScheduler'
 import type { Element, EQBand } from '../types'
 
 function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
@@ -76,15 +94,42 @@ export interface EQState {
   high: number  // dB, high shelf at 8000Hz
 }
 
+interface EventLane {
+  buffer: AudioBuffer
+  rng: () => number
+  voices: Set<AudioBufferSourceNode>
+  nextAt: number
+  minS: number
+  maxS: number
+}
+
 interface TrackNode {
   masterGain: GainNode
   panner: StereoPannerNode
   convolver: ConvolverNode
   dryGain: GainNode
   wetGain: GainNode
-  source: AudioBufferSourceNode
-  pitchNode: SoundTouchNode
+  source: AudioBufferSourceNode | null
+  pitchNode: SoundTouchNode | null
   filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
+  lane: EventLane | null
+  basePan: number
+}
+
+interface ChainParams {
+  eq: EQState
+  gain: number
+  pan: number
+  depth: number
+}
+
+interface TrackChain {
+  filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
+  masterGain: GainNode
+  panner: StereoPannerNode
+  convolver: ConvolverNode
+  dryGain: GainNode
+  wetGain: GainNode
 }
 
 interface DecodedElement {
@@ -110,7 +155,7 @@ function buildEQState(bands: EQBand[] | undefined): EQState {
   return state
 }
 
-function buildImpulseResponse(ctx: BaseAudioContext, duration = REVERB_IR_DURATION_S, decay = REVERB_IR_DECAY): AudioBuffer {
+function buildImpulseResponse(ctx: BaseAudioContext, random: () => number = Math.random, duration = REVERB_IR_DURATION_S, decay = REVERB_IR_DECAY): AudioBuffer {
   const sr = ctx.sampleRate
   const length = Math.floor(sr * duration)
   const ir = ctx.createBuffer(2, length, sr)
@@ -118,7 +163,7 @@ function buildImpulseResponse(ctx: BaseAudioContext, duration = REVERB_IR_DURATI
     const ch = ir.getChannelData(c)
     let sumSq = 0
     for (let i = 0; i < length; i++) {
-      const sample = (Math.random() * 2 - 1) * Math.pow(1 - i / length, decay)
+      const sample = (random() * 2 - 1) * Math.pow(1 - i / length, decay)
       ch[i] = sample
       sumSq += sample * sample
     }
@@ -130,9 +175,9 @@ function buildImpulseResponse(ctx: BaseAudioContext, duration = REVERB_IR_DURATI
   return ir
 }
 
-function createReverb(ctx: BaseAudioContext, depth: number): { convolver: ConvolverNode; dryGain: GainNode; wetGain: GainNode } {
+function createReverb(ctx: BaseAudioContext, depth: number, random: () => number = Math.random): { convolver: ConvolverNode; dryGain: GainNode; wetGain: GainNode } {
   const convolver = ctx.createConvolver()
-  convolver.buffer = buildImpulseResponse(ctx)
+  convolver.buffer = buildImpulseResponse(ctx, random)
   const dryGain = ctx.createGain()
   const wetGain = ctx.createGain()
   dryGain.gain.value = dryGainFor(depth)
@@ -158,12 +203,21 @@ function createMasterLimiter(ctx: BaseAudioContext): DynamicsCompressorNode {
   return limiter
 }
 
+function stopVoices(track: TrackNode, at: number) {
+  if (!track.lane) return
+  track.lane.voices.forEach((voice) => {
+    try { voice.stop(at) } catch {}
+  })
+  track.lane.voices.clear()
+}
+
 function releaseTrack(ctx: BaseAudioContext, track: TrackNode) {
   const t = ctx.currentTime
   track.masterGain.gain.cancelScheduledValues(t)
   track.masterGain.gain.setValueAtTime(track.masterGain.gain.value, t)
   track.masterGain.gain.linearRampToValueAtTime(0, t + SOURCE_RELEASE_S)
-  try { track.source.stop(t + SOURCE_RELEASE_S) } catch {}
+  if (track.source) { try { track.source.stop(t + SOURCE_RELEASE_S) } catch {} }
+  stopVoices(track, t + SOURCE_RELEASE_S)
 }
 
 function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode] {
@@ -189,6 +243,70 @@ function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, B
   return [low, mid, high]
 }
 
+function buildTrackChain(
+  ctx: BaseAudioContext,
+  bus: AudioNode,
+  params: ChainParams,
+  random: () => number = Math.random,
+): TrackChain {
+  const filters = createFilters(ctx, params.eq)
+  const [, , highFilter] = filters
+
+  const masterGain = ctx.createGain()
+  masterGain.gain.value = params.gain
+
+  const panner = createPanner(ctx, params.pan)
+  const { convolver, dryGain, wetGain } = createReverb(ctx, params.depth, random)
+
+  highFilter.connect(masterGain)
+  masterGain.connect(panner)
+  panner.connect(dryGain)
+  panner.connect(convolver)
+  convolver.connect(wetGain)
+  dryGain.connect(bus)
+  wetGain.connect(bus)
+
+  return { filters, masterGain, panner, convolver, dryGain, wetGain }
+}
+
+function triggerOneShot(
+  ctx: BaseAudioContext,
+  chain: TrackChain,
+  buffer: AudioBuffer,
+  basePan: number,
+  shape: TriggerShape,
+  when: number,
+  voices: Set<AudioBufferSourceNode> | null,
+): void {
+  const src = ctx.createBufferSource()
+  src.buffer = buffer
+  src.playbackRate.value = shape.rate
+
+  const gain = ctx.createGain()
+  gain.gain.value = dbToGain(shape.gainDb)
+  src.connect(gain)
+  gain.connect(chain.filters[0])
+
+  chain.panner.pan.setValueAtTime(clampPan(basePan + shape.panOffset), when)
+
+  if (voices) {
+    voices.add(src)
+    src.onended = () => {
+      voices.delete(src)
+      try { gain.disconnect() } catch {}
+    }
+  }
+
+  src.start(when)
+}
+
+function intervalsFor(el: Element): [number, number] {
+  return [
+    el.interval_min_s ?? DEFAULT_INTERVAL_MIN_S,
+    el.interval_max_s ?? DEFAULT_INTERVAL_MAX_S,
+  ]
+}
+
 export function useAudioEngine() {
   const ctxRef = useRef<AudioContext | null>(null)
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
@@ -204,6 +322,10 @@ export function useAudioEngine() {
   const binauralRef = useRef<BinauralNodes | null>(null)
   const binauralLeftHzRef = useRef(200)
   const binauralRightHzRef = useRef(208)
+
+  const schedulerRef = useRef<number | null>(null)
+  const lookaheadRef = useRef(LOOKAHEAD_S)
+  const intervalStateRef = useRef<Map<string, [number, number]>>(new Map())
 
   const animateRafRef = useRef(0)
   const animateSnapshotRef = useRef<Map<string, { vol: number; pan: number; depth: number }>>(new Map())
@@ -233,40 +355,102 @@ export function useAudioEngine() {
     }
   }
 
+  const onVisibility = useCallback(() => {
+    lookaheadRef.current = document.hidden ? LOOKAHEAD_HIDDEN_S : LOOKAHEAD_S
+  }, [])
+
+  const scheduleLanes = useCallback(() => {
+    const ctx = ctxRef.current
+    if (!ctx || ctx.state !== 'running') return
+
+    const now = ctx.currentTime
+    const horizon = now + lookaheadRef.current
+
+    tracksRef.current.forEach((track) => {
+      const lane = track.lane
+      if (!lane) return
+      if (lane.nextAt < now) lane.nextAt = now + EVENT_BACKLOG_RESET_S
+
+      while (lane.nextAt < horizon) {
+        if (lane.voices.size < EVENT_MAX_VOICES) {
+          triggerOneShot(
+            ctx,
+            track,
+            lane.buffer,
+            track.basePan,
+            nextShape(lane.rng),
+            lane.nextAt,
+            lane.voices,
+          )
+        }
+        lane.nextAt += nextInterval(lane.rng, lane.minS, lane.maxS, lane.buffer.duration)
+      }
+    })
+  }, [])
+
+  const stopScheduler = useCallback(() => {
+    if (schedulerRef.current === null) return
+    window.clearInterval(schedulerRef.current)
+    schedulerRef.current = null
+    document.removeEventListener('visibilitychange', onVisibility)
+  }, [onVisibility])
+
+  const syncScheduler = useCallback(() => {
+    let hasLane = false
+    tracksRef.current.forEach((track) => {
+      if (track.lane) hasLane = true
+    })
+
+    if (!hasLane) {
+      stopScheduler()
+      return
+    }
+    if (schedulerRef.current !== null) return
+
+    lookaheadRef.current = document.hidden ? LOOKAHEAD_HIDDEN_S : LOOKAHEAD_S
+    document.addEventListener('visibilitychange', onVisibility)
+    schedulerRef.current = window.setInterval(scheduleLanes, SCHEDULER_TICK_MS)
+  }, [onVisibility, scheduleLanes, stopScheduler])
+
   function startFromDecoded(ctx: AudioContext, decoded: DecodedElement[]) {
     tracksRef.current.forEach((track) => releaseTrack(ctx, track))
     tracksRef.current.clear()
 
     for (const { el, buffer } of decoded) {
       const eq = eqStateRef.current.get(el.label) ?? buildEQState(el.eq_json ?? undefined)
-      const filters = createFilters(ctx, eq)
-      const [lowFilter,, highFilter] = filters
-
-      const masterGain = ctx.createGain()
       const vol = volumeStateRef.current.has(el.label)
         ? volumeStateRef.current.get(el.label)!
         : el.volume
-      masterGain.gain.value = trackGain(vol)
-
-      const panner = createPanner(ctx, panStateRef.current.has(el.label)
+      const pan = panStateRef.current.has(el.label)
         ? panStateRef.current.get(el.label)!
-        : (el.pan ?? 0))
-
+        : (el.pan ?? 0)
       const depth = depthStateRef.current.get(el.label) ?? 0
-      const { convolver, dryGain, wetGain } = createReverb(ctx, depth)
-
       const bus = analyserRef.current ?? ctx.destination
-      highFilter.connect(masterGain)
-      masterGain.connect(panner)
-      panner.connect(dryGain)
-      panner.connect(convolver)
-      convolver.connect(wetGain)
-      dryGain.connect(bus)
-      wetGain.connect(bus)
+
+      const chain = buildTrackChain(ctx, bus, { eq, gain: trackGain(vol), pan, depth })
+
+      if (el.playback === 'oneshot') {
+        const [minS, maxS] = intervalStateRef.current.get(el.label) ?? intervalsFor(el)
+        tracksRef.current.set(el.label, {
+          ...chain,
+          source: null,
+          pitchNode: null,
+          basePan: pan,
+          lane: {
+            buffer,
+            rng: Math.random,
+            voices: new Set(),
+            nextAt: ctx.currentTime + firstTriggerDelay(Math.random, minS, buffer.duration),
+            minS,
+            maxS,
+          },
+        })
+        continue
+      }
 
       const pitchNode = new SoundTouchNode(ctx)
       pitchNode.pitch!.value = pitchRef.current
-      pitchNode.connect(lowFilter)
+      pitchNode.connect(chain.filters[0])
 
       const src = ctx.createBufferSource()
       src.buffer = buffer
@@ -274,8 +458,16 @@ export function useAudioEngine() {
       src.connect(pitchNode)
       src.start()
 
-      tracksRef.current.set(el.label, { masterGain, panner, convolver, dryGain, wetGain, source: src, pitchNode, filters })
+      tracksRef.current.set(el.label, {
+        ...chain,
+        source: src,
+        pitchNode,
+        basePan: pan,
+        lane: null,
+      })
     }
+
+    syncScheduler()
   }
 
   async function decodeElements(elements: Element[]): Promise<DecodedElement[]> {
@@ -330,7 +522,7 @@ export function useAudioEngine() {
     const pitch = freqHz / 440
     pitchRef.current = pitch
     tracksRef.current.forEach(({ pitchNode }) => {
-      pitchNode.pitch!.value = pitch
+      if (pitchNode) pitchNode.pitch!.value = pitch
     })
   }, [])
 
@@ -348,10 +540,26 @@ export function useAudioEngine() {
   const setPan = useCallback((label: string, pan: number) => {
     panStateRef.current.set(label, pan)
     const track = tracksRef.current.get(label)
-    if (track) {
-      track.panner.pan.setTargetAtTime(pan, getContext().currentTime, 0.05)
-    }
+    if (!track) return
+    track.basePan = pan
+    if (track.lane) return
+    track.panner.pan.setTargetAtTime(pan, getContext().currentTime, 0.05)
   }, [getContext])
+
+  const setEventInterval = useCallback((label: string, minS: number, maxS: number) => {
+    intervalStateRef.current.set(label, [minS, maxS])
+    const lane = tracksRef.current.get(label)?.lane
+    if (!lane) return
+    lane.minS = minS
+    lane.maxS = maxS
+    const ctx = ctxRef.current
+    if (ctx) {
+      lane.nextAt = Math.min(
+        lane.nextAt,
+        ctx.currentTime + nextInterval(lane.rng, minS, maxS, lane.buffer.duration),
+      )
+    }
+  }, [])
 
   const setDepth = useCallback((label: string, depth: number) => {
     depthStateRef.current.set(label, depth)
@@ -502,9 +710,13 @@ export function useAudioEngine() {
     animateCallbackRef.current = null
     animateSnapshotRef.current.clear()
     animateStateRef.current.clear()
+    stopScheduler()
     stopBinaural()
-    tracksRef.current.forEach(({ source }) => {
-      try { source.stop() } catch {}
+    tracksRef.current.forEach((track) => {
+      if (track.source) { try { track.source.stop() } catch {} }
+      track.lane?.voices.forEach((voice) => {
+        try { voice.stop() } catch {}
+      })
     })
     tracksRef.current.clear()
     decodedRef.current = []
@@ -512,19 +724,23 @@ export function useAudioEngine() {
     eqStateRef.current.clear()
     panStateRef.current.clear()
     depthStateRef.current.clear()
+    intervalStateRef.current.clear()
     workletReadyRef.current = false
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
     limiterRef.current = null
-  }, [stopBinaural])
+  }, [stopBinaural, stopScheduler])
 
   const forget = useCallback((labels: string[]) => {
     for (const label of labels) {
       const track = tracksRef.current.get(label)
       if (track) {
         if (ctxRef.current) releaseTrack(ctxRef.current, track)
-        else { try { track.source.stop() } catch {} }
+        else {
+          if (track.source) { try { track.source.stop() } catch {} }
+          stopVoices(track, 0)
+        }
         tracksRef.current.delete(label)
       }
       decodedRef.current = decodedRef.current.filter((d) => d.el.label !== label)
@@ -532,18 +748,19 @@ export function useAudioEngine() {
       eqStateRef.current.delete(label)
       panStateRef.current.delete(label)
       depthStateRef.current.delete(label)
+      intervalStateRef.current.delete(label)
       animateSnapshotRef.current.delete(label)
       animateStateRef.current.delete(label)
     }
-  }, [])
+    syncScheduler()
+  }, [syncScheduler])
 
   const getAnalyser = useCallback(() => analyserRef.current, [])
 
-  const exportMix = useCallback(async (filename: string) => {
+  const exportMix = useCallback(async (filename: string, seconds: number) => {
     if (decodedRef.current.length === 0) return
     const sampleRate = 44100
-    const duration = Math.max(...decodedRef.current.map(({ buffer }) => buffer.duration))
-    const offline = new OfflineAudioContext(2, Math.ceil(sampleRate * duration), sampleRate)
+    const offline = new OfflineAudioContext(2, Math.ceil(sampleRate * seconds), sampleRate)
 
     await SoundTouchNode.register(offline, '/soundtouch-processor.js')
 
@@ -552,34 +769,36 @@ export function useAudioEngine() {
 
     for (const { el, buffer } of decodedRef.current) {
       const liveTrack = tracksRef.current.get(el.label)
-      const eqState: EQState = liveTrack ? {
+      const eq: EQState = liveTrack ? {
         low: liveTrack.filters[0].gain.value,
         mid: liveTrack.filters[1].gain.value,
         high: liveTrack.filters[2].gain.value,
       } : buildEQState(el.eq_json ?? undefined)
 
-      const offlineFilters = createFilters(offline, eqState)
-      const [lowFilter,, highFilter] = offlineFilters
+      const isEvent = el.playback === 'oneshot'
+      const pan = liveTrack
+        ? (isEvent ? liveTrack.basePan : liveTrack.panner.pan.value)
+        : (el.pan ?? 0)
 
-      const gain = offline.createGain()
-      gain.gain.value = liveTrack ? liveTrack.masterGain.gain.value : trackGain(el.volume)
+      const rng = mulberry32((EXPORT_SEED ^ el.id) >>> 0)
+      const chain = buildTrackChain(offline, limiter, {
+        eq,
+        gain: liveTrack ? liveTrack.masterGain.gain.value : trackGain(el.volume),
+        pan,
+        depth: depthStateRef.current.get(el.label) ?? 0,
+      }, rng)
 
-      const depth = depthStateRef.current.get(el.label) ?? 0
-      const { convolver, dryGain, wetGain } = createReverb(offline, depth)
-
-      const panner = createPanner(offline, liveTrack ? liveTrack.panner.pan.value : (el.pan ?? 0))
-
-      highFilter.connect(gain)
-      gain.connect(panner)
-      panner.connect(dryGain)
-      panner.connect(convolver)
-      convolver.connect(wetGain)
-      dryGain.connect(limiter)
-      wetGain.connect(limiter)
+      if (isEvent) {
+        const [minS, maxS] = intervalStateRef.current.get(el.label) ?? intervalsFor(el)
+        for (const trigger of planTriggers(rng, seconds, minS, maxS, buffer.duration)) {
+          triggerOneShot(offline, chain, buffer, pan, trigger, trigger.at, null)
+        }
+        continue
+      }
 
       const offlinePitchNode = new SoundTouchNode(offline)
       offlinePitchNode.pitch!.value = pitchRef.current
-      offlinePitchNode.connect(lowFilter)
+      offlinePitchNode.connect(chain.filters[0])
 
       const src = offline.createBufferSource()
       src.buffer = buffer
@@ -603,5 +822,5 @@ export function useAudioEngine() {
     animateMutedRef.current = muted
   }, [])
 
-  return { load, start, pause, setVolume, setEQ, setPan, setDepth, setTuning, stop, forget, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
+  return { load, start, pause, setVolume, setEQ, setPan, setDepth, setTuning, setEventInterval, stop, forget, exportMix, getAnalyser, startAnimate, stopAnimate, setAnimateMuted, startBinaural, stopBinaural, setBinauralFreqs }
 }

@@ -4,7 +4,9 @@ import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
 import { EQPanel } from './EQPanel'
 import { SpatialModal } from './SpatialModal'
+import { DensityModal } from './DensityModal'
 import { LayerMenu } from './LayerMenu'
+import { DEFAULT_INTERVAL_MAX_S, DEFAULT_INTERVAL_MIN_S } from '../hooks/eventScheduler'
 import { alpha } from '../theme'
 
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
   onEQChange: (label: string, eq: EQState) => void
   onPanChange: (label: string, pan: number) => void
   onDepthChange: (label: string, depth: number) => void
+  onIntervalChange: (label: string, minS: number, maxS: number) => void
   onRegenerate: (element: Element) => void
   onDelete: (element: Element) => void
   deletable: boolean
@@ -32,7 +35,7 @@ function hashLabel(label: string): number {
   return h >>> 0
 }
 
-export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onRegenerate, onDelete, deletable }: Props) {
+export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onRegenerate, onDelete, deletable }: Props) {
   const blobSeed = hashLabel(element.label)
   const blobX = 20 + (blobSeed % 60)
   const blobY = 15 + ((blobSeed >> 8) % 70)
@@ -47,10 +50,22 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [spatialOpen, setSpatialOpen] = useState(false)
+  const [densityOpen, setDensityOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [interval, setInterval] = useState<[number, number]>([
+    element.interval_min_s ?? DEFAULT_INTERVAL_MIN_S,
+    element.interval_max_s ?? DEFAULT_INTERVAL_MAX_S,
+  ])
   const eqBtnRef = useRef<HTMLButtonElement>(null)
   const spatialBtnRef = useRef<HTMLButtonElement>(null)
+  const densityBtnRef = useRef<HTMLButtonElement>(null)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
+  const isEvent = element.playback === 'oneshot'
+
+  function handleIntervalChange(minS: number, maxS: number) {
+    setInterval([minS, maxS])
+    onIntervalChange(element.label, minS, maxS)
+  }
 
   const dispVolume = animatedVolume ?? volume
   const dispPan    = animatedPan    ?? pan
@@ -306,6 +321,17 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           {isMusic ? 'music' : 'sound'}
         </span>
 
+        {isEvent && (
+          <span
+            className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
+              muted ? 'bg-surface-raised text-ink-whisper' : 'bg-tag-event/10 text-tag-event'
+            }`}
+            style={{ padding: '4px 10px' }}
+          >
+            event
+          </span>
+        )}
+
         {/* Bottom buttons row */}
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           <button
@@ -335,6 +361,22 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             EQ
           </button>
 
+          {isEvent && (
+            <button
+              ref={densityBtnRef}
+              onClick={() => setDensityOpen(v => !v)}
+              title="How often this layer plays"
+              className={`w-8 h-8 rounded-full text-[13px] font-bold transition-all duration-150 border ${
+                densityOpen
+                  ? 'bg-accent/20 text-accent-bright border-accent/40'
+                  : 'bg-transparent text-ink-faint hover:text-ink-soft border-line hover:border-line-active'
+              }`}
+              style={{ fontFamily: 'inherit' }}
+            >
+              ⋯
+            </button>
+          )}
+
         </div>
         </div>
       </div>
@@ -355,6 +397,15 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         onRegenerate={() => onRegenerate(element)}
         onDelete={() => onDelete(element)}
         onClose={() => setMenuOpen(false)}
+      />
+
+      <DensityModal
+        intervalMinS={interval[0]}
+        intervalMaxS={interval[1]}
+        open={densityOpen}
+        anchorRef={densityBtnRef}
+        onIntervalChange={handleIntervalChange}
+        onClose={() => setDensityOpen(false)}
       />
 
       <SpatialModal
