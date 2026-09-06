@@ -115,6 +115,11 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         <p style={{ fontSize: '11px', color: 'var(--color-ink-muted)', lineHeight: '1.6', margin: 0, fontFamily: 'inherit' }}>
           {element.prompt}
         </p>
+        {element.clip_s != null && (
+          <p style={{ fontSize: '10px', color: 'var(--color-ink-faint)', lineHeight: '1.5', margin: '6px 0 0 0', fontFamily: 'inherit' }}>
+            {element.clip_s}s loop
+          </p>
+        )}
         {failed && element.error && (
           <p style={{ fontSize: '10px', color: 'var(--color-danger-bright)', lineHeight: '1.5', margin: '8px 0 0 0', fontFamily: 'inherit' }}>
             {element.error}

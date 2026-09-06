@@ -1,9 +1,15 @@
 from datetime import datetime
 from typing import Annotated, Any, Generic, Literal, TypeVar
 
-from pydantic import BaseModel, Field, StringConstraints
+from pydantic import BaseModel, Field, StringConstraints, model_validator
 
-from api.app.config import DEFAULT_DURATION_S, MAX_DURATION_S, MIN_DURATION_S
+from api.app.config import (
+    DEFAULT_DURATION_S,
+    MAX_DURATION_S,
+    MAX_INTERVAL_S,
+    MIN_DURATION_S,
+    MIN_INTERVAL_S,
+)
 
 T = TypeVar("T")
 
@@ -165,13 +171,19 @@ class ElementOut(BaseModel):
     error: str | None
     version: int
     position: int
+    playback: Literal["loop", "oneshot"]
+    clip_s: int | None
+    interval_min_s: float | None
+    interval_max_s: float | None
+    source: str
+    source_json: dict[str, Any] | None
     volume: float
     pan: float
     depth: float
     tuning_hz: float
     eq_json: list[dict[str, Any]] | None
     original: ElementOriginal
-    audio_url: str
+    audio_url: str | None
 
 
 class ElementMixUpdate(BaseModel):
@@ -179,7 +191,23 @@ class ElementMixUpdate(BaseModel):
     pan: float | None = Field(default=None, ge=-1, le=1)
     depth: float | None = Field(default=None, ge=0, le=1)
     tuning_hz: float | None = Field(default=None, ge=200, le=800)
+    interval_min_s: float | None = Field(
+        default=None, ge=MIN_INTERVAL_S, le=MAX_INTERVAL_S
+    )
+    interval_max_s: float | None = Field(
+        default=None, ge=MIN_INTERVAL_S, le=MAX_INTERVAL_S
+    )
     eq_json: list[EQBand] | None = None
+
+    @model_validator(mode="after")
+    def _ordered_interval(self) -> "ElementMixUpdate":
+        if (
+            self.interval_min_s is not None
+            and self.interval_max_s is not None
+            and self.interval_max_s < self.interval_min_s
+        ):
+            raise ValueError("interval_max_s must not be below interval_min_s")
+        return self
 
 
 class ElementRegenerate(BaseModel):

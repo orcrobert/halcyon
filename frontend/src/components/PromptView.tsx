@@ -55,7 +55,7 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
         disabled={disabled}
         aria-haspopup="listbox"
         aria-expanded={expanded}
-        title="Loop length of each generated layer"
+        title="Loop length of the evolving layers"
         className="flex items-center gap-1.5 rounded-lg border border-line-hover text-[11px] text-ink-dim hover:text-ink hover:border-line-strong transition disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ padding: '5px 9px', fontFamily: 'inherit' }}
       >
@@ -105,7 +105,7 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
             </button>
           ))}
           <p className="text-[10.5px] text-ink-faint leading-snug" style={{ padding: '8px 10px 6px 10px' }}>
-            Every layer loops forever — this sets how much audio plays before it repeats.
+            Beds loop from a few seconds of audio; this sets the length of the evolving layers.
           </p>
         </div>
       )}

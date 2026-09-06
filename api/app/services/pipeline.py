@@ -11,7 +11,7 @@ from api.app.config import DEFAULT_DURATION_S
 from api.app.db import session_scope
 from api.app.models.tables import Atmosphere, Element, utcnow
 from api.app.services import storage
-from api.app.services.decomposer import decompose, refine_element
+from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
 from api.app.services.generator import generate
 from api.app.services.runconfig import resolve_config
 from mixer.core import analyze
@@ -80,6 +80,12 @@ def _persist(
                 prompt=element.get("prompt", ""),
                 audio_path=audio_path,
                 duration_s=round(wav.shape[-1] / sr, 3),
+                playback=element.get("playback"),
+                clip_s=element.get("clip_s"),
+                interval_min_s=element.get("interval_min_s"),
+                interval_max_s=element.get("interval_max_s"),
+                source=element.get("source"),
+                source_json=element.get("source_json"),
                 volume=volume,
                 pan=pan,
                 depth=depth,
@@ -134,6 +140,13 @@ def _unique_label(atmosphere: Atmosphere, label: str, element_id: int) -> str:
     return f"{label} {suffix}"
 
 
+def _stored_role(atmosphere: Atmosphere, label: str) -> str:
+    for element in (atmosphere.decomposed_json or {}).get("elements", []):
+        if isinstance(element, dict) and element.get("label") == label:
+            return element.get("role") or DEFAULT_ROLE
+    return DEFAULT_ROLE
+
+
 def _stored_payload(element: Element) -> dict | None:
     try:
         path = storage.resolve_audio(element.audio_path)
@@ -145,6 +158,7 @@ def _stored_payload(element: Element) -> dict | None:
         "label": element.label,
         "type": element.type,
         "prompt": element.prompt,
+        "playback": element.playback or "loop",
         "file": str(path),
         "looped": True,
     }
@@ -193,6 +207,11 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                 "label": element.label,
                 "type": element.type,
                 "prompt": element.prompt,
+                "role": _stored_role(atmosphere, element.label),
+                "playback": element.playback or "loop",
+                "clip_s": element.clip_s,
+                "interval_min_s": element.interval_min_s,
+                "interval_max_s": element.interval_max_s,
             }
             if feedback:
                 spec = refine_element(
@@ -250,6 +269,12 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                         )
                         row.type = payload.get("type", row.type)
                         row.prompt = payload.get("prompt", row.prompt)
+                        row.playback = payload.get("playback")
+                        row.clip_s = payload.get("clip_s")
+                        row.interval_min_s = payload.get("interval_min_s")
+                        row.interval_max_s = payload.get("interval_max_s")
+                        row.source = payload.get("source")
+                        row.source_json = payload.get("source_json")
                         row.audio_path = storage.write_element_audio(
                             atmosphere.id, row.position, row.label, buffer.getvalue()
                         )

@@ -41,8 +41,10 @@ Definitive reference for how the system fits together. Skim
 - **Domain** (`models/tables.py`): `User` has many `Atmosphere`, each with many
   `Element` ordered by `position`. Status, progress, current stage and the
   requested `duration_s` (the loop length asked of the generator) live on the
-  atmosphere itself; `Element.status`/`error`/`version` track a single layer
-  being regenerated. `original_*` columns on `Element` store the mixer's computed
+  atmosphere itself, alongside `timings_json` (seconds per pipeline stage);
+  `Element.status`/`error`/`version` track a single layer being regenerated.
+  `Element.playback`/`clip_s`/`interval_min_s`/`interval_max_s` describe how a
+  layer repeats, and `source`/`source_json` where its audio came from. `original_*` columns on `Element` store the mixer's computed
   defaults so the UI can reset. `UserSettings` holds per-user provider config.
 - **Routers**: `auth.py`, `settings.py`, `atmospheres.py`, `elements.py`. Every
   query is scoped to the current user; a foreign id returns 404, not 403.
@@ -71,7 +73,8 @@ Definitive reference for how the system fits together. Skim
 
 ### `mixer/` — the DSP core (standalone package)
 Public API in `mixer/mixer/core.py`:
-- `analyze(elements)` → makes each clip loopable, computes per-element EQ
+- `analyze(elements)` → makes each clip loopable (skipped when the element is
+  `playback: "oneshot"` or already `looped`), computes per-element EQ
   (`effects/auto_eq.py`), volume (`effects/volume.py`), and spatial pan/depth
   (`effects/spatial.py`); annotates the element dicts in place.
 - `mix_to_file(elements, path)` → renders a single mixed WAV (resample → EQ →
@@ -140,7 +143,8 @@ Frontend                    API                          LLM      Generator
 | Volume    | 0 .. 2 (UI), stored gain; playback scales by 0.5 | `useAudioEngine` |
 | Tuning    | 400–580 Hz, 6 Hz snap, presets 432/440/528 | `TuningControl` + SoundTouch |
 | Binaural  | 200/208 Hz default, gain 0.15, 10 presets | `useAudioEngine` |
-| Loop      | 3 s search window, 1.5 s crossfade | `looping.py` |
+| Loop      | search 3 s or 30 % of the clip, crossfade 1.5 s or 20 % | `looping.py` |
+| Clip      | bed 4 s, event 2 s, texture/music the atmosphere length | `config.py` |
 | Poll      | 1.5 s interval, 20 s stuck-pending guard, 10 min timeout | `atmospheres.ts` |
 | Generator | 300 s request timeout | `services/generator.py` |
 | Progress  | 10 / 30 / 70 / 90 / 100 per stage | `services/pipeline.py` |

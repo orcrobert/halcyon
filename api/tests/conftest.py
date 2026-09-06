@@ -18,8 +18,18 @@ SAMPLE_RATE = 22050
 DECOMPOSED = {
     "atmosphere": "Rainy Library",
     "elements": [
-        {"label": "Rain on glass", "type": "sound", "prompt": "steady rain on a window"},
-        {"label": "Warm drone", "type": "music", "prompt": "soft ambient drone"},
+        {
+            "label": "Rain on glass",
+            "type": "sound",
+            "role": "bed",
+            "prompt": "steady rain on a window",
+        },
+        {
+            "label": "Warm drone",
+            "type": "music",
+            "role": "texture",
+            "prompt": "soft ambient drone",
+        },
     ],
 }
 

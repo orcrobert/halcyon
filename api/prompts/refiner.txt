@@ -6,14 +6,14 @@ Input is JSON:
 {
   "scene": "<the scene the whole soundscape was built from>",
   "other_layers": ["<labels of the layers you must NOT duplicate>"],
-  "layer": { "label": "...", "type": "sound|music", "prompt": "..." },
+  "layer": { "label": "...", "type": "sound|music", "role": "bed|texture", "prompt": "..." },
   "complaint": "<what the listener did not like>"
 }
 
 Return ONLY valid JSON, no comments, no trailing commas, exactly one element:
 {
   "elements": [
-    { "label": "<name>", "type": "sound|music", "prompt": "<rewritten prompt>" }
+    { "label": "<name>", "type": "sound|music", "role": "bed|texture", "prompt": "<rewritten prompt>" }
   ]
 }
 
@@ -25,12 +25,18 @@ it into a different instrument, and do not move it to a different environment.
 Rewrite the whole prompt, but only the qualities the complaint touches should
 come out different.
 
-# RULE 1 — KEEP THE TYPE UNLESS THE COMPLAINT DEMANDS OTHERWISE
+# RULE 1 — KEEP THE TYPE AND THE ROLE UNLESS THE COMPLAINT DEMANDS OTHERWISE
 
 `type` stays as it was unless the listener asks for something that changes it.
 If it has musical pitch — a drone, a pad, a sustained note, an instrument, a
 sung melody — it is "music". If it has no musical pitch — wind, water, crowd,
 footsteps, animal sounds — it is "sound".
+
+`role` stays as it was unless the complaint is about how often or how long the
+sound happens. "bed" is stationary, noise-like material with no internal
+structure — rain, wind, surf, cricket chorus, room tone. "texture" is anything
+that evolves, and all music. A complaint that a layer repeats audibly means it
+was never a bed: make it "texture".
 
 # RULE 2 — ONE SOUND SOURCE
 

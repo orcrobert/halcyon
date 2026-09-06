@@ -87,9 +87,6 @@ Slot omission: if a slot does not apply or does not add information, leave it ou
 
 FORBIDDEN: multiple sound sources in one prompt, metaphors, emotional adjectives, abstract scene descriptions in the [Sound event] slot.
 
-Also forbidden: sparse biological sounds (single bird calls, isolated animal cries) — use continuous textures instead ("continuous seagull calls", "dense cricket chorus").
-Also forbidden: transient/impact sounds (thunder, crashes, door slams) — only loopable continuous textures.
-
 ---
 
 # RULE 5 — MUSIC PROMPTS (type: "music" → MusicGen)
@@ -127,6 +124,22 @@ Calm, soft, immersive. No harsh textures, no sharp transients, no aggressive sou
 
 ---
 
+# RULE 7 — LAYER ROLE
+
+Every element carries a "role".
+
+"bed" is stationary, noise-like material with no internal structure: rain, wind, surf, cricket chorus, room tone, distant traffic, a running fridge. A few seconds of a bed, looped, is indistinguishable from minutes of it.
+
+"texture" is anything that evolves: all music, drones, pads, crowd murmur, shifting weather, anything with phrases. Music is always "texture".
+
+When in doubt, choose "texture".
+
+Every element must be material that can loop. No isolated one-off sounds: no single bird calls, no lone animal cries, no impacts (thunder, crashes, door slams). Where a scene suggests one, name the continuous form instead — "dense cricket chorus" rather than "single cricket chirp".
+
+Never write "looping", "repeating", "continuous" or "occasional" into a prompt. Repetition is handled after generation, and those words only make the model render the sound worse.
+
+---
+
 Output ONLY valid JSON, no comments, no trailing commas:
 {
   "atmosphere": "<short label>",
@@ -134,6 +147,7 @@ Output ONLY valid JSON, no comments, no trailing commas:
     {
       "label": "<name>",
       "type": "sound|music",
+      "role": "bed|texture",
       "prompt": "<single sound source following the template>"
     }
   ]

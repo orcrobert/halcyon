@@ -199,6 +199,17 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   `duration` in the `POST /generate` body. It is the loop length of every
   generated layer, not a playback length — playback is still infinite. A
   generator that ignores the field falls back to its own configured duration.
+- **The decomposer tags every layer with a `role`; code turns that into a clip
+  length.** `bed` is stationary noise-like material, `texture` anything that
+  evolves (music is always `texture`). `services/generator.py` `clip_length`
+  maps role → seconds using `BED_CLIP_S`/`EVENT_CLIP_S` in `api/app/config.py`
+  and sends it as a per-element `duration`; the result is stored on
+  `Element.clip_s`. Tuning constants live in code, never in the user-editable
+  prompt. A missing or unknown role falls back to `texture`, so custom
+  decomposer prompts written before roles existed keep working.
+- **Generator replies are matched by `index`, then `label`, then position.**
+  The reference generator batches by `(type, seconds)` and so answers out of
+  order. Never zip the reply positionally.
 - **Layers can be deleted and regenerated after the fact.** `DELETE
   /api/elements/{id}` is permanent — row plus WAV — and refuses the last layer.
   `POST /api/elements/{id}/regenerate` queues a background job on the same

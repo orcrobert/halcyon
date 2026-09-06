@@ -5,6 +5,9 @@ from api.app.services.prompts import default_decomposer_prompt, refiner_prompt
 from api.app.services.providers import complete_json
 from api.app.services.runconfig import RunConfig
 
+DEFAULT_ROLE = "texture"
+ROLE_PLAYBACK = {"bed": "loop", "texture": "loop", "event": "oneshot"}
+
 
 def _parse_result(raw: str) -> dict:
     try:
@@ -46,6 +49,11 @@ def _parse_result(raw: str) -> dict:
             raise ValueError(
                 f"decomposer element {i} has invalid type: {element['type']!r}"
             )
+        role = str(element.get("role", "")).strip().lower()
+        if role not in ROLE_PLAYBACK or element["type"] == "music":
+            role = DEFAULT_ROLE
+        element["role"] = role
+        element["playback"] = ROLE_PLAYBACK[role]
 
     return result
 
@@ -70,6 +78,7 @@ def refine_element(
             "layer": {
                 "label": element["label"],
                 "type": element["type"],
+                "role": element.get("role", DEFAULT_ROLE),
                 "prompt": element["prompt"],
             },
             "complaint": feedback,
