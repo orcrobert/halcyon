@@ -17,6 +17,11 @@ function timestampOf(a: Atmosphere): number {
   return new Date(a.generated_at ?? a.created_at).getTime()
 }
 
+function formatBuild(seconds: number): string {
+  if (seconds < 60) return `${Math.round(seconds)}s`
+  return `${Math.floor(seconds / 60)}m ${Math.round(seconds % 60).toString().padStart(2, '0')}s`
+}
+
 function groupByDate(items: Atmosphere[]): Group[] {
   const now = new Date()
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
@@ -406,6 +411,7 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
               hour: 'numeric', minute: '2-digit', hour12: false,
               month: 'short', day: 'numeric',
             })}
+            {isReady && a.timings?.total_s != null && ` · built in ${formatBuild(a.timings.total_s)}`}
             {isFailed && (a.error ?? 'Failed')}
             {isWorking && (a.status === 'generating' ? 'Generating…' : 'Queued')}
           </div>

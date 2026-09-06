@@ -41,6 +41,16 @@ export interface Element {
 
 export type AtmosphereStatus = 'pending' | 'generating' | 'ready' | 'failed'
 
+export interface AtmosphereTimings {
+  decompose_s?: number
+  generate_s?: number
+  mix_s?: number
+  persist_s?: number
+  total_s?: number
+  audio_s?: number
+  regenerate?: Omit<AtmosphereTimings, 'regenerate'>
+}
+
 export interface Atmosphere {
   id: number
   title: string | null
@@ -53,6 +63,7 @@ export interface Atmosphere {
   generated_at: string | null
   created_at: string
   updated_at: string
+  timings?: AtmosphereTimings | null
   elements?: Element[] | null
 }
 
