@@ -117,7 +117,10 @@ a stub for testing.
   matches your reply to the right layer no matter what order you answer in.
 - The per-element `duration` is the seconds to generate for that element. Beds —
   stationary, noise-like material the browser loops — ask for a few seconds;
-  evolving layers ask for the length the user chose next to the prompt box.
+  one-shot events ask for about two; evolving layers ask for the length the user
+  chose next to the prompt box. An event prompt describes a single occurrence
+  ("single owl hoot, distant, soft"); the browser retriggers it, so do not
+  generate a repeating version of it.
 - The top-level `duration` is that user-chosen length (5–120) and is the
   fallback for elements that carry none.
 - A generator that ignores both `duration` fields still works — it just always

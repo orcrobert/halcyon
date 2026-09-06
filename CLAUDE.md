@@ -201,12 +201,27 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   generator that ignores the field falls back to its own configured duration.
 - **The decomposer tags every layer with a `role`; code turns that into a clip
   length.** `bed` is stationary noise-like material, `texture` anything that
-  evolves (music is always `texture`). `services/generator.py` `clip_length`
-  maps role → seconds using `BED_CLIP_S`/`EVENT_CLIP_S` in `api/app/config.py`
-  and sends it as a per-element `duration`; the result is stored on
-  `Element.clip_s`. Tuning constants live in code, never in the user-editable
-  prompt. A missing or unknown role falls back to `texture`, so custom
-  decomposer prompts written before roles existed keep working.
+  evolves (music is always `texture` and never an `event`), `event` one short
+  sound triggered now and then. `services/generator.py` `clip_length` maps role
+  → seconds using `BED_CLIP_S`/`EVENT_CLIP_S` in `api/app/config.py` and sends
+  it as a per-element `duration`; the result is stored on `Element.clip_s`.
+  Tuning constants live in code, never in the user-editable prompt. A missing
+  or unknown role falls back to `texture`, so custom decomposer prompts written
+  before roles existed keep working.
+- **Events are scheduled in the browser, never baked into a WAV.** An `event`
+  element is one short clip; `playback` is `oneshot` and `interval_min_s`/
+  `interval_max_s` (from the LLM's `frequency` through `ROLE_INTERVALS`) set how
+  often it fires. `hooks/eventScheduler.ts` is pure and unit-tested; the lane
+  scheduler in `useAudioEngine` runs on `ctx.currentTime` with a lookahead, so
+  `ctx.suspend()` pauses it with no extra state. Events bypass the SoundTouch
+  worklet — global tuning is for tonal layers. Export plans triggers from a
+  seeded PRNG so the same length renders the same file.
+- **One-shots do not compete in the mix.** `analyze` runs `assign_volumes` and
+  `assign_spatial` over the loop layers only; a mostly-silent one-shot would
+  otherwise win the loudness anchor and push every bed to the 0.15 floor.
+  Events get `place_events` instead, sitting `EVENT_OFFSET_DB` under the
+  loudest loop layer, or under `EVENT_FALLBACK_ANCHOR_DB` when a scene has no
+  loop layer at all.
 - **Generator replies are matched by `index`, then `label`, then position.**
   The reference generator batches by `(type, seconds)` and so answers out of
   order. Never zip the reply positionally.

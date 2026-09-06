@@ -73,8 +73,9 @@ Definitive reference for how the system fits together. Skim
 
 ### `mixer/` — the DSP core (standalone package)
 Public API in `mixer/mixer/core.py`:
-- `analyze(elements)` → makes each clip loopable (skipped when the element is
-  `playback: "oneshot"` or already `looped`), computes per-element EQ
+- `analyze(elements)` → makes each clip loopable, or for `playback: "oneshot"`
+  trims it to its envelope and drops it if nothing survives, computes
+  per-element EQ
   (`effects/auto_eq.py`), volume (`effects/volume.py`), and spatial pan/depth
   (`effects/spatial.py`); annotates the element dicts in place.
 - `mix_to_file(elements, path)` → renders a single mixed WAV (resample → EQ →
@@ -145,6 +146,9 @@ Frontend                    API                          LLM      Generator
 | Binaural  | 200/208 Hz default, gain 0.15, 10 presets | `useAudioEngine` |
 | Loop      | search 3 s or 30 % of the clip, crossfade 1.5 s or 20 % | `looping.py` |
 | Clip      | bed 4 s, event 2 s, texture/music the atmosphere length | `config.py` |
+| Events    | rare 30-90 s, occasional 8-25 s, frequent 3-8 s | `config.py` |
+| Scheduler | 100 ms tick, 0.25 s lookahead (2 s hidden), 2 voices | `eventScheduler.ts` |
+| Export    | 30 / 60 / 120 / 300 s, seeded per element | `useAudioEngine` |
 | Poll      | 1.5 s interval, 20 s stuck-pending guard, 10 min timeout | `atmospheres.ts` |
 | Generator | 300 s request timeout | `services/generator.py` |
 | Progress  | 10 / 30 / 70 / 90 / 100 per stage | `services/pipeline.py` |
