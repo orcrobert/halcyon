@@ -45,6 +45,7 @@ const REVERB_DRY_ATTENUATION = 0.7
 const REVERB_WET_SEND = 0.6
 const REVERB_IR_DURATION_S = 2.5
 const REVERB_IR_DECAY = 3.0
+const SOURCE_RELEASE_S = 0.03
 
 const LIMITER_THRESHOLD_DB = -4
 const LIMITER_KNEE_DB = 0
@@ -149,6 +150,14 @@ function createMasterLimiter(ctx: BaseAudioContext): DynamicsCompressorNode {
   return limiter
 }
 
+function releaseTrack(ctx: BaseAudioContext, track: TrackNode) {
+  const t = ctx.currentTime
+  track.masterGain.gain.cancelScheduledValues(t)
+  track.masterGain.gain.setValueAtTime(track.masterGain.gain.value, t)
+  track.masterGain.gain.linearRampToValueAtTime(0, t + SOURCE_RELEASE_S)
+  try { track.source.stop(t + SOURCE_RELEASE_S) } catch {}
+}
+
 function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode] {
   const low = ctx.createBiquadFilter()
   low.type = 'lowshelf'
@@ -215,9 +224,7 @@ export function useAudioEngine() {
   }
 
   function startFromDecoded(ctx: AudioContext, decoded: DecodedElement[]) {
-    tracksRef.current.forEach(({ source }) => {
-      try { source.stop() } catch {}
-    })
+    tracksRef.current.forEach((track) => releaseTrack(ctx, track))
     tracksRef.current.clear()
 
     for (const { el, buffer } of decoded) {
@@ -505,7 +512,8 @@ export function useAudioEngine() {
     for (const label of labels) {
       const track = tracksRef.current.get(label)
       if (track) {
-        try { track.source.stop() } catch { /* already stopped */ }
+        if (ctxRef.current) releaseTrack(ctxRef.current, track)
+        else { try { track.source.stop() } catch {} }
         tracksRef.current.delete(label)
       }
       decodedRef.current = decodedRef.current.filter((d) => d.el.label !== label)
