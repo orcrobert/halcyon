@@ -89,11 +89,18 @@ atmospheres and expect a cold start per new container.
 
 ## What is verified
 
-`deploy.py` is checked against the real `modal` package (1.5.3): the module
-imports, the image spec builds, and the class and ASGI endpoint register. That
-catches API drift — `modal.Stub` is gone, `container_idle_timeout` is now
-`scaledown_window` — but it is not a deployment.
+`deploy.py` has been deployed and run on Modal hardware (A10G, `modal` 1.5.3).
+A cold container boots and loads both models in about 150 s; a warm container
+answers `POST /generate` for one 5 s element in about 18 s.
 
-**It has not been run on Modal hardware.** Deploying needs an account, and the
-GPU path, cold-start timings and volume caching are unexercised. Treat the first
-`modal deploy` as the real test.
+`deploy.py` is imported twice — once locally to build the image and register the
+app, once inside the container to resolve the class. Anything it does at module
+level must survive both. Local paths (the repo root, `.env`, `generators/core`)
+exist only in the first case, so they stay behind `modal.is_local()`.
+
+Requests that outlive Modal's synchronous window come back as a `303` to a
+polling URL rather than a result. A cold start hits this. Follow redirects
+(`curl -L`) when testing by hand; the API's `requests` calls already do.
+
+The account page's generator probe waits 10 s, so it reports a cold Modal host
+as unreachable. Warm it with `GET /` and probe again.
