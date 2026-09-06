@@ -35,6 +35,7 @@ The config cell sets the same environment variables every other host uses:
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` |
 | `GENERATION_DURATION` | `10` |
+| `GENERATION_LOUDNESS_LUFS` | `-20` |
 
 On a free T4, `musicgen-large` is tight. If loading runs out of VRAM, drop to
 `facebook/musicgen-medium`.

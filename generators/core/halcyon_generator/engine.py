@@ -79,6 +79,7 @@ class AudioCraftEngine:
                     wav.cpu(),
                     model.sample_rate,
                     strategy="loudness",
+                    loudness_headroom_db=-self.config.loudness_lufs,
                     loudness_compressor=True,
                 )
                 data = stem.with_suffix(".wav").read_bytes()

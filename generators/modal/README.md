@@ -53,6 +53,7 @@ The model settings are baked into the image instead:
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` | model for `type: sound` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` | model for `type: music` |
 | `GENERATION_DURATION` | `10` | seconds per element |
+| `GENERATION_LOUDNESS_LUFS` | `-20` | loudness each clip is normalised to |
 
 ```bash
 HALCYON_MODAL_GPU=T4 MUSICGEN_MODEL=facebook/musicgen-medium \
