@@ -140,11 +140,14 @@ def _unique_label(atmosphere: Atmosphere, label: str, element_id: int) -> str:
     return f"{label} {suffix}"
 
 
-def _stored_role(atmosphere: Atmosphere, label: str) -> str:
+def _stored_spec(atmosphere: Atmosphere, label: str) -> dict:
     for element in (atmosphere.decomposed_json or {}).get("elements", []):
         if isinstance(element, dict) and element.get("label") == label:
-            return element.get("role") or DEFAULT_ROLE
-    return DEFAULT_ROLE
+            return {
+                "role": element.get("role") or DEFAULT_ROLE,
+                "frequency": element.get("frequency"),
+            }
+    return {"role": DEFAULT_ROLE, "frequency": None}
 
 
 def _stored_payload(element: Element) -> dict | None:
@@ -207,7 +210,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                 "label": element.label,
                 "type": element.type,
                 "prompt": element.prompt,
-                "role": _stored_role(atmosphere, element.label),
+                **_stored_spec(atmosphere, element.label),
                 "playback": element.playback or "loop",
                 "clip_s": element.clip_s,
                 "interval_min_s": element.interval_min_s,

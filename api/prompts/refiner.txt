@@ -6,14 +6,14 @@ Input is JSON:
 {
   "scene": "<the scene the whole soundscape was built from>",
   "other_layers": ["<labels of the layers you must NOT duplicate>"],
-  "layer": { "label": "...", "type": "sound|music", "role": "bed|texture", "prompt": "..." },
+  "layer": { "label": "...", "type": "sound|music", "role": "bed|texture|event", "frequency": "rare|occasional|frequent|null", "prompt": "..." },
   "complaint": "<what the listener did not like>"
 }
 
 Return ONLY valid JSON, no comments, no trailing commas, exactly one element:
 {
   "elements": [
-    { "label": "<name>", "type": "sound|music", "role": "bed|texture", "prompt": "<rewritten prompt>" }
+    { "label": "<name>", "type": "sound|music", "role": "bed|texture|event", "frequency": "rare|occasional|frequent", "prompt": "<rewritten prompt>" }
   ]
 }
 
@@ -35,8 +35,15 @@ footsteps, animal sounds — it is "sound".
 `role` stays as it was unless the complaint is about how often or how long the
 sound happens. "bed" is stationary, noise-like material with no internal
 structure — rain, wind, surf, cricket chorus, room tone. "texture" is anything
-that evolves, and all music. A complaint that a layer repeats audibly means it
-was never a bed: make it "texture".
+that evolves, and all music. "event" is ONE short sound triggered now and then,
+written as a single occurrence — "single owl hoot, distant, soft". A complaint
+that a layer repeats audibly means it was never a bed: make it "texture". A
+complaint that a sound is constant when it should come and go makes it an
+"event", and the prompt must then describe one occurrence, never a plural.
+
+`frequency` applies only to events: "rare", "occasional" or "frequent". Keep it
+as it was unless the complaint is about how often the sound happens. Include it
+only when the role is "event"; omit it otherwise.
 
 # RULE 2 — ONE SOUND SOURCE
 

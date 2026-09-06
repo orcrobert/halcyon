@@ -132,22 +132,25 @@ Every element carries a "role".
 
 "texture" is anything that evolves: all music, drones, pads, crowd murmur, shifting weather, anything with phrases. Music is always "texture".
 
-When in doubt, choose "texture".
+"event" is ONE short sound that happens now and then: a single owl hoot, a distant dog bark, one bell strike, one creak, a drip. Describe ONE occurrence — "single owl hoot, distant, soft" — never "occasional hoots" and never a plural. At most 2 events per scene, and only when the scene genuinely calls for one. Music is never an event.
 
-Every element must be material that can loop. No isolated one-off sounds: no single bird calls, no lone animal cries, no impacts (thunder, crashes, door slams). Where a scene suggests one, name the continuous form instead — "dense cricket chorus" rather than "single cricket chirp".
+Every event carries a "frequency": "rare" (a few times a minute), "occasional" (every ten seconds or so), or "frequent" (every few seconds). Beds and textures have no frequency.
 
-Never write "looping", "repeating", "continuous" or "occasional" into a prompt. Repetition is handled after generation, and those words only make the model render the sound worse.
+When in doubt between bed and texture, choose "texture". When in doubt whether something is an event at all, it is not — make it a texture.
+
+Never write "looping", "repeating", "continuous" or "occasional" into a prompt. How often a sound happens is carried by "role" and "frequency", not by the prompt text, and those words only make the model render the sound worse.
 
 ---
 
-Output ONLY valid JSON, no comments, no trailing commas:
+Output ONLY valid JSON, no comments, no trailing commas. Include "frequency" only on elements whose role is "event":
 {
   "atmosphere": "<short label>",
   "elements": [
     {
       "label": "<name>",
       "type": "sound|music",
-      "role": "bed|texture",
+      "role": "bed|texture|event",
+      "frequency": "rare|occasional|frequent",
       "prompt": "<single sound source following the template>"
     }
   ]

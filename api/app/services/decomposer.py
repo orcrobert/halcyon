@@ -1,11 +1,13 @@
 import json
 import re
 
+from api.app.config import ROLE_INTERVALS
 from api.app.services.prompts import default_decomposer_prompt, refiner_prompt
 from api.app.services.providers import complete_json
 from api.app.services.runconfig import RunConfig
 
 DEFAULT_ROLE = "texture"
+DEFAULT_FREQUENCY = "occasional"
 ROLE_PLAYBACK = {"bed": "loop", "texture": "loop", "event": "oneshot"}
 
 
@@ -55,6 +57,17 @@ def _parse_result(raw: str) -> dict:
         element["role"] = role
         element["playback"] = ROLE_PLAYBACK[role]
 
+        if role == "event":
+            frequency = str(element.get("frequency", "")).strip().lower()
+            if frequency not in ROLE_INTERVALS:
+                frequency = DEFAULT_FREQUENCY
+            element["frequency"] = frequency
+            minimum, maximum = ROLE_INTERVALS[frequency]
+            element["interval_min_s"] = minimum
+            element["interval_max_s"] = maximum
+        else:
+            element.pop("frequency", None)
+
     return result
 
 
@@ -79,6 +92,7 @@ def refine_element(
                 "label": element["label"],
                 "type": element["type"],
                 "role": element.get("role", DEFAULT_ROLE),
+                "frequency": element.get("frequency"),
                 "prompt": element["prompt"],
             },
             "complaint": feedback,

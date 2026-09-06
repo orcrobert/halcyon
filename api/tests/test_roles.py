@@ -243,3 +243,123 @@ def test_intervals_can_be_stored_on_a_layer(client, auth, ready_atmosphere):
 
     assert body["interval_min_s"] == 8
     assert body["interval_max_s"] == 25
+
+
+def test_events_get_intervals_from_their_frequency():
+    from api.app.config import ROLE_INTERVALS
+    from api.app.services.decomposer import _parse_result
+
+    result = _parse_result(
+        json.dumps(
+            {
+                "atmosphere": "Night Forest",
+                "elements": [
+                    {
+                        "label": "Owl",
+                        "type": "sound",
+                        "role": "event",
+                        "frequency": "rare",
+                        "prompt": "single owl hoot",
+                    },
+                    {
+                        "label": "Drip",
+                        "type": "sound",
+                        "role": "event",
+                        "prompt": "single water drip",
+                    },
+                    {
+                        "label": "Rain",
+                        "type": "sound",
+                        "role": "bed",
+                        "frequency": "frequent",
+                        "prompt": "steady rain",
+                    },
+                ],
+            }
+        )
+    )
+
+    owl, drip, rain = result["elements"]
+
+    assert owl["playback"] == "oneshot"
+    assert (owl["interval_min_s"], owl["interval_max_s"]) == ROLE_INTERVALS["rare"]
+    assert (drip["interval_min_s"], drip["interval_max_s"]) == ROLE_INTERVALS[
+        "occasional"
+    ]
+    assert rain["playback"] == "loop"
+    assert "frequency" not in rain
+    assert "interval_min_s" not in rain
+
+
+def test_music_can_never_be_an_event():
+    from api.app.services.decomposer import _parse_result
+
+    result = _parse_result(
+        json.dumps(
+            {
+                "atmosphere": "Hall",
+                "elements": [
+                    {
+                        "label": "Drone",
+                        "type": "music",
+                        "role": "event",
+                        "frequency": "rare",
+                        "prompt": "warm drone",
+                    }
+                ],
+            }
+        )
+    )
+
+    element = result["elements"][0]
+    assert element["role"] == "texture"
+    assert element["playback"] == "loop"
+    assert "frequency" not in element
+
+
+def test_events_are_generated_short_and_stored_as_one_shots(
+    client, auth, monkeypatch, stub_pipeline
+):
+    import api.app.services.decomposer as decomposer_module
+    from api.app.config import EVENT_CLIP_S, ROLE_INTERVALS
+    from api.app.services.pipeline import run_generation
+
+    monkeypatch.setattr(
+        decomposer_module,
+        "complete_json",
+        lambda *_: json.dumps(
+            {
+                "atmosphere": "Night Forest",
+                "elements": [
+                    {
+                        "label": "Rain",
+                        "type": "sound",
+                        "role": "bed",
+                        "prompt": "steady rain",
+                    },
+                    {
+                        "label": "Owl",
+                        "type": "sound",
+                        "role": "event",
+                        "frequency": "rare",
+                        "prompt": "single owl hoot",
+                    },
+                ],
+            }
+        ),
+    )
+
+    atmosphere_id = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a night forest"}
+    ).json()["data"]["id"]
+    run_generation(atmosphere_id)
+
+    body = client.get(f"/api/atmospheres/{atmosphere_id}", headers=auth).json()["data"]
+    assert body["status"] == "ready", body["error"]
+
+    rain, owl = body["elements"]
+    assert rain["playback"] == "loop"
+    assert owl["playback"] == "oneshot"
+    assert owl["clip_s"] == EVENT_CLIP_S
+    assert (owl["interval_min_s"], owl["interval_max_s"]) == ROLE_INTERVALS["rare"]
+    assert owl["depth"] > 0
