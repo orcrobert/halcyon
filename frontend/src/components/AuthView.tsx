@@ -49,9 +49,9 @@ function BreathingWave() {
       <svg width="720" height="80" viewBox="0 0 720 80" style={{ overflow: 'visible', maxWidth: '100%' }}>
         <defs>
           <linearGradient id="auth-bw-grad" x1="0" y1="0" x2="720" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="rgba(99,102,241,0)" />
-            <stop offset="50%" stopColor="rgba(129,140,248,0.9)" />
-            <stop offset="100%" stopColor="rgba(99,102,241,0)" />
+            <stop offset="0%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 0%, transparent)' }} />
+            <stop offset="50%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent-bright) 90%, transparent)' }} />
+            <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 0%, transparent)' }} />
           </linearGradient>
           <filter id="auth-bw-glow" x="-20%" y="-200%" width="140%" height="500%">
             <feGaussianBlur stdDeviation="6" result="b1" />
@@ -61,7 +61,7 @@ function BreathingWave() {
         </defs>
         <path d={path} stroke="url(#auth-bw-grad)" strokeWidth="10" fill="none" strokeLinecap="round" filter="url(#auth-bw-glow)" opacity="0.18" />
         <path d={path} stroke="url(#auth-bw-grad)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        <path d={path} stroke="rgba(255,255,255,0.6)" strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" />
+        <path d={path} strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 60%, transparent)' }} />
       </svg>
     </div>
   )
@@ -130,8 +130,8 @@ export function AuthView() {
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4">
           <div
-            className="rounded-2xl border border-[#1e2035] bg-[#0d0e18] transition-opacity"
-            style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.4)', opacity: submitting ? 0.6 : 1 }}
+            className="rounded-2xl border border-line bg-surface transition-opacity"
+            style={{ boxShadow: '0 25px 50px color-mix(in srgb, var(--color-shade) 40%, transparent)', opacity: submitting ? 0.6 : 1 }}
           >
             <div className="flex flex-col gap-5" style={{ padding: '28px 28px 24px 28px' }}>
               {isRegister && (
@@ -186,17 +186,17 @@ export function AuthView() {
               <button
                 type="button"
                 onClick={() => switchMode(isRegister ? 'login' : 'register')}
-                className="text-[11px] text-slate-700 hover:text-slate-400 transition-colors"
+                className="text-[11px] text-ink-ghost hover:text-ink-dim transition-colors"
               >
                 {isRegister ? 'Have an account? Sign in' : 'New here? Sign up'}
               </button>
               <button
                 type="submit"
                 disabled={submitting}
-                className="flex items-center gap-2 text-white text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
+                className="flex items-center gap-2 text-wash text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 style={{
                   padding: '12px 24px',
-                  background: submitting ? 'rgba(99,102,241,0.25)' : '#6366f1',
+                  background: submitting ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'var(--color-accent)',
                   fontFamily: 'inherit',
                 }}
               >
@@ -205,7 +205,7 @@ export function AuthView() {
                     {[0, 1, 2].map((i) => (
                       <span
                         key={i}
-                        className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"
+                        className="w-1.5 h-1.5 bg-wash rounded-full animate-bounce"
                         style={{ animationDelay: `${i * 0.12}s` }}
                       />
                     ))}
@@ -225,7 +225,7 @@ export function AuthView() {
           </div>
 
           {errorMessage && Object.keys(fieldErrors).length === 0 && (
-            <p className="text-center text-red-500 text-sm">{errorMessage}</p>
+            <p className="text-center text-danger text-sm">{errorMessage}</p>
           )}
         </form>
 
@@ -250,7 +250,7 @@ interface FieldProps {
 function Field({ label, type, value, onChange, error, autoComplete, disabled, required }: FieldProps) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="text-[10px] uppercase tracking-[0.18em] text-slate-700 font-medium">
+      <span className="text-[10px] uppercase tracking-[0.18em] text-ink-ghost font-medium">
         {label}
       </span>
       <input
@@ -260,10 +260,10 @@ function Field({ label, type, value, onChange, error, autoComplete, disabled, re
         autoComplete={autoComplete}
         required={required}
         disabled={disabled}
-        className="w-full bg-transparent text-slate-200 border-b border-[#1e2035] focus:border-indigo-500/60 outline-none placeholder:text-slate-700 text-[15px] leading-relaxed transition-colors disabled:opacity-60"
+        className="w-full bg-transparent text-ink border-b border-line focus:border-accent/60 outline-none placeholder:text-ink-ghost text-[15px] leading-relaxed transition-colors disabled:opacity-60"
         style={{ padding: '6px 0 8px 0', fontFamily: 'inherit' }}
       />
-      {error && <span className="text-xs text-red-400">{error}</span>}
+      {error && <span className="text-xs text-danger-bright">{error}</span>}
     </label>
   )
 }

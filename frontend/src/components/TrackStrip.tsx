@@ -5,6 +5,7 @@ import { Fader } from './Fader'
 import { EQPanel } from './EQPanel'
 import { SpatialModal } from './SpatialModal'
 import { LayerMenu } from './LayerMenu'
+import { alpha } from '../theme'
 
 interface Props {
   element: Element
@@ -36,7 +37,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   const blobX = 20 + (blobSeed % 60)
   const blobY = 15 + ((blobSeed >> 8) % 70)
   const blobSize = 220 + ((blobSeed >> 16) % 120)
-  const blobHue = (blobSeed >> 4) % 2 === 0 ? '99,102,241' : '129,140,248'
+  const blobTint = (blobSeed >> 4) % 2 === 0 ? 'var(--color-accent)' : 'var(--color-accent-bright)'
   const driftAngle = (blobSeed % 360) * (Math.PI / 180)
   const driftX = Math.cos(driftAngle) * 12
   const driftY = Math.sin(driftAngle) * 12
@@ -98,24 +99,24 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           transform: hovered ? 'translateX(-50%) translateY(0)' : 'translateX(-50%) translateY(8px)',
           width: '220px',
           padding: '14px 16px',
-          background: '#0d0e18',
-          border: '1px solid #1d1e2e',
+          background: 'var(--color-surface)',
+          border: '1px solid var(--color-line)',
           borderRadius: '14px',
-          boxShadow: '0 24px 60px rgba(0,0,0,0.7)',
+          boxShadow: '0 24px 60px color-mix(in srgb, var(--color-shade) 70%, transparent)',
           opacity: hovered ? 1 : 0,
           pointerEvents: 'none',
           transition: 'opacity 0.18s ease, transform 0.18s ease',
           zIndex: 10,
         }}
       >
-        <p style={{ fontSize: '13px', fontWeight: 700, color: '#e2e8f0', margin: '0 0 6px 0', fontFamily: 'inherit' }}>
+        <p style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-ink)', margin: '0 0 6px 0', fontFamily: 'inherit' }}>
           {element.label}
         </p>
-        <p style={{ fontSize: '11px', color: '#64748b', lineHeight: '1.6', margin: 0, fontFamily: 'inherit' }}>
+        <p style={{ fontSize: '11px', color: 'var(--color-ink-muted)', lineHeight: '1.6', margin: 0, fontFamily: 'inherit' }}>
           {element.prompt}
         </p>
         {failed && element.error && (
-          <p style={{ fontSize: '10px', color: '#f87171', lineHeight: '1.5', margin: '8px 0 0 0', fontFamily: 'inherit' }}>
+          <p style={{ fontSize: '10px', color: 'var(--color-danger-bright)', lineHeight: '1.5', margin: '8px 0 0 0', fontFamily: 'inherit' }}>
             {element.error}
           </p>
         )}
@@ -126,9 +127,9 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           transform: 'translateX(-50%) rotate(45deg)',
           width: '8px',
           height: '8px',
-          background: '#0d0e18',
-          borderRight: '1px solid #1d1e2e',
-          borderBottom: '1px solid #1d1e2e',
+          background: 'var(--color-surface)',
+          borderRight: '1px solid var(--color-line)',
+          borderBottom: '1px solid var(--color-line)',
         }} />
       </div>
 
@@ -138,10 +139,10 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         onMouseLeave={() => setHovered(false)}
         className={`relative flex flex-col items-center rounded-2xl border transition-all duration-300 overflow-hidden ${
           failed
-            ? 'border-red-500/40'
+            ? 'border-danger/40'
             : muted
-              ? 'bg-[#0d0e14] border-[#0f1018]'
-              : 'border-[#1d1e2e] hover:border-[#2a2b40]'
+              ? 'bg-surface border-line-faint'
+              : 'border-line hover:border-line-active'
         }`}
         style={{
           width: '100px',
@@ -151,15 +152,15 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           flexDirection: 'column',
           alignItems: 'center',
           background: muted
-            ? '#0d0e14'
-            : 'linear-gradient(180deg, rgba(24,26,42,0.85) 0%, rgba(17,18,24,0.85) 100%)',
+            ? 'var(--color-surface)'
+            : 'linear-gradient(180deg, color-mix(in srgb, var(--color-surface-hover) 85%, transparent) 0%, color-mix(in srgb, var(--color-surface-raised) 85%, transparent) 100%)',
           backdropFilter: muted ? 'none' : 'blur(8px)',
           WebkitBackdropFilter: muted ? 'none' : 'blur(8px)',
           boxShadow: muted
             ? 'none'
             : hovered
-              ? '0 14px 32px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04), inset 0 -1px 0 rgba(0,0,0,0.3)'
-              : '0 8px 20px rgba(0,0,0,0.35), 0 1px 3px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.03), inset 0 -1px 0 rgba(0,0,0,0.25)',
+              ? '0 14px 32px color-mix(in srgb, var(--color-shade) 45%, transparent), 0 2px 6px color-mix(in srgb, var(--color-shade) 30%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 4%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--color-shade) 30%, transparent)'
+              : '0 8px 20px color-mix(in srgb, var(--color-shade) 35%, transparent), 0 1px 3px color-mix(in srgb, var(--color-shade) 25%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 3%, transparent), inset 0 -1px 0 color-mix(in srgb, var(--color-shade) 25%, transparent)',
         }}
       >
         {!muted && (
@@ -175,7 +176,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
                 ? `translate(calc(-50% + ${driftX}px), calc(-50% + ${driftY}px)) scale(1.08)`
                 : 'translate(-50%, -50%) scale(1)',
               borderRadius: '50%',
-              background: `radial-gradient(circle, rgba(${blobHue},${hovered ? 0.10 : 0.07}) 0%, rgba(${blobHue},${hovered ? 0.035 : 0.025}) 40%, transparent 70%)`,
+              background: `radial-gradient(circle, ${alpha(blobTint, hovered ? 10 : 7)} 0%, ${alpha(blobTint, hovered ? 3.5 : 2.5)} 40%, transparent 70%)`,
               filter: 'blur(52px)',
               pointerEvents: 'none',
               zIndex: 0,
@@ -194,10 +195,10 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           aria-expanded={menuOpen}
           className={`absolute flex items-center justify-center rounded-full transition-all duration-150 border ${
             failed
-              ? 'bg-red-500/15 text-red-400 border-red-500/40'
+              ? 'bg-danger/15 text-danger-bright border-danger/40'
               : menuOpen
-                ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40'
-                : 'bg-white/[0.02] text-slate-700 hover:text-slate-300 border-white/[0.06] hover:border-[#2a2b40]'
+                ? 'bg-accent/15 text-accent-soft border-accent/40'
+                : 'bg-wash/[0.02] text-ink-ghost hover:text-ink-soft border-wash/[0.06] hover:border-line-active'
           }`}
           style={{ top: 8, right: 8, width: 22, height: 22, zIndex: 2, padding: 0 }}
         >
@@ -213,15 +214,15 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
               position: 'absolute', inset: 0, zIndex: 5,
               display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center', gap: 10,
-              background: 'rgba(10,11,20,0.72)',
+              background: 'color-mix(in srgb, var(--color-surface-sunken) 72%, transparent)',
               backdropFilter: 'blur(2px)',
               WebkitBackdropFilter: 'blur(2px)',
             }}
           >
-            <svg className="animate-spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2.5" strokeLinecap="round">
+            <svg className="animate-spin stroke-accent-bright" width="18" height="18" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" strokeLinecap="round">
               <path d="M21 12a9 9 0 1 1-6.22-8.56" />
             </svg>
-            <span style={{ fontSize: 9, letterSpacing: '0.16em', color: '#6366f1', fontFamily: 'inherit', textTransform: 'uppercase' }}>
+            <span style={{ fontSize: 9, letterSpacing: '0.16em', color: 'var(--color-accent)', fontFamily: 'inherit', textTransform: 'uppercase' }}>
               redoing
             </span>
           </div>
@@ -239,7 +240,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         >
 
         {/* Volume % */}
-        <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-slate-800' : 'text-slate-700'}`}>
+        <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-ink-whisper' : 'text-ink-ghost'}`}>
           {muted ? '—' : `${Math.round(dispVolume * 100)}`}
         </span>
 
@@ -259,8 +260,8 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             width: '36px',
             height: '36px',
             borderRadius: '50%',
-            border: `1px solid ${spatialOpen ? 'rgba(99,102,241,0.5)' : 'rgba(255,255,255,0.07)'}`,
-            background: spatialOpen ? 'rgba(99,102,241,0.08)' : 'rgba(255,255,255,0.02)',
+            border: `1px solid ${spatialOpen ? 'color-mix(in srgb, var(--color-accent) 50%, transparent)' : 'color-mix(in srgb, var(--color-wash) 7%, transparent)'}`,
+            background: spatialOpen ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : 'color-mix(in srgb, var(--color-wash) 2%, transparent)',
             cursor: 'pointer',
             display: 'flex',
             alignItems: 'center',
@@ -271,25 +272,29 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
           }}
         >
           <svg width="20" height="20" viewBox="0 0 20 20">
-            <circle cx="10" cy="10" r="8" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
-            <line x1="10" y1="3" x2="10" y2="17" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
-            <line x1="3" y1="10" x2="17" y2="10" stroke="rgba(255,255,255,0.06)" strokeWidth="0.75" />
+            <circle cx="10" cy="10" r="8" fill="none" strokeWidth="1" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 12%, transparent)' }} />
+            <line x1="10" y1="3" x2="10" y2="17" strokeWidth="0.75" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 6%, transparent)' }} />
+            <line x1="3" y1="10" x2="17" y2="10" strokeWidth="0.75" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 6%, transparent)' }} />
             <circle
               cx={10 + dispPan * 7}
               cy={3 + dispDepth * 14}
               r="2.5"
-              fill={Math.abs(dispPan) > 0.03 || dispDepth > 0.03 ? 'rgba(99,102,241,0.9)' : 'rgba(255,255,255,0.35)'}
+              style={{
+                fill: Math.abs(dispPan) > 0.03 || dispDepth > 0.03
+                  ? alpha('var(--color-accent)', 90)
+                  : alpha('var(--color-wash)', 35),
+              }}
             />
           </svg>
         </button>
 
         {/* Divider */}
-        <div className={`w-full h-px ${muted ? 'bg-[#111318]' : 'bg-[#1d1e2e]'}`} />
+        <div className={`w-full h-px ${muted ? 'bg-surface-raised' : 'bg-line'}`} />
 
         {/* Type badge */}
         <span
           className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
-            muted ? 'bg-slate-900 text-slate-800' : isMusic ? 'bg-violet-500/10 text-violet-500' : 'bg-sky-500/10 text-sky-500'
+            muted ? 'bg-surface-raised text-ink-whisper' : isMusic ? 'bg-tag-music/10 text-tag-music' : 'bg-tag-sound/10 text-tag-sound'
           }`}
           style={{ padding: '4px 10px' }}
         >
@@ -303,8 +308,8 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             title="Mute"
             className={`w-8 h-8 rounded-full text-xs font-bold transition-all duration-150 border ${
               muted
-                ? 'bg-red-500/20 text-red-400 border-red-500/40'
-                : 'bg-transparent text-slate-600 hover:text-slate-300 border-[#1d1e2e] hover:border-[#2a2b40]'
+                ? 'bg-danger/20 text-danger-bright border-danger/40'
+                : 'bg-transparent text-ink-faint hover:text-ink-soft border-line hover:border-line-active'
             }`}
             style={{ fontFamily: 'inherit' }}
           >
@@ -317,8 +322,8 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             title="EQ"
             className={`w-8 h-8 rounded-full text-[9px] font-bold transition-all duration-150 border ${
               eqOpen
-                ? 'bg-indigo-500/20 text-indigo-400 border-indigo-500/40'
-                : 'bg-transparent text-slate-600 hover:text-slate-300 border-[#1d1e2e] hover:border-[#2a2b40]'
+                ? 'bg-accent/20 text-accent-bright border-accent/40'
+                : 'bg-transparent text-ink-faint hover:text-ink-soft border-line hover:border-line-active'
             }`}
             style={{ fontFamily: 'inherit', letterSpacing: '0.04em' }}
           >

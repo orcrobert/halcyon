@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import { useSpring, useMotionValue, animate } from 'framer-motion'
+import { alpha, token } from '../theme'
 
 interface Props {
   value: number
@@ -41,6 +42,10 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
+    const idle = token('--color-line-active')
+    const accent = token('--color-accent')
+    const accentBright = token('--color-accent-bright')
+
     const draw = () => {
       rafRef.current = requestAnimationFrame(draw)
       const s = scale.get()
@@ -77,11 +82,11 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
 
       ctx.closePath()
 
-      const baseColor = disabled ? '#2a2b40' : dragging ? '#818cf8' : '#6366f1'
+      const baseColor = disabled ? idle : dragging ? accentBright : accent
       ctx.fillStyle = baseColor
       ctx.fill()
 
-      ctx.strokeStyle = 'rgba(8,9,14,0.5)'
+      ctx.strokeStyle = alpha(token('--color-bg'), 50)
       ctx.lineWidth = 1.5
       ctx.stroke()
     }
@@ -161,9 +166,9 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
         transform: 'translateX(-50%)',
         width: '4px',
         height: '100%',
-        background: 'linear-gradient(to bottom, #15172a 0%, #1e2035 50%, #15172a 100%)',
+        background: 'linear-gradient(to bottom, var(--color-surface-high) 0%, var(--color-line) 50%, var(--color-surface-high) 100%)',
         borderRadius: '2px',
-        boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.02)',
+        boxShadow: `inset 0 0 0 1px ${alpha('var(--color-wash)', 2)}`,
       }} />
 
       <div style={{
@@ -174,10 +179,12 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
         width: '4px',
         height: `${display * TRACK_HEIGHT}px`,
         background: disabled
-          ? '#2a2b40'
-          : 'linear-gradient(to top, rgba(99,102,241,0.15) 0%, rgba(99,102,241,0.55) 60%, rgba(129,140,248,0.85) 100%)',
+          ? 'var(--color-line-active)'
+          : `linear-gradient(to top, ${alpha('var(--color-accent)', 15)} 0%, ${alpha('var(--color-accent)', 55)} 60%, ${alpha('var(--color-accent-bright)', 85)} 100%)`,
         borderRadius: '2px',
-        boxShadow: disabled ? 'none' : '0 0 8px rgba(99,102,241,0.35), inset 0 0 0 1px rgba(129,140,248,0.15)',
+        boxShadow: disabled
+          ? 'none'
+          : `0 0 8px ${alpha('var(--color-accent)', 35)}, inset 0 0 0 1px ${alpha('var(--color-accent-bright)', 15)}`,
         transition: 'box-shadow 0.25s ease',
       }} />
 

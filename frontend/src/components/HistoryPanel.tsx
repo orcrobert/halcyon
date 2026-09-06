@@ -153,34 +153,34 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
         onClick={onClose}
         className="fixed inset-0 z-40 transition-opacity duration-200"
         style={{
-          background: 'rgba(0,0,0,0.55)',
+          background: 'color-mix(in srgb, var(--color-shade) 55%, transparent)',
           backdropFilter: 'blur(3px)',
           WebkitBackdropFilter: 'blur(3px)',
           opacity: visible ? 1 : 0,
         }}
       />
       <aside
-        className="fixed z-50 flex flex-col bg-[#0a0b12] border border-[#1a1b2a] overflow-hidden"
+        className="fixed z-50 flex flex-col bg-surface-sunken border border-surface-hover overflow-hidden"
         style={{
           ...panelStyle,
           transition: 'transform 0.26s cubic-bezier(0.32, 0.72, 0, 1)',
-          boxShadow: '0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(99,102,241,0.04)',
+          boxShadow: '0 30px 80px color-mix(in srgb, var(--color-shade) 60%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 4%, transparent)',
         }}
       >
         {/* Header */}
         <header className="flex items-center justify-between gap-3" style={{ padding: '22px 22px 18px 22px' }}>
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-indigo-500/[0.08] border border-indigo-500/20">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-accent/[0.08] border border-accent/20">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-accent-bright">
                 <circle cx="12" cy="12" r="10" />
                 <polyline points="12 6 12 12 16 14" />
               </svg>
             </div>
-            <h2 className="text-[15px] font-semibold text-white/90 tracking-tight">History</h2>
+            <h2 className="text-[15px] font-semibold text-wash/90 tracking-tight">History</h2>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-200 hover:bg-white/[0.04] transition"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-ink-muted hover:text-ink hover:bg-wash/[0.04] transition"
             aria-label="Close"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -194,7 +194,7 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
         <div style={{ padding: '0 22px 18px 22px' }}>
           <div className="relative">
             <svg
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-600 pointer-events-none"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint pointer-events-none"
               width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"
             >
               <circle cx="11" cy="11" r="8" />
@@ -205,7 +205,7 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search atmospheres..."
-              className="w-full bg-[#0d0e18] border border-[#1e2035] rounded-xl text-slate-200 placeholder:text-slate-700 text-[13px] outline-none focus:border-indigo-500/40 transition-colors"
+              className="w-full bg-surface border border-line rounded-xl text-ink placeholder:text-ink-ghost text-[13px] outline-none focus:border-accent/40 transition-colors"
               style={{ padding: '10px 14px 10px 38px', fontFamily: 'inherit' }}
             />
           </div>
@@ -214,36 +214,36 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
         {/* List */}
         <div
           className="flex-1 overflow-y-auto"
-          style={{ scrollbarWidth: 'thin', scrollbarColor: '#1e2035 transparent', padding: '4px 14px 14px 14px' }}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--color-line) transparent', padding: '4px 14px 14px 14px' }}
         >
           {loading && (
             <div className="flex flex-col gap-2.5 px-2 pt-2">
               {[0, 1, 2].map((i) => (
-                <div key={i} className="h-[60px] rounded-xl animate-pulse" style={{ background: 'rgba(255,255,255,0.025)' }} />
+                <div key={i} className="h-[60px] rounded-xl animate-pulse" style={{ background: 'color-mix(in srgb, var(--color-wash) 2.5%, transparent)' }} />
               ))}
             </div>
           )}
 
           {error && !loading && (
-            <p className="px-2 py-4 text-[13px] text-red-400">{error}</p>
+            <p className="px-2 py-4 text-[13px] text-danger-bright">{error}</p>
           )}
 
           {!loading && !error && items.length === 0 && (
             <div className="px-4 pt-16 flex flex-col items-center text-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-[#0d0e18] border border-[#1e2035] flex items-center justify-center">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-slate-700">
+              <div className="w-14 h-14 rounded-2xl bg-surface border border-line flex items-center justify-center">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" className="text-ink-ghost">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                 </svg>
               </div>
               <div>
-                <p className="text-[14px] text-slate-300 mb-1.5">No atmospheres yet</p>
-                <p className="text-[12px] text-slate-600 leading-relaxed">Generate one to start your history.</p>
+                <p className="text-[14px] text-ink-soft mb-1.5">No atmospheres yet</p>
+                <p className="text-[12px] text-ink-faint leading-relaxed">Generate one to start your history.</p>
               </div>
             </div>
           )}
 
           {!loading && !error && items.length > 0 && filtered.length === 0 && (
-            <p className="px-4 py-10 text-center text-[12px] text-slate-600">
+            <p className="px-4 py-10 text-center text-[12px] text-ink-faint">
               No matches for "{query}"
             </p>
           )}
@@ -251,7 +251,7 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
           {groups.map((group) => (
             <section key={group.label} className="pb-3">
               <div style={{ padding: '14px 10px 8px 10px' }}>
-                <span className="text-[10px] uppercase tracking-[0.16em] text-slate-700 font-semibold">
+                <span className="text-[10px] uppercase tracking-[0.16em] text-ink-ghost font-semibold">
                   {group.label}
                 </span>
               </div>
@@ -275,7 +275,7 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
         {/* Footer */}
         {!loading && items.length > 0 && (
           <footer
-            className="border-t border-[#13141f] text-[11px] text-slate-700"
+            className="border-t border-line-soft text-[11px] text-ink-ghost"
             style={{ padding: '14px 22px' }}
           >
             {items.length} atmosphere{items.length === 1 ? '' : 's'}
@@ -305,19 +305,19 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
       <div
         className="relative rounded-xl overflow-hidden"
         style={{
-          background: 'rgba(239,68,68,0.06)',
-          border: '1px solid rgba(239,68,68,0.18)',
+          background: 'color-mix(in srgb, var(--color-danger) 6%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--color-danger) 18%, transparent)',
         }}
       >
         <div className="flex items-center gap-3" style={{ padding: '10px 12px' }}>
           <div
             className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center"
             style={{
-              background: 'rgba(239,68,68,0.10)',
-              border: '1px solid rgba(239,68,68,0.22)',
+              background: 'color-mix(in srgb, var(--color-danger) 10%, transparent)',
+              border: '1px solid color-mix(in srgb, var(--color-danger) 22%, transparent)',
             }}
           >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-danger-bright">
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6" />
               <path d="M10 11v6M14 11v6" />
@@ -325,10 +325,10 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="text-[12px] text-red-300/80 leading-tight" style={{ letterSpacing: '0.01em' }}>
+            <div className="text-[12px] text-danger-soft/80 leading-tight" style={{ letterSpacing: '0.01em' }}>
               Delete this atmosphere?
             </div>
-            <div className="text-[11px] text-slate-500 truncate" style={{ marginTop: '2px' }}>
+            <div className="text-[11px] text-ink-muted truncate" style={{ marginTop: '2px' }}>
               {a.title ?? a.prompt}
             </div>
           </div>
@@ -336,22 +336,22 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
           <div className="flex items-center gap-1.5 shrink-0">
             <button
               onClick={(e) => { e.stopPropagation(); onCancelDelete() }}
-              className="text-[11px] text-slate-400 hover:text-slate-200 rounded-lg transition"
+              className="text-[11px] text-ink-dim hover:text-ink rounded-lg transition"
               style={{ padding: '6px 12px', fontFamily: 'inherit' }}
             >
               Cancel
             </button>
             <button
               onClick={(e) => { e.stopPropagation(); onConfirmDelete() }}
-              className="text-[11px] font-semibold text-white rounded-lg transition"
+              className="text-[11px] font-semibold text-wash rounded-lg transition"
               style={{
                 padding: '6px 14px',
-                background: 'rgb(220, 38, 38)',
+                background: 'var(--color-danger-deep)',
                 fontFamily: 'inherit',
-                boxShadow: '0 0 0 1px rgba(239,68,68,0.35), 0 4px 12px rgba(239,68,68,0.18)',
+                boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-danger) 35%, transparent), 0 4px 12px color-mix(in srgb, var(--color-danger) 18%, transparent)',
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = 'rgb(239,68,68)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = 'rgb(220, 38, 38)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--color-danger)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'var(--color-danger-deep)' }}
             >
               Delete
             </button>
@@ -365,7 +365,7 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
     <div
       className="group relative rounded-xl transition-colors"
       style={{ padding: '10px 12px', background: 'transparent' }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-wash) 3%, transparent)' }}
       onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
     >
       <button
@@ -376,20 +376,20 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
         <div
           className="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center mt-0.5"
           style={{
-            background: isReady ? 'rgba(99,102,241,0.08)' : isFailed ? 'rgba(239,68,68,0.06)' : 'rgba(245,158,11,0.06)',
-            border: `1px solid ${isReady ? 'rgba(99,102,241,0.15)' : isFailed ? 'rgba(239,68,68,0.15)' : 'rgba(245,158,11,0.15)'}`,
+            background: isReady ? 'color-mix(in srgb, var(--color-accent) 8%, transparent)' : isFailed ? 'color-mix(in srgb, var(--color-danger) 6%, transparent)' : 'color-mix(in srgb, var(--color-band-gamma) 6%, transparent)',
+            border: `1px solid ${isReady ? 'color-mix(in srgb, var(--color-accent) 15%, transparent)' : isFailed ? 'color-mix(in srgb, var(--color-danger) 15%, transparent)' : 'color-mix(in srgb, var(--color-band-gamma) 15%, transparent)'}`,
           }}
         >
           {isWorking ? (
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+            <span className="w-1.5 h-1.5 rounded-full bg-warn animate-pulse" />
           ) : isFailed ? (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-red-400/70">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-danger-bright/70">
               <circle cx="12" cy="12" r="10" />
               <line x1="12" y1="8" x2="12" y2="12" />
               <line x1="12" y1="16" x2="12.01" y2="16" />
             </svg>
           ) : (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-indigo-400">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-accent-bright">
               <path d="M9 18V5l12-2v13" />
               <circle cx="6" cy="18" r="3" />
               <circle cx="18" cy="16" r="3" />
@@ -398,10 +398,10 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
         </div>
 
         <div className="flex-1 min-w-0" style={{ paddingRight: '28px' }}>
-          <div className={`text-[13px] truncate leading-snug ${isReady ? 'text-slate-200' : 'text-slate-500'}`}>
+          <div className={`text-[13px] truncate leading-snug ${isReady ? 'text-ink' : 'text-ink-muted'}`}>
             {a.title ?? a.prompt}
           </div>
-          <div className="text-[11px] text-slate-600 truncate" style={{ marginTop: '3px' }}>
+          <div className="text-[11px] text-ink-faint truncate" style={{ marginTop: '3px' }}>
             {isReady && new Date(a.generated_at ?? a.created_at).toLocaleString(undefined, {
               hour: 'numeric', minute: '2-digit', hour12: false,
               month: 'short', day: 'numeric',
@@ -414,7 +414,7 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
 
       <button
         onClick={(e) => { e.stopPropagation(); onRequestDelete() }}
-        className="absolute top-1/2 -translate-y-1/2 right-2 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 hover:bg-red-500/[0.08] transition"
+        className="absolute top-1/2 -translate-y-1/2 right-2 w-7 h-7 rounded-lg flex items-center justify-center opacity-0 group-hover:opacity-100 text-ink-muted hover:text-danger-bright hover:bg-danger/[0.08] transition"
         aria-label="Delete"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

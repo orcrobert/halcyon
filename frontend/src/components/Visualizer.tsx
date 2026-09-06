@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { alpha, token } from '../theme'
 
 interface Props {
   getAnalyser: () => AnalyserNode | null
@@ -23,6 +24,8 @@ export function Visualizer({ getAnalyser, playing }: Props) {
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
+
+    const accent = token('--color-accent')
 
     const draw = () => {
       rafRef.current = requestAnimationFrame(draw)
@@ -72,7 +75,7 @@ export function Visualizer({ getAnalyser, playing }: Props) {
       const maxBarH = H - 2
 
       ctx.save()
-      ctx.shadowColor = `rgba(99,102,241,${0.95 * amp})`
+      ctx.shadowColor = alpha(accent, 95 * amp)
       ctx.shadowBlur = 32
       for (let i = 0; i < BARS; i++) {
         const v = bars[i]
@@ -80,13 +83,13 @@ export function Visualizer({ getAnalyser, playing }: Props) {
         const x = i * (barWidth + gap)
         const barH = Math.max(1, v * maxBarH)
         const top = baseline - barH
-        ctx.fillStyle = `rgba(99,102,241,${0.8 * amp})`
+        ctx.fillStyle = alpha(accent, 80 * amp)
         ctx.fillRect(x, top, barWidth, barH)
       }
       ctx.restore()
 
       ctx.save()
-      ctx.shadowColor = `rgba(99,102,241,${0.85 * amp})`
+      ctx.shadowColor = alpha(accent, 85 * amp)
       ctx.shadowBlur = 12
       for (let i = 0; i < BARS; i++) {
         const v = bars[i]
@@ -94,7 +97,7 @@ export function Visualizer({ getAnalyser, playing }: Props) {
         const x = i * (barWidth + gap)
         const barH = Math.max(1, v * maxBarH)
         const top = baseline - barH
-        ctx.fillStyle = `rgba(99,102,241,${0.95 * amp})`
+        ctx.fillStyle = alpha(accent, 95 * amp)
         ctx.fillRect(x, top, barWidth, barH)
       }
       ctx.restore()

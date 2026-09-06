@@ -16,6 +16,7 @@ PLAIN_FIELDS = (
     "decomposer_model",
     "decomposer_base_url",
     "decomposer_prompt",
+    "theme",
 )
 
 
@@ -30,6 +31,7 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
             getattr(preferences, "decomposer_api_key_enc", None)
         ),
         decomposer_prompt=getattr(preferences, "decomposer_prompt", None),
+        theme=getattr(preferences, "theme", None),
         defaults={
             "generator_url": defaults.generator_url,
             "decomposer_provider": defaults.decomposer_provider,

@@ -130,22 +130,22 @@ export function DashboardView({
   }, [animating, onStartAnimate, onStopAnimate])
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#08090e]">
+    <div className="min-h-screen flex flex-col bg-bg">
       <TuningControl
         onTuningChange={onTuningChange}
         initialFreq={session.elements?.[0]?.tuning_hz ?? 440}
       />
 
       {/* Top bar */}
-      <header className="flex items-center justify-between border-b border-[#13141f]" style={{ padding: '18px 32px' }}>
+      <header className="flex items-center justify-between border-b border-line-soft" style={{ padding: '18px 32px' }}>
         {/* Live indicator */}
         <div className={`flex items-center gap-2 border rounded-xl px-4 py-2 transition-all duration-150 ${
           playing
-            ? 'border-indigo-500/30 bg-indigo-500/5'
-            : 'border-[#1d1e2e]'
+            ? 'border-accent/30 bg-accent/5'
+            : 'border-line'
         }`}>
-          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${playing ? 'bg-indigo-500 animate-pulse' : 'bg-slate-700'}`} />
-          <span className={`text-[12px] font-medium uppercase tracking-[0.12em] hidden sm:block ${playing ? 'text-indigo-400' : 'text-slate-600'}`}>
+          <span className={`w-2 h-2 rounded-full flex-shrink-0 ${playing ? 'bg-accent animate-pulse' : 'bg-ink-ghost'}`} />
+          <span className={`text-[12px] font-medium uppercase tracking-[0.12em] hidden sm:block ${playing ? 'text-accent-bright' : 'text-ink-faint'}`}>
             {playing ? 'Live' : 'Paused'}
           </span>
         </div>
@@ -159,12 +159,12 @@ export function DashboardView({
             onClick={() => setBinauralOpen(o => !o)}
             style={{
               width: 36, height: 36, borderRadius: '50%', cursor: 'pointer',
-              border: binauralActive ? '1px solid rgba(99,102,241,0.5)' : '1px solid rgba(99,102,241,0.2)',
-              background: binauralActive ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.04)',
-              color: binauralActive ? '#818cf8' : 'rgba(99,102,241,0.4)',
+              border: binauralActive ? '1px solid color-mix(in srgb, var(--color-accent) 50%, transparent)' : '1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)',
+              background: binauralActive ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'color-mix(in srgb, var(--color-accent) 4%, transparent)',
+              color: binauralActive ? 'var(--color-accent-bright)' : 'color-mix(in srgb, var(--color-accent) 40%, transparent)',
               fontSize: 13, fontFamily: 'inherit', fontStyle: 'italic', fontWeight: 600,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: binauralActive ? '0 0 16px rgba(99,102,241,0.25), 0 0 4px rgba(99,102,241,0.15)' : 'none',
+              boxShadow: binauralActive ? '0 0 16px color-mix(in srgb, var(--color-accent) 25%, transparent), 0 0 4px color-mix(in srgb, var(--color-accent) 15%, transparent)' : 'none',
               transition: 'all 0.2s',
             }}
           >
@@ -173,7 +173,7 @@ export function DashboardView({
 
           <button
             onClick={onExport}
-            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150"
+            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150"
             style={{ fontFamily: 'inherit' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -188,7 +188,7 @@ export function DashboardView({
             onClick={handleRegenerateScene}
             disabled={sceneRegenerating}
             title="Generate this scene again as a new atmosphere"
-            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{ fontFamily: 'inherit' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -200,7 +200,7 @@ export function DashboardView({
 
           <button
             onClick={onReset}
-            className="flex items-center gap-2 text-[12px] font-medium text-slate-400 hover:text-slate-200 border border-[#1d1e2e] hover:border-[#2a2b40] rounded-xl px-4 py-2 transition-all duration-150"
+            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150"
             style={{ fontFamily: 'inherit' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
@@ -221,9 +221,9 @@ export function DashboardView({
 
           {/* Title */}
           <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-700 mb-3">Now playing</p>
+            <p className="text-[11px] uppercase tracking-[0.2em] text-ink-ghost mb-3">Now playing</p>
             <div className="flex items-center justify-center gap-3">
-              <h1 className="text-3xl font-bold text-white" style={{ letterSpacing: '-0.02em' }}>
+              <h1 className="text-3xl font-bold text-wash" style={{ letterSpacing: '-0.02em' }}>
                 {session.title ?? session.prompt}
               </h1>
               <button
@@ -235,25 +235,25 @@ export function DashboardView({
                   width: 22, height: 22,
                   fontSize: 10, fontFamily: 'inherit',
                   fontWeight: 700, letterSpacing: '0.04em',
-                  color: 'rgba(165,180,252,0.85)',
-                  border: '1px solid rgba(99,102,241,0.3)',
-                  background: 'rgba(99,102,241,0.06)',
+                  color: 'color-mix(in srgb, var(--color-accent-soft) 85%, transparent)',
+                  border: '1px solid color-mix(in srgb, var(--color-accent) 30%, transparent)',
+                  background: 'color-mix(in srgb, var(--color-accent) 6%, transparent)',
                   cursor: 'pointer',
                   lineHeight: 1,
                   paddingTop: 1,
-                  boxShadow: '0 0 0 0 rgba(99,102,241,0)',
+                  boxShadow: '0 0 0 0 color-mix(in srgb, var(--color-accent) 0%, transparent)',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(99,102,241,0.16)'
-                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.55)'
-                  e.currentTarget.style.boxShadow = '0 0 14px rgba(99,102,241,0.25)'
-                  e.currentTarget.style.color = '#c7d2fe'
+                  e.currentTarget.style.background = 'color-mix(in srgb, var(--color-accent) 16%, transparent)'
+                  e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-accent) 55%, transparent)'
+                  e.currentTarget.style.boxShadow = '0 0 14px color-mix(in srgb, var(--color-accent) 25%, transparent)'
+                  e.currentTarget.style.color = 'var(--color-accent-pale)'
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'rgba(99,102,241,0.06)'
-                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)'
-                  e.currentTarget.style.boxShadow = '0 0 0 0 rgba(99,102,241,0)'
-                  e.currentTarget.style.color = 'rgba(165,180,252,0.85)'
+                  e.currentTarget.style.background = 'color-mix(in srgb, var(--color-accent) 6%, transparent)'
+                  e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--color-accent) 30%, transparent)'
+                  e.currentTarget.style.boxShadow = '0 0 0 0 color-mix(in srgb, var(--color-accent) 0%, transparent)'
+                  e.currentTarget.style.color = 'color-mix(in srgb, var(--color-accent-soft) 85%, transparent)'
                 }}
               >
                 P
@@ -264,15 +264,15 @@ export function DashboardView({
           {/* Play/Pause */}
           <button
             onClick={onPlayPause}
-            className="flex items-center justify-center w-12 h-12 rounded-full border border-[#1d1e2e] bg-[#111218] hover:border-indigo-500/40 hover:bg-indigo-500/5 transition-all duration-200"
+            className="flex items-center justify-center w-12 h-12 rounded-full border border-line bg-surface-raised hover:border-accent/40 hover:bg-accent/5 transition-all duration-200"
           >
             {playing ? (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-slate-300">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-ink-soft">
                 <rect x="6" y="4" width="4" height="16" rx="1" />
                 <rect x="14" y="4" width="4" height="16" rx="1" />
               </svg>
             ) : (
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-indigo-400">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="text-accent-bright">
                 <polygon points="5,3 19,12 5,21" />
               </svg>
             )}
@@ -285,9 +285,9 @@ export function DashboardView({
               style={{
                 fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em',
                 padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
-                border: allMutedLocal ? '1px solid rgba(239,68,68,0.35)' : '1px solid rgba(255,255,255,0.07)',
-                background: allMutedLocal ? 'rgba(239,68,68,0.08)' : 'rgba(255,255,255,0.02)',
-                color: allMutedLocal ? '#f87171' : '#334155',
+                border: allMutedLocal ? '1px solid color-mix(in srgb, var(--color-danger) 35%, transparent)' : '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)',
+                background: allMutedLocal ? 'color-mix(in srgb, var(--color-danger) 8%, transparent)' : 'color-mix(in srgb, var(--color-wash) 2%, transparent)',
+                color: allMutedLocal ? 'var(--color-danger-bright)' : 'var(--color-ink-ghost)',
                 transition: 'all 0.2s',
               }}
             >
@@ -299,10 +299,10 @@ export function DashboardView({
               style={{
                 fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.1em',
                 padding: '4px 14px', borderRadius: 8, cursor: 'pointer',
-                border: animating ? '1px solid rgba(99,102,241,0.45)' : '1px solid rgba(255,255,255,0.07)',
-                background: animating ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)',
-                color: animating ? '#818cf8' : '#334155',
-                boxShadow: animating ? '0 0 12px rgba(99,102,241,0.15)' : 'none',
+                border: animating ? '1px solid color-mix(in srgb, var(--color-accent) 45%, transparent)' : '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)',
+                background: animating ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'color-mix(in srgb, var(--color-wash) 2%, transparent)',
+                color: animating ? 'var(--color-accent-bright)' : 'var(--color-ink-ghost)',
+                boxShadow: animating ? '0 0 12px color-mix(in srgb, var(--color-accent) 15%, transparent)' : 'none',
                 transition: 'all 0.2s',
               }}
             >
@@ -359,12 +359,12 @@ export function DashboardView({
             maxWidth: 'calc(100vw - 32px)',
             padding: '10px 14px',
             borderRadius: 12,
-            border: '1px solid rgba(239,68,68,0.35)',
-            background: 'rgba(24,10,12,0.92)',
-            boxShadow: '0 20px 40px rgba(0,0,0,0.55)',
+            border: '1px solid color-mix(in srgb, var(--color-danger) 35%, transparent)',
+            background: 'color-mix(in srgb, var(--color-surface-danger) 92%, transparent)',
+            boxShadow: '0 20px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)',
           }}
         >
-          <span style={{ fontSize: 12, color: '#fca5a5', fontFamily: 'inherit' }}>
+          <span style={{ fontSize: 12, color: 'var(--color-danger-soft)', fontFamily: 'inherit' }}>
             {actionError}
           </span>
           <button
@@ -372,9 +372,9 @@ export function DashboardView({
             aria-label="Dismiss"
             style={{
               width: 20, height: 20, borderRadius: '50%', cursor: 'pointer',
-              border: '1px solid rgba(255,255,255,0.08)',
-              background: 'rgba(255,255,255,0.03)',
-              color: '#f87171', fontSize: 11, lineHeight: 1,
+              border: '1px solid color-mix(in srgb, var(--color-wash) 8%, transparent)',
+              background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+              color: 'var(--color-danger-bright)', fontSize: 11, lineHeight: 1,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontFamily: 'inherit', flexShrink: 0,
             }}
@@ -386,7 +386,7 @@ export function DashboardView({
 
       {/* Footer */}
       <footer className="py-6 text-center">
-        <p className="text-[11px] text-slate-800 uppercase tracking-widest">
+        <p className="text-[11px] text-ink-whisper uppercase tracking-widest">
           Drag faders · Space to play/pause
         </p>
       </footer>

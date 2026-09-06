@@ -4,6 +4,8 @@ import { extractErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
 import { GeneratorsCard } from './GeneratorsCard'
 import { PromptEditorModal } from './PromptEditorModal'
+import { ThemeCard } from './ThemeCard'
+import { DEFAULT_THEME, applyTheme, storeTheme, storedTheme } from '../themes'
 import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
 interface Props {
@@ -25,9 +27,9 @@ const EMPTY_DRAFT: Draft = {
 }
 
 const INPUT_CLASS =
-  'w-full bg-[#0b0c15] border border-[#1e2035] rounded-xl text-slate-200 placeholder:text-slate-700 text-[13.5px] outline-none focus:border-indigo-500/45 transition-colors'
+  'w-full bg-surface-sunken border border-line rounded-xl text-ink placeholder:text-ink-ghost text-[13.5px] outline-none focus:border-accent/45 transition-colors'
 const INPUT_STYLE: React.CSSProperties = { padding: '11px 13px', fontFamily: 'inherit' }
-const LABEL_CLASS = 'text-[10px] uppercase tracking-[0.18em] text-slate-600 font-semibold'
+const LABEL_CLASS = 'text-[10px] uppercase tracking-[0.18em] text-ink-faint font-semibold'
 
 function toDraft(settings: Settings): Draft {
   return {
@@ -57,6 +59,7 @@ export function AccountView({ onBack }: Props) {
   const [promptOpen, setPromptOpen] = useState(false)
   const [promptSaving, setPromptSaving] = useState(false)
   const [promptError, setPromptError] = useState<string | null>(null)
+  const [theme, setTheme] = useState<string>(storedTheme)
 
   useEffect(() => {
     let cancelled = false
@@ -67,6 +70,10 @@ export function AccountView({ onBack }: Props) {
         if (cancelled) return
         setSettings(res)
         setDraft(toDraft(res))
+        const active = res.theme ?? DEFAULT_THEME
+        setTheme(active)
+        applyTheme(active)
+        storeTheme(active)
       })
       .catch((e) => { if (!cancelled) setError(extractErrors(e).message) })
       .finally(() => { if (!cancelled) setLoading(false) })
@@ -89,6 +96,18 @@ export function AccountView({ onBack }: Props) {
   const provider: DecomposerProvider | undefined = settings?.providers.find(
     (p) => p.key === draft.decomposer_provider,
   )
+
+  async function handleTheme(id: string) {
+    setTheme(id)
+    applyTheme(id)
+    storeTheme(id)
+    setError(null)
+    try {
+      setSettings(await updateSettings({ theme: id }))
+    } catch (e) {
+      setError(extractErrors(e).message)
+    }
+  }
 
   async function handleSave() {
     if (!settings) return
@@ -159,7 +178,7 @@ export function AccountView({ onBack }: Props) {
         style={{
           height: '460px',
           background:
-            'radial-gradient(ellipse 60% 100% at 50% 0%, rgba(99,102,241,0.09), rgba(99,102,241,0) 72%)',
+            'radial-gradient(ellipse 60% 100% at 50% 0%, color-mix(in srgb, var(--color-accent) 9%, transparent), color-mix(in srgb, var(--color-accent) 0%, transparent) 72%)',
         }}
       />
 
@@ -169,7 +188,7 @@ export function AccountView({ onBack }: Props) {
       >
         <button
           onClick={onBack}
-          className="flex items-center gap-2 self-start text-[12px] text-slate-500 hover:text-slate-300 transition-colors"
+          className="flex items-center gap-2 self-start text-[12px] text-ink-muted hover:text-ink-soft transition-colors"
           style={{ marginBottom: '44px', fontFamily: 'inherit' }}
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -181,21 +200,21 @@ export function AccountView({ onBack }: Props) {
 
         <header className="flex flex-col items-center text-center" style={{ marginBottom: '44px' }}>
           <div
-            className="flex items-center justify-center rounded-2xl text-[15px] font-semibold text-indigo-200"
+            className="flex items-center justify-center rounded-2xl text-[15px] font-semibold text-accent-pale"
             style={{
               width: '52px',
               height: '52px',
               marginBottom: '16px',
-              background: 'linear-gradient(150deg, rgba(99,102,241,0.20), rgba(99,102,241,0.05))',
-              border: '1px solid rgba(99,102,241,0.25)',
+              background: 'linear-gradient(150deg, color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 5%, transparent))',
+              border: '1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)',
             }}
           >
             {user ? initials(user.name, user.email) : '·'}
           </div>
-          <h1 className="text-[21px] font-semibold text-white/95 tracking-tight leading-tight">
+          <h1 className="text-[21px] font-semibold text-wash/95 tracking-tight leading-tight">
             {user?.name || 'Account'}
           </h1>
-          <p className="text-[12.5px] text-slate-500" style={{ marginTop: '5px' }}>
+          <p className="text-[12.5px] text-ink-muted" style={{ marginTop: '5px' }}>
             {user?.email}
           </p>
         </header>
@@ -203,7 +222,7 @@ export function AccountView({ onBack }: Props) {
         {loading && (
           <div className="flex flex-col gap-4">
             {[0, 1].map((i) => (
-              <div key={i} className="rounded-2xl animate-pulse" style={{ height: '150px', background: 'rgba(255,255,255,0.022)' }} />
+              <div key={i} className="rounded-2xl animate-pulse" style={{ height: '150px', background: 'color-mix(in srgb, var(--color-wash) 2.2%, transparent)' }} />
             ))}
           </div>
         )}
@@ -211,6 +230,8 @@ export function AccountView({ onBack }: Props) {
         {!loading && settings && (
           <div className="flex flex-col gap-4">
             <GeneratorsCard />
+
+            <ThemeCard value={theme} onChange={handleTheme} />
 
             <Card
               title="Decomposer"
@@ -257,7 +278,7 @@ export function AccountView({ onBack }: Props) {
                     <button
                       onClick={handleClearKey}
                       disabled={saving}
-                      className="text-[11px] text-slate-500 hover:text-red-400 transition disabled:opacity-40"
+                      className="text-[11px] text-ink-muted hover:text-danger-bright transition disabled:opacity-40"
                       style={{ fontFamily: 'inherit' }}
                     >
                       Remove
@@ -291,14 +312,14 @@ export function AccountView({ onBack }: Props) {
                     <button
                       type="button"
                       onClick={() => setRevealKey((v) => !v)}
-                      className="absolute inset-y-0 right-0 flex items-center text-[11px] text-slate-600 hover:text-slate-300 transition-colors"
+                      className="absolute inset-y-0 right-0 flex items-center text-[11px] text-ink-faint hover:text-ink-soft transition-colors"
                       style={{ paddingRight: '13px', fontFamily: 'inherit' }}
                     >
                       {revealKey ? 'Hide' : 'Show'}
                     </button>
                   )}
                 </div>
-                <p className="text-[11.5px] text-slate-600 leading-relaxed">
+                <p className="text-[11.5px] text-ink-faint leading-relaxed">
                   {provider?.requires_api_key
                     ? 'Stored encrypted and never shown again.'
                     : 'Optional for local servers.'}
@@ -309,33 +330,33 @@ export function AccountView({ onBack }: Props) {
                 <span className={LABEL_CLASS}>System prompt</span>
                 <button
                   onClick={() => { setPromptError(null); setPromptOpen(true) }}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-[#1e2035] bg-[#0b0c15] hover:border-indigo-500/40 transition-colors text-left"
+                  className="flex items-center justify-between gap-3 rounded-xl border border-line bg-surface-sunken hover:border-accent/40 transition-colors text-left"
                   style={{ padding: '11px 13px', fontFamily: 'inherit' }}
                 >
                   <span className="flex flex-col gap-1 min-w-0">
-                    <span className="text-[13px] text-slate-300">
+                    <span className="text-[13px] text-ink-soft">
                       {settings.decomposer_prompt ? 'Custom prompt' : 'Default prompt'}
                     </span>
-                    <span className="text-[11px] text-slate-600 truncate">
+                    <span className="text-[11px] text-ink-faint truncate">
                       {settings.decomposer_prompt
                         ? 'Your own decomposition rules'
                         : 'The rules Halcyon ships with'}
                     </span>
                   </span>
-                  <span className="text-[11px] text-indigo-300/80 shrink-0">Edit</span>
+                  <span className="text-[11px] text-accent-soft/80 shrink-0">Edit</span>
                 </button>
               </div>
             </Card>
 
-            {error && <p className="text-[12.5px] text-red-400 leading-relaxed">{error}</p>}
+            {error && <p className="text-[12.5px] text-danger-bright leading-relaxed">{error}</p>}
 
             <div
               className="flex items-center justify-between gap-3"
-              style={{ marginTop: '6px', paddingTop: '18px', borderTop: '1px solid #15161f' }}
+              style={{ marginTop: '6px', paddingTop: '18px', borderTop: '1px solid var(--color-line-soft)' }}
             >
               <button
                 onClick={logout}
-                className="text-[12.5px] text-slate-500 hover:text-red-400 transition-colors"
+                className="text-[12.5px] text-ink-muted hover:text-danger-bright transition-colors"
                 style={{ fontFamily: 'inherit' }}
               >
                 Sign out
@@ -343,12 +364,12 @@ export function AccountView({ onBack }: Props) {
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="text-[13px] font-medium text-white rounded-xl transition disabled:opacity-50"
+                className="text-[13px] font-medium text-wash rounded-xl transition disabled:opacity-50"
                 style={{
                   padding: '11px 22px',
-                  background: 'rgb(79, 70, 229)',
+                  background: 'var(--color-accent-deep)',
                   fontFamily: 'inherit',
-                  boxShadow: '0 0 0 1px rgba(99,102,241,0.35), 0 6px 18px rgba(99,102,241,0.20)',
+                  boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent), 0 6px 18px color-mix(in srgb, var(--color-accent) 20%, transparent)',
                 }}
               >
                 {saving ? 'Saving…' : saved ? 'Saved' : 'Save changes'}
@@ -358,7 +379,7 @@ export function AccountView({ onBack }: Props) {
         )}
 
         {!loading && !settings && error && (
-          <p className="text-[13px] text-red-400 leading-relaxed">{error}</p>
+          <p className="text-[13px] text-danger-bright leading-relaxed">{error}</p>
         )}
       </div>
 
@@ -380,12 +401,12 @@ export function AccountView({ onBack }: Props) {
 function Card({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
   return (
     <section
-      className="rounded-2xl border border-[#1a1b2a] bg-[#0d0e18] flex flex-col gap-4"
-      style={{ padding: '22px', boxShadow: '0 18px 40px rgba(0,0,0,0.30)' }}
+      className="rounded-2xl border border-surface-hover bg-surface flex flex-col gap-4"
+      style={{ padding: '22px', boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 30%, transparent)' }}
     >
       <div>
-        <h2 className="text-[14px] font-semibold text-slate-200 tracking-tight">{title}</h2>
-        <p className="text-[11.5px] text-slate-600 leading-relaxed" style={{ marginTop: '4px' }}>{hint}</p>
+        <h2 className="text-[14px] font-semibold text-ink tracking-tight">{title}</h2>
+        <p className="text-[11.5px] text-ink-faint leading-relaxed" style={{ marginTop: '4px' }}>{hint}</p>
       </div>
       {children}
     </section>

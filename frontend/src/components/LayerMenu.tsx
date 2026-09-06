@@ -98,20 +98,20 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
       pointerEvents: visible ? 'auto' : 'none',
     }}>
       <div ref={containerRef} style={{
-        background: 'rgba(8,9,18,0.55)',
+        background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
         backdropFilter: 'blur(40px) saturate(180%) brightness(1.05)',
         WebkitBackdropFilter: 'blur(40px) saturate(180%) brightness(1.05)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid color-mix(in srgb, var(--color-wash) 10%, transparent)',
         borderRadius: 16,
         overflow: 'hidden',
-        boxShadow: '0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
+        boxShadow: '0 40px 100px color-mix(in srgb, var(--color-shade) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 8%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 6%, transparent)',
       }}>
 
         <div style={{
           padding: '11px 14px 8px',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
         }}>
-          <span style={{ fontSize: 9, color: '#253047', fontFamily: 'inherit', letterSpacing: '0.18em' }}>
+          <span style={{ fontSize: 9, color: 'var(--color-ink-trace)', fontFamily: 'inherit', letterSpacing: '0.18em' }}>
             LAYER
           </span>
         </div>
@@ -119,11 +119,11 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
         <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
           <button
             onClick={() => { onClose(); onRegenerate() }}
-            style={{ ...rowStyle, color: '#cbd5e1' }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(99,102,241,0.12)' }}
+            style={{ ...rowStyle, color: 'var(--color-ink-soft)' }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-accent) 12%, transparent)' }}
             onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <svg className="stroke-accent-bright" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
@@ -140,19 +140,19 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
             title={deletable ? undefined : 'An atmosphere needs at least one layer'}
             style={{
               ...rowStyle,
-              color: confirming ? '#fca5a5' : '#94a3b8',
-              background: confirming ? 'rgba(239,68,68,0.12)' : 'transparent',
+              color: confirming ? 'var(--color-danger-soft)' : 'var(--color-ink-dim)',
+              background: confirming ? 'color-mix(in srgb, var(--color-danger) 12%, transparent)' : 'transparent',
               opacity: deletable ? 1 : 0.35,
               cursor: deletable ? 'pointer' : 'not-allowed',
             }}
             onMouseEnter={(e) => {
-              if (deletable && !confirming) e.currentTarget.style.background = 'rgba(239,68,68,0.1)'
+              if (deletable && !confirming) e.currentTarget.style.background = 'color-mix(in srgb, var(--color-danger) 10%, transparent)'
             }}
             onMouseLeave={(e) => {
               if (!confirming) e.currentTarget.style.background = 'transparent'
             }}
           >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={confirming ? '#f87171' : '#64748b'} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: confirming ? 'var(--color-danger-bright)' : 'var(--color-ink-muted)', flexShrink: 0 }}>
               <polyline points="3 6 5 6 21 6" />
               <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
             </svg>
@@ -162,9 +162,9 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
 
         <div style={{
           padding: '8px 14px 10px',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
+          borderTop: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
         }}>
-          <span style={{ fontSize: 9.5, color: '#1e2d42', fontFamily: 'inherit', lineHeight: 1.5 }}>
+          <span style={{ fontSize: 9.5, color: 'var(--color-ink-whisper)', fontFamily: 'inherit', lineHeight: 1.5 }}>
             {confirming ? 'This removes the audio too.' : 'esc to close'}
           </span>
         </div>

@@ -56,7 +56,7 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
         aria-haspopup="listbox"
         aria-expanded={expanded}
         title="Loop length of each generated layer"
-        className="flex items-center gap-1.5 rounded-lg border border-[#232640] text-[11px] text-slate-400 hover:text-slate-200 hover:border-[#32365a] transition disabled:opacity-40 disabled:cursor-not-allowed"
+        className="flex items-center gap-1.5 rounded-lg border border-line-hover text-[11px] text-ink-dim hover:text-ink hover:border-line-strong transition disabled:opacity-40 disabled:cursor-not-allowed"
         style={{ padding: '5px 9px', fontFamily: 'inherit' }}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -72,10 +72,10 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
       {expanded && (
         <div
           role="listbox"
-          className="absolute left-0 bottom-full mb-2 rounded-xl border border-[#232640] bg-[#12131f] z-20"
-          style={{ width: 232, padding: 6, boxShadow: '0 18px 40px rgba(0,0,0,0.55)' }}
+          className="absolute left-0 bottom-full mb-2 rounded-xl border border-line-hover bg-surface-high z-20"
+          style={{ width: 232, padding: 6, boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)' }}
         >
-          <p className="text-[10px] uppercase tracking-wider text-slate-600" style={{ padding: '6px 10px 8px 10px' }}>
+          <p className="text-[10px] uppercase tracking-wider text-ink-faint" style={{ padding: '6px 10px 8px 10px' }}>
             Soundscape length
           </p>
           {DURATION_CHOICES.map((choice) => (
@@ -88,23 +88,23 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
                 onChange(choice.seconds)
                 setOpen(false)
               }}
-              className="w-full flex items-center justify-between gap-3 rounded-lg text-left hover:bg-white/[0.04] transition"
+              className="w-full flex items-center justify-between gap-3 rounded-lg text-left hover:bg-wash/[0.04] transition"
               style={{ padding: '8px 10px', fontFamily: 'inherit' }}
             >
               <span className="flex flex-col">
-                <span className={`text-[13px] ${choice.seconds === value ? 'text-slate-100' : 'text-slate-300'}`}>
+                <span className={`text-[13px] ${choice.seconds === value ? 'text-ink-bright' : 'text-ink-soft'}`}>
                   {choice.seconds} seconds
                 </span>
-                <span className="text-[10.5px] text-slate-600">{choice.hint}</span>
+                <span className="text-[10.5px] text-ink-faint">{choice.hint}</span>
               </span>
               {choice.seconds === value && (
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="stroke-accent-bright" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               )}
             </button>
           ))}
-          <p className="text-[10.5px] text-slate-600 leading-snug" style={{ padding: '8px 10px 6px 10px' }}>
+          <p className="text-[10.5px] text-ink-faint leading-snug" style={{ padding: '8px 10px 6px 10px' }}>
             Every layer loops forever — this sets how much audio plays before it repeats.
           </p>
         </div>
@@ -232,9 +232,9 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
       <svg width="720" height="80" viewBox="0 0 720 80" style={{ overflow: 'visible', maxWidth: '100%' }}>
         <defs>
           <linearGradient id="bw-grad" x1="0" y1="0" x2="720" y2="0" gradientUnits="userSpaceOnUse">
-            <stop offset="0%" stopColor="#6366f1" stopOpacity="0" />
-            <stop offset="50%" stopColor="#818cf8" stopOpacity="0.9" />
-            <stop offset="100%" stopColor="#6366f1" stopOpacity="0" />
+            <stop offset="0%" style={{ stopColor: 'var(--color-accent)' }} stopOpacity="0" />
+            <stop offset="50%" style={{ stopColor: 'var(--color-accent-bright)' }} stopOpacity="0.9" />
+            <stop offset="100%" style={{ stopColor: 'var(--color-accent)' }} stopOpacity="0" />
           </linearGradient>
           <filter id="bw-glow" x="-20%" y="-200%" width="140%" height="500%">
             <feGaussianBlur stdDeviation="6" result="b1" />
@@ -244,7 +244,7 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
         </defs>
         <path d={path} stroke="url(#bw-grad)" strokeWidth="10" fill="none" strokeLinecap="round" filter="url(#bw-glow)" opacity="0.18" />
         <path d={path} stroke="url(#bw-grad)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
-        <path d={path} stroke="rgba(255,255,255,0.6)" strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" />
+        <path d={path} strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 60%, transparent)' }} />
       </svg>
     </div>
   )
@@ -276,7 +276,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
       {onOpenHistory && (
         <button
           onClick={onOpenHistory}
-          className="absolute top-6 left-6 w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-200 hover:bg-white/[0.04] transition"
+          className="absolute top-6 left-6 w-9 h-9 rounded-lg flex items-center justify-center text-ink-muted hover:text-ink hover:bg-wash/[0.04] transition"
           aria-label="Open history"
           title="History"
         >
@@ -290,7 +290,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
       {onOpenAccount && (
         <button
           onClick={onOpenAccount}
-          className="absolute top-6 right-6 w-9 h-9 rounded-lg flex items-center justify-center text-slate-500 hover:text-slate-200 hover:bg-white/[0.04] transition"
+          className="absolute top-6 right-6 w-9 h-9 rounded-lg flex items-center justify-center text-ink-muted hover:text-ink hover:bg-wash/[0.04] transition"
           aria-label="Open account settings"
           title="Account"
         >
@@ -307,8 +307,8 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
 
         <div className="flex flex-col gap-4">
           <div
-            className="rounded-2xl border border-[#1e2035] bg-[#0d0e18] transition-opacity"
-            style={{ boxShadow: '0 25px 50px rgba(0,0,0,0.4)', opacity: loading ? 0.6 : 1 }}
+            className="rounded-2xl border border-line bg-surface transition-opacity"
+            style={{ boxShadow: '0 25px 50px color-mix(in srgb, var(--color-shade) 40%, transparent)', opacity: loading ? 0.6 : 1 }}
           >
             <textarea
               value={prompt}
@@ -317,21 +317,21 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
               disabled={loading}
               placeholder="A place, a mood, a moment in time…"
               rows={5}
-              className="w-full bg-transparent text-slate-200 resize-none border-none outline-none placeholder:text-slate-600 text-[15px] leading-relaxed"
+              className="w-full bg-transparent text-ink resize-none border-none outline-none placeholder:text-ink-faint text-[15px] leading-relaxed"
               style={{ padding: '24px 28px 12px 28px', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
             <div className="flex items-center justify-between gap-4" style={{ padding: '0 28px 20px 28px' }}>
               <div className="flex items-center gap-3 min-w-0">
                 <LengthMenu value={durationS} onChange={setDurationS} disabled={loading} />
-                <span className="text-[11px] text-slate-700 truncate">Shift + Enter for new line</span>
+                <span className="text-[11px] text-ink-ghost truncate">Shift + Enter for new line</span>
               </div>
               <button
                 onClick={submit}
                 disabled={loading || !prompt.trim()}
-                className="flex items-center gap-2 text-white text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
+                className="flex items-center gap-2 text-wash text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 style={{
                   padding: '12px 24px',
-                  background: loading || !prompt.trim() ? 'rgba(99,102,241,0.25)' : '#6366f1',
+                  background: loading || !prompt.trim() ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'var(--color-accent)',
                   fontFamily: 'inherit',
                 }}
               >
@@ -340,7 +340,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
                     {[0, 1, 2].map((i) => (
                       <span
                         key={i}
-                        className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"
+                        className="w-1.5 h-1.5 bg-wash rounded-full animate-bounce"
                         style={{ animationDelay: `${i * 0.12}s` }}
                       />
                     ))}
@@ -359,9 +359,9 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
             </div>
           </div>
 
-          {error && <p className="text-center text-red-500 text-sm">{error}</p>}
+          {error && <p className="text-center text-danger text-sm">{error}</p>}
           {loading && (
-            <p className="text-center text-slate-500 text-sm">
+            <p className="text-center text-ink-muted text-sm">
               Decomposing prompt and generating audio — this takes ~30 seconds...
             </p>
           )}

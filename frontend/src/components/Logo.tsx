@@ -9,13 +9,13 @@ export function Mark({ size = 22 }: { size?: number }) {
       viewBox="0 0 48 46"
       fill="none"
       aria-hidden="true"
-      style={{ display: 'block', filter: 'drop-shadow(0 0 14px rgba(124,86,255,0.35))' }}
+      style={{ display: 'block', filter: 'drop-shadow(0 0 14px color-mix(in srgb, var(--color-brand) 35%, transparent))' }}
     >
       <defs>
         <linearGradient id="halcyon-mark" x1="0" y1="0" x2="48" y2="46" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#a78bfa" />
-          <stop offset="55%" stopColor="#7c56ff" />
-          <stop offset="100%" stopColor="#4f46e5" />
+          <stop offset="0%" style={{ stopColor: 'var(--color-brand-light)' }} />
+          <stop offset="55%" style={{ stopColor: 'var(--color-brand)' }} />
+          <stop offset="100%" style={{ stopColor: 'var(--color-brand-deep)' }} />
         </linearGradient>
       </defs>
       <path d={MARK_PATH} fill="url(#halcyon-mark)" />
@@ -29,11 +29,12 @@ export function Logo({ size = 22, tagline }: { size?: number; tagline?: string }
       <div className="flex items-center gap-2.5">
         <Mark size={size} />
         <span
-          className="text-white/90"
+          className="text-wash/90"
           style={{
+            fontFamily: 'var(--font-display)',
             fontSize: `${size * 0.86}px`,
-            fontWeight: 300,
-            letterSpacing: '0.14em',
+            fontWeight: 'var(--font-weight-brand)',
+            letterSpacing: 'var(--tracking-brand)',
             textTransform: 'uppercase',
             paddingLeft: '1px',
           }}
@@ -43,7 +44,7 @@ export function Logo({ size = 22, tagline }: { size?: number; tagline?: string }
       </div>
       {tagline && (
         <p
-          className="text-[15px] text-slate-400 leading-relaxed mx-auto"
+          className="text-[15px] text-ink-dim leading-relaxed mx-auto"
           style={{ maxWidth: '400px', fontWeight: 300, letterSpacing: '-0.005em' }}
         >
           {tagline}

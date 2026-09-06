@@ -16,6 +16,8 @@ import {
 } from './api/atmospheres'
 import { deleteElement, regenerateElement } from './api/elements'
 import type { Atmosphere, EQBand, Element } from './types'
+import { getSettings } from './api/settings'
+import { DEFAULT_THEME, applyTheme, storeTheme } from './themes'
 
 const PENDING_KEY = 'halcyon_pending_atmosphere_id'
 
@@ -38,7 +40,7 @@ export default function App() {
 
   if (state.status === 'guest') {
     return (
-      <div className="min-h-screen" style={{ background: '#08090e' }}>
+      <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
         <AuthView />
       </div>
     )
@@ -60,6 +62,19 @@ function AuthedApp() {
   const [binauralLeftHz, setBinauralLeftHz] = useState(200)
   const [binauralRightHz, setBinauralRightHz] = useState(208)
   const [actionError, setActionError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getSettings()
+      .then((res) => {
+        if (cancelled) return
+        const active = res.theme ?? DEFAULT_THEME
+        applyTheme(active)
+        storeTheme(active)
+      })
+      .catch(() => { /* keep whatever the browser already had */ })
+    return () => { cancelled = true }
+  }, [])
 
   const pollAbortRef = useRef<AbortController | null>(null)
   const regenAbortRef = useRef<AbortController | null>(null)
@@ -383,7 +398,7 @@ function AuthedApp() {
   }, [view, atmosphere, handlePlayPause])
 
   return (
-    <div className="min-h-screen" style={{ background: '#08090e' }}>
+    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
       {view === 'prompt' && (
         <PromptView
           onSubmit={handleGenerate}
@@ -444,8 +459,8 @@ function AuthedApp() {
 
 function FullScreenStatus({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#08090e' }}>
-      <div className="text-white/30 text-sm">{children}</div>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg)' }}>
+      <div className="text-wash/30 text-sm">{children}</div>
     </div>
   )
 }

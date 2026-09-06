@@ -99,10 +99,10 @@ function DiamondMarker({ x, y, glowColor, filterId }: { x: number; y: number; gl
   const d = `M ${x} ${y - s} L ${x + s * 0.55} ${y} L ${x} ${y + s} L ${x - s * 0.55} ${y} Z`
   return (
     <>
-      <path d={d} fill={glowColor} opacity="0.9" filter={`url(#${filterId})`} />
+      <path d={d} style={{ fill: glowColor }} opacity="0.9" filter={`url(#${filterId})`} />
       <path d={d} fill="white" opacity="0.9" />
-      <line x1={x - 14} y1={y} x2={x - s * 0.55 - 3} y2={y} stroke={glowColor} strokeWidth="1" opacity="0.5" />
-      <line x1={x + s * 0.55 + 3} y1={y} x2={x + 14} y2={y} stroke={glowColor} strokeWidth="1" opacity="0.5" />
+      <line x1={x - 14} y1={y} x2={x - s * 0.55 - 3} y2={y} strokeWidth="1" opacity="0.5" style={{ stroke: glowColor }} />
+      <line x1={x + s * 0.55 + 3} y1={y} x2={x + 14} y2={y} strokeWidth="1" opacity="0.5" style={{ stroke: glowColor }} />
     </>
   )
 }
@@ -229,7 +229,7 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
   const shownFreq = displayFreq
   const isDetuned = Math.round(shownFreq) !== 440
   const cents = Math.round(1200 * Math.log2(shownFreq / 440))
-  const glowColor = '#6366f1'
+  const glowColor = 'var(--color-accent)'
   const apexY = freqToY(shownFreq, trackH)
   const apexX = freqToX(shownFreq, trackW)
   const pathV = buildWavyLineV(apexY, trackH, phase, seed)
@@ -248,29 +248,29 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
             left: '50%', transform: 'translateX(-50%)',
             zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
             width: '80px', height: '28px',
-            background: open ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)',
-            border: `1px solid ${open ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.05)'}`,
+            background: open ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'color-mix(in srgb, var(--color-wash) 2%, transparent)',
+            border: `1px solid ${open ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'color-mix(in srgb, var(--color-wash) 5%, transparent)'}`,
             borderBottom: 'none', borderRadius: '8px 8px 0 0', cursor: 'pointer',
             transition: 'bottom 0.35s cubic-bezier(0.4,0,0.2,1), background 0.2s', padding: 0,
           }}
         >
           <svg width="20" height="10" viewBox="0 0 20 10" fill="none">
-            <path d="M1 8 Q10 1 19 8" stroke={open ? '#818cf8' : '#2a3040'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+            <path d="M1 8 Q10 1 19 8" strokeWidth="1.5" strokeLinecap="round" fill="none" style={{ stroke: open ? 'var(--color-accent-bright)' : 'var(--color-line-active)' }} />
           </svg>
-          {isDetuned && !open && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 8px #6366f1' }} />}
+          {isDetuned && !open && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--color-accent)', boxShadow: '0 0 8px var(--color-accent)' }} />}
         </button>
 
         <div ref={panelRef} style={{
           position: 'fixed', bottom: open ? '0px' : '-220px', left: 0, right: 0, height: '220px',
-          zIndex: 49, background: 'rgba(7,8,13,0.98)', borderTop: '1px solid rgba(99,102,241,0.08)',
+          zIndex: 49, background: 'color-mix(in srgb, var(--color-bg) 98%, transparent)', borderTop: '1px solid color-mix(in srgb, var(--color-accent) 8%, transparent)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-evenly',
           transition: 'bottom 0.35s cubic-bezier(0.4,0,0.2,1)',
           padding: '12px 20px 16px',
         }}>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-            <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#334155', textTransform: 'uppercase', fontFamily: 'inherit' }}>Tuning</span>
-            <span style={{ fontSize: '20px', fontWeight: 700, color: isDetuned ? '#a5b4fc' : '#475569', fontVariantNumeric: 'tabular-nums', fontFamily: 'inherit', letterSpacing: '-0.02em' }}>{Math.round(shownFreq)} Hz</span>
-            <span style={{ fontSize: '10px', color: cents === 0 ? 'transparent' : '#6366f1', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums' }}>{cents > 0 ? '+' : ''}{cents}¢</span>
+            <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: 'var(--color-ink-ghost)', textTransform: 'uppercase', fontFamily: 'inherit' }}>Tuning</span>
+            <span style={{ fontSize: '20px', fontWeight: 700, color: isDetuned ? 'var(--color-accent-soft)' : 'var(--color-ink-faint)', fontVariantNumeric: 'tabular-nums', fontFamily: 'inherit', letterSpacing: '-0.02em' }}>{Math.round(shownFreq)} Hz</span>
+            <span style={{ fontSize: '10px', color: cents === 0 ? 'transparent' : 'var(--color-accent)', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums' }}>{cents > 0 ? '+' : ''}{cents}¢</span>
           </div>
 
           <div style={{ position: 'relative' }}>
@@ -288,31 +288,31 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
                   <feGaussianBlur stdDeviation="8" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
                 </filter>
                 <linearGradient id="tcm-grad" x1={TOP_PAD} y1="0" x2={TOP_PAD + trackW} y2="0" gradientUnits="userSpaceOnUse">
-                  <stop offset="0%" stopColor={glowColor} stopOpacity="0.04" />
-                  <stop offset={`${gradStopPct}%`} stopColor={glowColor} stopOpacity="1" />
-                  <stop offset="100%" stopColor={glowColor} stopOpacity="0.04" />
+                  <stop offset="0%" style={{ stopColor: glowColor }} stopOpacity="0.04" />
+                  <stop offset={`${gradStopPct}%`} style={{ stopColor: glowColor }} stopOpacity="1" />
+                  <stop offset="100%" style={{ stopColor: glowColor }} stopOpacity="0.04" />
                 </linearGradient>
               </defs>
-              <line x1={TOP_PAD} y1={38} x2={TOP_PAD + trackW} y2={38} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+              <line x1={TOP_PAD} y1={38} x2={TOP_PAD + trackW} y2={38} strokeWidth="1" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 6%, transparent)' }} />
               {PRESETS.map(p => {
                 const px = freqToX(p, trackW)
                 const active = Math.round(shownFreq) === p
                 return (
                   <g key={p}>
-                    <line x1={px} y1={33} x2={px} y2={43} stroke={active ? '#818cf8' : 'rgba(255,255,255,0.15)'} strokeWidth={active ? 1.5 : 1} />
-                    <text x={px} y={28} fontSize="9" fill={active ? '#818cf8' : '#2a3550'} textAnchor="middle" fontFamily="inherit">{p}</text>
+                    <line x1={px} y1={33} x2={px} y2={43} strokeWidth={active ? 1.5 : 1} style={{ stroke: active ? 'var(--color-accent-bright)' : 'color-mix(in srgb, var(--color-wash) 15%, transparent)' }} />
+                    <text x={px} y={28} fontSize="9" textAnchor="middle" fontFamily="inherit" style={{ fill: active ? 'var(--color-accent-bright)' : 'var(--color-line-active)' }}>{p}</text>
                   </g>
                 )
               })}
-              <path d={pathH} stroke={glowColor} strokeWidth="14" fill="none" strokeLinecap="round" filter="url(#tcm-bloom)" opacity="0.25" />
-              <path d={pathH} stroke={glowColor} strokeWidth="5" fill="none" strokeLinecap="round" filter="url(#tcm-soft)" opacity="0.5" />
+              <path d={pathH} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-bloom)" opacity="0.25" />
+              <path d={pathH} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-soft)" opacity="0.5" />
               <path d={pathH} stroke="url(#tcm-grad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-              <path d={pathH} stroke="rgba(255,255,255,0.8)" strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" />
+              <path d={pathH} strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 80%, transparent)' }} />
               <DiamondMarker x={apexX} y={38} glowColor={glowColor} filterId="tcm-apex" />
             </svg>
             {/* subtle edge fades */}
-            <div style={{ position: 'absolute', top: 0, left: 0, width: '18%', height: '100%', background: 'linear-gradient(to right, rgba(7,8,13,0.98), transparent)', pointerEvents: 'none' }} />
-            <div style={{ position: 'absolute', top: 0, right: 0, width: '18%', height: '100%', background: 'linear-gradient(to left, rgba(7,8,13,0.98), transparent)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, left: 0, width: '18%', height: '100%', background: 'linear-gradient(to right, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
+            <div style={{ position: 'absolute', top: 0, right: 0, width: '18%', height: '100%', background: 'linear-gradient(to left, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center' }}>
@@ -321,11 +321,11 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
               return (
                 <button key={p} onClick={() => applyPreset(p)} style={{
                   padding: '7px 20px', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit', letterSpacing: '0.1em',
-                  border: `1px solid ${active ? 'rgba(99,102,241,0.55)' : 'rgba(255,255,255,0.12)'}`,
+                  border: `1px solid ${active ? 'color-mix(in srgb, var(--color-accent) 55%, transparent)' : 'color-mix(in srgb, var(--color-wash) 12%, transparent)'}`,
                   borderRadius: '100px', cursor: 'pointer',
-                  background: active ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                  color: active ? '#c7d2fe' : '#64748b',
-                  boxShadow: active ? '0 0 14px rgba(99,102,241,0.25)' : 'none',
+                  background: active ? 'color-mix(in srgb, var(--color-accent) 20%, transparent)' : 'color-mix(in srgb, var(--color-wash) 5%, transparent)',
+                  color: active ? 'var(--color-accent-pale)' : 'var(--color-ink-muted)',
+                  boxShadow: active ? '0 0 14px color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'none',
                   transition: 'all 0.15s ease',
                 }}>{p} Hz</button>
               )
@@ -348,28 +348,28 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
           position: 'fixed', right: open ? '220px' : '0px', top: '50%', transform: 'translateY(-50%)',
           zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
           width: '24px', height: '64px',
-          background: open ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.02)',
-          border: `1px solid ${open ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.05)'}`,
+          background: open ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'color-mix(in srgb, var(--color-wash) 2%, transparent)',
+          border: `1px solid ${open ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'color-mix(in srgb, var(--color-wash) 5%, transparent)'}`,
           borderRight: 'none', borderRadius: '8px 0 0 8px', cursor: 'pointer',
           transition: 'right 0.35s cubic-bezier(0.4,0,0.2,1), background 0.2s, border-color 0.2s', padding: 0,
         }}
       >
         <svg width="10" height="20" viewBox="0 0 10 20" fill="none">
-          <path d="M8 1 Q1 10 8 19" stroke={open ? '#818cf8' : '#2a3040'} strokeWidth="1.5" strokeLinecap="round" fill="none" />
+          <path d="M8 1 Q1 10 8 19" strokeWidth="1.5" strokeLinecap="round" fill="none" style={{ stroke: open ? 'var(--color-accent-bright)' : 'var(--color-line-active)' }} />
         </svg>
-        {isDetuned && !open && <div style={{ position: 'absolute', top: '6px', right: '6px', width: '5px', height: '5px', borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 8px #6366f1' }} />}
+        {isDetuned && !open && <div style={{ position: 'absolute', top: '6px', right: '6px', width: '5px', height: '5px', borderRadius: '50%', background: 'var(--color-accent)', boxShadow: '0 0 8px var(--color-accent)' }} />}
       </button>
 
       <div ref={panelRef} style={{
         position: 'fixed', right: open ? '0px' : '-220px', top: 0, bottom: 0, width: '220px',
-        zIndex: 49, background: 'rgba(7,8,13,0.98)', borderLeft: '1px solid rgba(99,102,241,0.08)',
+        zIndex: 49, background: 'color-mix(in srgb, var(--color-bg) 98%, transparent)', borderLeft: '1px solid color-mix(in srgb, var(--color-accent) 8%, transparent)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'space-between',
         transition: 'right 0.35s cubic-bezier(0.4,0,0.2,1)', paddingTop: '28px', paddingBottom: '28px',
       }}>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
-          <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: '#334155', textTransform: 'uppercase', fontFamily: 'inherit' }}>Tuning</span>
-          <span style={{ fontSize: '22px', fontWeight: 700, color: isDetuned ? '#a5b4fc' : '#475569', fontVariantNumeric: 'tabular-nums', fontFamily: 'inherit', transition: 'color 0.2s', letterSpacing: '-0.02em' }}>{Math.round(shownFreq)} Hz</span>
-          <span style={{ fontSize: '10px', minHeight: '14px', color: cents === 0 ? 'transparent' : '#6366f1', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums' }}>{cents > 0 ? '+' : ''}{cents}¢</span>
+          <span style={{ fontSize: '9px', letterSpacing: '0.2em', color: 'var(--color-ink-ghost)', textTransform: 'uppercase', fontFamily: 'inherit' }}>Tuning</span>
+          <span style={{ fontSize: '22px', fontWeight: 700, color: isDetuned ? 'var(--color-accent-soft)' : 'var(--color-ink-faint)', fontVariantNumeric: 'tabular-nums', fontFamily: 'inherit', transition: 'color 0.2s', letterSpacing: '-0.02em' }}>{Math.round(shownFreq)} Hz</span>
+          <span style={{ fontSize: '10px', minHeight: '14px', color: cents === 0 ? 'transparent' : 'var(--color-accent)', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums' }}>{cents > 0 ? '+' : ''}{cents}¢</span>
         </div>
 
         <div style={{ position: 'relative', flexShrink: 0 }}>
@@ -387,35 +387,35 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
                 <feGaussianBlur stdDeviation="8" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
               </filter>
               <linearGradient id="tcd-grad" x1="0" y1={TOP_PAD} x2="0" y2={TOP_PAD + trackH} gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stopColor={glowColor} stopOpacity="0.04" />
-                <stop offset={`${gradStopPct}%`} stopColor={glowColor} stopOpacity="1" />
-                <stop offset="100%" stopColor={glowColor} stopOpacity="0.04" />
+                <stop offset="0%" style={{ stopColor: glowColor }} stopOpacity="0.04" />
+                <stop offset={`${gradStopPct}%`} style={{ stopColor: glowColor }} stopOpacity="1" />
+                <stop offset="100%" style={{ stopColor: glowColor }} stopOpacity="0.04" />
               </linearGradient>
             </defs>
 
-            <line x1={AXIS_X} y1={TOP_PAD} x2={AXIS_X} y2={TOP_PAD + trackH} stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
+            <line x1={AXIS_X} y1={TOP_PAD} x2={AXIS_X} y2={TOP_PAD + trackH} strokeWidth="1" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 6%, transparent)' }} />
 
             {PRESETS.map(p => {
               const py = freqToY(p, trackH)
               const active = Math.round(shownFreq) === p
               return (
                 <g key={p}>
-                  <line x1={AXIS_X - 5} y1={py} x2={AXIS_X + 5} y2={py} stroke={active ? '#818cf8' : 'rgba(255,255,255,0.15)'} strokeWidth={active ? 1.5 : 1} />
-                  <text x={AXIS_X - 10} y={py + 3.5} fontSize="9" fill={active ? '#818cf8' : '#2a3550'} textAnchor="end" fontFamily="inherit">{p}</text>
+                  <line x1={AXIS_X - 5} y1={py} x2={AXIS_X + 5} y2={py} strokeWidth={active ? 1.5 : 1} style={{ stroke: active ? 'var(--color-accent-bright)' : 'color-mix(in srgb, var(--color-wash) 15%, transparent)' }} />
+                  <text x={AXIS_X - 10} y={py + 3.5} fontSize="9" textAnchor="end" fontFamily="inherit" style={{ fill: active ? 'var(--color-accent-bright)' : 'var(--color-line-active)' }}>{p}</text>
                 </g>
               )
             })}
 
-            <path d={pathV} stroke={glowColor} strokeWidth="14" fill="none" strokeLinecap="round" filter="url(#tcd-bloom)" opacity="0.25" />
-            <path d={pathV} stroke={glowColor} strokeWidth="5" fill="none" strokeLinecap="round" filter="url(#tcd-soft)" opacity="0.5" />
+            <path d={pathV} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-bloom)" opacity="0.25" />
+            <path d={pathV} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-soft)" opacity="0.5" />
             <path d={pathV} stroke="url(#tcd-grad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
-            <path d={pathV} stroke="rgba(255,255,255,0.8)" strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" />
+            <path d={pathV} strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 80%, transparent)' }} />
 
             <DiamondMarker x={AXIS_X} y={apexY} glowColor={glowColor} filterId="tcd-apex" />
           </svg>
           {/* subtle top/bottom fades using divs — no masks, no SVG filters */}
-          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, rgba(7,8,13,0.98), transparent)', pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to top, rgba(7,8,13,0.98), transparent)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to top, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', alignItems: 'center' }}>
@@ -424,11 +424,11 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
             return (
               <button key={p} onClick={() => applyPreset(p)} style={{
                 padding: '6px 18px', fontSize: '11px', fontWeight: 700, fontFamily: 'inherit', letterSpacing: '0.1em',
-                border: `1px solid ${active ? 'rgba(99,102,241,0.55)' : 'rgba(255,255,255,0.12)'}`,
+                border: `1px solid ${active ? 'color-mix(in srgb, var(--color-accent) 55%, transparent)' : 'color-mix(in srgb, var(--color-wash) 12%, transparent)'}`,
                 borderRadius: '100px', cursor: 'pointer',
-                background: active ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.05)',
-                color: active ? '#c7d2fe' : '#64748b',
-                boxShadow: active ? '0 0 14px rgba(99,102,241,0.25)' : 'none',
+                background: active ? 'color-mix(in srgb, var(--color-accent) 20%, transparent)' : 'color-mix(in srgb, var(--color-wash) 5%, transparent)',
+                color: active ? 'var(--color-accent-pale)' : 'var(--color-ink-muted)',
+                boxShadow: active ? '0 0 14px color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'none',
                 transition: 'all 0.15s ease',
               }}>{p} Hz</button>
             )

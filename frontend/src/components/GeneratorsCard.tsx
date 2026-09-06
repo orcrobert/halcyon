@@ -17,13 +17,13 @@ import type {
 } from '../types'
 
 const INPUT_CLASS =
-  'w-full bg-[#0b0c15] border border-[#1e2035] rounded-xl text-slate-200 placeholder:text-slate-700 text-[12.5px] outline-none focus:border-indigo-500/45 transition-colors'
+  'w-full bg-surface-sunken border border-line rounded-xl text-ink placeholder:text-ink-ghost text-[12.5px] outline-none focus:border-accent/45 transition-colors'
 const INPUT_STYLE: React.CSSProperties = { padding: '9px 12px', fontFamily: 'inherit' }
 
 const STATUS_COLOR: Record<GeneratorStatus, string> = {
-  ok: 'rgb(52, 211, 153)',
-  unreachable: 'rgb(248, 113, 113)',
-  error: 'rgb(251, 191, 36)',
+  ok: 'var(--color-success)',
+  unreachable: 'var(--color-danger-bright)',
+  error: 'var(--color-warn)',
 }
 
 const STATUS_LABEL: Record<GeneratorStatus, string> = {
@@ -131,12 +131,12 @@ export function GeneratorsCard() {
 
   return (
     <section
-      className="rounded-2xl border border-[#1a1b2a] bg-[#0d0e18] flex flex-col gap-4"
-      style={{ padding: '22px', boxShadow: '0 18px 40px rgba(0,0,0,0.30)' }}
+      className="rounded-2xl border border-surface-hover bg-surface flex flex-col gap-4"
+      style={{ padding: '22px', boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 30%, transparent)' }}
     >
       <div>
-        <h2 className="text-[14px] font-semibold text-slate-200 tracking-tight">Generator</h2>
-        <p className="text-[11.5px] text-slate-600 leading-relaxed" style={{ marginTop: '4px' }}>
+        <h2 className="text-[14px] font-semibold text-ink tracking-tight">Generator</h2>
+        <p className="text-[11.5px] text-ink-faint leading-relaxed" style={{ marginTop: '4px' }}>
           Where your audio is synthesised. Save a URL against each host you use and pick one —
           they are remembered separately, so switching never means finding a link again.
         </p>
@@ -145,7 +145,7 @@ export function GeneratorsCard() {
       {loading && (
         <div className="flex flex-col gap-2">
           {[0, 1, 2].map((i) => (
-            <div key={i} className="rounded-xl animate-pulse" style={{ height: '58px', background: 'rgba(255,255,255,0.022)' }} />
+            <div key={i} className="rounded-xl animate-pulse" style={{ height: '58px', background: 'color-mix(in srgb, var(--color-wash) 2.2%, transparent)' }} />
           ))}
         </div>
       )}
@@ -168,8 +168,8 @@ export function GeneratorsCard() {
                 className="rounded-xl border transition-colors"
                 style={{
                   padding: '13px 14px',
-                  borderColor: active ? 'rgba(99,102,241,0.35)' : '#191a27',
-                  background: active ? 'rgba(99,102,241,0.06)' : 'rgba(255,255,255,0.014)',
+                  borderColor: active ? 'color-mix(in srgb, var(--color-accent) 35%, transparent)' : 'var(--color-surface-hover)',
+                  background: active ? 'color-mix(in srgb, var(--color-accent) 6%, transparent)' : 'color-mix(in srgb, var(--color-wash) 1.4%, transparent)',
                 }}
               >
                 <div className="flex items-center gap-3">
@@ -182,20 +182,20 @@ export function GeneratorsCard() {
                     style={{
                       width: '15px',
                       height: '15px',
-                      borderColor: active ? 'rgb(99,102,241)' : existing ? '#3a3d55' : '#23253a',
+                      borderColor: active ? 'var(--color-accent)' : existing ? 'var(--color-line-strong)' : 'var(--color-line-hover)',
                       background: active
-                        ? 'radial-gradient(circle, rgb(129,140,248) 0%, rgb(79,70,229) 60%, transparent 62%)'
+                        ? 'radial-gradient(circle, var(--color-accent-bright) 0%, var(--color-accent-deep) 60%, transparent 62%)'
                         : 'transparent',
                     }}
                   />
 
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className={`text-[13px] font-medium ${existing ? 'text-slate-200' : 'text-slate-400'}`}>
+                      <span className={`text-[13px] font-medium ${existing ? 'text-ink' : 'text-ink-dim'}`}>
                         {host.label}
                       </span>
                       {active && (
-                        <span className="text-[10px] uppercase tracking-[0.14em] text-indigo-300/80">
+                        <span className="text-[10px] uppercase tracking-[0.14em] text-accent-soft/80">
                           In use
                         </span>
                       )}
@@ -207,7 +207,7 @@ export function GeneratorsCard() {
                         />
                       )}
                     </div>
-                    <p className="text-[11.5px] text-slate-600 leading-relaxed" style={{ marginTop: '2px' }}>
+                    <p className="text-[11.5px] text-ink-faint leading-relaxed" style={{ marginTop: '2px' }}>
                       {report ?? host.hint}
                     </p>
                   </div>
@@ -217,7 +217,7 @@ export function GeneratorsCard() {
                       <button
                         onClick={() => handleTest(host)}
                         disabled={working}
-                        className="text-[11.5px] text-slate-500 hover:text-slate-300 transition disabled:opacity-40"
+                        className="text-[11.5px] text-ink-muted hover:text-ink-soft transition disabled:opacity-40"
                         style={{ fontFamily: 'inherit' }}
                       >
                         {working ? '…' : 'Test'}
@@ -227,7 +227,7 @@ export function GeneratorsCard() {
                       <button
                         onClick={() => handleClear(host)}
                         disabled={working}
-                        className="text-[11.5px] text-slate-600 hover:text-red-400 transition disabled:opacity-40"
+                        className="text-[11.5px] text-ink-faint hover:text-danger-bright transition disabled:opacity-40"
                         style={{ fontFamily: 'inherit' }}
                       >
                         Clear
@@ -237,7 +237,7 @@ export function GeneratorsCard() {
                       href={host.docs_url}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-[11.5px] text-slate-600 hover:text-indigo-300 transition-colors"
+                      className="text-[11.5px] text-ink-faint hover:text-accent-soft transition-colors"
                       title={`${host.label} setup guide`}
                     >
                       Guide
@@ -265,12 +265,12 @@ export function GeneratorsCard() {
                     <button
                       onClick={() => handleSaveUrl(host)}
                       disabled={working}
-                      className="shrink-0 text-[12px] font-medium text-white rounded-xl transition disabled:opacity-40"
+                      className="shrink-0 text-[12px] font-medium text-wash rounded-xl transition disabled:opacity-40"
                       style={{
                         padding: '8px 14px',
-                        background: 'rgb(79, 70, 229)',
+                        background: 'var(--color-accent-deep)',
                         fontFamily: 'inherit',
-                        boxShadow: '0 0 0 1px rgba(99,102,241,0.35)',
+                        boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent)',
                       }}
                     >
                       Save
@@ -279,7 +279,7 @@ export function GeneratorsCard() {
                 </div>
 
                 {probe?.detail && (
-                  <p className="text-[11.5px] text-red-400/90 leading-relaxed" style={{ marginTop: '8px' }}>
+                  <p className="text-[11.5px] text-danger-bright/90 leading-relaxed" style={{ marginTop: '8px' }}>
                     {probe.detail}
                   </p>
                 )}
@@ -290,13 +290,13 @@ export function GeneratorsCard() {
       )}
 
       {!loading && list && !list.generators.some((g) => g.is_active) && (
-        <p className="text-[11.5px] text-slate-600 leading-relaxed">
+        <p className="text-[11.5px] text-ink-faint leading-relaxed">
           None selected — falling back to this instance's default,{' '}
-          <span className="text-slate-500">{list.instance_default_url}</span>.
+          <span className="text-ink-muted">{list.instance_default_url}</span>.
         </p>
       )}
 
-      {error && <p className="text-[12px] text-red-400 leading-relaxed">{error}</p>}
+      {error && <p className="text-[12px] text-danger-bright leading-relaxed">{error}</p>}
     </section>
   )
 }

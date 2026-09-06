@@ -1,0 +1,100 @@
+:root {
+  --surface-0: #08090e;
+  --surface-1: #0a0b15;
+  --surface-2: #0d0e18;
+  --surface-3: #111218;
+  --surface-4: #13141f;
+  --surface-5: #1a1b2a;
+  --surface-6: #1d1e2e;
+  --surface-7: #232640;
+  --surface-8: #2a2b40;
+  --surface-9: #32365a;
+
+  --ink-0: #1e2d42;
+  --ink-1: #253047;
+  --ink-2: #2d3a4f;
+  --ink-3: #334155;
+  --ink-4: #475569;
+  --ink-5: #64748b;
+  --ink-6: #94a3b8;
+  --ink-7: #cbd5e1;
+  --ink-8: #e2e8f0;
+  --ink-9: #f1f5f9;
+
+  --accent-0: #4f46e5;
+  --accent-1: #6366f1;
+  --accent-2: #818cf8;
+  --accent-3: #a5b4fc;
+  --accent-4: #c7d2fe;
+
+  --brand-0: #4f46e5;
+  --brand-1: #7c56ff;
+  --brand-2: #a78bfa;
+
+  --danger-0: #dc2626;
+  --danger-1: #ef4444;
+  --danger-2: #f87171;
+  --danger-3: #fca5a5;
+}
+
+@theme static {
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  --font-display: var(--font-sans);
+  --font-weight-brand: 300;
+  --tracking-brand: 0.14em;
+
+  --color-bg: var(--surface-0);
+  --color-surface-sunken: var(--surface-1);
+  --color-surface: var(--surface-2);
+  --color-surface-raised: var(--surface-3);
+  --color-surface-high: var(--surface-4);
+  --color-surface-hover: var(--surface-5);
+  --color-surface-danger: #180a0c;
+
+  --color-line-faint: var(--surface-3);
+  --color-line-soft: var(--surface-4);
+  --color-line: var(--surface-6);
+  --color-line-hover: var(--surface-7);
+  --color-line-active: var(--surface-8);
+  --color-line-strong: var(--surface-9);
+
+  --color-ink-bright: var(--ink-9);
+  --color-ink: var(--ink-8);
+  --color-ink-soft: var(--ink-7);
+  --color-ink-dim: var(--ink-6);
+  --color-ink-muted: var(--ink-5);
+  --color-ink-faint: var(--ink-4);
+  --color-ink-ghost: var(--ink-3);
+  --color-ink-veil: var(--ink-2);
+  --color-ink-trace: var(--ink-1);
+  --color-ink-whisper: var(--ink-0);
+
+  --color-accent-deep: var(--accent-0);
+  --color-accent: var(--accent-1);
+  --color-accent-bright: var(--accent-2);
+  --color-accent-soft: var(--accent-3);
+  --color-accent-pale: var(--accent-4);
+
+  --color-brand-deep: var(--brand-0);
+  --color-brand: var(--brand-1);
+  --color-brand-light: var(--brand-2);
+
+  --color-danger-deep: var(--danger-0);
+  --color-danger: var(--danger-1);
+  --color-danger-bright: var(--danger-2);
+  --color-danger-soft: var(--danger-3);
+  --color-success: #34d399;
+  --color-warn: #fbbf24;
+
+  --color-tag-music: #8b5cf6;
+  --color-tag-sound: #0ea5e9;
+
+  --color-band-theta: #8b5cf6;
+  --color-band-alpha: #06b6d4;
+  --color-band-beta: #10b981;
+  --color-band-gamma: #f59e0b;
+
+  --color-wash: #ffffff;
+  --color-shade: #000000;
+}

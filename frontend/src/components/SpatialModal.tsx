@@ -1,5 +1,6 @@
 import { useRef, useCallback, useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { alpha } from '../theme'
 
 interface Props {
   pan: number
@@ -178,8 +179,8 @@ export function SpatialModal({
     const isCenter = Math.abs(gx - HALF) < 1
     gridLines.push(
       <line key={`v${gx}`} x1={gx} y1={0} x2={gx} y2={PAD}
-        stroke={isCenter ? 'rgba(148,163,184,0.2)' : 'rgba(148,163,184,0.07)'}
         strokeWidth={isCenter ? 0.75 : 0.5}
+        style={{ stroke: isCenter ? alpha('var(--color-ink-dim)', 20) : alpha('var(--color-ink-dim)', 7) }}
       />
     )
   }
@@ -187,8 +188,8 @@ export function SpatialModal({
     const isCenter = Math.abs(gy - HALF) < 1
     gridLines.push(
       <line key={`h${gy}`} x1={0} y1={gy} x2={PAD} y2={gy}
-        stroke={isCenter ? 'rgba(148,163,184,0.2)' : 'rgba(148,163,184,0.07)'}
         strokeWidth={isCenter ? 0.75 : 0.5}
+        style={{ stroke: isCenter ? alpha('var(--color-ink-dim)', 20) : alpha('var(--color-ink-dim)', 7) }}
       />
     )
   }
@@ -212,13 +213,13 @@ export function SpatialModal({
       pointerEvents: visible ? 'auto' : 'none',
     }}>
       <div ref={containerRef} style={{
-        background: 'rgba(8,9,18,0.55)',
+        background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
         backdropFilter: 'blur(40px) saturate(180%) brightness(1.05)',
         WebkitBackdropFilter: 'blur(40px) saturate(180%) brightness(1.05)',
-        border: '1px solid rgba(255,255,255,0.1)',
+        border: '1px solid color-mix(in srgb, var(--color-wash) 10%, transparent)',
         borderRadius: '18px',
         overflow: 'hidden',
-        boxShadow: '0 40px 100px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
+        boxShadow: '0 40px 100px color-mix(in srgb, var(--color-shade) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 8%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 6%, transparent)',
       }}>
 
         {/* Header — coords only, no label */}
@@ -227,23 +228,23 @@ export function SpatialModal({
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
+          borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
         }}>
-          <span style={{ fontSize: '9px', color: '#253047', fontFamily: 'inherit', letterSpacing: '0.08em' }}>
+          <span style={{ fontSize: '9px', color: 'var(--color-ink-trace)', fontFamily: 'inherit', letterSpacing: '0.08em' }}>
             SPATIAL
           </span>
           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
             <span style={{
               fontSize: '10px', fontFamily: 'inherit', fontVariantNumeric: 'tabular-nums',
-              color: isOffCenter ? '#818cf8' : '#2d3a4f',
+              color: isOffCenter ? 'var(--color-accent-bright)' : 'var(--color-ink-veil)',
               transition: 'color 0.2s', letterSpacing: '0.04em',
             }}>
               {panLabel}
             </span>
-            <span style={{ fontSize: '10px', color: '#1e2a3a' }}>·</span>
+            <span style={{ fontSize: '10px', color: 'var(--color-ink-whisper)' }}>·</span>
             <span style={{
               fontSize: '10px', fontFamily: 'inherit',
-              color: depth > 0.04 ? '#6366f1' : '#2d3a4f',
+              color: depth > 0.04 ? 'var(--color-accent)' : 'var(--color-ink-veil)',
               transition: 'color 0.2s',
             }}>
               {depthLabel}
@@ -264,8 +265,8 @@ export function SpatialModal({
         >
           <defs>
             <radialGradient id={gradId} cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stopColor="rgba(99,102,241,0.2)" />
-              <stop offset="100%" stopColor="rgba(99,102,241,0)" />
+              <stop offset="0%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 20%, transparent)' }} />
+              <stop offset="100%" style={{ stopColor: 'color-mix(in srgb, var(--color-accent) 0%, transparent)' }} />
             </radialGradient>
             <filter id={glowId} x="-80%" y="-80%" width="260%" height="260%">
               <feGaussianBlur stdDeviation="7" result="blur" />
@@ -289,41 +290,41 @@ export function SpatialModal({
           {/* Straight line center → dot */}
           {isOffCenter && (
             <line
-              x1={HALF} y1={HALF} x2={dotX} y2={dotY}
-              stroke="rgba(99,102,241,0.3)" strokeWidth="1"
-              strokeDasharray="3 5" strokeLinecap="round"
+              x1={HALF} y1={HALF} x2={dotX} y2={dotY} strokeWidth="1"
+              strokeDasharray="3 5" strokeLinecap="round" style={{ stroke: 'color-mix(in srgb, var(--color-accent) 30%, transparent)' }}
             />
           )}
 
           {/* Center pip */}
-          <circle cx={HALF} cy={HALF} r="2" fill="rgba(255,255,255,0.15)" style={{ pointerEvents: 'none' }} />
+          <circle cx={HALF} cy={HALF} r="2" style={{ fill: 'color-mix(in srgb, var(--color-wash) 15%, transparent)', pointerEvents: 'none' }} />
 
           {/* Outer wobbly ring — faint */}
           {(dotHovered || isDragging) && waveAmp > 0.1 && (
             <path
               d={dotPathBig}
               fill="none"
-              stroke="rgba(99,102,241,0.1)"
               strokeWidth="1"
-              style={{ pointerEvents: 'none' }}
+              style={{ stroke: 'color-mix(in srgb, var(--color-accent) 10%, transparent)', pointerEvents: 'none' }}
             />
           )}
 
           {/* Dot fill */}
           <circle
             cx={dotX} cy={dotY} r={DOT_R}
-            fill="rgba(8,9,18,0.88)"
-            style={{ pointerEvents: 'none' }}
+            style={{ fill: 'color-mix(in srgb, var(--color-bg) 88%, transparent)', pointerEvents: 'none' }}
           />
 
           {/* Wobbly dot border */}
           <path
             d={dotPath}
-            fill="rgba(8,9,18,0.0)"
-            stroke={isOffCenter ? 'rgba(99,102,241,0.85)' : 'rgba(255,255,255,0.22)'}
             strokeWidth="1.5"
             filter={isOffCenter ? `url(#${glowId})` : undefined}
-            style={{ transition: 'stroke 0.2s', cursor: 'crosshair' }}
+            style={{
+              fill: 'transparent',
+              stroke: isOffCenter ? alpha('var(--color-accent)', 85) : alpha('var(--color-wash)', 22),
+              transition: 'stroke 0.2s',
+              cursor: 'crosshair',
+            }}
             onMouseEnter={() => setDotHovered(true)}
             onMouseLeave={() => setDotHovered(false)}
           />
@@ -331,8 +332,11 @@ export function SpatialModal({
           {/* Inner pip */}
           <circle
             cx={dotX} cy={dotY} r="3"
-            fill={isOffCenter ? '#6366f1' : 'rgba(255,255,255,0.35)'}
-            style={{ transition: 'fill 0.2s', pointerEvents: 'none' }}
+            style={{
+              fill: isOffCenter ? 'var(--color-accent)' : alpha('var(--color-wash)', 35),
+              transition: 'fill 0.2s',
+              pointerEvents: 'none',
+            }}
           />
         </svg>
 
@@ -341,12 +345,12 @@ export function SpatialModal({
           padding: '8px 16px',
           display: 'flex',
           justifyContent: 'space-between',
-          borderTop: '1px solid rgba(255,255,255,0.05)',
+          borderTop: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
         }}>
-          <span style={{ fontSize: '9px', color: '#1e2d42', fontFamily: 'inherit', letterSpacing: '0.07em' }}>
+          <span style={{ fontSize: '9px', color: 'var(--color-ink-whisper)', fontFamily: 'inherit', letterSpacing: '0.07em' }}>
             L · R  ·  NEAR ↑ FAR ↓
           </span>
-          <span style={{ fontSize: '9px', color: '#1e2d42', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
+          <span style={{ fontSize: '9px', color: 'var(--color-ink-whisper)', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
             dbl-click reset
           </span>
         </div>

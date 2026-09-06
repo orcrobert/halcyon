@@ -62,7 +62,7 @@ export function PromptModal({ open, prompt, onClose }: Props) {
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0, zIndex: 9998,
-          background: 'rgba(0,0,0,0.45)',
+          background: 'color-mix(in srgb, var(--color-shade) 45%, transparent)',
           opacity: visible ? 1 : 0,
           transition: 'opacity 0.2s ease',
           backdropFilter: 'blur(6px)',
@@ -83,25 +83,25 @@ export function PromptModal({ open, prompt, onClose }: Props) {
         pointerEvents: visible ? 'auto' : 'none',
       }}>
         <div ref={containerRef} style={{
-          background: 'rgba(10,11,20,0.78)',
+          background: 'color-mix(in srgb, var(--color-surface-sunken) 78%, transparent)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          border: '1px solid color-mix(in srgb, var(--color-wash) 8%, transparent)',
           borderRadius: 18,
           overflow: 'hidden',
-          boxShadow: '0 40px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.08), inset 0 1px 0 rgba(255,255,255,0.04)',
+          boxShadow: '0 40px 80px color-mix(in srgb, var(--color-shade) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 8%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 4%, transparent)',
           display: 'flex', flexDirection: 'column',
         }}>
 
           <div style={{
             padding: '14px 18px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <span style={{
                 fontSize: 9,
-                color: '#253047',
+                color: 'var(--color-ink-trace)',
                 fontFamily: 'inherit',
                 letterSpacing: '0.18em',
                 textTransform: 'uppercase',
@@ -114,9 +114,9 @@ export function PromptModal({ open, prompt, onClose }: Props) {
               aria-label="Close"
               style={{
                 width: 24, height: 24, borderRadius: '50%', cursor: 'pointer',
-                border: '1px solid rgba(255,255,255,0.07)',
-                background: 'rgba(255,255,255,0.03)',
-                color: '#475569', fontSize: 12,
+                border: '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)',
+                background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+                color: 'var(--color-ink-faint)', fontSize: 12,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'inherit', lineHeight: 1,
               }}
@@ -130,7 +130,7 @@ export function PromptModal({ open, prompt, onClose }: Props) {
               style={{
                 fontSize: 14,
                 lineHeight: 1.6,
-                color: '#cbd5e1',
+                color: 'var(--color-ink-soft)',
                 fontFamily: 'inherit',
                 fontWeight: 300,
                 whiteSpace: 'pre-wrap',
@@ -145,9 +145,9 @@ export function PromptModal({ open, prompt, onClose }: Props) {
           <div style={{
             padding: '12px 18px',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-            borderTop: '1px solid rgba(255,255,255,0.05)',
+            borderTop: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
           }}>
-            <span style={{ fontSize: 9, color: '#1e2d42', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
+            <span style={{ fontSize: 9, color: 'var(--color-ink-whisper)', fontFamily: 'inherit', letterSpacing: '0.06em' }}>
               esc to close
             </span>
             <button
@@ -158,14 +158,14 @@ export function PromptModal({ open, prompt, onClose }: Props) {
                 fontSize: 11, fontFamily: 'inherit', letterSpacing: '0.08em',
                 cursor: 'pointer',
                 border: copied
-                  ? '1px solid rgba(99,102,241,0.55)'
-                  : '1px solid rgba(255,255,255,0.1)',
+                  ? '1px solid color-mix(in srgb, var(--color-accent) 55%, transparent)'
+                  : '1px solid color-mix(in srgb, var(--color-wash) 10%, transparent)',
                 background: copied
-                  ? 'rgba(99,102,241,0.16)'
-                  : 'rgba(255,255,255,0.04)',
-                color: copied ? '#a5b4fc' : '#94a3b8',
+                  ? 'color-mix(in srgb, var(--color-accent) 16%, transparent)'
+                  : 'color-mix(in srgb, var(--color-wash) 4%, transparent)',
+                color: copied ? 'var(--color-accent-soft)' : 'var(--color-ink-dim)',
                 transition: 'all 0.18s ease',
-                boxShadow: copied ? '0 0 14px rgba(99,102,241,0.18)' : 'none',
+                boxShadow: copied ? '0 0 14px color-mix(in srgb, var(--color-accent) 18%, transparent)' : 'none',
               }}
             >
               {copied ? (

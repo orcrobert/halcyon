@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import { alpha } from '../theme'
 
 type Mode = 'write' | 'preview'
 
@@ -35,7 +36,7 @@ const ACTIONS: Action[] = [
   { key: 'rule', label: '—', title: 'Divider', prefix: '\n---\n' },
 ]
 
-const ACCENT = '#818cf8'
+const ACCENT = 'var(--color-accent-bright)'
 
 function applyAction(text: string, start: number, end: number, action: Action) {
   if (action.block) {
@@ -111,7 +112,7 @@ export function PromptEditorModal({
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0, zIndex: 9998,
-          background: 'rgba(0,0,0,0.55)',
+          background: 'color-mix(in srgb, var(--color-shade) 55%, transparent)',
           opacity: visible ? 1 : 0,
           transition: 'opacity 0.2s ease',
           backdropFilter: 'blur(4px)',
@@ -130,24 +131,24 @@ export function PromptEditorModal({
           transform: visible ? 'translateY(0) scale(1)' : 'translateY(14px) scale(0.98)',
           transition: 'opacity 0.22s ease, transform 0.22s ease',
           pointerEvents: visible ? 'auto' : 'none',
-          background: 'rgba(10,11,20,0.86)',
+          background: 'color-mix(in srgb, var(--color-surface-sunken) 86%, transparent)',
           backdropFilter: 'blur(48px) saturate(180%)',
           WebkitBackdropFilter: 'blur(48px) saturate(180%)',
-          border: '1px solid rgba(255,255,255,0.09)',
+          border: '1px solid color-mix(in srgb, var(--color-wash) 9%, transparent)',
           borderRadius: 20,
           overflow: 'hidden',
-          boxShadow: '0 60px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(99,102,241,0.1), inset 0 1px 0 rgba(255,255,255,0.06)',
+          boxShadow: '0 60px 120px color-mix(in srgb, var(--color-shade) 80%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 10%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 6%, transparent)',
           display: 'flex', flexDirection: 'column',
         }}>
 
           <div style={{
             padding: '16px 22px', flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
-            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
               <span style={{
-                fontSize: 9, color: '#253047', fontFamily: 'inherit',
+                fontSize: 9, color: 'var(--color-ink-trace)', fontFamily: 'inherit',
                 letterSpacing: '0.14em', textTransform: 'uppercase', whiteSpace: 'nowrap',
               }}>
                 Decomposer Prompt
@@ -155,9 +156,9 @@ export function PromptEditorModal({
               <span style={{
                 fontSize: 9, fontFamily: 'inherit', letterSpacing: '0.08em',
                 padding: '2px 8px', borderRadius: 6, whiteSpace: 'nowrap',
-                background: isDefault ? 'rgba(255,255,255,0.04)' : `${ACCENT}14`,
-                border: isDefault ? '1px solid rgba(255,255,255,0.07)' : `1px solid ${ACCENT}30`,
-                color: isDefault ? '#475569' : ACCENT,
+                background: isDefault ? 'color-mix(in srgb, var(--color-wash) 4%, transparent)' : alpha(ACCENT, 8),
+                border: isDefault ? '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)' : `1px solid ${alpha(ACCENT, 19)}`,
+                color: isDefault ? 'var(--color-ink-faint)' : ACCENT,
               }}>
                 {isDefault ? 'DEFAULT' : 'CUSTOM'}
               </span>
@@ -166,8 +167,8 @@ export function PromptEditorModal({
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <div style={{
                 display: 'flex', padding: 3, borderRadius: 10, gap: 2,
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
+                background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-wash) 6%, transparent)',
               }}>
                 {(['write', 'preview'] as Mode[]).map((m) => (
                   <button
@@ -177,8 +178,8 @@ export function PromptEditorModal({
                       fontSize: 10, fontFamily: 'inherit', letterSpacing: '0.08em',
                       padding: '4px 14px', borderRadius: 7, cursor: 'pointer',
                       border: '1px solid transparent',
-                      background: mode === m ? 'rgba(99,102,241,0.16)' : 'transparent',
-                      color: mode === m ? ACCENT : '#475569',
+                      background: mode === m ? 'color-mix(in srgb, var(--color-accent) 16%, transparent)' : 'transparent',
+                      color: mode === m ? ACCENT : 'var(--color-ink-faint)',
                       transition: 'all 0.15s',
                     }}
                   >
@@ -190,9 +191,9 @@ export function PromptEditorModal({
                 onClick={onClose}
                 style={{
                   width: 26, height: 26, borderRadius: '50%', cursor: 'pointer',
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  background: 'rgba(255,255,255,0.03)',
-                  color: '#334155', fontSize: 12, fontFamily: 'inherit',
+                  border: '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)',
+                  background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+                  color: 'var(--color-ink-ghost)', fontSize: 12, fontFamily: 'inherit',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}
               >
@@ -204,7 +205,7 @@ export function PromptEditorModal({
           {mode === 'write' && (
             <div style={{
               padding: '8px 18px', flexShrink: 0, display: 'flex', gap: 4,
-              borderBottom: '1px solid rgba(255,255,255,0.04)',
+              borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
             }}>
               {ACTIONS.map((action) => (
                 <button
@@ -213,10 +214,10 @@ export function PromptEditorModal({
                   onClick={() => format(action)}
                   style={{
                     minWidth: 30, height: 26, padding: '0 8px', borderRadius: 8,
-                    border: '1px solid rgba(255,255,255,0.06)',
-                    background: 'rgba(255,255,255,0.03)',
-                    color: '#64748b', fontSize: 10, cursor: 'pointer',
-                    fontFamily: action.key === 'code' ? 'ui-monospace, monospace' : 'inherit',
+                    border: '1px solid color-mix(in srgb, var(--color-wash) 6%, transparent)',
+                    background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)',
+                    color: 'var(--color-ink-muted)', fontSize: 10, cursor: 'pointer',
+                    fontFamily: action.key === 'code' ? 'var(--font-mono)' : 'inherit',
                     fontWeight: action.key === 'bold' ? 700 : 400,
                     fontStyle: action.key === 'italic' ? 'italic' : 'normal',
                     transition: 'all 0.15s',
@@ -238,9 +239,9 @@ export function PromptEditorModal({
                 autoComplete="off"
                 style={{
                   flex: 1, resize: 'none', outline: 'none', border: 'none',
-                  background: 'transparent', color: '#cbd5e1',
+                  background: 'transparent', color: 'var(--color-ink-soft)',
                   padding: '20px 26px',
-                  fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+                  fontFamily: 'var(--font-mono)',
                   fontSize: 12.5, lineHeight: 1.75, tabSize: 2,
                 }}
               />
@@ -253,11 +254,11 @@ export function PromptEditorModal({
 
           <div style={{
             padding: '12px 22px', flexShrink: 0,
-            borderTop: '1px solid rgba(255,255,255,0.04)',
+            borderTop: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16,
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, minWidth: 0 }}>
-              <span style={{ fontSize: 9, color: '#1e2d42', fontFamily: 'inherit', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
+              <span style={{ fontSize: 9, color: 'var(--color-ink-whisper)', fontFamily: 'inherit', letterSpacing: '0.06em', whiteSpace: 'nowrap' }}>
                 {draft.length.toLocaleString()} chars · {words.toLocaleString()} words
               </span>
               <button
@@ -266,14 +267,14 @@ export function PromptEditorModal({
                 style={{
                   fontSize: 11, fontFamily: 'inherit', cursor: isDefault ? 'default' : 'pointer',
                   background: 'none', border: 'none', padding: 0,
-                  color: isDefault ? '#1e2d42' : '#64748b',
+                  color: isDefault ? 'var(--color-ink-whisper)' : 'var(--color-ink-muted)',
                   whiteSpace: 'nowrap',
                 }}
               >
                 Restore default
               </button>
               {error && (
-                <span style={{ fontSize: 11, color: '#f87171', fontFamily: 'inherit', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <span style={{ fontSize: 11, color: 'var(--color-danger-bright)', fontFamily: 'inherit', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {error}
                 </span>
               )}
@@ -285,8 +286,8 @@ export function PromptEditorModal({
                 style={{
                   fontSize: 12, fontFamily: 'inherit', cursor: 'pointer',
                   padding: '9px 16px', borderRadius: 10,
-                  border: '1px solid rgba(255,255,255,0.07)',
-                  background: 'rgba(255,255,255,0.03)', color: '#64748b',
+                  border: '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)',
+                  background: 'color-mix(in srgb, var(--color-wash) 3%, transparent)', color: 'var(--color-ink-muted)',
                 }}
               >
                 Cancel
@@ -298,9 +299,9 @@ export function PromptEditorModal({
                   fontSize: 12.5, fontFamily: 'inherit',
                   cursor: saving || !dirty ? 'default' : 'pointer',
                   padding: '9px 20px', borderRadius: 10, border: 'none',
-                  background: 'rgb(79, 70, 229)', color: '#fff',
+                  background: 'var(--color-accent-deep)', color: 'var(--color-wash)',
                   opacity: saving || !dirty ? 0.45 : 1,
-                  boxShadow: '0 0 0 1px rgba(99,102,241,0.35), 0 6px 18px rgba(99,102,241,0.20)',
+                  boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent), 0 6px 18px color-mix(in srgb, var(--color-accent) 20%, transparent)',
                   transition: 'opacity 0.15s',
                 }}
               >
@@ -317,42 +318,42 @@ export function PromptEditorModal({
 
 function MarkdownPreview({ source }: { source: string }) {
   return (
-    <div style={{ maxWidth: 760, margin: '0 auto', color: '#94a3b8', fontSize: 13.5, lineHeight: 1.75 }}>
+    <div style={{ maxWidth: 760, margin: '0 auto', color: 'var(--color-ink-dim)', fontSize: 13.5, lineHeight: 1.75 }}>
       <Markdown
         remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => (
-            <h1 style={{ fontSize: 19, color: '#e2e8f0', fontWeight: 600, letterSpacing: '-0.01em', margin: '26px 0 10px' }}>{children}</h1>
+            <h1 style={{ fontSize: 19, color: 'var(--color-ink)', fontWeight: 600, letterSpacing: '-0.01em', margin: '26px 0 10px' }}>{children}</h1>
           ),
           h2: ({ children }) => (
-            <h2 style={{ fontSize: 15.5, color: '#cbd5e1', fontWeight: 600, margin: '24px 0 8px' }}>{children}</h2>
+            <h2 style={{ fontSize: 15.5, color: 'var(--color-ink-soft)', fontWeight: 600, margin: '24px 0 8px' }}>{children}</h2>
           ),
           h3: ({ children }) => (
-            <h3 style={{ fontSize: 13.5, color: '#cbd5e1', fontWeight: 600, letterSpacing: '0.02em', margin: '20px 0 6px' }}>{children}</h3>
+            <h3 style={{ fontSize: 13.5, color: 'var(--color-ink-soft)', fontWeight: 600, letterSpacing: '0.02em', margin: '20px 0 6px' }}>{children}</h3>
           ),
           p: ({ children }) => <p style={{ margin: '10px 0' }}>{children}</p>,
           ul: ({ children }) => <ul style={{ margin: '10px 0', paddingLeft: 20, listStyle: 'disc' }}>{children}</ul>,
           ol: ({ children }) => <ol style={{ margin: '10px 0', paddingLeft: 22, listStyle: 'decimal' }}>{children}</ol>,
           li: ({ children }) => <li style={{ margin: '4px 0' }}>{children}</li>,
-          strong: ({ children }) => <strong style={{ color: '#e2e8f0', fontWeight: 600 }}>{children}</strong>,
-          em: ({ children }) => <em style={{ color: '#a5b4fc' }}>{children}</em>,
+          strong: ({ children }) => <strong style={{ color: 'var(--color-ink)', fontWeight: 600 }}>{children}</strong>,
+          em: ({ children }) => <em style={{ color: 'var(--color-accent-soft)' }}>{children}</em>,
           a: ({ children, href }) => (
             <a href={href} target="_blank" rel="noreferrer" style={{ color: ACCENT, textDecoration: 'underline' }}>{children}</a>
           ),
-          hr: () => <hr style={{ border: 'none', borderTop: '1px solid rgba(255,255,255,0.07)', margin: '22px 0' }} />,
+          hr: () => <hr style={{ border: 'none', borderTop: '1px solid color-mix(in srgb, var(--color-wash) 7%, transparent)', margin: '22px 0' }} />,
           blockquote: ({ children }) => (
             <blockquote style={{
               margin: '12px 0', padding: '4px 0 4px 14px',
-              borderLeft: `2px solid ${ACCENT}55`, color: '#64748b',
+              borderLeft: `2px solid ${alpha(ACCENT, 33)}`, color: 'var(--color-ink-muted)',
             }}>
               {children}
             </blockquote>
           ),
           code: ({ children }) => (
             <code style={{
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+              fontFamily: 'var(--font-mono)',
               fontSize: 12, padding: '1px 5px', borderRadius: 5,
-              background: 'rgba(99,102,241,0.10)', color: '#c7d2fe',
+              background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)', color: 'var(--color-accent-pale)',
             }}>
               {children}
             </code>
@@ -360,9 +361,9 @@ function MarkdownPreview({ source }: { source: string }) {
           pre: ({ children }) => (
             <pre style={{
               margin: '12px 0', padding: 14, borderRadius: 12, overflowX: 'auto',
-              background: 'rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.05)',
-              fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', fontSize: 12,
-              color: '#cbd5e1',
+              background: 'color-mix(in srgb, var(--color-shade) 35%, transparent)', border: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)',
+              fontFamily: 'var(--font-mono)', fontSize: 12,
+              color: 'var(--color-ink-soft)',
             }}>
               {children}
             </pre>
@@ -374,14 +375,14 @@ function MarkdownPreview({ source }: { source: string }) {
           ),
           th: ({ children }) => (
             <th style={{
-              textAlign: 'left', padding: '6px 10px', color: '#cbd5e1',
-              borderBottom: '1px solid rgba(255,255,255,0.10)', fontWeight: 600,
+              textAlign: 'left', padding: '6px 10px', color: 'var(--color-ink-soft)',
+              borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 10%, transparent)', fontWeight: 600,
             }}>
               {children}
             </th>
           ),
           td: ({ children }) => (
-            <td style={{ padding: '6px 10px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>{children}</td>
+            <td style={{ padding: '6px 10px', borderBottom: '1px solid color-mix(in srgb, var(--color-wash) 5%, transparent)' }}>{children}</td>
           ),
         }}
       >

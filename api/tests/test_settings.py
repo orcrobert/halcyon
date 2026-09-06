@@ -195,3 +195,22 @@ def test_switching_provider_drops_inherited_credentials(client, auth, monkeypatc
 
     assert config.decomposer_provider == "ollama"
     assert config.decomposer_api_key is None
+
+
+def test_theme_starts_unset_and_round_trips(client, auth):
+    assert client.get("/api/settings", headers=auth).json()["data"]["theme"] is None
+
+    body = client.put("/api/settings", headers=auth, json={"theme": "gruvbox"}).json()[
+        "data"
+    ]
+
+    assert body["theme"] == "gruvbox"
+    assert client.get("/api/settings", headers=auth).json()["data"]["theme"] == "gruvbox"
+
+
+def test_theme_clears_back_to_the_default(client, auth):
+    client.put("/api/settings", headers=auth, json={"theme": "dracula"})
+
+    body = client.put("/api/settings", headers=auth, json={"theme": ""}).json()["data"]
+
+    assert body["theme"] is None
