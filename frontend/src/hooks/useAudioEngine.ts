@@ -45,7 +45,12 @@ const REVERB_DRY_ATTENUATION = 0.7
 const REVERB_WET_SEND = 0.6
 const REVERB_IR_DURATION_S = 2.5
 const REVERB_IR_DECAY = 3.0
-const REVERB_IR_TARGET_RMS = 0.05
+
+const LIMITER_THRESHOLD_DB = -4
+const LIMITER_KNEE_DB = 0
+const LIMITER_RATIO = 20
+const LIMITER_ATTACK_S = 0.001
+const LIMITER_RELEASE_S = 0.1
 
 const EQ_LOW_FREQ_HZ = 200
 const EQ_MID_FREQ_HZ = 1000
@@ -116,9 +121,8 @@ function buildImpulseResponse(ctx: BaseAudioContext, duration = REVERB_IR_DURATI
       ch[i] = sample
       sumSq += sample * sample
     }
-    const rms = Math.sqrt(sumSq / length)
-    if (rms > 0) {
-      const scale = REVERB_IR_TARGET_RMS / rms
+    if (sumSq > 0) {
+      const scale = 1 / Math.sqrt(sumSq)
       for (let i = 0; i < length; i++) ch[i] *= scale
     }
   }
@@ -133,6 +137,16 @@ function createReverb(ctx: BaseAudioContext, depth: number): { convolver: Convol
   dryGain.gain.value = dryGainFor(depth)
   wetGain.gain.value = wetGainFor(depth)
   return { convolver, dryGain, wetGain }
+}
+
+function createMasterLimiter(ctx: BaseAudioContext): DynamicsCompressorNode {
+  const limiter = ctx.createDynamicsCompressor()
+  limiter.threshold.value = LIMITER_THRESHOLD_DB
+  limiter.knee.value = LIMITER_KNEE_DB
+  limiter.ratio.value = LIMITER_RATIO
+  limiter.attack.value = LIMITER_ATTACK_S
+  limiter.release.value = LIMITER_RELEASE_S
+  return limiter
 }
 
 function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode] {
@@ -186,13 +200,7 @@ export function useAudioEngine() {
       analyserRef.current.fftSize = 256
       analyserRef.current.smoothingTimeConstant = 0.8
 
-      const limiter = ctxRef.current.createDynamicsCompressor()
-      limiter.threshold.value = -4
-      limiter.knee.value = 0
-      limiter.ratio.value = 20
-      limiter.attack.value = 0.001
-      limiter.release.value = 0.1
-
+      const limiter = createMasterLimiter(ctxRef.current)
       analyserRef.current.connect(limiter)
       limiter.connect(ctxRef.current.destination)
     }
@@ -520,6 +528,9 @@ export function useAudioEngine() {
 
     await SoundTouchNode.register(offline, '/soundtouch-processor.js')
 
+    const limiter = createMasterLimiter(offline)
+    limiter.connect(offline.destination)
+
     for (const { el, buffer } of decodedRef.current) {
       const liveTrack = tracksRef.current.get(el.label)
       const eqState: EQState = liveTrack ? {
@@ -546,7 +557,7 @@ export function useAudioEngine() {
       convolver.connect(wetGain)
       dryGain.connect(panner)
       wetGain.connect(panner)
-      panner.connect(offline.destination)
+      panner.connect(limiter)
 
       const offlinePitchNode = new SoundTouchNode(offline)
       offlinePitchNode.pitch!.value = pitchRef.current
