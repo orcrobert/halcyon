@@ -74,12 +74,14 @@ def test_the_engine_clamps_absurd_durations():
 def test_config_reads_overrides_from_the_environment(monkeypatch):
     monkeypatch.setenv("MUSICGEN_MODEL", "facebook/musicgen-small")
     monkeypatch.setenv("GENERATION_DURATION", "5")
+    monkeypatch.setenv("GENERATION_LOUDNESS_LUFS", "-23")
     monkeypatch.setenv("GENERATION_DEVICE", "cpu")
 
     config = GeneratorConfig.from_env()
 
     assert config.musicgen_model == "facebook/musicgen-small"
     assert config.duration == 5
+    assert config.loudness_lufs == -23.0
     assert config.device == "cpu"
 
 

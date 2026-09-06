@@ -34,7 +34,7 @@ halcyon-generator check http://localhost:9000
 ```
 
 Flags override the environment variables (`AUDIOGEN_MODEL`, `MUSICGEN_MODEL`,
-`GENERATION_DURATION`, `GENERATION_DEVICE`, `PORT`).
+`GENERATION_DURATION`, `GENERATION_LOUDNESS_LUFS`, `GENERATION_DEVICE`, `PORT`).
 
 `check` probes a generator and prints what it reports — the quickest way to tell
 whether a URL is live before pasting it anywhere.

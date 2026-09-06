@@ -40,12 +40,18 @@ function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   return arrayBuffer
 }
 
-const TRACK_GAIN_SCALE = 0.5
+const TRACK_GAIN_SCALE = 0.7
 const REVERB_DRY_ATTENUATION = 0.7
 const REVERB_WET_SEND = 0.6
 const REVERB_IR_DURATION_S = 2.5
 const REVERB_IR_DECAY = 3.0
-const REVERB_IR_TARGET_RMS = 0.05
+const SOURCE_RELEASE_S = 0.03
+
+const LIMITER_THRESHOLD_DB = -4
+const LIMITER_KNEE_DB = 0
+const LIMITER_RATIO = 20
+const LIMITER_ATTACK_S = 0.001
+const LIMITER_RELEASE_S = 0.1
 
 const EQ_LOW_FREQ_HZ = 200
 const EQ_MID_FREQ_HZ = 1000
@@ -116,9 +122,8 @@ function buildImpulseResponse(ctx: BaseAudioContext, duration = REVERB_IR_DURATI
       ch[i] = sample
       sumSq += sample * sample
     }
-    const rms = Math.sqrt(sumSq / length)
-    if (rms > 0) {
-      const scale = REVERB_IR_TARGET_RMS / rms
+    if (sumSq > 0) {
+      const scale = 1 / Math.sqrt(sumSq)
       for (let i = 0; i < length; i++) ch[i] *= scale
     }
   }
@@ -133,6 +138,32 @@ function createReverb(ctx: BaseAudioContext, depth: number): { convolver: Convol
   dryGain.gain.value = dryGainFor(depth)
   wetGain.gain.value = wetGainFor(depth)
   return { convolver, dryGain, wetGain }
+}
+
+function createPanner(ctx: BaseAudioContext, pan: number): StereoPannerNode {
+  const panner = ctx.createStereoPanner()
+  panner.channelCount = 1
+  panner.channelCountMode = 'explicit'
+  panner.pan.value = pan
+  return panner
+}
+
+function createMasterLimiter(ctx: BaseAudioContext): DynamicsCompressorNode {
+  const limiter = ctx.createDynamicsCompressor()
+  limiter.threshold.value = LIMITER_THRESHOLD_DB
+  limiter.knee.value = LIMITER_KNEE_DB
+  limiter.ratio.value = LIMITER_RATIO
+  limiter.attack.value = LIMITER_ATTACK_S
+  limiter.release.value = LIMITER_RELEASE_S
+  return limiter
+}
+
+function releaseTrack(ctx: BaseAudioContext, track: TrackNode) {
+  const t = ctx.currentTime
+  track.masterGain.gain.cancelScheduledValues(t)
+  track.masterGain.gain.setValueAtTime(track.masterGain.gain.value, t)
+  track.masterGain.gain.linearRampToValueAtTime(0, t + SOURCE_RELEASE_S)
+  try { track.source.stop(t + SOURCE_RELEASE_S) } catch {}
 }
 
 function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode] {
@@ -163,6 +194,7 @@ export function useAudioEngine() {
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
   const analyserRef = useRef<AnalyserNode | null>(null)
+  const limiterRef = useRef<DynamicsCompressorNode | null>(null)
   const volumeStateRef = useRef<Map<string, number>>(new Map())
   const eqStateRef = useRef<Map<string, EQState>>(new Map())
   const panStateRef = useRef<Map<string, number>>(new Map())
@@ -186,15 +218,10 @@ export function useAudioEngine() {
       analyserRef.current.fftSize = 256
       analyserRef.current.smoothingTimeConstant = 0.8
 
-      const limiter = ctxRef.current.createDynamicsCompressor()
-      limiter.threshold.value = -4
-      limiter.knee.value = 0
-      limiter.ratio.value = 20
-      limiter.attack.value = 0.001
-      limiter.release.value = 0.1
-
+      const limiter = createMasterLimiter(ctxRef.current)
       analyserRef.current.connect(limiter)
       limiter.connect(ctxRef.current.destination)
+      limiterRef.current = limiter
     }
     return ctxRef.current
   }, [])
@@ -207,9 +234,7 @@ export function useAudioEngine() {
   }
 
   function startFromDecoded(ctx: AudioContext, decoded: DecodedElement[]) {
-    tracksRef.current.forEach(({ source }) => {
-      try { source.stop() } catch {}
-    })
+    tracksRef.current.forEach((track) => releaseTrack(ctx, track))
     tracksRef.current.clear()
 
     for (const { el, buffer } of decoded) {
@@ -223,21 +248,21 @@ export function useAudioEngine() {
         : el.volume
       masterGain.gain.value = trackGain(vol)
 
-      const panner = ctx.createStereoPanner()
-      panner.pan.value = panStateRef.current.has(el.label)
+      const panner = createPanner(ctx, panStateRef.current.has(el.label)
         ? panStateRef.current.get(el.label)!
-        : (el.pan ?? 0)
+        : (el.pan ?? 0))
 
       const depth = depthStateRef.current.get(el.label) ?? 0
       const { convolver, dryGain, wetGain } = createReverb(ctx, depth)
 
+      const bus = analyserRef.current ?? ctx.destination
       highFilter.connect(masterGain)
-      masterGain.connect(dryGain)
-      masterGain.connect(convolver)
+      masterGain.connect(panner)
+      panner.connect(dryGain)
+      panner.connect(convolver)
       convolver.connect(wetGain)
-      dryGain.connect(panner)
-      wetGain.connect(panner)
-      panner.connect(analyserRef.current ?? ctx.destination)
+      dryGain.connect(bus)
+      wetGain.connect(bus)
 
       const pitchNode = new SoundTouchNode(ctx)
       pitchNode.pitch!.value = pitchRef.current
@@ -358,7 +383,7 @@ export function useAudioEngine() {
     leftSplitter.connect(merger, 0, 0)
     rightSplitter.connect(merger, 0, 1)
     merger.connect(gain)
-    gain.connect(ctx.destination)
+    gain.connect(limiterRef.current ?? ctx.destination)
 
     leftOsc.start()
     rightOsc.start()
@@ -491,13 +516,15 @@ export function useAudioEngine() {
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
+    limiterRef.current = null
   }, [stopBinaural])
 
   const forget = useCallback((labels: string[]) => {
     for (const label of labels) {
       const track = tracksRef.current.get(label)
       if (track) {
-        try { track.source.stop() } catch { /* already stopped */ }
+        if (ctxRef.current) releaseTrack(ctxRef.current, track)
+        else { try { track.source.stop() } catch {} }
         tracksRef.current.delete(label)
       }
       decodedRef.current = decodedRef.current.filter((d) => d.el.label !== label)
@@ -520,6 +547,9 @@ export function useAudioEngine() {
 
     await SoundTouchNode.register(offline, '/soundtouch-processor.js')
 
+    const limiter = createMasterLimiter(offline)
+    limiter.connect(offline.destination)
+
     for (const { el, buffer } of decodedRef.current) {
       const liveTrack = tracksRef.current.get(el.label)
       const eqState: EQState = liveTrack ? {
@@ -537,16 +567,15 @@ export function useAudioEngine() {
       const depth = depthStateRef.current.get(el.label) ?? 0
       const { convolver, dryGain, wetGain } = createReverb(offline, depth)
 
-      const panner = offline.createStereoPanner()
-      panner.pan.value = liveTrack ? liveTrack.panner.pan.value : (el.pan ?? 0)
+      const panner = createPanner(offline, liveTrack ? liveTrack.panner.pan.value : (el.pan ?? 0))
 
       highFilter.connect(gain)
-      gain.connect(dryGain)
-      gain.connect(convolver)
+      gain.connect(panner)
+      panner.connect(dryGain)
+      panner.connect(convolver)
       convolver.connect(wetGain)
-      dryGain.connect(panner)
-      wetGain.connect(panner)
-      panner.connect(offline.destination)
+      dryGain.connect(limiter)
+      wetGain.connect(limiter)
 
       const offlinePitchNode = new SoundTouchNode(offline)
       offlinePitchNode.pitch!.value = pitchRef.current

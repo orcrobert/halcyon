@@ -163,3 +163,43 @@ def test_make_loopable_handles_short_clip():
     looped = make_loopable(short, sr)
     assert looped.shape[0] == 1
     assert looped.shape[1] <= short.shape[1]
+
+
+def _hot_transients(sr: int, seconds: float, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    n = int(sr * seconds)
+    mono = 0.15 * rng.standard_normal(n)
+    burst = np.exp(-np.arange(800) / 150.0) * np.sin(np.arange(800) * 0.9)
+    for start in rng.integers(0, n - 800, 40):
+        mono[start:start + 800] += rng.uniform(4.0, 8.0) * burst
+    mono = mono / np.sqrt(np.mean(mono ** 2)) * 10 ** (-14 / 20)
+    return np.tanh(mono).astype(np.float32)
+
+
+def _correlated_pad(sr: int, seconds: float) -> np.ndarray:
+    t = np.arange(int(sr * seconds)) / sr
+    mono = sum(np.sin(2 * np.pi * f * t) for f in (110.0, 165.0, 220.0, 330.0))
+    mono = mono / np.sqrt(np.mean(mono ** 2)) * 10 ** (-14 / 20)
+    return np.tanh(mono).astype(np.float32)
+
+
+def test_make_loopable_never_exceeds_full_scale():
+    sr = 16000
+    looped = make_loopable(_hot_transients(sr, 10.0, seed=3)[np.newaxis, :], sr)
+    assert np.abs(looped).max() <= 1.0
+
+
+def test_make_loopable_does_not_swell_at_the_loop_head():
+    sr = 16000
+    n_fade = int(1.5 * sr)
+    looped = make_loopable(_correlated_pad(sr, 10.0)[np.newaxis, :], sr)[0]
+    head = looped[n_fade // 2 - 800 : n_fade // 2 + 800]
+    body = looped[n_fade:]
+    ratio_db = 20 * np.log10(np.sqrt(np.mean(head ** 2)) / np.sqrt(np.mean(body ** 2)))
+    assert abs(ratio_db) < 1.0
+
+
+def test_make_loopable_seam_is_continuous():
+    sr = 16000
+    looped = make_loopable(_correlated_pad(sr, 10.0)[np.newaxis, :], sr)[0]
+    assert abs(looped[0] - looped[-1]) < 0.05

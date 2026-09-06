@@ -12,26 +12,32 @@ Last reviewed against the tree at `refactor/architecture-cleanup`.
 
 ## Correctness
 
-- 🟡 **Binaural oscillators bypass the master bus.** In `useAudioEngine.ts`,
-  `startBinaural` connects its gain node straight to `ctx.destination`, while
-  every track routes through the analyser and the −4 dB limiter. So the beat
-  tones are neither visualised nor limited, and they survive a track mute. They
-  are also absent from `exportMix`, which renders tracks only. *Risky: routing
-  them through the analyser changes what the visualiser shows and what the
-  limiter clamps; decide deliberately whether binaural is part of the mix or an
-  overlay, then make playback and export agree.*
+- 🟡 **Binaural oscillators skip the analyser and the export.** In
+  `useAudioEngine.ts`, `startBinaural` feeds the master limiter directly, so the
+  beat tones are limited with the mix but not visualised, and they survive a
+  track mute. They are also absent from `exportMix`, which renders tracks only.
+  *Risky: decide deliberately whether binaural is part of the mix or an overlay,
+  then make playback and export agree.*
 - 🟡 **A generator failure is terminal.** `GenerationWorker` runs each
   atmosphere once; any exception marks it `failed`. Against a Colab+ngrok link
   that drops routinely, one transient error loses the whole run. *Risky:
   retries with backoff change failure semantics and re-spend GPU time; decide
   deliberately rather than drifting into it.*
 - 🟢 **The two mixing engines can drift in loudness.** The Python mixer
-  peak-normalizes in `mix_to_file`; the browser uses a −4 dB 20:1 limiter. A
-  backend mix and a browser export of the same atmosphere will not match. Their
-  *parameter* conventions are now pinned (EQ 200/1k/8k, pan −1..1, depth 0..1,
-  and the shared constants at the top of `useAudioEngine.ts`), but the gain
-  stage is not. *Risky: align intentionally and document which chain is
-  canonical.*
+  peak-normalizes in `mix_to_file`; the browser runs live playback and
+  `exportMix` through the same −4 dB 20:1 limiter. A backend mix and a browser
+  export of the same atmosphere will still not match. Their *parameter*
+  conventions are pinned (EQ 200/1k/8k, pan −1..1, depth 0..1, and the shared
+  constants at the top of `useAudioEngine.ts`), but the gain stage is not.
+  *Risky: align intentionally and document which chain is canonical.*
+- 🟢 **The pitch worklet drops frames when tuning is off 440 Hz.**
+  `public/soundtouch-processor.js` is a verbatim copy of the npm package
+  (`npm run copy-worklets` overwrites it). Its `process()` zero-fills any render
+  quantum SoundTouch has not filled yet; at unity pitch that never happens after
+  warm-up, but at A=432 it produces a handful of zeroed frames every few seconds
+  (measured: 6 frames in 10 s), each an audible tick. *Risky: fixing it means
+  forking the worklet to hold back a one-quantum cushion before extracting, and
+  dropping the copy script.*
 
 ## Test coverage
 

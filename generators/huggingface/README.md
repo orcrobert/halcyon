@@ -46,6 +46,7 @@ Keep the Space public, or put it behind your own proxy.
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` | model for `type: sound` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` | model for `type: music` |
 | `GENERATION_DURATION` | `10` | seconds per element |
+| `GENERATION_LOUDNESS_LUFS` | `-20` | loudness each clip is normalised to |
 | `GENERATION_DEVICE` | `cuda` | torch device |
 
 Set them as Space variables. Models load at startup, so the first boot after a
