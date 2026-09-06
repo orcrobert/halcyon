@@ -17,7 +17,7 @@ Definitive reference for how the system fits together. Skim
   atmosphere object.
 - **Audio engine**: `hooks/useAudioEngine.ts` is the heart of playback. It
   decodes element WAVs, builds one Web Audio graph per track
-  (`source → SoundTouch pitch → 3-band EQ → gain → reverb send/dry → panner →
+  (`source → SoundTouch pitch → 3-band EQ → gain → panner → reverb send/dry →
   analyser → limiter → destination`), and exposes imperative setters
   (`setVolume`, `setEQ`, `setPan`, `setDepth`, `setTuning`), an autonomous
   `startAnimate` drift loop, binaural oscillators, and an offline `exportMix`.

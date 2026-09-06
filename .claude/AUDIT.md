@@ -12,14 +12,12 @@ Last reviewed against the tree at `refactor/architecture-cleanup`.
 
 ## Correctness
 
-- 🟡 **Binaural oscillators bypass the master bus.** In `useAudioEngine.ts`,
-  `startBinaural` connects its gain node straight to `ctx.destination`, while
-  every track routes through the analyser and the −4 dB limiter. So the beat
-  tones are neither visualised nor limited, and they survive a track mute. They
-  are also absent from `exportMix`, which renders tracks only. *Risky: routing
-  them through the analyser changes what the visualiser shows and what the
-  limiter clamps; decide deliberately whether binaural is part of the mix or an
-  overlay, then make playback and export agree.*
+- 🟡 **Binaural oscillators skip the analyser and the export.** In
+  `useAudioEngine.ts`, `startBinaural` feeds the master limiter directly, so the
+  beat tones are limited with the mix but not visualised, and they survive a
+  track mute. They are also absent from `exportMix`, which renders tracks only.
+  *Risky: decide deliberately whether binaural is part of the mix or an overlay,
+  then make playback and export agree.*
 - 🟡 **A generator failure is terminal.** `GenerationWorker` runs each
   atmosphere once; any exception marks it `failed`. Against a Colab+ngrok link
   that drops routinely, one transient error loses the whole run. *Risky:
