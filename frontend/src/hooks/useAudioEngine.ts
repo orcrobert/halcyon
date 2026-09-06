@@ -40,7 +40,7 @@ function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
   return arrayBuffer
 }
 
-const TRACK_GAIN_SCALE = 0.5
+const TRACK_GAIN_SCALE = 0.7
 const REVERB_DRY_ATTENUATION = 0.7
 const REVERB_WET_SEND = 0.6
 const REVERB_IR_DURATION_S = 2.5
@@ -140,6 +140,14 @@ function createReverb(ctx: BaseAudioContext, depth: number): { convolver: Convol
   return { convolver, dryGain, wetGain }
 }
 
+function createPanner(ctx: BaseAudioContext, pan: number): StereoPannerNode {
+  const panner = ctx.createStereoPanner()
+  panner.channelCount = 1
+  panner.channelCountMode = 'explicit'
+  panner.pan.value = pan
+  return panner
+}
+
 function createMasterLimiter(ctx: BaseAudioContext): DynamicsCompressorNode {
   const limiter = ctx.createDynamicsCompressor()
   limiter.threshold.value = LIMITER_THRESHOLD_DB
@@ -186,6 +194,7 @@ export function useAudioEngine() {
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
   const analyserRef = useRef<AnalyserNode | null>(null)
+  const limiterRef = useRef<DynamicsCompressorNode | null>(null)
   const volumeStateRef = useRef<Map<string, number>>(new Map())
   const eqStateRef = useRef<Map<string, EQState>>(new Map())
   const panStateRef = useRef<Map<string, number>>(new Map())
@@ -212,6 +221,7 @@ export function useAudioEngine() {
       const limiter = createMasterLimiter(ctxRef.current)
       analyserRef.current.connect(limiter)
       limiter.connect(ctxRef.current.destination)
+      limiterRef.current = limiter
     }
     return ctxRef.current
   }, [])
@@ -238,21 +248,21 @@ export function useAudioEngine() {
         : el.volume
       masterGain.gain.value = trackGain(vol)
 
-      const panner = ctx.createStereoPanner()
-      panner.pan.value = panStateRef.current.has(el.label)
+      const panner = createPanner(ctx, panStateRef.current.has(el.label)
         ? panStateRef.current.get(el.label)!
-        : (el.pan ?? 0)
+        : (el.pan ?? 0))
 
       const depth = depthStateRef.current.get(el.label) ?? 0
       const { convolver, dryGain, wetGain } = createReverb(ctx, depth)
 
+      const bus = analyserRef.current ?? ctx.destination
       highFilter.connect(masterGain)
-      masterGain.connect(dryGain)
-      masterGain.connect(convolver)
+      masterGain.connect(panner)
+      panner.connect(dryGain)
+      panner.connect(convolver)
       convolver.connect(wetGain)
-      dryGain.connect(panner)
-      wetGain.connect(panner)
-      panner.connect(analyserRef.current ?? ctx.destination)
+      dryGain.connect(bus)
+      wetGain.connect(bus)
 
       const pitchNode = new SoundTouchNode(ctx)
       pitchNode.pitch!.value = pitchRef.current
@@ -373,7 +383,7 @@ export function useAudioEngine() {
     leftSplitter.connect(merger, 0, 0)
     rightSplitter.connect(merger, 0, 1)
     merger.connect(gain)
-    gain.connect(ctx.destination)
+    gain.connect(limiterRef.current ?? ctx.destination)
 
     leftOsc.start()
     rightOsc.start()
@@ -506,6 +516,7 @@ export function useAudioEngine() {
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
+    limiterRef.current = null
   }, [stopBinaural])
 
   const forget = useCallback((labels: string[]) => {
@@ -556,16 +567,15 @@ export function useAudioEngine() {
       const depth = depthStateRef.current.get(el.label) ?? 0
       const { convolver, dryGain, wetGain } = createReverb(offline, depth)
 
-      const panner = offline.createStereoPanner()
-      panner.pan.value = liveTrack ? liveTrack.panner.pan.value : (el.pan ?? 0)
+      const panner = createPanner(offline, liveTrack ? liveTrack.panner.pan.value : (el.pan ?? 0))
 
       highFilter.connect(gain)
-      gain.connect(dryGain)
-      gain.connect(convolver)
+      gain.connect(panner)
+      panner.connect(dryGain)
+      panner.connect(convolver)
       convolver.connect(wetGain)
-      dryGain.connect(panner)
-      wetGain.connect(panner)
-      panner.connect(limiter)
+      dryGain.connect(limiter)
+      wetGain.connect(limiter)
 
       const offlinePitchNode = new SoundTouchNode(offline)
       offlinePitchNode.pitch!.value = pitchRef.current
