@@ -47,6 +47,7 @@ def serialize_atmosphere(
         created_at=atmosphere.created_at,
         updated_at=atmosphere.updated_at,
         generated_at=atmosphere.generated_at,
+        timings=atmosphere.timings_json,
         elements=(
             [serialize_element(element) for element in atmosphere.elements]
             if include_elements

@@ -112,6 +112,9 @@ class Atmosphere(SQLModel, table=True):
     decomposed_json: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSON, nullable=True)
     )
+    timings_json: dict[str, Any] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
     created_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
     updated_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
     generated_at: datetime | None = Field(

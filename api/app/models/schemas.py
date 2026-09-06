@@ -206,6 +206,7 @@ class AtmosphereOut(BaseModel):
     created_at: datetime
     updated_at: datetime
     generated_at: datetime | None
+    timings: dict[str, Any] | None = None
     elements: list[ElementOut] | None = None
 
 

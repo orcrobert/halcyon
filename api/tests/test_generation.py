@@ -201,3 +201,35 @@ def test_restart_reclaims_stranded_atmospheres(client, auth):
 
     assert body["status"] == "failed"
     assert "restart" in body["error"]
+
+
+def test_generation_records_stage_timings(client, auth, ready_atmosphere):
+    body = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()["data"]
+
+    timings = body["timings"]
+    assert set(timings) == {
+        "decompose_s",
+        "generate_s",
+        "mix_s",
+        "persist_s",
+        "total_s",
+        "audio_s",
+    }
+    assert all(value >= 0 for value in timings.values())
+    assert timings["audio_s"] > 0
+
+
+def test_regeneration_records_its_own_timings(client, auth, ready_atmosphere):
+    from api.app.services.pipeline import regenerate_element
+
+    element_id = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()[
+        "data"
+    ]["elements"][0]["id"]
+    regenerate_element(element_id)
+
+    timings = client.get(f"/api/atmospheres/{ready_atmosphere}", headers=auth).json()[
+        "data"
+    ]["timings"]
+
+    assert set(timings["regenerate"]) == {"generate_s", "mix_s", "total_s", "audio_s"}
+    assert timings["total_s"] >= 0
