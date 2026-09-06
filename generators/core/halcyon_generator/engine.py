@@ -51,16 +51,16 @@ class AudioCraftEngine:
         if not self.loaded:
             self.load()
 
-        seconds = self.resolve_duration(duration)
-
-        sounds = [e for e in elements if e.get("type") == "sound"]
-        music = [e for e in elements if e.get("type") == "music"]
+        groups: dict[tuple[str, int], list[dict[str, Any]]] = {}
+        for element in elements:
+            kind = "music" if element.get("type") == "music" else "sound"
+            seconds = self.resolve_duration(element.get("duration") or duration)
+            groups.setdefault((kind, seconds), []).append(element)
 
         results: list[dict[str, Any]] = []
-        if sounds:
-            results.extend(self._generate_batch(self._audiogen, sounds, seconds))
-        if music:
-            results.extend(self._generate_batch(self._musicgen, music, seconds))
+        for (kind, seconds), group in groups.items():
+            model = self._musicgen if kind == "music" else self._audiogen
+            results.extend(self._generate_batch(model, group, seconds))
         return results
 
     def _generate_batch(
