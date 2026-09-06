@@ -5,9 +5,11 @@ import modal
 
 AUDIOCRAFT = "git+https://github.com/facebookresearch/audiocraft.git"
 
-CORE_SRC = Path(__file__).resolve().parents[1] / "core"
 CORE_DST = "/opt/halcyon-core"
-ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
+CACHE_DIR = "/cache"
+CUDA_INDEX = "https://download.pytorch.org/whl/cu121"
+
+LOCAL = modal.is_local()
 
 
 def _load_env_file(path: Path) -> None:
@@ -21,11 +23,12 @@ def _load_env_file(path: Path) -> None:
         os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
 
 
-_load_env_file(ENV_FILE)
+if LOCAL:
+    REPO_ROOT = Path(__file__).resolve().parents[2]
+    CORE_SRC = REPO_ROOT / "generators" / "core"
+    _load_env_file(REPO_ROOT / ".env")
 
-CACHE_DIR = "/cache"
 GPU = os.getenv("HALCYON_MODAL_GPU", "A10G")
-CUDA_INDEX = "https://download.pytorch.org/whl/cu121"
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -37,8 +40,15 @@ image = (
         "xformers==0.0.23.post1",
         extra_index_url=CUDA_INDEX,
     )
-    .add_local_dir(CORE_SRC, CORE_DST, copy=True, ignore=["__pycache__", "*.egg-info"])
-    .run_commands(f"pip install '{CORE_DST}[audiocraft]'")
+)
+
+if LOCAL:
+    image = image.add_local_dir(
+        CORE_SRC, CORE_DST, copy=True, ignore=["__pycache__", "*.egg-info"]
+    )
+
+image = (
+    image.run_commands(f"pip install '{CORE_DST}[audiocraft]'")
     .run_commands(f"pip install --no-deps {AUDIOCRAFT}")
     .env(
         {
