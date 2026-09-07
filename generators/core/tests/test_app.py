@@ -21,6 +21,20 @@ class StubEngine:
         return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
 
 
+class RecordingAudioCraftEngine(AudioCraftEngine):
+    def __init__(self, config=None):
+        super().__init__(config)
+        self.batches = []
+
+    def load(self):
+        self._audiogen = "audiogen"
+        self._musicgen = "musicgen"
+
+    def _generate_batch(self, model, elements, seconds):
+        self.batches.append((model, [e["label"] for e in elements], seconds))
+        return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
+
+
 def client(engine=None):
     return TestClient(create_app(engine=engine or StubEngine(), eager=False))
 
@@ -108,3 +122,41 @@ def test_the_cli_requires_a_subcommand():
 
     with pytest.raises(SystemExit):
         build_parser().parse_args([])
+
+
+def test_the_engine_batches_by_type_and_requested_length():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(duration=10))
+
+    engine.generate(
+        [
+            {"label": "rain", "type": "sound", "duration": 4},
+            {"label": "drone", "type": "music", "duration": 30},
+            {"label": "wind", "type": "sound", "duration": 4},
+            {"label": "hoot", "type": "sound", "duration": 2},
+        ]
+    )
+
+    assert engine.batches == [
+        ("audiogen", ["rain", "wind"], 4),
+        ("musicgen", ["drone"], 30),
+        ("audiogen", ["hoot"], 2),
+    ]
+
+
+def test_elements_without_a_length_fall_back_to_the_batch_duration():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(duration=10))
+
+    engine.generate([{"label": "rain", "type": "sound"}], duration=30)
+    engine.generate([{"label": "rain", "type": "sound"}])
+
+    assert [seconds for _, _, seconds in engine.batches] == [30, 10]
+
+
+def test_unknown_element_keys_survive_the_round_trip():
+    elements = [
+        {"index": 0, "label": "rain", "type": "sound", "prompt": "rain", "duration": 4},
+        {"index": 1, "label": "drone", "type": "music", "prompt": "drone", "duration": 30},
+    ]
+    returned = RecordingAudioCraftEngine(GeneratorConfig()).generate(elements)
+
+    assert [e["index"] for e in returned] == [0, 1]

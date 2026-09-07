@@ -27,6 +27,12 @@ def serialize_element(element: Element) -> ElementOut:
         error=element.error,
         version=element.version or 1,
         position=element.position,
+        playback="oneshot" if element.playback == "oneshot" else "loop",
+        clip_s=element.clip_s,
+        interval_min_s=element.interval_min_s,
+        interval_max_s=element.interval_max_s,
+        source=element.source or "generated",
+        source_json=element.source_json,
         volume=element.volume,
         pan=element.pan,
         depth=element.depth,
@@ -38,7 +44,11 @@ def serialize_element(element: Element) -> ElementOut:
             depth=element.original_depth,
             eq_json=element.original_eq_json,
         ),
-        audio_url=f"/api/elements/{element.id}/audio?v={element.version or 1}",
+        audio_url=(
+            f"/api/elements/{element.id}/audio?v={element.version or 1}"
+            if element.audio_path
+            else None
+        ),
     )
 
 

@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import type { Atmosphere, Element } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
@@ -10,6 +10,89 @@ import { RegenerateModal } from './RegenerateModal'
 
 export interface AnimatedValues { vol: number; pan: number; depth: number }
 
+const EXPORT_CHOICES: { seconds: number; label: string }[] = [
+  { seconds: 30, label: '30 seconds' },
+  { seconds: 60, label: '1 minute' },
+  { seconds: 120, label: '2 minutes' },
+  { seconds: 300, label: '5 minutes' },
+]
+
+function ExportMenu({ onExport }: { onExport: (seconds: number) => Promise<void> }) {
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+    }
+    function onKeyDown(event: globalThis.KeyboardEvent) {
+      if (event.key === 'Escape') setOpen(false)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [open])
+
+  async function choose(seconds: number) {
+    setOpen(false)
+    setBusy(true)
+    try {
+      await onExport(seconds)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div ref={rootRef} className="relative">
+      <button
+        onClick={() => setOpen(o => !o)}
+        disabled={busy}
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{ fontFamily: 'inherit' }}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+        <span className="hidden sm:block">{busy ? 'Rendering…' : 'Export'}</span>
+      </button>
+
+      {open && (
+        <div
+          role="listbox"
+          className="absolute right-0 top-full mt-2 rounded-xl border border-line-hover bg-surface-high z-30"
+          style={{ width: 196, padding: 6, boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)' }}
+        >
+          <p className="text-[10px] uppercase tracking-wider text-ink-faint" style={{ padding: '6px 10px 8px 10px' }}>
+            Export length
+          </p>
+          {EXPORT_CHOICES.map((choice) => (
+            <button
+              key={choice.seconds}
+              role="option"
+              aria-selected={false}
+              onClick={() => choose(choice.seconds)}
+              className="w-full flex items-center rounded-lg text-left text-[13px] text-ink-soft hover:bg-wash/[0.04] hover:text-ink-bright transition"
+              style={{ padding: '8px 10px', fontFamily: 'inherit' }}
+            >
+              {choice.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 interface Props {
   session: Atmosphere
   playing: boolean
@@ -19,8 +102,9 @@ interface Props {
   onEQChange: (label: string, eq: EQState) => void
   onPanChange: (label: string, pan: number) => void
   onDepthChange: (label: string, depth: number) => void
+  onIntervalChange: (label: string, minS: number, maxS: number) => void
   onTuningChange: (freqHz: number) => void
-  onExport: () => Promise<void>
+  onExport: (seconds: number) => Promise<void>
   onReset: () => void
   onRegenerateElement: (element: Element, feedback: string) => Promise<void>
   onDeleteElement: (element: Element) => Promise<void>
@@ -42,7 +126,7 @@ interface Props {
 
 export function DashboardView({
   session, playing, getAnalyser, onPlayPause,
-  onVolumeChange, onEQChange, onPanChange, onDepthChange, onTuningChange,
+  onVolumeChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onTuningChange,
   onExport, onReset, onRegenerateElement, onDeleteElement, onRegenerateScene,
   actionError, onDismissActionError,
   onStartAnimate, onStopAnimate, onSetAnimateMuted,
@@ -171,18 +255,7 @@ export function DashboardView({
             β
           </button>
 
-          <button
-            onClick={onExport}
-            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150"
-            style={{ fontFamily: 'inherit' }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <span className="hidden sm:block">Export</span>
-          </button>
+          <ExportMenu onExport={onExport} />
 
           <button
             onClick={handleRegenerateScene}
@@ -338,6 +411,7 @@ export function DashboardView({
                 onEQChange={onEQChange}
                 onPanChange={onPanChange}
                 onDepthChange={onDepthChange}
+                onIntervalChange={onIntervalChange}
               />
             )
           })}

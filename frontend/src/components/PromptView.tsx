@@ -11,32 +11,81 @@ const DURATION_CHOICES: { seconds: number; hint: string }[] = [
 ]
 
 interface Props {
-  onSubmit: (prompt: string, durationS: number) => void
+  onSubmit: (prompt: string, durationS: number, useEvents: boolean) => void
   loading: boolean
   error: string | null
   onOpenAccount?: () => void
   onOpenHistory?: () => void
 }
 
-interface LengthMenuProps {
-  value: number
-  onChange: (seconds: number) => void
+const SUBMENU_W = 214
+
+interface OptionsMenuProps {
+  durationS: number
+  useEvents: boolean
+  onDurationChange: (seconds: number) => void
+  onUseEventsChange: (value: boolean) => void
   disabled: boolean
 }
 
-function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
+function Toggle({ on }: { on: boolean }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        width: 30,
+        height: 17,
+        borderRadius: 999,
+        flexShrink: 0,
+        position: 'relative',
+        background: on
+          ? 'var(--color-accent)'
+          : 'color-mix(in srgb, var(--color-wash) 12%, transparent)',
+        transition: 'background 0.18s ease',
+      }}
+    >
+      <span
+        style={{
+          position: 'absolute',
+          top: 2,
+          left: on ? 15 : 2,
+          width: 13,
+          height: 13,
+          borderRadius: '50%',
+          background: 'var(--color-wash)',
+          transition: 'left 0.18s ease',
+        }}
+      />
+    </span>
+  )
+}
+
+function OptionsMenu({
+  durationS, useEvents, onDurationChange, onUseEventsChange, disabled,
+}: OptionsMenuProps) {
   const [open, setOpen] = useState(false)
+  const [lengthOpen, setLengthOpen] = useState(false)
+  const [flipLength, setFlipLength] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const expanded = open && !disabled
+  const customised = durationS !== DEFAULT_DURATION_S || !useEvents
 
   useEffect(() => {
     if (!expanded) return
 
     function onPointerDown(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false)
+      if (rootRef.current?.contains(event.target as Node)) return
+      setOpen(false)
+      setLengthOpen(false)
     }
     function onKeyDown(event: globalThis.KeyboardEvent) {
-      if (event.key === 'Escape') setOpen(false)
+      if (event.key !== 'Escape') return
+      if (lengthOpen) {
+        setLengthOpen(false)
+        return
+      }
+      setOpen(false)
     }
 
     document.addEventListener('mousedown', onPointerDown)
@@ -45,68 +94,159 @@ function LengthMenu({ value, onChange, disabled }: LengthMenuProps) {
       document.removeEventListener('mousedown', onPointerDown)
       document.removeEventListener('keydown', onKeyDown)
     }
-  }, [expanded])
+  }, [expanded, lengthOpen])
+
+  function togglePanel() {
+    setLengthOpen(false)
+    setOpen((o) => !o)
+  }
+
+  function toggleLength() {
+    const opening = !lengthOpen
+    const rect = panelRef.current?.getBoundingClientRect()
+    if (opening && rect) {
+      setFlipLength(rect.right + SUBMENU_W + 14 > window.innerWidth)
+    }
+    setLengthOpen(opening)
+  }
 
   return (
     <div ref={rootRef} className="relative">
       <button
         type="button"
-        onClick={() => setOpen((o) => !o)}
+        onClick={togglePanel}
         disabled={disabled}
-        aria-haspopup="listbox"
+        aria-haspopup="dialog"
         aria-expanded={expanded}
-        title="Loop length of each generated layer"
-        className="flex items-center gap-1.5 rounded-lg border border-line-hover text-[11px] text-ink-dim hover:text-ink hover:border-line-strong transition disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{ padding: '5px 9px', fontFamily: 'inherit' }}
+        aria-label="Generation options"
+        title="Generation options"
+        className="relative flex items-center justify-center rounded-full border transition disabled:opacity-40 disabled:cursor-not-allowed"
+        style={{
+          width: 30,
+          height: 30,
+          borderColor: expanded
+            ? 'color-mix(in srgb, var(--color-accent) 50%, transparent)'
+            : 'var(--color-line-hover)',
+          background: expanded
+            ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)'
+            : 'transparent',
+          color: expanded ? 'var(--color-accent-bright)' : 'var(--color-ink-dim)',
+        }}
       >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="12" r="9" />
-          <polyline points="12 7 12 12 15.5 14" />
+        <svg
+          width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+          strokeWidth="2.2" strokeLinecap="round"
+          style={{ transform: expanded ? 'rotate(45deg)' : 'none', transition: 'transform 0.18s ease' }}
+        >
+          <line x1="12" y1="5" x2="12" y2="19" />
+          <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
-        {value}s
-        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.7 }}>
-          <polyline points="6 15 12 9 18 15" />
-        </svg>
+        {customised && !expanded && (
+          <span
+            aria-hidden
+            className="absolute rounded-full bg-accent-bright"
+            style={{ width: 5, height: 5, top: 1, right: 1 }}
+          />
+        )}
       </button>
 
       {expanded && (
         <div
-          role="listbox"
+          ref={panelRef}
+          role="dialog"
+          aria-label="Generation options"
           className="absolute left-0 bottom-full mb-2 rounded-xl border border-line-hover bg-surface-high z-20"
-          style={{ width: 232, padding: 6, boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)' }}
+          style={{ width: 236, padding: 6, boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)' }}
         >
-          <p className="text-[10px] uppercase tracking-wider text-ink-faint" style={{ padding: '6px 10px 8px 10px' }}>
-            Soundscape length
-          </p>
-          {DURATION_CHOICES.map((choice) => (
-            <button
-              key={choice.seconds}
-              type="button"
-              role="option"
-              aria-selected={choice.seconds === value}
-              onClick={() => {
-                onChange(choice.seconds)
-                setOpen(false)
-              }}
-              className="w-full flex items-center justify-between gap-3 rounded-lg text-left hover:bg-wash/[0.04] transition"
-              style={{ padding: '8px 10px', fontFamily: 'inherit' }}
-            >
-              <span className="flex flex-col">
-                <span className={`text-[13px] ${choice.seconds === value ? 'text-ink-bright' : 'text-ink-soft'}`}>
-                  {choice.seconds} seconds
-                </span>
-                <span className="text-[10.5px] text-ink-faint">{choice.hint}</span>
+          <button
+            type="button"
+            onClick={toggleLength}
+            aria-haspopup="listbox"
+            aria-expanded={lengthOpen}
+            className="w-full flex items-center justify-between gap-3 rounded-lg text-left transition"
+            style={{
+              padding: '8px 10px',
+              fontFamily: 'inherit',
+              background: lengthOpen ? 'color-mix(in srgb, var(--color-wash) 5%, transparent)' : 'transparent',
+            }}
+          >
+            <span className="text-[13px] text-ink-soft">Length</span>
+            <span className="flex items-center gap-1.5">
+              <span className="text-[12px] text-ink-faint tabular-nums">{durationS}s</span>
+              <svg
+                className="stroke-ink-faint" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                style={{ transform: flipLength ? 'rotate(180deg)' : 'none' }}
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </span>
+          </button>
+
+          <div className="bg-line" style={{ height: 1, margin: '6px 10px' }} />
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={useEvents}
+            onClick={() => onUseEventsChange(!useEvents)}
+            className="w-full flex items-center justify-between gap-3 rounded-lg text-left hover:bg-wash/[0.04] transition"
+            style={{ padding: '8px 10px', fontFamily: 'inherit' }}
+          >
+            <span className="flex flex-col">
+              <span className={`text-[13px] ${useEvents ? 'text-ink-bright' : 'text-ink-soft'}`}>
+                Use events
               </span>
-              {choice.seconds === value && (
-                <svg className="stroke-accent-bright" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
-            </button>
-          ))}
-          <p className="text-[10.5px] text-ink-faint leading-snug" style={{ padding: '8px 10px 6px 10px' }}>
-            Every layer loops forever — this sets how much audio plays before it repeats.
-          </p>
+              <span className="text-[10.5px] text-ink-faint leading-snug">
+                Let sparse sounds come and go instead of looping
+              </span>
+            </span>
+            <Toggle on={useEvents} />
+          </button>
+
+          {lengthOpen && (
+            <div
+              role="listbox"
+              aria-label="Soundscape length"
+              className="absolute top-0 rounded-xl border border-line-hover bg-surface-high"
+              style={{
+                width: SUBMENU_W,
+                padding: 6,
+                zIndex: 21,
+                boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)',
+                ...(flipLength
+                  ? { right: '100%', marginRight: 6 }
+                  : { left: '100%', marginLeft: 6 }),
+              }}
+            >
+              {DURATION_CHOICES.map((choice) => (
+                <button
+                  key={choice.seconds}
+                  type="button"
+                  role="option"
+                  aria-selected={choice.seconds === durationS}
+                  onClick={() => {
+                    onDurationChange(choice.seconds)
+                    setLengthOpen(false)
+                  }}
+                  className="w-full flex items-center justify-between gap-3 rounded-lg text-left hover:bg-wash/[0.04] transition"
+                  style={{ padding: '7px 10px', fontFamily: 'inherit' }}
+                >
+                  <span className="flex flex-col">
+                    <span className={`text-[13px] ${choice.seconds === durationS ? 'text-ink-bright' : 'text-ink-soft'}`}>
+                      {choice.seconds} seconds
+                    </span>
+                    <span className="text-[10.5px] text-ink-faint">{choice.hint}</span>
+                  </span>
+                  {choice.seconds === durationS && (
+                    <svg className="stroke-accent-bright flex-shrink-0" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -253,10 +393,11 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
 export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHistory }: Props) {
   const [prompt, setPrompt] = useState('')
   const [durationS, setDurationS] = useState(DEFAULT_DURATION_S)
+  const [useEvents, setUseEvents] = useState(true)
   const [pulse, setPulse] = useState({ key: '', seq: 0 })
 
   function submit() {
-    if (prompt.trim() && !loading) onSubmit(prompt.trim(), durationS)
+    if (prompt.trim() && !loading) onSubmit(prompt.trim(), durationS, useEvents)
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -322,7 +463,13 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
             />
             <div className="flex items-center justify-between gap-4" style={{ padding: '0 28px 20px 28px' }}>
               <div className="flex items-center gap-3 min-w-0">
-                <LengthMenu value={durationS} onChange={setDurationS} disabled={loading} />
+                <OptionsMenu
+                  durationS={durationS}
+                  useEvents={useEvents}
+                  onDurationChange={setDurationS}
+                  onUseEventsChange={setUseEvents}
+                  disabled={loading}
+                />
                 <span className="text-[11px] text-ink-ghost truncate">Shift + Enter for new line</span>
               </div>
               <button

@@ -3,17 +3,37 @@ from scipy.signal import fftconvolve
 
 PEAK_CEILING = 1.0
 
+LOOP_CROSSFADE_S = 1.5
+LOOP_SEARCH_WINDOW_S = 3.0
+LOOP_CROSSFADE_FRACTION = 0.2
+LOOP_SEARCH_FRACTION = 0.3
+
+
+def loop_windows(
+    total_s: float,
+    search_window: float | None = None,
+    crossfade_duration: float | None = None,
+) -> tuple[float, float]:
+    if search_window is None:
+        search_window = min(LOOP_SEARCH_WINDOW_S, total_s * LOOP_SEARCH_FRACTION)
+    if crossfade_duration is None:
+        crossfade_duration = min(LOOP_CROSSFADE_S, total_s * LOOP_CROSSFADE_FRACTION)
+    return search_window, crossfade_duration
+
 
 def find_loop_point(
     wav: np.ndarray,
     sr: int,
-    search_window: float = 3.0,
-    crossfade_duration: float = 1.5,
+    search_window: float | None = None,
+    crossfade_duration: float | None = None,
 ) -> int:
-    n_fade = int(crossfade_duration * sr)
-
     mono = wav.mean(axis=0) if wav.ndim == 2 else wav
     total = len(mono)
+
+    search_window, crossfade_duration = loop_windows(
+        total / sr, search_window, crossfade_duration
+    )
+    n_fade = int(crossfade_duration * sr)
 
     if total < n_fade * 3:
         return total - n_fade
@@ -51,15 +71,18 @@ def _limit_peak(wav: np.ndarray) -> np.ndarray:
 def make_loopable(
     wav: np.ndarray,
     sr: int,
-    search_window: float = 3.0,
-    crossfade_duration: float = 1.5,
+    search_window: float | None = None,
+    crossfade_duration: float | None = None,
 ) -> np.ndarray:
-    n_fade = int(crossfade_duration * sr)
-
     if wav.ndim == 1:
         wav = wav[np.newaxis, :]
 
     channels, total = wav.shape
+
+    search_window, crossfade_duration = loop_windows(
+        total / sr, search_window, crossfade_duration
+    )
+    n_fade = int(crossfade_duration * sr)
 
     if total < n_fade * 3:
         t = np.linspace(0, np.pi / 2, min(n_fade, total))

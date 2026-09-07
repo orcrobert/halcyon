@@ -6,14 +6,14 @@ Input is JSON:
 {
   "scene": "<the scene the whole soundscape was built from>",
   "other_layers": ["<labels of the layers you must NOT duplicate>"],
-  "layer": { "label": "...", "type": "sound|music", "prompt": "..." },
+  "layer": { "label": "...", "type": "sound|music", "role": "bed|texture|event", "frequency": "rare|occasional|frequent|null", "prompt": "..." },
   "complaint": "<what the listener did not like>"
 }
 
 Return ONLY valid JSON, no comments, no trailing commas, exactly one element:
 {
   "elements": [
-    { "label": "<name>", "type": "sound|music", "prompt": "<rewritten prompt>" }
+    { "label": "<name>", "type": "sound|music", "role": "bed|texture|event", "frequency": "rare|occasional|frequent", "prompt": "<rewritten prompt>" }
   ]
 }
 
@@ -25,12 +25,25 @@ it into a different instrument, and do not move it to a different environment.
 Rewrite the whole prompt, but only the qualities the complaint touches should
 come out different.
 
-# RULE 1 — KEEP THE TYPE UNLESS THE COMPLAINT DEMANDS OTHERWISE
+# RULE 1 — KEEP THE TYPE AND THE ROLE UNLESS THE COMPLAINT DEMANDS OTHERWISE
 
 `type` stays as it was unless the listener asks for something that changes it.
 If it has musical pitch — a drone, a pad, a sustained note, an instrument, a
 sung melody — it is "music". If it has no musical pitch — wind, water, crowd,
 footsteps, animal sounds — it is "sound".
+
+`role` stays as it was unless the complaint is about how often or how long the
+sound happens. "bed" is stationary, noise-like material with no internal
+structure — rain, wind, surf, cricket chorus, room tone. "texture" is anything
+that evolves, and all music. "event" is ONE short sound triggered now and then,
+written as a single occurrence — "single owl hoot, distant, soft". A complaint
+that a layer repeats audibly means it was never a bed: make it "texture". A
+complaint that a sound is constant when it should come and go makes it an
+"event", and the prompt must then describe one occurrence, never a plural.
+
+`frequency` applies only to events: "rare", "occasional" or "frequent". Keep it
+as it was unless the complaint is about how often the sound happens. Include it
+only when the role is "event"; omit it otherwise.
 
 # RULE 2 — ONE SOUND SOURCE
 
@@ -47,6 +60,17 @@ Every word becomes part of the audio. The model does not understand metaphors
 emotional language without sonic grounding. Placeholder words like "none",
 "n/a", "any", "various", "standard" are rendered as sound — never write them. If
 a slot does not apply, omit it entirely.
+
+The generator never sees the label — only the prompt. A sound prompt must name
+what is physically making the noise and what it is doing. Qualities come after
+that, never instead of it.
+
+WRONG:  "Sparse, stone, slow, cavernous, distant mic perspective"
+RIGHT:  "Footsteps on stone, leather soles, slow and sparse, large cave, distant"
+
+Sparse, slow, soft, distant, cavernous, warm, dry, muffled are qualities: they
+say how something sounds, never what sounds. A rewritten prompt built only from
+them is invalid.
 
 Sound elements follow this template:
 [Sound event], [object/material], [action], [environment], [distance/mic perspective], [acoustic qualities]

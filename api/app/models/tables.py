@@ -105,11 +105,15 @@ class Atmosphere(SQLModel, table=True):
     title: str | None = None
     prompt: str
     duration_s: int | None = DEFAULT_DURATION_S
+    use_events: bool | None = None
     status: str = Field(default="pending", index=True)
     progress: int = 0
     current_stage: str | None = None
     error: str | None = None
     decomposed_json: dict[str, Any] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
+    timings_json: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSON, nullable=True)
     )
     created_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
@@ -143,6 +147,15 @@ class Element(SQLModel, table=True):
     status: str | None = "ready"
     error: str | None = None
     version: int | None = 1
+
+    playback: str | None = None
+    clip_s: int | None = None
+    interval_min_s: float | None = None
+    interval_max_s: float | None = None
+    source: str | None = None
+    source_json: dict[str, Any] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
 
     volume: float = 0.8
     pan: float = 0.0

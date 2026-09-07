@@ -12,6 +12,16 @@ DEFAULT_DURATION_S = 10
 MIN_DURATION_S = 5
 MAX_DURATION_S = 120
 
+BED_CLIP_S = 4
+EVENT_CLIP_S = 2
+ROLE_INTERVALS = {
+    "rare": (30.0, 90.0),
+    "occasional": (8.0, 25.0),
+    "frequent": (3.0, 8.0),
+}
+MIN_INTERVAL_S = 1.0
+MAX_INTERVAL_S = 300.0
+
 logger = logging.getLogger(__name__)
 
 

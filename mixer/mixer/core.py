@@ -3,10 +3,20 @@ import numpy as np
 import soundfile as sf
 
 from mixer.effects.looping import make_loopable
-from mixer.effects.eq import apply_eq
+from mixer.effects.eq import apply_eq, remove_subsonics
 from mixer.effects.auto_eq import auto_eq
+from mixer.effects.events import (
+    EVENT_DEFAULT_INTERVAL_S,
+    EVENT_MIN_S,
+    place_events,
+    rms_db,
+    trim_to_envelope,
+)
 from mixer.effects.volume import assign_volumes
 from mixer.effects.spatial import apply_pan, assign_spatial
+
+EVENT_SCATTER_SEED = 0
+MIX_FALLBACK_LENGTH_S = 30.0
 
 
 def _resample(wav: np.ndarray, sr: int, target_sr: int) -> np.ndarray:
@@ -33,6 +43,33 @@ def _to_stereo(track: np.ndarray) -> np.ndarray:
     return track
 
 
+def _scatter(
+    track: np.ndarray,
+    target_len: int,
+    sr: int,
+    min_s: float,
+    max_s: float,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    out = np.zeros((track.shape[0], target_len), dtype=np.float64)
+    clip = track.shape[-1]
+    low = max(min_s, clip / sr)
+    high = max(max_s, low)
+
+    at = rng.uniform(0.5, low)
+    while True:
+        start = int(at * sr)
+        if start >= target_len:
+            return out
+        end = min(start + clip, target_len)
+        out[:, start:end] += track[:, : end - start]
+        at += rng.uniform(low, high)
+
+
+def _is_event(element: dict) -> bool:
+    return element.get("playback") == "oneshot"
+
+
 def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[int]]:
     wavs: list[np.ndarray] = []
     srs: list[int] = []
@@ -43,8 +80,12 @@ def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[in
         if not path or not os.path.exists(path):
             continue
         wav, sr = sf.read(path, always_2d=True)
-        wav = wav.T
-        if not element.get("looped"):
+        wav = remove_subsonics(wav.T, sr)
+        if _is_event(element):
+            wav = trim_to_envelope(wav, sr)
+            if wav.shape[-1] < EVENT_MIN_S * sr:
+                continue
+        elif not element.get("looped"):
             wav = make_loopable(wav, sr)
         wavs.append(wav)
         srs.append(sr)
@@ -62,8 +103,36 @@ def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[in
         for wav, sr, bands in zip(wavs, srs, eq_bands_per_element)
     ]
 
-    volumes = assign_volumes(valid, eqd_wavs, srs)
-    spatial = assign_spatial(list(zip(eqd_wavs, srs)))
+    loop_idx = [i for i, element in enumerate(valid) if not _is_event(element)]
+    event_idx = [i for i, element in enumerate(valid) if _is_event(element)]
+
+    volumes: list[float] = [0.0] * len(valid)
+    spatial: list[tuple[float, float]] = [(0.0, 0.0)] * len(valid)
+
+    if loop_idx:
+        loop_volumes = assign_volumes(
+            [valid[i] for i in loop_idx],
+            [eqd_wavs[i] for i in loop_idx],
+            [srs[i] for i in loop_idx],
+        )
+        loop_spatial = assign_spatial([(eqd_wavs[i], srs[i]) for i in loop_idx])
+        for slot, i in enumerate(loop_idx):
+            volumes[i] = loop_volumes[slot]
+            spatial[i] = loop_spatial[slot]
+
+    if event_idx:
+        anchor = max(
+            (
+                rms_db(eqd_wavs[i]) + 20.0 * np.log10(max(volumes[i], 1e-9))
+                for i in loop_idx
+            ),
+            default=None,
+        )
+        placements = place_events([eqd_wavs[i] for i in event_idx], anchor)
+        for slot, i in enumerate(event_idx):
+            volume, pan, depth = placements[slot]
+            volumes[i] = volume
+            spatial[i] = (pan, depth)
 
     for element, vol, (pan, depth) in zip(valid, volumes, spatial):
         element["volume"] = vol
@@ -89,8 +158,36 @@ def mix_to_file(elements: list[dict], output_path: str = "output/mixed.wav") -> 
         wav = wav * float(element.get("volume", 1.0))
         tracks.append(wav)
 
-    max_len = max(t.shape[-1] for t in tracks)
-    tracks = [_to_stereo(_loop_to_length(t, max_len)) for t in tracks]
+    loop_lengths = [
+        track.shape[-1]
+        for track, element in zip(tracks, valid)
+        if not _is_event(element)
+    ]
+    max_len = (
+        max(loop_lengths)
+        if loop_lengths
+        else int(MIX_FALLBACK_LENGTH_S * target_sr)
+    )
+
+    rng = np.random.default_rng(EVENT_SCATTER_SEED)
+    default_min, default_max = EVENT_DEFAULT_INTERVAL_S
+    laid = []
+    for element, track in zip(valid, tracks):
+        if _is_event(element):
+            laid.append(
+                _scatter(
+                    track,
+                    max_len,
+                    target_sr,
+                    float(element.get("interval_min_s") or default_min),
+                    float(element.get("interval_max_s") or default_max),
+                    rng,
+                )
+            )
+        else:
+            laid.append(_loop_to_length(track, max_len))
+
+    tracks = [_to_stereo(track) for track in laid]
 
     mixed = np.stack(tracks).sum(axis=0)
 

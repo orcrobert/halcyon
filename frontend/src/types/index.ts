@@ -13,7 +13,9 @@ export interface EQBand {
   q: number
 }
 
-export type ElementStatus = 'ready' | 'regenerating' | 'failed'
+export type ElementStatus = 'ready' | 'regenerating' | 'sourcing' | 'failed'
+
+export type ElementPlayback = 'loop' | 'oneshot'
 
 export interface Element {
   id: number
@@ -25,6 +27,12 @@ export interface Element {
   error: string | null
   version: number
   position: number
+  playback: ElementPlayback
+  clip_s: number | null
+  interval_min_s: number | null
+  interval_max_s: number | null
+  source: string
+  source_json: Record<string, unknown> | null
   volume: number
   pan: number
   depth: number
@@ -36,16 +44,27 @@ export interface Element {
     depth: number
     eq_json: EQBand[] | null
   }
-  audio_url: string
+  audio_url: string | null
 }
 
 export type AtmosphereStatus = 'pending' | 'generating' | 'ready' | 'failed'
+
+export interface AtmosphereTimings {
+  decompose_s?: number
+  generate_s?: number
+  mix_s?: number
+  persist_s?: number
+  total_s?: number
+  audio_s?: number
+  regenerate?: Omit<AtmosphereTimings, 'regenerate'>
+}
 
 export interface Atmosphere {
   id: number
   title: string | null
   prompt: string
   duration_s: number
+  use_events: boolean
   status: AtmosphereStatus
   progress: number
   current_stage: string | null
@@ -53,6 +72,7 @@ export interface Atmosphere {
   generated_at: string | null
   created_at: string
   updated_at: string
+  timings?: AtmosphereTimings | null
   elements?: Element[] | null
 }
 
@@ -71,6 +91,8 @@ export type ElementMixUpdate = Partial<{
   pan: number
   depth: number
   tuning_hz: number
+  interval_min_s: number
+  interval_max_s: number
   eq_json: EQBand[]
 }>
 

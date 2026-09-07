@@ -4,7 +4,9 @@ import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
 import { EQPanel } from './EQPanel'
 import { SpatialModal } from './SpatialModal'
+import { DensityModal } from './DensityModal'
 import { LayerMenu } from './LayerMenu'
+import { DEFAULT_INTERVAL_MAX_S, DEFAULT_INTERVAL_MIN_S } from '../hooks/eventScheduler'
 import { alpha } from '../theme'
 
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
   onEQChange: (label: string, eq: EQState) => void
   onPanChange: (label: string, pan: number) => void
   onDepthChange: (label: string, depth: number) => void
+  onIntervalChange: (label: string, minS: number, maxS: number) => void
   onRegenerate: (element: Element) => void
   onDelete: (element: Element) => void
   deletable: boolean
@@ -32,7 +35,7 @@ function hashLabel(label: string): number {
   return h >>> 0
 }
 
-export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onRegenerate, onDelete, deletable }: Props) {
+export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onRegenerate, onDelete, deletable }: Props) {
   const blobSeed = hashLabel(element.label)
   const blobX = 20 + (blobSeed % 60)
   const blobY = 15 + ((blobSeed >> 8) % 70)
@@ -47,10 +50,21 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   const [hovered, setHovered] = useState(false)
   const [eqOpen, setEqOpen] = useState(false)
   const [spatialOpen, setSpatialOpen] = useState(false)
+  const [densityOpen, setDensityOpen] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [interval, setInterval] = useState<[number, number]>([
+    element.interval_min_s ?? DEFAULT_INTERVAL_MIN_S,
+    element.interval_max_s ?? DEFAULT_INTERVAL_MAX_S,
+  ])
   const eqBtnRef = useRef<HTMLButtonElement>(null)
   const spatialBtnRef = useRef<HTMLButtonElement>(null)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
+  const isEvent = element.playback === 'oneshot'
+
+  function handleIntervalChange(minS: number, maxS: number) {
+    setInterval([minS, maxS])
+    onIntervalChange(element.label, minS, maxS)
+  }
 
   const dispVolume = animatedVolume ?? volume
   const dispPan    = animatedPan    ?? pan
@@ -115,6 +129,11 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         <p style={{ fontSize: '11px', color: 'var(--color-ink-muted)', lineHeight: '1.6', margin: 0, fontFamily: 'inherit' }}>
           {element.prompt}
         </p>
+        {element.clip_s != null && (
+          <p style={{ fontSize: '10px', color: 'var(--color-ink-faint)', lineHeight: '1.5', margin: '6px 0 0 0', fontFamily: 'inherit' }}>
+            {element.clip_s}s loop
+          </p>
+        )}
         {failed && element.error && (
           <p style={{ fontSize: '10px', color: 'var(--color-danger-bright)', lineHeight: '1.5', margin: '8px 0 0 0', fontFamily: 'inherit' }}>
             {element.error}
@@ -294,11 +313,15 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         {/* Type badge */}
         <span
           className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
-            muted ? 'bg-surface-raised text-ink-whisper' : isMusic ? 'bg-tag-music/10 text-tag-music' : 'bg-tag-sound/10 text-tag-sound'
+            muted
+              ? 'bg-surface-raised text-ink-whisper'
+              : isEvent ? 'bg-tag-event/10 text-tag-event'
+              : isMusic ? 'bg-tag-music/10 text-tag-music'
+              : 'bg-tag-sound/10 text-tag-sound'
           }`}
           style={{ padding: '4px 10px' }}
         >
-          {isMusic ? 'music' : 'sound'}
+          {isEvent ? 'event' : isMusic ? 'music' : 'sound'}
         </span>
 
         {/* Bottom buttons row */}
@@ -349,7 +372,17 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         deletable={deletable}
         onRegenerate={() => onRegenerate(element)}
         onDelete={() => onDelete(element)}
+        onFrequency={isEvent ? () => setDensityOpen(true) : undefined}
         onClose={() => setMenuOpen(false)}
+      />
+
+      <DensityModal
+        intervalMinS={interval[0]}
+        intervalMaxS={interval[1]}
+        open={densityOpen}
+        anchorRef={menuBtnRef}
+        onIntervalChange={handleIntervalChange}
+        onClose={() => setDensityOpen(false)}
       />
 
       <SpatialModal

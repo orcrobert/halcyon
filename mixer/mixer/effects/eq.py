@@ -1,6 +1,19 @@
 import numpy as np
-from scipy.signal import sosfilt, iirpeak, iirnotch
+from scipy.signal import sosfilt, sosfiltfilt, iirpeak, iirnotch
 from scipy.signal import butter
+
+RUMBLE_HZ = 30.0
+RUMBLE_ORDER = 2
+RUMBLE_MIN_SAMPLES = 64
+
+
+def remove_subsonics(wav: np.ndarray, sr: int) -> np.ndarray:
+    nyq = sr / 2.0
+    if RUMBLE_HZ >= nyq or wav.shape[-1] < RUMBLE_MIN_SAMPLES:
+        return wav
+    sos = butter(RUMBLE_ORDER, RUMBLE_HZ / nyq, btype="highpass", output="sos")
+    padlen = min(3 * (2 * len(sos) + 1), wav.shape[-1] - 1)
+    return sosfiltfilt(sos, wav, axis=-1, padlen=padlen)
 
 
 def _shelf(freq: float, gain_db: float, shelf_type: str, sr: int) -> np.ndarray:

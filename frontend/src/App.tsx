@@ -82,7 +82,7 @@ function AuthedApp() {
 
   const {
     load, start, pause, setVolume, setEQ, setPan, setDepth,
-    setTuning, stop, forget, exportMix, getAnalyser,
+    setTuning, setEventInterval, stop, forget, exportMix, getAnalyser,
     startAnimate, stopAnimate, setAnimateMuted,
     startBinaural, stopBinaural, setBinauralFreqs,
   } = useAudioEngine()
@@ -114,8 +114,11 @@ function AuthedApp() {
       setVolume(el.label, el.volume)
       setPan(el.label, el.pan)
       setDepth(el.label, el.depth)
+      if (el.playback === 'oneshot' && el.interval_min_s !== null && el.interval_max_s !== null) {
+        setEventInterval(el.label, el.interval_min_s, el.interval_max_s)
+      }
     }
-  }, [load, setVolume, setPan, setDepth])
+  }, [load, setVolume, setPan, setDepth, setEventInterval])
 
   const activatePollFor = useCallback(async (id: number) => {
     pollAbortRef.current?.abort()
@@ -181,11 +184,11 @@ function AuthedApp() {
     }
   }, [activatePollFor])
 
-  const handleGenerate = useCallback(async (prompt: string, durationS: number) => {
+  const handleGenerate = useCallback(async (prompt: string, durationS: number, useEvents: boolean) => {
     setSubmitting(true)
     setError(null)
     try {
-      const created = await createAtmosphere({ prompt, duration_s: durationS })
+      const created = await createAtmosphere({ prompt, duration_s: durationS, use_events: useEvents })
       localStorage.setItem(PENDING_KEY, String(created.id))
       setAtmosphere(created)
       setView('generating')
@@ -341,6 +344,12 @@ function AuthedApp() {
     if (id !== undefined) enqueue(id, { depth })
   }, [setDepth, enqueue, labelToId])
 
+  const handleIntervalChange = useCallback((label: string, minS: number, maxS: number) => {
+    setEventInterval(label, minS, maxS)
+    const id = labelToId.get(label)
+    if (id !== undefined) enqueue(id, { interval_min_s: minS, interval_max_s: maxS })
+  }, [setEventInterval, enqueue, labelToId])
+
   const handleTuningChange = useCallback((freqHz: number) => {
     setTuning(freqHz)
     const tuning_hz = Math.round(freqHz)
@@ -427,8 +436,9 @@ function AuthedApp() {
           onEQChange={handleEQChange}
           onPanChange={handlePanChange}
           onDepthChange={handleDepthChange}
+          onIntervalChange={handleIntervalChange}
           onTuningChange={handleTuningChange}
-          onExport={() => exportMix(atmosphere.title ?? `atmosphere-${atmosphere.id}`)}
+          onExport={(seconds) => exportMix(atmosphere.title ?? `atmosphere-${atmosphere.id}`, seconds)}
           onReset={handleNewAtmosphere}
           onRegenerateElement={handleRegenerateElement}
           onDeleteElement={handleDeleteElement}

@@ -14,6 +14,7 @@ export async function createAtmosphere(payload: {
   prompt: string
   title?: string
   duration_s?: number
+  use_events?: boolean
 }): Promise<Atmosphere> {
   const { data } = await api.post<AtmosphereResponse>('/api/atmospheres', payload)
   return data.data

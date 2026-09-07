@@ -20,6 +20,45 @@ router = APIRouter(prefix="/api/atmospheres", tags=["atmospheres"])
 
 PER_PAGE = 20
 
+CARRIED_FIELDS = (
+    "role",
+    "playback",
+    "clip_s",
+    "interval_min_s",
+    "interval_max_s",
+    "source",
+    "source_json",
+)
+
+
+def _element_specs(atmosphere: Atmosphere) -> list[dict]:
+    roles = {
+        element.get("label"): element.get("role")
+        for element in (atmosphere.decomposed_json or {}).get("elements", [])
+        if isinstance(element, dict)
+    }
+
+    specs = []
+    for element in atmosphere.elements:
+        carried = {
+            "role": roles.get(element.label),
+            "playback": element.playback,
+            "clip_s": element.clip_s,
+            "interval_min_s": element.interval_min_s,
+            "interval_max_s": element.interval_max_s,
+            "source": element.source,
+            "source_json": element.source_json,
+        }
+        specs.append(
+            {
+                "label": element.label,
+                "type": element.type,
+                "prompt": element.prompt,
+                **{k: v for k, v in carried.items() if v is not None},
+            }
+        )
+    return specs
+
 
 def owned_atmosphere(
     session: Session, user: User, atmosphere_id: int
@@ -40,6 +79,7 @@ def serialize_atmosphere(
         title=atmosphere.title,
         prompt=atmosphere.prompt,
         duration_s=atmosphere.duration_s or DEFAULT_DURATION_S,
+        use_events=atmosphere.use_events is not False,
         status=atmosphere.status,
         progress=atmosphere.progress,
         current_stage=atmosphere.current_stage,
@@ -47,6 +87,7 @@ def serialize_atmosphere(
         created_at=atmosphere.created_at,
         updated_at=atmosphere.updated_at,
         generated_at=atmosphere.generated_at,
+        timings=atmosphere.timings_json,
         elements=(
             [serialize_element(element) for element in atmosphere.elements]
             if include_elements
@@ -96,6 +137,7 @@ def store(
         prompt=payload.prompt.strip(),
         title=payload.title.strip() if payload.title else None,
         duration_s=payload.duration_s,
+        use_events=payload.use_events,
         status="pending",
     )
     session.add(atmosphere)
@@ -117,11 +159,17 @@ def regenerate(
     source = owned_atmosphere(session, user, atmosphere_id)
     decomposed = source.decomposed_json or {}
 
-    elements = [
-        {"label": element.label, "type": element.type, "prompt": element.prompt}
-        for element in source.elements
-    ] or [
-        {"label": element["label"], "type": element["type"], "prompt": element["prompt"]}
+    elements = _element_specs(source) or [
+        {
+            "label": element["label"],
+            "type": element["type"],
+            "prompt": element["prompt"],
+            **{
+                key: element[key]
+                for key in CARRIED_FIELDS
+                if element.get(key) is not None
+            },
+        }
         for element in decomposed.get("elements", [])
         if isinstance(element, dict)
         and element.get("label")
@@ -140,6 +188,7 @@ def regenerate(
         prompt=source.prompt,
         title=source.title,
         duration_s=source.duration_s,
+        use_events=source.use_events,
         status="pending",
         decomposed_json={
             "atmosphere": decomposed.get("atmosphere"),

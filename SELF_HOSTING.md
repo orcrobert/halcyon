@@ -103,33 +103,46 @@ a stub for testing.
 
 ```json
 {
-  "duration": 10,
+  "duration": 30,
   "elements": [
-    { "label": "wind", "type": "sound", "prompt": "low desert wind, distant, soft" },
-    { "label": "drone", "type": "music", "prompt": "ambient drone, warm low sustained tone" }
+    { "index": 0, "label": "wind", "type": "sound", "prompt": "low desert wind, distant, soft", "duration": 4 },
+    { "index": 1, "label": "drone", "type": "music", "prompt": "ambient drone, warm low sustained tone", "duration": 30 }
   ]
 }
 ```
 
 - `type` is `"sound"` (synthesize with AudioGen) or `"music"` (MusicGen).
 - `prompt` is the text to generate from.
-- `duration` is the seconds of audio to generate per element, chosen by the user
-  next to the prompt box (5–120). A generator that ignores it still works — it
-  just always produces its own configured length.
+- `index` is the element's position in the request. Echo it back and the API
+  matches your reply to the right layer no matter what order you answer in.
+- The per-element `duration` is the seconds to generate for that element. Beds —
+  stationary, noise-like material the browser loops — ask for a few seconds;
+  one-shot events ask for about two; evolving layers ask for the length the user
+  chose next to the prompt box. An event prompt describes a single occurrence
+  ("single owl hoot, distant, soft"); the browser retriggers it, so do not
+  generate a repeating version of it.
+- The top-level `duration` is that user-chosen length (5–120) and is the
+  fallback for elements that carry none.
+- A generator that ignores both `duration` fields still works — it just always
+  produces its own configured length.
 
 **Response** — echo each element back with base64-encoded WAV bytes added:
 
 ```json
 {
   "elements": [
-    { "label": "wind", "type": "sound", "prompt": "...", "audio_b64": "<base64 WAV>" },
-    { "label": "drone", "type": "music", "prompt": "...", "audio_b64": "<base64 WAV>" }
+    { "index": 0, "label": "wind", "type": "sound", "prompt": "...", "audio_b64": "<base64 WAV>" },
+    { "index": 1, "label": "drone", "type": "music", "prompt": "...", "audio_b64": "<base64 WAV>" }
   ]
 }
 ```
 
 - `audio_b64` must be the base64 encoding of a complete WAV file.
-- Keep the other element fields; the API reads them back.
+- Keep `index` (or at least `label`); the API matches replies by `index`, then
+  by `label`, then by position. Elements that come back without `audio_b64` are
+  dropped and the rest of the mix goes ahead.
+- Batching by length pays off: generating four elements at 4 s costs far less
+  than four at 30 s on an autoregressive model.
 - The API waits up to **300 s** per request, so a generator that honours long
   durations should still fit a whole batch inside that budget.
 - There is no auth between the API and the generator by default — run the

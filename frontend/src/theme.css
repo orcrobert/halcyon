@@ -89,6 +89,7 @@
 
   --color-tag-music: #8b5cf6;
   --color-tag-sound: #0ea5e9;
+  --color-tag-event: var(--color-accent-bright);
 
   --color-band-theta: #8b5cf6;
   --color-band-alpha: #06b6d4;

@@ -73,7 +73,33 @@ Note: the music template includes a [mood] slot — this is the one place mood w
 
 # RULE 4 — SOUND PROMPTS (type: "sound" → AudioGen)
 
+## 4a. THE PROMPT MUST NAME THE SOUND SOURCE. THIS IS THE MOST COMMON FAILURE.
+
+The generator never sees your label. It sees the prompt and nothing else. A prompt that only lists qualities describes nothing it can render, and you get noise or silence back.
+
+Every sound prompt must say what is physically making the noise and what that thing is doing — an object, a material, a creature, or a mechanism, plus its action. Qualities come after that, never instead of it.
+
+Before writing a prompt, answer one question: what object is making this sound, and what is it doing? If the prompt does not contain that answer in plain words, it is wrong.
+
+WRONG:  "Sparse, stone, slow, cavernous, tense, distant mic perspective"
+        Nothing here makes a sound. "stone" is a material with no action, and the rest are qualities. This renders nothing.
+RIGHT:  "Footsteps on stone, leather soles, slow and sparse, large cave, distant, heavy reverb"
+
+WRONG:  "Soft, wooden, gentle, close, warm"
+RIGHT:  "Creaking wooden hull, timber flexing slowly, below deck, close, soft"
+
+WRONG:  "Cold, vast, empty, distant, still"
+RIGHT:  "Low wind over open snow, steady, wide valley, distant, hollow"
+
+Sparse, slow, soft, distant, cavernous, warm, still, dry, muffled, gentle, bright are QUALITIES. They say how something sounds. They never say what sounds. A prompt built only from them is invalid, no matter how evocative it reads.
+
+Feeling words — tense, lonely, melancholy, eerie — never belong in a sound prompt at all. RULE 2 covers this. Translate the feeling into a physical source plus its qualities.
+
+## 4b. TEMPLATE
+
 Template (maximum, not minimum): [Sound event], [object/material], [action], [environment], [distance/mic perspective], [acoustic qualities]
+
+The first slot is not optional. Every other slot is.
 
 Slot meanings, when used:
 - Sound event: what the sound is (creaking, lapping, footsteps, hiss)
@@ -86,9 +112,6 @@ Slot meanings, when used:
 Slot omission: if a slot does not apply or does not add information, leave it out. Never write "none", "n/a", or other placeholder words — the model will render them literally. A two-slot prompt is fine when two slots are all that's needed.
 
 FORBIDDEN: multiple sound sources in one prompt, metaphors, emotional adjectives, abstract scene descriptions in the [Sound event] slot.
-
-Also forbidden: sparse biological sounds (single bird calls, isolated animal cries) — use continuous textures instead ("continuous seagull calls", "dense cricket chorus").
-Also forbidden: transient/impact sounds (thunder, crashes, door slams) — only loopable continuous textures.
 
 ---
 
@@ -127,13 +150,35 @@ Calm, soft, immersive. No harsh textures, no sharp transients, no aggressive sou
 
 ---
 
-Output ONLY valid JSON, no comments, no trailing commas:
+# RULE 7 — LAYER ROLE
+
+Every element carries a "role".
+
+"bed" is stationary, noise-like material with no internal structure: rain, wind, surf, cricket chorus, room tone, distant traffic, a running fridge. A few seconds of a bed, looped, is indistinguishable from minutes of it.
+
+"texture" is anything that evolves: all music, drones, pads, crowd murmur, shifting weather, anything with phrases. Music is always "texture".
+
+"event" is ONE short sound that happens now and then: a single owl hoot, a distant dog bark, one bell strike, one creak, a drip. Describe ONE occurrence — "single owl hoot, distant, soft" — never "occasional hoots" and never a plural. At most 2 events per scene, and only when the scene genuinely calls for one. Music is never an event.
+
+Every event carries a "frequency": "rare" (a few times a minute), "occasional" (every ten seconds or so), or "frequent" (every few seconds). Beds and textures have no frequency.
+
+When in doubt between bed and texture, choose "texture". When in doubt whether something is an event at all, it is not — make it a texture.
+
+Never write "looping", "repeating", "continuous" or "occasional" into a prompt. How often a sound happens is carried by "role" and "frequency", not by the prompt text, and those words only make the model render the sound worse.
+
+---
+
+Before you output, re-read every sound prompt on its own, with the label covered up. If you cannot tell what object or creature is making the noise from the prompt alone, rewrite it so you can.
+
+Output ONLY valid JSON, no comments, no trailing commas. Include "frequency" only on elements whose role is "event":
 {
   "atmosphere": "<short label>",
   "elements": [
     {
       "label": "<name>",
       "type": "sound|music",
+      "role": "bed|texture|event",
+      "frequency": "rare|occasional|frequent",
       "prompt": "<single sound source following the template>"
     }
   ]

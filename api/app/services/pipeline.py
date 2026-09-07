@@ -1,6 +1,7 @@
 import io
 import logging
 import tempfile
+import time
 from pathlib import Path
 
 import soundfile as sf
@@ -10,7 +11,7 @@ from api.app.config import DEFAULT_DURATION_S
 from api.app.db import session_scope
 from api.app.models.tables import Atmosphere, Element, utcnow
 from api.app.services import storage
-from api.app.services.decomposer import decompose, refine_element
+from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
 from api.app.services.generator import generate
 from api.app.services.runconfig import resolve_config
 from mixer.core import analyze
@@ -49,7 +50,10 @@ def _persist(
     valid: list[dict],
     wavs: list,
     srs: list[int],
+    timings: dict[str, float],
+    started: float,
 ) -> None:
+    persist_started = time.perf_counter()
     atmosphere.elements.clear()
     session.flush()
 
@@ -76,6 +80,12 @@ def _persist(
                 prompt=element.get("prompt", ""),
                 audio_path=audio_path,
                 duration_s=round(wav.shape[-1] / sr, 3),
+                playback=element.get("playback"),
+                clip_s=element.get("clip_s"),
+                interval_min_s=element.get("interval_min_s"),
+                interval_max_s=element.get("interval_max_s"),
+                source=element.get("source"),
+                source_json=element.get("source_json"),
                 volume=volume,
                 pan=pan,
                 depth=depth,
@@ -87,6 +97,11 @@ def _persist(
             )
         )
 
+    atmosphere.timings_json = {
+        **timings,
+        "persist_s": round(time.perf_counter() - persist_started, 3),
+        "total_s": round(time.perf_counter() - started, 3),
+    }
     atmosphere.status = "ready"
     atmosphere.current_stage = None
     atmosphere.progress = 100
@@ -95,6 +110,14 @@ def _persist(
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
     session.commit()
+
+
+def _clip_seconds(path: Path) -> float:
+    try:
+        info = sf.info(str(path))
+    except Exception:
+        return 0.0
+    return info.frames / info.samplerate if info.samplerate else 0.0
 
 
 def _mark_element(
@@ -117,6 +140,16 @@ def _unique_label(atmosphere: Atmosphere, label: str, element_id: int) -> str:
     return f"{label} {suffix}"
 
 
+def _stored_spec(atmosphere: Atmosphere, label: str) -> dict:
+    for element in (atmosphere.decomposed_json or {}).get("elements", []):
+        if isinstance(element, dict) and element.get("label") == label:
+            return {
+                "role": element.get("role") or DEFAULT_ROLE,
+                "frequency": element.get("frequency"),
+            }
+    return {"role": DEFAULT_ROLE, "frequency": None}
+
+
 def _stored_payload(element: Element) -> dict | None:
     try:
         path = storage.resolve_audio(element.audio_path)
@@ -128,6 +161,7 @@ def _stored_payload(element: Element) -> dict | None:
         "label": element.label,
         "type": element.type,
         "prompt": element.prompt,
+        "playback": element.playback or "loop",
         "file": str(path),
         "looped": True,
     }
@@ -166,6 +200,9 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
             atmosphere.user.preferences, atmosphere.user.generators
         )
 
+        started = time.perf_counter()
+        timings: dict[str, float] = {}
+
         try:
             _mark_element(session, element, "regenerating", None)
 
@@ -173,6 +210,11 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                 "label": element.label,
                 "type": element.type,
                 "prompt": element.prompt,
+                **_stored_spec(atmosphere, element.label),
+                "playback": element.playback or "loop",
+                "clip_s": element.clip_s,
+                "interval_min_s": element.interval_min_s,
+                "interval_max_s": element.interval_max_s,
             }
             if feedback:
                 spec = refine_element(
@@ -181,18 +223,23 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                     atmosphere.prompt,
                     [row.label for row in atmosphere.elements if row.id != element.id],
                     config,
+                    atmosphere.use_events is not False,
                 )
 
+            mark = time.perf_counter()
             generated = generate(
                 {"elements": [spec]},
                 config,
                 atmosphere.duration_s or DEFAULT_DURATION_S,
             )
+            timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
             with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:
                 fresh = Path(scratch) / "fresh.wav"
                 fresh.write_bytes(generated[0].pop("audio"))
+                timings["audio_s"] = round(_clip_seconds(fresh), 3)
 
+                mark = time.perf_counter()
                 jobs: list[tuple[Element, dict]] = []
                 for row in atmosphere.elements:
                     if row.id == element.id:
@@ -212,6 +259,8 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                 if not any(row.id == element.id for row, _, _, _ in mixed):
                     raise ValueError("No usable audio came back from the generator")
 
+                timings["mix_s"] = round(time.perf_counter() - mark, 3)
+
                 for row, payload, wav, sr in mixed:
                     regenerated = row.id == element.id
                     if regenerated:
@@ -224,6 +273,12 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                         )
                         row.type = payload.get("type", row.type)
                         row.prompt = payload.get("prompt", row.prompt)
+                        row.playback = payload.get("playback")
+                        row.clip_s = payload.get("clip_s")
+                        row.interval_min_s = payload.get("interval_min_s")
+                        row.interval_max_s = payload.get("interval_max_s")
+                        row.source = payload.get("source")
+                        row.source_json = payload.get("source_json")
                         row.audio_path = storage.write_element_audio(
                             atmosphere.id, row.position, row.label, buffer.getvalue()
                         )
@@ -238,6 +293,11 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                     _apply_mix(row, payload, regenerated)
                     session.add(row)
 
+                timings["total_s"] = round(time.perf_counter() - started, 3)
+                atmosphere.timings_json = {
+                    **(atmosphere.timings_json or {}),
+                    "regenerate": timings,
+                }
                 atmosphere.updated_at = utcnow()
                 session.add(atmosphere)
                 session.commit()
@@ -262,27 +322,41 @@ def run_generation(atmosphere_id: int) -> None:
             atmosphere.user.preferences, atmosphere.user.generators
         )
 
+        started = time.perf_counter()
+        timings: dict[str, float] = {}
+
         try:
             _set_stage(session, atmosphere, "decomposing")
+            mark = time.perf_counter()
+            allow_events = atmosphere.use_events is not False
             decomposed = atmosphere.decomposed_json or decompose(
-                atmosphere.prompt, config
+                atmosphere.prompt, config, allow_events
             )
+            timings["decompose_s"] = round(time.perf_counter() - mark, 3)
 
             _set_stage(session, atmosphere, "generating")
+            mark = time.perf_counter()
             elements = generate(
                 decomposed, config, atmosphere.duration_s or DEFAULT_DURATION_S
             )
+            timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
             _set_stage(session, atmosphere, "mixing")
+            mark = time.perf_counter()
             with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:
+                audio_s = 0.0
                 for index, element in enumerate(elements):
                     path = Path(scratch) / f"{index:02d}.wav"
                     path.write_bytes(element.pop("audio"))
                     element["file"] = str(path)
+                    audio_s += _clip_seconds(path)
 
                 valid, wavs, srs = analyze(elements)
                 if not valid:
                     raise ValueError("No usable audio came back from the generator")
+
+                timings["mix_s"] = round(time.perf_counter() - mark, 3)
+                timings["audio_s"] = round(audio_s, 3)
 
                 _set_stage(session, atmosphere, "persisting")
                 atmosphere.decomposed_json = {
@@ -295,7 +369,7 @@ def run_generation(atmosphere_id: int) -> None:
                 if not atmosphere.title:
                     atmosphere.title = decomposed.get("atmosphere")
 
-                _persist(session, atmosphere, valid, wavs, srs)
+                _persist(session, atmosphere, valid, wavs, srs, timings, started)
         except Exception as exc:
             logger.exception("Generation failed for atmosphere %s", atmosphere_id)
             session.rollback()
