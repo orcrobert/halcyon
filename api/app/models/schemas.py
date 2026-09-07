@@ -220,6 +220,7 @@ class AtmosphereCreate(BaseModel):
     duration_s: int = Field(
         default=DEFAULT_DURATION_S, ge=MIN_DURATION_S, le=MAX_DURATION_S
     )
+    use_events: bool = True
 
 
 class AtmosphereOut(BaseModel):
@@ -227,6 +228,7 @@ class AtmosphereOut(BaseModel):
     title: str | None
     prompt: str
     duration_s: int
+    use_events: bool
     status: str
     progress: int
     current_stage: str | None

@@ -64,6 +64,7 @@ export interface Atmosphere {
   title: string | null
   prompt: string
   duration_s: number
+  use_events: boolean
   status: AtmosphereStatus
   progress: number
   current_stage: string | null

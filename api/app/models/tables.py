@@ -105,6 +105,7 @@ class Atmosphere(SQLModel, table=True):
     title: str | None = None
     prompt: str
     duration_s: int | None = DEFAULT_DURATION_S
+    use_events: bool | None = None
     status: str = Field(default="pending", index=True)
     progress: int = 0
     current_stage: str | None = None

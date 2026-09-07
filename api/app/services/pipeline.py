@@ -223,6 +223,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                     atmosphere.prompt,
                     [row.label for row in atmosphere.elements if row.id != element.id],
                     config,
+                    atmosphere.use_events is not False,
                 )
 
             mark = time.perf_counter()
@@ -327,8 +328,9 @@ def run_generation(atmosphere_id: int) -> None:
         try:
             _set_stage(session, atmosphere, "decomposing")
             mark = time.perf_counter()
+            allow_events = atmosphere.use_events is not False
             decomposed = atmosphere.decomposed_json or decompose(
-                atmosphere.prompt, config
+                atmosphere.prompt, config, allow_events
             )
             timings["decompose_s"] = round(time.perf_counter() - mark, 3)
 

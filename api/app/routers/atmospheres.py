@@ -79,6 +79,7 @@ def serialize_atmosphere(
         title=atmosphere.title,
         prompt=atmosphere.prompt,
         duration_s=atmosphere.duration_s or DEFAULT_DURATION_S,
+        use_events=atmosphere.use_events is not False,
         status=atmosphere.status,
         progress=atmosphere.progress,
         current_stage=atmosphere.current_stage,
@@ -136,6 +137,7 @@ def store(
         prompt=payload.prompt.strip(),
         title=payload.title.strip() if payload.title else None,
         duration_s=payload.duration_s,
+        use_events=payload.use_events,
         status="pending",
     )
     session.add(atmosphere)
@@ -186,6 +188,7 @@ def regenerate(
         prompt=source.prompt,
         title=source.title,
         duration_s=source.duration_s,
+        use_events=source.use_events,
         status="pending",
         decomposed_json={
             "atmosphere": decomposed.get("atmosphere"),

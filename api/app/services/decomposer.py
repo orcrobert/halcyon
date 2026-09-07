@@ -10,8 +10,20 @@ DEFAULT_ROLE = "texture"
 DEFAULT_FREQUENCY = "occasional"
 ROLE_PLAYBACK = {"bed": "loop", "texture": "loop", "event": "oneshot"}
 
+NO_EVENTS_NOTE = "\n".join([
+    "",
+    "---",
+    "",
+    "# OVERRIDE - NO EVENTS IN THIS SCENE",
+    "",
+    'Do not use the "event" role and do not write "frequency" on any element.',
+    'Every element is "bed" or "texture". A sound that would have been a single',
+    "occurrence becomes continuous material instead: name the continuous form",
+    '("dense cricket chorus", never "single cricket chirp").',
+])
 
-def _parse_result(raw: str) -> dict:
+
+def _parse_result(raw: str, allow_events: bool = True) -> dict:
     try:
         result = json.loads(raw)
     except json.JSONDecodeError:
@@ -54,6 +66,8 @@ def _parse_result(raw: str) -> dict:
         role = str(element.get("role", "")).strip().lower()
         if role not in ROLE_PLAYBACK or element["type"] == "music":
             role = DEFAULT_ROLE
+        if role == "event" and not allow_events:
+            role = DEFAULT_ROLE
         element["role"] = role
         element["playback"] = ROLE_PLAYBACK[role]
 
@@ -71,10 +85,12 @@ def _parse_result(raw: str) -> dict:
     return result
 
 
-def decompose(prompt: str, config: RunConfig) -> dict:
+def decompose(prompt: str, config: RunConfig, allow_events: bool = True) -> dict:
     system = config.decomposer_prompt or default_decomposer_prompt()
+    if not allow_events:
+        system = system + NO_EVENTS_NOTE
     raw = complete_json(config, system, f"Scene: {prompt}")
-    return _parse_result(raw)
+    return _parse_result(raw, allow_events)
 
 
 def refine_element(
@@ -83,6 +99,7 @@ def refine_element(
     scene: str,
     siblings: list[str],
     config: RunConfig,
+    allow_events: bool = True,
 ) -> dict:
     request = json.dumps(
         {
@@ -99,5 +116,8 @@ def refine_element(
         },
         ensure_ascii=False,
     )
-    raw = complete_json(config, refiner_prompt(), request)
-    return _parse_result(raw)["elements"][0]
+    system = refiner_prompt()
+    if not allow_events:
+        system = system + NO_EVENTS_NOTE
+    raw = complete_json(config, system, request)
+    return _parse_result(raw, allow_events)["elements"][0]

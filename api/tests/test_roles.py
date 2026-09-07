@@ -3,7 +3,7 @@ import json
 
 import pytest
 
-from api.tests.conftest import FakeResponse
+from api.tests.conftest import FakeResponse, wav_bytes
 
 
 def _config():
@@ -363,3 +363,95 @@ def test_events_are_generated_short_and_stored_as_one_shots(
     assert owl["clip_s"] == EVENT_CLIP_S
     assert (owl["interval_min_s"], owl["interval_max_s"]) == ROLE_INTERVALS["rare"]
     assert owl["depth"] > 0
+
+
+def test_events_are_suppressed_when_the_scene_turns_them_off():
+    from api.app.services.decomposer import _parse_result
+
+    payload = json.dumps(
+        {
+            "atmosphere": "Night Forest",
+            "elements": [
+                {
+                    "label": "Owl",
+                    "type": "sound",
+                    "role": "event",
+                    "frequency": "rare",
+                    "prompt": "single owl hoot",
+                }
+            ],
+        }
+    )
+
+    with_events = _parse_result(payload)["elements"][0]
+    without = _parse_result(payload, allow_events=False)["elements"][0]
+
+    assert with_events["playback"] == "oneshot"
+    assert without["role"] == "texture"
+    assert without["playback"] == "loop"
+    assert "frequency" not in without
+    assert "interval_min_s" not in without
+
+
+def test_turning_events_off_reaches_the_decomposer(client, auth, monkeypatch):
+    import api.app.services.decomposer as decomposer_module
+    from api.app.services.pipeline import run_generation
+
+    seen = {}
+
+    def capture(config, system, user):
+        seen["system"] = system
+        return json.dumps(
+            {
+                "atmosphere": "Night Forest",
+                "elements": [
+                    {
+                        "label": "Owl",
+                        "type": "sound",
+                        "role": "event",
+                        "frequency": "rare",
+                        "prompt": "single owl hoot",
+                    }
+                ],
+            }
+        )
+
+    monkeypatch.setattr(decomposer_module, "complete_json", capture)
+
+    import base64
+
+    import api.app.services.generator as generator_module
+
+    monkeypatch.setattr(
+        generator_module.requests,
+        "post",
+        lambda url, **kw: FakeResponse(
+            {
+                "elements": [
+                    {**e, "audio_b64": base64.b64encode(wav_bytes()).decode()}
+                    for e in kw["json"]["elements"]
+                ]
+            }
+        ),
+    )
+
+    atmosphere_id = client.post(
+        "/api/atmospheres",
+        headers=auth,
+        json={"prompt": "a night forest", "use_events": False},
+    ).json()["data"]["id"]
+    run_generation(atmosphere_id)
+
+    body = client.get(f"/api/atmospheres/{atmosphere_id}", headers=auth).json()["data"]
+
+    assert body["use_events"] is False
+    assert "NO EVENTS IN THIS SCENE" in seen["system"]
+    assert body["elements"][0]["playback"] == "loop"
+
+
+def test_scenes_allow_events_by_default(client, auth):
+    body = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a night forest"}
+    ).json()["data"]
+
+    assert body["use_events"] is True
