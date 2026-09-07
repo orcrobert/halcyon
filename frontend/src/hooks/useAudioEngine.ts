@@ -71,6 +71,9 @@ const LIMITER_RATIO = 20
 const LIMITER_ATTACK_S = 0.001
 const LIMITER_RELEASE_S = 0.1
 
+const RUMBLE_FREQ_HZ = 30
+const RUMBLE_Q = 0.707
+
 const EQ_LOW_FREQ_HZ = 200
 const EQ_MID_FREQ_HZ = 1000
 const EQ_MID_Q = 1.4
@@ -104,6 +107,7 @@ interface EventLane {
 }
 
 interface TrackNode {
+  input: AudioNode
   masterGain: GainNode
   panner: StereoPannerNode
   convolver: ConvolverNode
@@ -124,6 +128,7 @@ interface ChainParams {
 }
 
 interface TrackChain {
+  input: AudioNode
   filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
   masterGain: GainNode
   panner: StereoPannerNode
@@ -250,7 +255,13 @@ function buildTrackChain(
   random: () => number = Math.random,
 ): TrackChain {
   const filters = createFilters(ctx, params.eq)
-  const [, , highFilter] = filters
+  const [lowFilter, , highFilter] = filters
+
+  const rumble = ctx.createBiquadFilter()
+  rumble.type = 'highpass'
+  rumble.frequency.value = RUMBLE_FREQ_HZ
+  rumble.Q.value = RUMBLE_Q
+  rumble.connect(lowFilter)
 
   const masterGain = ctx.createGain()
   masterGain.gain.value = params.gain
@@ -266,7 +277,7 @@ function buildTrackChain(
   dryGain.connect(bus)
   wetGain.connect(bus)
 
-  return { filters, masterGain, panner, convolver, dryGain, wetGain }
+  return { input: rumble, filters, masterGain, panner, convolver, dryGain, wetGain }
 }
 
 function triggerOneShot(
@@ -285,7 +296,7 @@ function triggerOneShot(
   const gain = ctx.createGain()
   gain.gain.value = dbToGain(shape.gainDb)
   src.connect(gain)
-  gain.connect(chain.filters[0])
+  gain.connect(chain.input)
 
   chain.panner.pan.setValueAtTime(clampPan(basePan + shape.panOffset), when)
 
@@ -450,7 +461,7 @@ export function useAudioEngine() {
 
       const pitchNode = new SoundTouchNode(ctx)
       pitchNode.pitch!.value = pitchRef.current
-      pitchNode.connect(chain.filters[0])
+      pitchNode.connect(chain.input)
 
       const src = ctx.createBufferSource()
       src.buffer = buffer
@@ -798,7 +809,7 @@ export function useAudioEngine() {
 
       const offlinePitchNode = new SoundTouchNode(offline)
       offlinePitchNode.pitch!.value = pitchRef.current
-      offlinePitchNode.connect(chain.filters[0])
+      offlinePitchNode.connect(chain.input)
 
       const src = offline.createBufferSource()
       src.buffer = buffer

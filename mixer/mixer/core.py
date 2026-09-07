@@ -3,7 +3,7 @@ import numpy as np
 import soundfile as sf
 
 from mixer.effects.looping import make_loopable
-from mixer.effects.eq import apply_eq
+from mixer.effects.eq import apply_eq, remove_subsonics
 from mixer.effects.auto_eq import auto_eq
 from mixer.effects.events import (
     EVENT_DEFAULT_INTERVAL_S,
@@ -80,7 +80,7 @@ def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[in
         if not path or not os.path.exists(path):
             continue
         wav, sr = sf.read(path, always_2d=True)
-        wav = wav.T
+        wav = remove_subsonics(wav.T, sr)
         if _is_event(element):
             wav = trim_to_envelope(wav, sr)
             if wav.shape[-1] < EVENT_MIN_S * sr:

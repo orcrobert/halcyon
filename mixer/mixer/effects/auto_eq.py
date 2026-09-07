@@ -32,6 +32,11 @@ _AIR_THRESH_MUSIC = 0.18
 # Cutting low-mid on a tuba would just hollow it out.
 _LOW_THRESH = 0.30
 _HI_MID_THRESH = 0.35
+
+_AIR_HZ = 8000.0
+_AIR_SHELF_HZ = 10000.0
+_HI_MID_HZ = 3000.0
+_NYQUIST_HEADROOM = 0.75
 _LOW_CENTROID_MIN = 1500.0
 _HI_MID_CENTROID_MIN = 3000.0
 
@@ -133,10 +138,14 @@ def _tonal_shape(S: np.ndarray, freqs: np.ndarray, element_type: str) -> list[di
     spec_75 = np.percentile(S, 75, axis=1)
     total = spec_75.sum() + 1e-9
 
+    nyquist = float(freqs[-1]) if freqs.size else _AIR_HZ
+    air_start = min(_AIR_HZ, nyquist * _NYQUIST_HEADROOM)
+    air_shelf = min(_AIR_SHELF_HZ, nyquist * _NYQUIST_HEADROOM)
+
     sub_mask    = freqs < 80
     low_mask    = (freqs >= 80) & (freqs < 300)
-    air_mask    = freqs >= 8000
-    hi_mid_mask = (freqs >= 3000) & (freqs < 8000)
+    air_mask    = freqs >= air_start
+    hi_mid_mask = (freqs >= _HI_MID_HZ) & (freqs < air_start)
 
     sub_e    = float(spec_75[sub_mask].sum()    / total) if sub_mask.any()    else 0.0
     low_e    = float(spec_75[low_mask].sum()    / total) if low_mask.any()    else 0.0
@@ -157,7 +166,9 @@ def _tonal_shape(S: np.ndarray, freqs: np.ndarray, element_type: str) -> list[di
 
     if air_e > air_thresh:
         db = -min(6.0, (air_e - air_thresh) * 25.0)
-        bands.append({"type": "highshelf", "freq": 10000, "gain": round(db, 1)})
+        bands.append(
+            {"type": "highshelf", "freq": round(air_shelf), "gain": round(db, 1)}
+        )
 
     if low_e > _LOW_THRESH and centroid > _LOW_CENTROID_MIN:
         db = -min(4.0, (low_e - _LOW_THRESH) * 15.0)

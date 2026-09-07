@@ -408,3 +408,77 @@ def test_mix_to_file_scatters_one_shots_instead_of_tiling(tmp_path):
 
     assert out_sr == sr
     assert mixed.shape[0] < int(sr * 6.5)
+
+
+def test_remove_subsonics_strips_rumble_and_dc_without_touching_the_body(tmp_path):
+    from mixer.effects.eq import remove_subsonics
+
+    sr = 16000
+    t = np.arange(int(sr * 2.0)) / sr
+    body = 0.30 * np.sin(2 * np.pi * 400.0 * t)
+    rumble = 0.60 * np.sin(2 * np.pi * 12.0 * t) + 0.05
+    wav = (body + rumble).astype(np.float32)[np.newaxis, :]
+
+    cleaned = remove_subsonics(wav, sr)
+
+    def band_rms(x, lo, hi):
+        n = x.shape[-1]
+        spec = np.abs(np.fft.rfft(x[0] * np.hanning(n))) / n * 2
+        freqs = np.fft.rfftfreq(n, 1 / sr)
+        sel = (freqs >= lo) & (freqs < hi)
+        return float(np.sqrt((spec[sel] ** 2).sum()))
+
+    assert band_rms(cleaned, 0, 30) < band_rms(wav, 0, 30) * 0.1
+    assert band_rms(cleaned, 300, 500) > band_rms(wav, 300, 500) * 0.9
+    assert abs(float(cleaned.mean())) < 1e-3
+    assert np.abs(cleaned).max() < np.abs(wav).max()
+
+
+def test_remove_subsonics_leaves_short_and_low_rate_clips_alone():
+    from mixer.effects.eq import remove_subsonics
+
+    tiny = np.ones((1, 32), dtype=np.float32)
+    assert remove_subsonics(tiny, 16000) is tiny
+
+    low_rate = np.ones((1, 512), dtype=np.float32)
+    assert remove_subsonics(low_rate, 50) is low_rate
+
+
+def test_the_air_band_scales_with_the_sample_rate():
+    from scipy.signal import butter, sosfilt
+
+    from mixer.effects.auto_eq import _stft_power, _tonal_shape
+
+    rng = np.random.default_rng(3)
+
+    def hissy(sr):
+        t = np.arange(int(sr * 2.0)) / sr
+        air_start = min(8000.0, (sr / 2) * 0.75)
+        sos = butter(4, air_start / (sr / 2), btype="highpass", output="sos")
+        hiss = sosfilt(sos, rng.standard_normal(len(t)))
+        return (0.05 * np.sin(2 * np.pi * 200.0 * t) + hiss).astype(np.float32)
+
+    for sr in (16000, 32000):
+        S, freqs = _stft_power(hissy(sr), sr)
+
+        assert (freqs >= min(8000.0, freqs[-1] * 0.75)).sum() > 1
+
+        shelves = [b for b in _tonal_shape(S, freqs, "sound") if b["type"] == "highshelf"]
+        assert shelves, f"no air cut produced at {sr} Hz"
+        assert shelves[0]["freq"] < sr / 2
+
+
+def test_the_air_cut_is_unchanged_for_full_bandwidth_audio():
+    from scipy.signal import butter, sosfilt
+
+    from mixer.effects.auto_eq import _stft_power, _tonal_shape
+
+    rng = np.random.default_rng(5)
+    sr = 44100
+    sos = butter(4, 8000 / (sr / 2), btype="highpass", output="sos")
+    mono = sosfilt(sos, rng.standard_normal(sr * 2)).astype(np.float32)
+
+    S, freqs = _stft_power(mono, sr)
+    shelves = [b for b in _tonal_shape(S, freqs, "sound") if b["type"] == "highshelf"]
+
+    assert shelves and shelves[0]["freq"] == 10000
