@@ -58,7 +58,6 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
   ])
   const eqBtnRef = useRef<HTMLButtonElement>(null)
   const spatialBtnRef = useRef<HTMLButtonElement>(null)
-  const densityBtnRef = useRef<HTMLButtonElement>(null)
   const menuBtnRef = useRef<HTMLButtonElement>(null)
   const isEvent = element.playback === 'oneshot'
 
@@ -314,23 +313,16 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         {/* Type badge */}
         <span
           className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
-            muted ? 'bg-surface-raised text-ink-whisper' : isMusic ? 'bg-tag-music/10 text-tag-music' : 'bg-tag-sound/10 text-tag-sound'
+            muted
+              ? 'bg-surface-raised text-ink-whisper'
+              : isEvent ? 'bg-tag-event/10 text-tag-event'
+              : isMusic ? 'bg-tag-music/10 text-tag-music'
+              : 'bg-tag-sound/10 text-tag-sound'
           }`}
           style={{ padding: '4px 10px' }}
         >
-          {isMusic ? 'music' : 'sound'}
+          {isEvent ? 'event' : isMusic ? 'music' : 'sound'}
         </span>
-
-        {isEvent && (
-          <span
-            className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
-              muted ? 'bg-surface-raised text-ink-whisper' : 'bg-tag-event/10 text-tag-event'
-            }`}
-            style={{ padding: '4px 10px' }}
-          >
-            event
-          </span>
-        )}
 
         {/* Bottom buttons row */}
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
@@ -361,22 +353,6 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
             EQ
           </button>
 
-          {isEvent && (
-            <button
-              ref={densityBtnRef}
-              onClick={() => setDensityOpen(v => !v)}
-              title="How often this layer plays"
-              className={`w-8 h-8 rounded-full text-[13px] font-bold transition-all duration-150 border ${
-                densityOpen
-                  ? 'bg-accent/20 text-accent-bright border-accent/40'
-                  : 'bg-transparent text-ink-faint hover:text-ink-soft border-line hover:border-line-active'
-              }`}
-              style={{ fontFamily: 'inherit' }}
-            >
-              ⋯
-            </button>
-          )}
-
         </div>
         </div>
       </div>
@@ -396,6 +372,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         deletable={deletable}
         onRegenerate={() => onRegenerate(element)}
         onDelete={() => onDelete(element)}
+        onFrequency={isEvent ? () => setDensityOpen(true) : undefined}
         onClose={() => setMenuOpen(false)}
       />
 
@@ -403,7 +380,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         intervalMinS={interval[0]}
         intervalMaxS={interval[1]}
         open={densityOpen}
-        anchorRef={densityBtnRef}
+        anchorRef={menuBtnRef}
         onIntervalChange={handleIntervalChange}
         onClose={() => setDensityOpen(false)}
       />

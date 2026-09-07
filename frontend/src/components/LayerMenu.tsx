@@ -7,13 +7,14 @@ interface Props {
   deletable: boolean
   onRegenerate: () => void
   onDelete: () => void
+  onFrequency?: () => void
   onClose: () => void
 }
 
 const MENU_W = 208
-const MENU_H = 150
+const MENU_H = 190
 
-export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, onClose }: Props) {
+export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, onFrequency, onClose }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const [pos, setPos] = useState({ x: 0, y: 0 })
   const [visible, setVisible] = useState(false)
@@ -129,6 +130,21 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
             </svg>
             Regenerate
           </button>
+
+          {onFrequency && (
+            <button
+              onClick={() => { onClose(); onFrequency() }}
+              style={{ ...rowStyle, color: 'var(--color-ink-soft)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-accent) 12%, transparent)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <svg className="stroke-accent-bright" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <circle cx="12" cy="12" r="9" />
+                <polyline points="12 7 12 12 15.5 14" />
+              </svg>
+              How often
+            </button>
+          )}
 
           <button
             onClick={() => {
