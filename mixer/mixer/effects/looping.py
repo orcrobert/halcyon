@@ -61,7 +61,7 @@ def _correlation(a: np.ndarray, b: np.ndarray) -> float:
     return float(np.clip(np.sum(a * b) / denom, 0.0, 1.0))
 
 
-def _limit_peak(wav: np.ndarray) -> np.ndarray:
+def limit_peak(wav: np.ndarray) -> np.ndarray:
     peak = float(np.abs(wav).max()) if wav.size else 0.0
     if peak > PEAK_CEILING:
         return wav * (PEAK_CEILING / peak)
@@ -89,7 +89,7 @@ def make_loopable(
         result = wav.copy()
         result[:, :len(t)] *= np.sin(t)
         result[:, -len(t):] *= np.cos(t)
-        return _limit_peak(result)
+        return limit_peak(result)
 
     loop_point = find_loop_point(wav, sr, search_window, crossfade_duration)
 
@@ -105,4 +105,4 @@ def make_loopable(
 
     output[:, :n_fade] = ((output[:, :n_fade] * fade_in) + (tail * fade_out)) * norm
 
-    return _limit_peak(output)
+    return limit_peak(output)
