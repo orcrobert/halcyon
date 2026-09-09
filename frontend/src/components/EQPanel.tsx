@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import type { EQState } from '../hooks/useAudioEngine'
+import { isCanonicalBand, type EQState } from '../hooks/useAudioEngine'
 import type { EQBand } from '../types'
 
 interface Props {
@@ -21,9 +21,10 @@ function buildInitialState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
   for (const band of bands) {
+    if (!isCanonicalBand(band)) continue
     if (band.type === 'lowshelf') state.low = clampEQ(band.gain)
     else if (band.type === 'highshelf') state.high = clampEQ(band.gain)
-    else if (band.type === 'peaking') state.mid = clampEQ(band.gain)
+    else state.mid = clampEQ(band.gain)
   }
   return state
 }

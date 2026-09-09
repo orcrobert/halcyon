@@ -10,7 +10,7 @@ export interface EQBand {
   type: 'lowshelf' | 'peaking' | 'highshelf'
   freq: number
   gain: number
-  q: number
+  q?: number
 }
 
 export type ElementStatus = 'ready' | 'regenerating' | 'sourcing' | 'failed'
