@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import { SoundTouchNode } from '@soundtouchjs/audio-worklet'
 import { apiUrl, authHeaders } from '../api/client'
 import {
   DEFAULT_INTERVAL_MAX_S,
@@ -63,8 +64,6 @@ const REVERB_WET_SEND = 0.6
 const REVERB_IR_DURATION_S = 2.5
 const REVERB_IR_DECAY = 3.0
 const SOURCE_RELEASE_S = 0.03
-const REFERENCE_PITCH_HZ = 440
-const TUNING_GLIDE_S = 0.08
 const LOOP_PAD_MIN_S = 0.005
 
 const LIMITER_THRESHOLD_DB = -4
@@ -118,6 +117,7 @@ interface TrackNode {
   dryGain: GainNode
   wetGain: GainNode
   source: AudioBufferSourceNode | null
+  pitchNode: SoundTouchNode | null
   filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
   lane: EventLane | null
   basePan: number
@@ -388,6 +388,7 @@ export function useAudioEngine() {
   const panStateRef = useRef<Map<string, number>>(new Map())
   const depthStateRef = useRef<Map<string, number>>(new Map())
   const pitchRef = useRef(1.0)
+  const workletReadyRef = useRef(false)
   const binauralRef = useRef<BinauralNodes | null>(null)
   const binauralLeftHzRef = useRef(200)
   const binauralRightHzRef = useRef(208)
@@ -416,6 +417,13 @@ export function useAudioEngine() {
     }
     return ctxRef.current
   }, [])
+
+  async function ensureWorklet(ctx: AudioContext) {
+    if (!workletReadyRef.current) {
+      await SoundTouchNode.register(ctx, '/soundtouch-processor.js')
+      workletReadyRef.current = true
+    }
+  }
 
   const onVisibility = useCallback(() => {
     lookaheadRef.current = document.hidden ? LOOKAHEAD_HIDDEN_S : LOOKAHEAD_S
@@ -502,6 +510,7 @@ export function useAudioEngine() {
         tracksRef.current.set(el.label, {
           ...chain,
           source: null,
+          pitchNode: null,
           basePan: pan,
           lane: {
             buffer,
@@ -515,15 +524,19 @@ export function useAudioEngine() {
         continue
       }
 
+      const pitchNode = new SoundTouchNode(ctx)
+      pitchNode.pitch!.value = pitchRef.current
+      pitchNode.connect(chain.input)
+
       const src = ctx.createBufferSource()
       src.buffer = buffer
-      src.playbackRate.value = pitchRef.current
-      src.connect(chain.input)
+      src.connect(pitchNode)
       startLoop(src, buffer, el.duration_s)
 
       tracksRef.current.set(el.label, {
         ...chain,
         source: src,
+        pitchNode,
         basePan: pan,
         lane: null,
       })
@@ -553,6 +566,7 @@ export function useAudioEngine() {
   const load = useCallback(async (elements: Element[]) => {
     const ctx = getContext()
     if (ctx.state === 'suspended') await ctx.resume()
+    await ensureWorklet(ctx)
     decodedRef.current = await decodeElements(elements)
     startFromDecoded(ctx, decodedRef.current)
   }, [getContext])
@@ -560,6 +574,7 @@ export function useAudioEngine() {
   const start = useCallback(async () => {
     const ctx = getContext()
     if (tracksRef.current.size === 0 && decodedRef.current.length > 0) {
+      await ensureWorklet(ctx)
       startFromDecoded(ctx, decodedRef.current)
     }
     if (ctx.state === 'suspended') await ctx.resume()
@@ -579,12 +594,10 @@ export function useAudioEngine() {
   }, [getContext])
 
   const setTuning = useCallback((freqHz: number) => {
-    const pitch = freqHz / REFERENCE_PITCH_HZ
+    const pitch = freqHz / 440
     pitchRef.current = pitch
-    const ctx = ctxRef.current
-    if (!ctx) return
-    tracksRef.current.forEach(({ source }) => {
-      if (source) source.playbackRate.setTargetAtTime(pitch, ctx.currentTime, TUNING_GLIDE_S)
+    tracksRef.current.forEach(({ pitchNode }) => {
+      if (pitchNode) pitchNode.pitch!.value = pitch
     })
   }, [])
 
@@ -787,6 +800,7 @@ export function useAudioEngine() {
     panStateRef.current.clear()
     depthStateRef.current.clear()
     intervalStateRef.current.clear()
+    workletReadyRef.current = false
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
@@ -823,6 +837,8 @@ export function useAudioEngine() {
     const sampleRate = 44100
     const offline = new OfflineAudioContext(2, Math.ceil(sampleRate * seconds), sampleRate)
 
+    await SoundTouchNode.register(offline, '/soundtouch-processor.js')
+
     const limiter = createMasterLimiter(offline)
     limiter.connect(offline.destination)
 
@@ -856,10 +872,13 @@ export function useAudioEngine() {
         continue
       }
 
+      const offlinePitchNode = new SoundTouchNode(offline)
+      offlinePitchNode.pitch!.value = pitchRef.current
+      offlinePitchNode.connect(chain.input)
+
       const src = offline.createBufferSource()
       src.buffer = buffer
-      src.playbackRate.value = pitchRef.current
-      src.connect(chain.input)
+      src.connect(offlinePitchNode)
       startLoop(src, buffer, el.duration_s)
     }
 

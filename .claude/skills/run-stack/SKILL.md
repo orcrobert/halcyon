@@ -50,6 +50,6 @@ Bring services up bottom-up so a submitted prompt has everything it needs.
 | Failed with "interrupted by a server restart" | The API restarted mid-run; generate again |
 | 401 on everything | Token cleared or revoked — sign in again |
 | Blank page on :8001 | No `frontend/dist` build |
-| No audio | Interact with the page first — autoplay is blocked until then |
+| No audio | Interact with page (autoplay); is `public/soundtouch-processor.js` present? |
 
 See MANUAL.md §6 for the full troubleshooting table.

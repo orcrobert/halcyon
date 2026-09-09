@@ -213,9 +213,9 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   `interval_max_s` (from the LLM's `frequency` through `ROLE_INTERVALS`) set how
   often it fires. `hooks/eventScheduler.ts` is pure and unit-tested; the lane
   scheduler in `useAudioEngine` runs on `ctx.currentTime` with a lookahead, so
-  `ctx.suspend()` pauses it with no extra state. Events ignore global tuning —
-  it is for tonal layers, and rides the loop source's `playbackRate`. Export
-  plans triggers from a seeded PRNG so the same length renders the same file.
+  `ctx.suspend()` pauses it with no extra state. Events bypass the SoundTouch
+  worklet — global tuning is for tonal layers. Export plans triggers from a
+  seeded PRNG so the same length renders the same file.
 - **One-shots do not compete in the mix.** `analyze` runs `assign_volumes` and
   `assign_spatial` over the loop layers only; a mostly-silent one-shot would
   otherwise win the loudness anchor and push every bed to the 0.15 floor.
