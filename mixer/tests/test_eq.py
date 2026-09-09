@@ -8,7 +8,7 @@ from scipy.signal import sosfreqz
 from mixer.core import analyze
 from mixer.effects.auto_eq import auto_eq
 from mixer.effects.eq import _peak, _shelf, apply_eq
-from mixer.effects.looping import PEAK_CEILING
+from mixer.effects.looping import PEAK_CEILING, make_loopable
 
 SR = 48000
 
@@ -79,3 +79,27 @@ def test_analyze_keeps_every_clip_under_the_ceiling(tmp_path):
     assert wavs
     for wav in wavs:
         assert np.abs(wav).max() <= PEAK_CEILING + 1e-9
+
+
+def _swelling_drone(sr: int, seconds: float, f0: float, seed: int) -> np.ndarray:
+    rng = np.random.default_rng(seed)
+    t = np.arange(int(sr * seconds)) / sr
+    envelope = 1.0 + 0.75 * np.sin(2 * np.pi * 0.75 * t + rng.random() * 6.28)
+    tone = np.sin(2 * np.pi * f0 * t) + 0.35 * np.sin(2 * np.pi * 2 * f0 * t + 0.7)
+    signal = tone * envelope + 0.04 * rng.standard_normal(t.size)
+    return (0.3 * signal / np.abs(signal).max())[np.newaxis, :]
+
+
+def _seam_step_db(looped: np.ndarray, sr: int) -> float:
+    mono = looped.mean(axis=0)
+    window = int(0.05 * sr)
+    head = np.sqrt(np.mean(mono[:window] ** 2))
+    tail = np.sqrt(np.mean(mono[-window:] ** 2))
+    return abs(20.0 * np.log10((head + 1e-12) / (tail + 1e-12)))
+
+
+@pytest.mark.parametrize("seed", range(6))
+def test_a_swelling_drone_loops_without_a_level_step(seed):
+    sr = 16000
+    looped = make_loopable(_swelling_drone(sr, 4.0, 60.0 + 7 * seed, seed), sr)
+    assert _seam_step_db(looped, sr) < 1.5
