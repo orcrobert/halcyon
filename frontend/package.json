@@ -4,15 +4,13 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "copy-worklets": "node -e \"require('fs').copyFileSync('node_modules/@soundtouchjs/audio-worklet/dist/soundtouch-processor.js', 'public/soundtouch-processor.js')\"",
-    "dev": "npm run copy-worklets && vite",
-    "build": "npm run copy-worklets && tsc -b && vite build",
+    "dev": "vite",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@soundtouchjs/audio-worklet": "^1.0.10",
     "@types/three": "^0.184.1",
     "axios": "^1.15.2",
     "framer-motion": "^12.38.0",

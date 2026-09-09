@@ -213,9 +213,9 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   `interval_max_s` (from the LLM's `frequency` through `ROLE_INTERVALS`) set how
   often it fires. `hooks/eventScheduler.ts` is pure and unit-tested; the lane
   scheduler in `useAudioEngine` runs on `ctx.currentTime` with a lookahead, so
-  `ctx.suspend()` pauses it with no extra state. Events bypass the SoundTouch
-  worklet — global tuning is for tonal layers. Export plans triggers from a
-  seeded PRNG so the same length renders the same file.
+  `ctx.suspend()` pauses it with no extra state. Events ignore global tuning —
+  it is for tonal layers, and rides the loop source's `playbackRate`. Export
+  plans triggers from a seeded PRNG so the same length renders the same file.
 - **One-shots do not compete in the mix.** `analyze` runs `assign_volumes` and
   `assign_spatial` over the loop layers only; a mostly-silent one-shot would
   otherwise win the loudness anchor and push every bed to the 0.15 floor.
@@ -250,7 +250,14 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and
   the browser `useAudioEngine` (used for live playback/export). Keep their
-  parameter conventions aligned (EQ bands 200/1k/8k, pan −1..1, depth 0..1).
+  parameter conventions aligned (pan −1..1, depth 0..1) and their filter maths
+  identical — both are the RBJ cookbook, which is what Web Audio implements.
+- **`eq_json` is a full band list, not three sliders.** `auto_eq` emits
+  corrective bands at whatever frequency the analysis picked; the browser builds
+  every one of them into a biquad chain. The three at 200/1k/8k are reserved for
+  the user's sliders, which read and write only those and carry the rest
+  through. Never collapse the list to three bands — that silently throws the
+  auto-EQ away and reapplies its gains at the wrong frequencies.
 - **Known issues and cleanup targets** are catalogued in
   [`.claude/AUDIT.md`](.claude/AUDIT.md). Read it before large refactors.
 

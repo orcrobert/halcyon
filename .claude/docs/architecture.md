@@ -17,7 +17,8 @@ Definitive reference for how the system fits together. Skim
   atmosphere object.
 - **Audio engine**: `hooks/useAudioEngine.ts` is the heart of playback. It
   decodes element WAVs, builds one Web Audio graph per track
-  (`source → SoundTouch pitch → 3-band EQ → gain → panner → reverb send/dry →
+  (`source (playbackRate = tuning) → rumble HPF → corrective EQ → 3-band EQ →
+  gain → panner → reverb send/dry →
   analyser → limiter → destination`), and exposes imperative setters
   (`setVolume`, `setEQ`, `setPan`, `setDepth`, `setTuning`), an autonomous
   `startAnimate` drift loop, binaural oscillators, and an offline `exportMix`.
@@ -142,7 +143,7 @@ Frontend                    API                          LLM      Generator
 | Pan       | −1 (L) .. +1 (R), equal-power | both engines |
 | Depth     | 0 .. 1 (reverb send) | frontend reverb, mixer `depth` |
 | Volume    | 0 .. 2 (UI), stored gain; playback scales by 0.5 | `useAudioEngine` |
-| Tuning    | 400–580 Hz, 6 Hz snap, presets 432/440/528 | `TuningControl` + SoundTouch |
+| Tuning    | 400–580 Hz, 6 Hz snap, presets 432/440/528 | `TuningControl` + source `playbackRate` |
 | Binaural  | 200/208 Hz default, gain 0.15, 10 presets | `useAudioEngine` |
 | Loop      | search 3 s or 30 % of the clip, crossfade 1.5 s or 20 % | `looping.py` |
 | Clip      | bed 4 s, event 2 s, texture/music the atmosphere length | `config.py` |

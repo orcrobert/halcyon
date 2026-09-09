@@ -161,7 +161,7 @@ uvicorn api.app.main:app --port 8001
 | Decomposition 422 | Model returned malformed/empty elements | Check model availability; try a clearer prompt or another model |
 | 401 on every call | Token expired or revoked | Sign in again |
 | Blank page at `:8001` | No `frontend/dist` build | `cd frontend && npm run build`, or use the dev server |
-| No audio in browser | Autoplay blocked / worklet not served | Interact with the page first; ensure `public/soundtouch-processor.js` exists (`npm run copy-worklets`) |
+| No audio in browser | Autoplay blocked | Interact with the page first, then press play |
 
 ---
 

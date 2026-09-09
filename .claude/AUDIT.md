@@ -30,14 +30,10 @@ Last reviewed against the tree at `refactor/architecture-cleanup`.
   conventions are pinned (EQ 200/1k/8k, pan −1..1, depth 0..1, and the shared
   constants at the top of `useAudioEngine.ts`), but the gain stage is not.
   *Risky: align intentionally and document which chain is canonical.*
-- 🟢 **The pitch worklet drops frames when tuning is off 440 Hz.**
-  `public/soundtouch-processor.js` is a verbatim copy of the npm package
-  (`npm run copy-worklets` overwrites it). Its `process()` zero-fills any render
-  quantum SoundTouch has not filled yet; at unity pitch that never happens after
-  warm-up, but at A=432 it produces a handful of zeroed frames every few seconds
-  (measured: 6 frames in 10 s), each an audible tick. *Risky: fixing it means
-  forking the worklet to hold back a one-quantum cushion before extracting, and
-  dropping the copy script.*
+- ✅ **The pitch worklet dropped frames when tuning was off 440 Hz.** Resolved:
+  tuning is a `playbackRate` on the loop source now, so there is no worklet and
+  no zero-filled quanta. Pitch and speed move together, which is inaudible on
+  an infinite ambient loop and costs nothing in artefacts.
 
 ## Test coverage
 
