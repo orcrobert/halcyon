@@ -65,6 +65,7 @@ const REVERB_IR_DECAY = 3.0
 const SOURCE_RELEASE_S = 0.03
 const REFERENCE_PITCH_HZ = 440
 const TUNING_GLIDE_S = 0.08
+const LOOP_PAD_MIN_S = 0.005
 
 const LIMITER_THRESHOLD_DB = -4
 const LIMITER_KNEE_DB = 0
@@ -150,6 +151,25 @@ interface BinauralNodes {
   rightOsc: OscillatorNode
   merger: ChannelMergerNode
   gain: GainNode
+}
+
+function loopRegion(buffer: AudioBuffer, declared: number | null | undefined): number | null {
+  if (!declared || declared <= 0) return null
+  const pad = (buffer.duration - declared) / 2
+  if (pad < LOOP_PAD_MIN_S) return null
+  return pad
+}
+
+function startLoop(src: AudioBufferSourceNode, buffer: AudioBuffer, declared: number | null | undefined) {
+  src.loop = true
+  const pad = loopRegion(buffer, declared)
+  if (pad === null) {
+    src.start()
+    return
+  }
+  src.loopStart = pad
+  src.loopEnd = pad + declared!
+  src.start(0, pad)
 }
 
 export function isCanonicalBand(band: EQBand): boolean {
@@ -497,10 +517,9 @@ export function useAudioEngine() {
 
       const src = ctx.createBufferSource()
       src.buffer = buffer
-      src.loop = true
       src.playbackRate.value = pitchRef.current
       src.connect(chain.input)
-      src.start()
+      startLoop(src, buffer, el.duration_s)
 
       tracksRef.current.set(el.label, {
         ...chain,
@@ -839,10 +858,9 @@ export function useAudioEngine() {
 
       const src = offline.createBufferSource()
       src.buffer = buffer
-      src.loop = true
       src.playbackRate.value = pitchRef.current
       src.connect(chain.input)
-      src.start()
+      startLoop(src, buffer, el.duration_s)
     }
 
     const rendered = await offline.startRendering()

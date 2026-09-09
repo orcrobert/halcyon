@@ -20,6 +20,12 @@ LOOP_ENVELOPE_MAX_DB = 12.0
 # candidate that still seams well rather than the best one at any length.
 LOOP_LENGTH_WEIGHT = 0.25
 
+# A decoder resampling the clip to the device rate has no data beyond the first
+# and last sample, so it starves there and the seam that was clean in the file
+# arrives as a tick. Carry a copy of each end past the loop points and let the
+# player loop the interior, where the resampler saw real data on both sides.
+LOOP_PAD_S = 0.05
+
 
 def loop_windows(
     total_s: float,
@@ -151,3 +157,12 @@ def make_loopable(
     output[:, :n_fade] = ((output[:, :n_fade] * fade_in) + (tail * fade_out)) * norm
 
     return limit_peak(output)
+
+
+def pad_for_looping(wav: np.ndarray, sr: int) -> np.ndarray:
+    if wav.ndim == 1:
+        wav = wav[np.newaxis, :]
+    pad = int(LOOP_PAD_S * sr)
+    if pad <= 0 or wav.shape[-1] <= pad:
+        return wav
+    return np.concatenate([wav[:, -pad:], wav, wav[:, :pad]], axis=-1)

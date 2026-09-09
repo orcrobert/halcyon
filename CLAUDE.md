@@ -258,6 +258,15 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   the user's sliders, which read and write only those and carry the rest
   through. Never collapse the list to three bands — that silently throws the
   auto-EQ away and reapplies its gains at the wrong frequencies.
+- **Stored loop clips carry padding the player must skip.** A decoder
+  resampling a clip to the device rate starves at the first and last sample, so
+  a seam that is clean in the file arrives as a tick once per loop — worst on
+  the 16 kHz `sound` layers, which need the most resampling and loop the
+  shortest. `pad_for_looping` writes `LOOP_PAD_S` of each end past the loop
+  points and `Element.duration_s` stays the *unpadded* length, so the browser
+  derives the loop region as `(buffer.duration - duration_s) / 2` and plays the
+  interior. A file with no padding falls back to looping the whole buffer, so
+  clips written before this keep working. One-shots are never padded.
 - **Known issues and cleanup targets** are catalogued in
   [`.claude/AUDIT.md`](.claude/AUDIT.md). Read it before large refactors.
 

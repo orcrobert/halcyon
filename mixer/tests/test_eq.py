@@ -8,7 +8,12 @@ from scipy.signal import sosfreqz
 from mixer.core import analyze
 from mixer.effects.auto_eq import auto_eq
 from mixer.effects.eq import _peak, _shelf, apply_eq
-from mixer.effects.looping import PEAK_CEILING, make_loopable
+from mixer.effects.looping import (
+    LOOP_PAD_S,
+    PEAK_CEILING,
+    make_loopable,
+    pad_for_looping,
+)
 
 SR = 48000
 
@@ -103,3 +108,33 @@ def test_a_swelling_drone_loops_without_a_level_step(seed):
     sr = 16000
     looped = make_loopable(_swelling_drone(sr, 4.0, 60.0 + 7 * seed, seed), sr)
     assert _seam_step_db(looped, sr) < 1.5
+
+
+def test_padding_survives_the_decoder_resample_at_the_loop_points():
+    from scipy.signal import resample_poly
+
+    sr = 16000
+    source = make_loopable(_swelling_drone(sr, 4.0, 55.0, 1), sr)[0]
+    pad = int(LOOP_PAD_S * sr)
+
+    reference = resample_poly(np.tile(source, 3), 3, 1)[
+        source.size * 3 : source.size * 6
+    ]
+    bare = resample_poly(source, 3, 1)
+    interior = resample_poly(pad_for_looping(source[np.newaxis, :], sr)[0], 3, 1)[
+        pad * 3 : -pad * 3
+    ]
+
+    edge = 32
+    bare_error = np.abs(
+        np.concatenate([bare[:edge], bare[-edge:]])
+        - np.concatenate([reference[:edge], reference[-edge:]])
+    ).max()
+    padded_error = np.abs(
+        np.concatenate([interior[:edge], interior[-edge:]])
+        - np.concatenate([reference[:edge], reference[-edge:]])
+    ).max()
+
+    assert interior.size == reference.size
+    assert bare_error > 1e-4
+    assert padded_error < bare_error / 100
