@@ -232,6 +232,7 @@ class AtmosphereOut(BaseModel):
     status: str
     progress: int
     current_stage: str | None
+    stage_detail: str | None = None
     error: str | None
     created_at: datetime
     updated_at: datetime

@@ -14,22 +14,24 @@ from api.app.services import storage
 from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
 from api.app.services.generator import generate
 from api.app.services.runconfig import resolve_config
+from api.app.services.stages import (
+    PERSISTING_DETAIL,
+    STAGE_PROGRESS,
+    decomposing_detail,
+    generating_detail,
+    mixing_detail,
+)
 from mixer.core import analyze
 from mixer.effects.looping import pad_for_looping
 
 logger = logging.getLogger(__name__)
 
-STAGE_PROGRESS = {
-    "decomposing": 10,
-    "generating": 30,
-    "mixing": 70,
-    "persisting": 90,
-}
-
-
-def _set_stage(session: Session, atmosphere: Atmosphere, stage: str) -> None:
+def _set_stage(
+    session: Session, atmosphere: Atmosphere, stage: str, detail: str | None = None
+) -> None:
     atmosphere.status = "generating"
     atmosphere.current_stage = stage
+    atmosphere.stage_detail = detail
     atmosphere.progress = STAGE_PROGRESS[stage]
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
@@ -39,6 +41,7 @@ def _set_stage(session: Session, atmosphere: Atmosphere, stage: str) -> None:
 def _fail(session: Session, atmosphere: Atmosphere, message: str) -> None:
     atmosphere.status = "failed"
     atmosphere.current_stage = None
+    atmosphere.stage_detail = None
     atmosphere.error = message
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
@@ -110,6 +113,7 @@ def _persist(
     }
     atmosphere.status = "ready"
     atmosphere.current_stage = None
+    atmosphere.stage_detail = None
     atmosphere.progress = 100
     atmosphere.error = None
     atmosphere.generated_at = utcnow()
@@ -331,7 +335,7 @@ def run_generation(atmosphere_id: int) -> None:
         timings: dict[str, float] = {}
 
         try:
-            _set_stage(session, atmosphere, "decomposing")
+            _set_stage(session, atmosphere, "decomposing", decomposing_detail(config))
             mark = time.perf_counter()
             allow_events = atmosphere.use_events is not False
             decomposed = atmosphere.decomposed_json or decompose(
@@ -339,14 +343,19 @@ def run_generation(atmosphere_id: int) -> None:
             )
             timings["decompose_s"] = round(time.perf_counter() - mark, 3)
 
-            _set_stage(session, atmosphere, "generating")
+            _set_stage(
+                session,
+                atmosphere,
+                "generating",
+                generating_detail(config, decomposed["elements"]),
+            )
             mark = time.perf_counter()
             elements = generate(
                 decomposed, config, atmosphere.duration_s or DEFAULT_DURATION_S
             )
             timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
-            _set_stage(session, atmosphere, "mixing")
+            _set_stage(session, atmosphere, "mixing", mixing_detail(elements))
             mark = time.perf_counter()
             with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:
                 audio_s = 0.0
@@ -363,7 +372,7 @@ def run_generation(atmosphere_id: int) -> None:
                 timings["mix_s"] = round(time.perf_counter() - mark, 3)
                 timings["audio_s"] = round(audio_s, 3)
 
-                _set_stage(session, atmosphere, "persisting")
+                _set_stage(session, atmosphere, "persisting", PERSISTING_DETAIL)
                 atmosphere.decomposed_json = {
                     "atmosphere": decomposed.get("atmosphere"),
                     "elements": [
