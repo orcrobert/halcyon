@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Atmosphere } from '../types'
 import { alpha, token } from '../theme'
+import { STAGES, stageDetail, stageIndex, stageLabel } from '../stages'
 
 interface Props {
   atmosphere: Atmosphere
@@ -142,13 +143,71 @@ function GenerationCanvas() {
   )
 }
 
+function StageTracker({ atmosphere }: { atmosphere: Atmosphere }) {
+  const active = stageIndex(atmosphere)
+  const detail = stageDetail(atmosphere)
+
+  return (
+    <div className="flex flex-col items-center gap-4 w-full">
+      <ol className="flex items-center justify-center gap-0 w-full" style={{ maxWidth: '640px' }}>
+        {STAGES.map((stage, i) => {
+          const done = i < active
+          const current = i === active
+          return (
+            <li key={stage.key} className="flex items-center flex-1 last:flex-none min-w-0">
+              <div className="flex flex-col items-center gap-2 shrink-0">
+                <span
+                  className={`block rounded-full transition-all duration-500 ${
+                    current ? 'w-2.5 h-2.5 bg-accent-bright' : done ? 'w-2 h-2 bg-accent/70' : 'w-2 h-2 bg-line'
+                  }`}
+                  style={current ? { boxShadow: '0 0 0 4px color-mix(in srgb, var(--color-accent) 18%, transparent)' } : undefined}
+                />
+                <span
+                  className={`text-[10px] uppercase tracking-[0.16em] whitespace-nowrap transition-colors duration-500 ${
+                    current ? 'text-accent-bright' : done ? 'text-ink-dim' : 'text-ink-ghost'
+                  }`}
+                >
+                  {stage.label}
+                </span>
+              </div>
+              {i < STAGES.length - 1 && (
+                <span
+                  className={`flex-1 h-px mx-2 -mt-5 transition-colors duration-500 ${done ? 'bg-accent/50' : 'bg-line-soft'}`}
+                />
+              )}
+            </li>
+          )
+        })}
+      </ol>
+
+      <div className="w-full rounded-full overflow-hidden bg-line-faint" style={{ maxWidth: '640px', height: '2px' }}>
+        <div
+          className="h-full bg-accent-bright transition-all duration-700 ease-out"
+          style={{ width: `${Math.max(2, Math.min(100, atmosphere.progress))}%` }}
+        />
+      </div>
+
+      <p
+        key={detail}
+        className="text-[13px] text-ink-muted text-center leading-relaxed"
+        style={{ maxWidth: '560px', fontWeight: 300, animation: 'fade-in 0.4s ease-out' }}
+      >
+        {detail}
+      </p>
+    </div>
+  )
+}
+
+function elapsedSince(iso: string): number {
+  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+}
+
 export function GeneratingView({ atmosphere, onCancel }: Props) {
-  const [elapsed, setElapsed] = useState(0)
+  const [elapsed, setElapsed] = useState(() => elapsedSince(atmosphere.created_at))
   useEffect(() => {
-    const start = Date.now()
-    const t = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000)
+    const t = setInterval(() => setElapsed(elapsedSince(atmosphere.created_at)), 1000)
     return () => clearInterval(t)
-  }, [])
+  }, [atmosphere.created_at])
 
   return (
     <div className="relative flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
@@ -156,7 +215,7 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
 
         <div className="flex flex-col items-center gap-2 text-center">
           <span className="text-[10px] uppercase tracking-[0.32em] text-accent-bright/70 font-medium">
-            Composing
+            {stageLabel(atmosphere)}
           </span>
           {atmosphere.title && (
             <h1 className="text-[20px] text-ink leading-tight" style={{ fontWeight: 400, letterSpacing: '-0.01em' }}>
@@ -169,6 +228,8 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
         </div>
 
         <GenerationCanvas />
+
+        <StageTracker atmosphere={atmosphere} />
 
         <div className="flex items-center justify-center gap-5 text-[11px] uppercase tracking-[0.18em]">
           <div className="flex items-center gap-1.5">

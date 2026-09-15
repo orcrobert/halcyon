@@ -51,6 +51,7 @@ export type AtmosphereStatus = 'pending' | 'generating' | 'ready' | 'failed'
 
 export interface AtmosphereTimings {
   decompose_s?: number
+  wake_s?: number
   generate_s?: number
   mix_s?: number
   persist_s?: number
@@ -68,6 +69,7 @@ export interface Atmosphere {
   status: AtmosphereStatus
   progress: number
   current_stage: string | null
+  stage_detail: string | null
   error: string | null
   generated_at: string | null
   created_at: string
