@@ -1,5 +1,7 @@
 import base64
 import logging
+import time
+from collections.abc import Callable
 
 import requests
 
@@ -8,6 +10,8 @@ from api.app.services.runconfig import RunConfig
 
 GENERATOR_TIMEOUT_S = 300
 PROBE_TIMEOUT_S = 10
+WAKE_TIMEOUT_S = 120
+WAKE_POLL_S = 3
 
 ROLE_CLIP_S = {"bed": BED_CLIP_S, "event": EVENT_CLIP_S}
 
@@ -46,6 +50,26 @@ def probe(url: str) -> tuple[str, str | None, dict | None]:
         if key in payload
     }
     return "ok", None, reported or None
+
+
+def wait_until_ready(
+    url: str,
+    on_wait: Callable[[str, int], None] | None = None,
+    timeout_s: int = WAKE_TIMEOUT_S,
+    poll_s: float = WAKE_POLL_S,
+) -> bool:
+    started = time.monotonic()
+    while True:
+        status, _, reported = probe(url)
+        if status == "ok" and (reported or {}).get("loaded", True):
+            return True
+        elapsed = int(time.monotonic() - started)
+        if elapsed >= timeout_s:
+            logger.warning("Generator at %s never reported ready; posting anyway", url)
+            return False
+        if on_wait is not None:
+            on_wait("loading" if status == "ok" else status, elapsed)
+        time.sleep(poll_s)
 
 
 def clip_length(element: dict, duration_s: int) -> int:

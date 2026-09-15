@@ -123,3 +123,95 @@ def test_run_config_carries_the_active_generator_kind(client, auth):
     assert config.generator_url == "https://x.modal.run"
     assert config.generator_kind == "modal"
     assert config.generator_name == "Modal box"
+
+
+def test_a_cold_generator_is_waited_for_and_reported(client, auth, stub_pipeline, monkeypatch):
+    import api.app.services.generator as generator_module
+    from api.app.services.pipeline import run_generation
+    from conftest import FakeResponse
+
+    answers = iter(
+        [
+            FakeResponse({"status": "ok", "loaded": False}),
+            FakeResponse({"status": "ok", "loaded": False}),
+            FakeResponse({"status": "ok", "loaded": True}),
+        ]
+    )
+    monkeypatch.setattr(generator_module.requests, "get", lambda url, **kwargs: next(answers))
+    monkeypatch.setattr(generator_module.time, "sleep", lambda _s: None)
+
+    posts = []
+    original_post = generator_module.requests.post
+    monkeypatch.setattr(
+        generator_module.requests,
+        "post",
+        lambda url, **kwargs: posts.append(url) or original_post(url, **kwargs),
+    )
+
+    details = []
+    original_set_detail = generator_module.wait_until_ready
+
+    def spy(url, on_wait=None, **kwargs):
+        def record(status, elapsed):
+            details.append(status)
+            if on_wait is not None:
+                on_wait(status, elapsed)
+
+        return original_set_detail(url, record, **kwargs)
+
+    monkeypatch.setattr("api.app.services.pipeline.wait_until_ready", spy)
+
+    client.post(
+        "/api/generators",
+        headers=auth,
+        json={"name": "Modal box", "url": "https://x.modal.run", "kind": "modal"},
+    )
+    atmosphere_id = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
+    ).json()["data"]["id"]
+
+    run_generation(atmosphere_id)
+    body = client.get(f"/api/atmospheres/{atmosphere_id}", headers=auth).json()["data"]
+
+    assert details == ["loading", "loading"]
+    assert len(posts) == 1
+    assert body["status"] == "ready"
+    assert "wake_s" in body["timings"]
+
+
+def test_an_unreachable_generator_is_posted_to_after_the_wake_timeout(monkeypatch):
+    import api.app.services.generator as generator_module
+
+    monkeypatch.setattr(
+        generator_module,
+        "probe",
+        lambda url: ("unreachable", "no route", None),
+    )
+    clock = iter([0, 0, 5, 10])
+    monkeypatch.setattr(generator_module.time, "monotonic", lambda: next(clock))
+    monkeypatch.setattr(generator_module.time, "sleep", lambda _s: None)
+
+    seen = []
+    ready = generator_module.wait_until_ready(
+        "http://gpu.local:9000", lambda status, elapsed: seen.append((status, elapsed)), timeout_s=10
+    )
+
+    assert ready is False
+    assert seen == [("unreachable", 0), ("unreachable", 5)]
+
+
+def test_waking_wording_follows_the_host():
+    from api.app.services.stages import waking_detail
+
+    assert waking_detail(_config(generator_kind="modal"), "unreachable", 12).startswith(
+        "Modal is starting a GPU container"
+    )
+    assert waking_detail(_config(generator_kind="colab"), "unreachable", 3) == (
+        "Waiting for the Colab notebook to answer (3s)"
+    )
+    assert waking_detail(_config(), "unreachable", 3) == (
+        "Waiting for the generator at gpu.local to answer (3s)"
+    )
+    assert waking_detail(_config(generator_kind="modal"), "loading", 40) == (
+        "Modal is loading the AudioCraft models (40s)"
+    )

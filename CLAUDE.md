@@ -173,6 +173,16 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   alias `COLAB_URL`) and a fragile link — the API times out (300 s) if it is
   down. The contract is documented in
   [SELF_HOSTING.md](SELF_HOSTING.md#the-generator-contract).
+- **The pipeline narrates itself through `Atmosphere.stage_detail`.** Every
+  `_set_stage` call carries a human sentence built in
+  `services/stages.py` from the `RunConfig` (provider, model, generator host)
+  and the decomposition, and the loading screen shows it verbatim. Before
+  `POST /generate` the worker sits in a `waking` stage, polling the
+  generator's `GET /` (`wait_until_ready`) until it answers with
+  `loaded: true` or `WAKE_TIMEOUT_S` passes, ticking the elapsed seconds into
+  the detail — that is how a Modal cold start or a still-loading Colab shows
+  up as such instead of as a long silent `generating`. Tests stub that probe
+  through the autouse `awake_generator` fixture.
 - **`generators/` holds four hosts over one package.** Generation logic belongs
   in `generators/core`; `colab/`, `local/`, `huggingface/` and `modal/` install
   it from git and should stay thin. Do not fix a generation bug in one host — fix

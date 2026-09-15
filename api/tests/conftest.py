@@ -47,6 +47,8 @@ class RecordingWorker:
 
 
 class FakeResponse:
+    status_code = 200
+
     def __init__(self, payload: dict) -> None:
         self._payload = payload
 
@@ -105,6 +107,17 @@ def token(register):
 @pytest.fixture
 def auth(token):
     return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture(autouse=True)
+def awake_generator(monkeypatch):
+    import api.app.services.generator as generator_module
+
+    monkeypatch.setattr(
+        generator_module.requests,
+        "get",
+        lambda url, **kwargs: FakeResponse({"status": "ok", "loaded": True}),
+    )
 
 
 @pytest.fixture

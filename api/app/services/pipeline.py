@@ -12,7 +12,7 @@ from api.app.db import session_scope
 from api.app.models.tables import Atmosphere, Element, utcnow
 from api.app.services import storage
 from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
-from api.app.services.generator import generate
+from api.app.services.generator import generate, wait_until_ready
 from api.app.services.runconfig import resolve_config
 from api.app.services.stages import (
     PERSISTING_DETAIL,
@@ -20,6 +20,7 @@ from api.app.services.stages import (
     decomposing_detail,
     generating_detail,
     mixing_detail,
+    waking_detail,
 )
 from mixer.core import analyze
 from mixer.effects.looping import pad_for_looping
@@ -36,6 +37,24 @@ def _set_stage(
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
     session.commit()
+
+
+def _set_detail(session: Session, atmosphere: Atmosphere, detail: str) -> None:
+    atmosphere.stage_detail = detail
+    atmosphere.updated_at = utcnow()
+    session.add(atmosphere)
+    session.commit()
+
+
+def _wake_generator(session: Session, atmosphere: Atmosphere, config) -> None:
+    def on_wait(probe_status: str, elapsed_s: int) -> None:
+        detail = waking_detail(config, probe_status, elapsed_s)
+        if atmosphere.current_stage != "waking":
+            _set_stage(session, atmosphere, "waking", detail)
+        else:
+            _set_detail(session, atmosphere, detail)
+
+    wait_until_ready(config.generator_url, on_wait)
 
 
 def _fail(session: Session, atmosphere: Atmosphere, message: str) -> None:
@@ -236,6 +255,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                     atmosphere.use_events is not False,
                 )
 
+            wait_until_ready(config.generator_url)
             mark = time.perf_counter()
             generated = generate(
                 {"elements": [spec]},
@@ -342,6 +362,10 @@ def run_generation(atmosphere_id: int) -> None:
                 atmosphere.prompt, config, allow_events
             )
             timings["decompose_s"] = round(time.perf_counter() - mark, 3)
+
+            mark = time.perf_counter()
+            _wake_generator(session, atmosphere, config)
+            timings["wake_s"] = round(time.perf_counter() - mark, 3)
 
             _set_stage(
                 session,

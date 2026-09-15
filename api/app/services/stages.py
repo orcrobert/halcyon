@@ -6,6 +6,7 @@ from api.app.services.runconfig import RunConfig
 
 STAGE_PROGRESS = {
     "decomposing": 10,
+    "waking": 20,
     "generating": 30,
     "mixing": 70,
     "persisting": 90,
@@ -19,6 +20,24 @@ def host_label(config: RunConfig) -> str:
     if host is not None and config.generator_kind != "custom":
         return host.label
     return urlparse(config.generator_url).hostname or config.generator_url
+
+
+WAKING_BY_KIND = {
+    "modal": "Modal is starting a GPU container, cold starts usually take under a minute",
+    "colab": "Waiting for the Colab notebook to answer",
+    "huggingface": "Waiting for the Space to wake up",
+}
+
+
+def waking_detail(config: RunConfig, probe_status: str, elapsed_s: int) -> str:
+    if probe_status == "loading":
+        text = f"{host_label(config)} is loading the AudioCraft models"
+    else:
+        text = WAKING_BY_KIND.get(
+            config.generator_kind,
+            f"Waiting for the generator at {host_label(config)} to answer",
+        )
+    return f"{text} ({elapsed_s}s)"
 
 
 def decomposing_detail(config: RunConfig) -> str:
