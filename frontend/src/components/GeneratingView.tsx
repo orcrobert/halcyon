@@ -148,49 +148,31 @@ function StageTracker({ atmosphere }: { atmosphere: Atmosphere }) {
   const detail = stageDetail(atmosphere)
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
-      <ol className="flex items-center justify-center gap-0 w-full" style={{ maxWidth: '640px' }}>
-        {STAGES.map((stage, i) => {
-          const done = i < active
-          const current = i === active
-          return (
-            <li key={stage.key} className="flex items-center flex-1 last:flex-none min-w-0">
-              <div className="flex flex-col items-center gap-2 shrink-0">
-                <span
-                  className={`block rounded-full transition-all duration-500 ${
-                    current ? 'w-2.5 h-2.5 bg-accent-bright' : done ? 'w-2 h-2 bg-accent/70' : 'w-2 h-2 bg-line'
-                  }`}
-                  style={current ? { boxShadow: '0 0 0 4px color-mix(in srgb, var(--color-accent) 18%, transparent)' } : undefined}
-                />
-                <span
-                  className={`text-[10px] uppercase tracking-[0.16em] whitespace-nowrap transition-colors duration-500 ${
-                    current ? 'text-accent-bright' : done ? 'text-ink-dim' : 'text-ink-ghost'
-                  }`}
-                >
-                  {stage.label}
-                </span>
-              </div>
-              {i < STAGES.length - 1 && (
-                <span
-                  className={`flex-1 h-px mx-2 -mt-5 transition-colors duration-500 ${done ? 'bg-accent/50' : 'bg-line-soft'}`}
-                />
-              )}
-            </li>
-          )
-        })}
-      </ol>
+    <div className="flex flex-col items-center gap-3 w-full">
+      <div className="flex items-center gap-1.5 w-full" style={{ maxWidth: '520px' }}>
+        {STAGES.map((stage, i) => (
+          <span
+            key={stage.key}
+            className={`flex-1 rounded-full transition-colors duration-700 ${
+              i < active ? 'bg-accent/60' : i === active ? 'bg-accent-bright animate-pulse' : 'bg-line'
+            }`}
+            style={{ height: 2, animationDuration: '1.8s' }}
+          />
+        ))}
+      </div>
 
-      <div className="w-full rounded-full overflow-hidden bg-line-faint" style={{ maxWidth: '640px', height: '2px' }}>
-        <div
-          className="h-full bg-accent-bright transition-all duration-700 ease-out"
-          style={{ width: `${Math.max(2, Math.min(100, atmosphere.progress))}%` }}
-        />
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
+        <span className="text-accent-bright/90">{stageLabel(atmosphere)}</span>
+        <span className="text-ink-ghost">·</span>
+        <span className="text-ink-faint tabular-nums">
+          step {active + 1} of {STAGES.length}
+        </span>
       </div>
 
       <p
         key={detail}
-        className="text-[13px] text-ink-muted text-center leading-relaxed"
-        style={{ maxWidth: '560px', fontWeight: 300, animation: 'fade-in 0.4s ease-out' }}
+        className="text-[13px] text-ink-soft text-center leading-relaxed"
+        style={{ maxWidth: '520px', fontWeight: 300, animation: 'fade-in 0.4s ease-out' }}
       >
         {detail}
       </p>
@@ -215,7 +197,7 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
 
         <div className="flex flex-col items-center gap-2 text-center">
           <span className="text-[10px] uppercase tracking-[0.32em] text-accent-bright/70 font-medium">
-            {stageLabel(atmosphere)}
+            Composing
           </span>
           {atmosphere.title && (
             <h1 className="text-[20px] text-ink leading-tight" style={{ fontWeight: 400, letterSpacing: '-0.01em' }}>
@@ -229,22 +211,24 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
 
         <GenerationCanvas />
 
-        <StageTracker atmosphere={atmosphere} />
+        <div className="flex flex-col items-center gap-5">
+          <StageTracker atmosphere={atmosphere} />
 
-        <div className="flex items-center justify-center gap-5 text-[11px] uppercase tracking-[0.18em]">
-          <div className="flex items-center gap-1.5">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="w-1 h-1 rounded-full bg-accent-bright/80 animate-pulse"
-                style={{ animationDelay: `${i * 0.18}s`, animationDuration: '1.4s' }}
-              />
-            ))}
+          <div className="flex items-center justify-center gap-5 text-[11px] uppercase tracking-[0.18em]">
+            <div className="flex items-center gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="w-1 h-1 rounded-full bg-accent-bright/80 animate-pulse"
+                  style={{ animationDelay: `${i * 0.18}s`, animationDuration: '1.4s' }}
+                />
+              ))}
+            </div>
+            <span className="text-ink-ghost">·</span>
+            <span className="text-accent-bright/80 tabular-nums">{formatElapsed(elapsed)}</span>
+            <span className="text-ink-ghost">·</span>
+            <span className="text-ink-faint tabular-nums">{atmosphere.duration_s}s layers</span>
           </div>
-          <span className="text-ink-ghost">·</span>
-          <span className="text-accent-bright/80 tabular-nums">{formatElapsed(elapsed)}</span>
-          <span className="text-ink-ghost">·</span>
-          <span className="text-ink-faint tabular-nums">{atmosphere.duration_s}s layers</span>
         </div>
 
         <div className="flex justify-center">
