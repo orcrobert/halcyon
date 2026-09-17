@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Atmosphere } from '../types'
 import { alpha, token } from '../theme'
-import { STAGES, stageDetail, stageIndex, stageLabel } from '../stages'
+import { STAGES, resolveStage } from '../stages'
 
 interface Props {
   atmosphere: Atmosphere
@@ -144,8 +144,7 @@ function GenerationCanvas() {
 }
 
 function StageTracker({ atmosphere }: { atmosphere: Atmosphere }) {
-  const active = stageIndex(atmosphere)
-  const detail = stageDetail(atmosphere)
+  const { index: active, label, detail, settled } = resolveStage(atmosphere)
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
@@ -162,11 +161,15 @@ function StageTracker({ atmosphere }: { atmosphere: Atmosphere }) {
       </div>
 
       <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
-        <span className="text-accent-bright/90">{stageLabel(atmosphere)}</span>
-        <span className="text-ink-ghost">·</span>
-        <span className="text-ink-faint tabular-nums">
-          step {active + 1} of {STAGES.length}
-        </span>
+        <span className="text-accent-bright/90">{label}</span>
+        {!settled && (
+          <>
+            <span className="text-ink-ghost">·</span>
+            <span className="text-ink-faint tabular-nums">
+              step {active + 1} of {STAGES.length}
+            </span>
+          </>
+        )}
       </div>
 
       <p

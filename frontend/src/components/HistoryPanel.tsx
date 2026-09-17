@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { listAtmospheres, deleteAtmosphere } from '../api/atmospheres'
 import type { Atmosphere } from '../types'
-import { stageLabel } from '../stages'
+import { resolveStage } from '../stages'
 
 interface Props {
   open: boolean
@@ -414,7 +414,7 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
             })}
             {isReady && a.timings?.total_s != null && ` · built in ${formatBuild(a.timings.total_s)}`}
             {isFailed && (a.error ?? 'Failed')}
-            {isWorking && (a.status === 'generating' ? `Generating · ${stageLabel(a).toLowerCase()}` : 'Queued · click to follow')}
+            {isWorking && (a.status === 'generating' ? `Generating · ${resolveStage(a).label.toLowerCase()}` : 'Queued · click to follow')}
           </div>
         </div>
       </button>

@@ -50,7 +50,7 @@ export async function pollAtmosphere(
 ): Promise<Atmosphere> {
   const interval = options.intervalMs ?? 1500
   const timeout = options.timeoutMs ?? 10 * 60_000
-  const stuckPendingMs = options.stuckPendingMs ?? 20_000
+  const stuckPendingMs = options.stuckPendingMs ?? 120_000
   const start = Date.now()
   let leftPendingAt: number | null = null
 
