@@ -126,7 +126,7 @@ export interface Settings {
 
 export type GeneratorKind = 'colab' | 'modal' | 'huggingface' | 'local' | 'custom'
 
-export type GeneratorStatus = 'ok' | 'unreachable' | 'error'
+export type GeneratorStatus = 'ok' | 'starting' | 'unreachable' | 'error'
 
 export interface GeneratorReport {
   audiogen_model?: string

@@ -12,6 +12,7 @@ GENERATOR_TIMEOUT_S = 300
 PROBE_TIMEOUT_S = 10
 WAKE_TIMEOUT_S = 120
 WAKE_POLL_S = 3
+WAKE_TICK_S = 2.0
 
 ROLE_CLIP_S = {"bed": BED_CLIP_S, "event": EVENT_CLIP_S}
 
@@ -21,11 +22,14 @@ logger = logging.getLogger(__name__)
 def probe(url: str) -> tuple[str, str | None, dict | None]:
     target = f"{url.rstrip('/')}/"
     try:
-        response = requests.get(target, timeout=PROBE_TIMEOUT_S)
+        response = requests.get(target, timeout=PROBE_TIMEOUT_S, allow_redirects=False)
     except requests.Timeout:
         return "unreachable", "The generator did not answer within 10 seconds.", None
     except requests.RequestException as exc:
         return "unreachable", str(exc), None
+
+    if 300 <= response.status_code < 400:
+        return "starting", "The generator is still starting up.", None
 
     if response.status_code >= 400:
         return "error", f"The generator answered {response.status_code}.", None

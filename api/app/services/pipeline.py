@@ -1,6 +1,7 @@
 import io
 import logging
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -12,7 +13,7 @@ from api.app.db import session_scope
 from api.app.models.tables import Atmosphere, Element, utcnow
 from api.app.services import storage
 from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
-from api.app.services.generator import generate, wait_until_ready
+from api.app.services.generator import WAKE_TICK_S, generate, wait_until_ready
 from api.app.services.runconfig import resolve_config
 from api.app.services.stages import (
     PERSISTING_DETAIL,
@@ -47,14 +48,27 @@ def _set_detail(session: Session, atmosphere: Atmosphere, detail: str) -> None:
 
 
 def _wake_generator(session: Session, atmosphere: Atmosphere, config) -> None:
-    def on_wait(probe_status: str, elapsed_s: int) -> None:
-        detail = waking_detail(config, probe_status, elapsed_s)
-        if atmosphere.current_stage != "waking":
-            _set_stage(session, atmosphere, "waking", detail)
-        else:
-            _set_detail(session, atmosphere, detail)
+    state = {"status": "waiting"}
 
-    wait_until_ready(config.generator_url, on_wait)
+    def on_wait(probe_status: str, _elapsed_s: int) -> None:
+        state["status"] = probe_status
+
+    _set_stage(session, atmosphere, "waking", waking_detail(config, "waiting", 0))
+
+    started = time.monotonic()
+    probing = threading.Thread(
+        target=wait_until_ready,
+        args=(config.generator_url, on_wait),
+        daemon=True,
+    )
+    probing.start()
+
+    while probing.is_alive():
+        probing.join(WAKE_TICK_S)
+        if not probing.is_alive():
+            break
+        elapsed = int(time.monotonic() - started)
+        _set_detail(session, atmosphere, waking_detail(config, state["status"], elapsed))
 
 
 def _fail(session: Session, atmosphere: Atmosphere, message: str) -> None:

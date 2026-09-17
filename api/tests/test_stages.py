@@ -245,3 +245,116 @@ def test_a_stored_naive_timestamp_is_reported_as_utc(client, auth):
     assert datetime.fromisoformat(body["created_at"]) == datetime(
         2026, 9, 17, 12, 0, 0, tzinfo=timezone.utc
     )
+
+
+def _stage_of(atmosphere_id: int) -> tuple[str | None, str | None]:
+    from api.app.db import session_scope
+    from api.app.models.tables import Atmosphere
+
+    with session_scope() as session:
+        row = session.get(Atmosphere, atmosphere_id)
+        return row.current_stage, row.stage_detail
+
+
+def test_the_waking_stage_is_entered_before_the_generator_is_probed(
+    client, auth, stub_pipeline, monkeypatch
+):
+    from api.app.services.pipeline import run_generation
+
+    seen: list[tuple[str | None, str | None]] = []
+    atmosphere_id = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
+    ).json()["data"]["id"]
+
+    def slow_probe(url, on_wait=None, **kwargs):
+        seen.append(_stage_of(atmosphere_id))
+        return True
+
+    monkeypatch.setattr("api.app.services.pipeline.wait_until_ready", slow_probe)
+
+    run_generation(atmosphere_id)
+
+    assert [stage for stage, _ in seen] == ["waking"]
+    assert seen[0][1].endswith("(0s)")
+
+
+def test_the_waking_detail_ticks_while_a_probe_blocks(
+    client, auth, stub_pipeline, monkeypatch
+):
+    import time
+
+    from api.app.services.pipeline import run_generation
+
+    details: list[str] = []
+    real_set_detail = __import__(
+        "api.app.services.pipeline", fromlist=["_set_detail"]
+    )._set_detail
+
+    def record(session, atmosphere, detail):
+        details.append(detail)
+        real_set_detail(session, atmosphere, detail)
+
+    monkeypatch.setattr("api.app.services.pipeline._set_detail", record)
+    monkeypatch.setattr("api.app.services.pipeline.WAKE_TICK_S", 0.05)
+    monkeypatch.setattr(
+        "api.app.services.pipeline.wait_until_ready",
+        lambda url, on_wait=None, **kwargs: time.sleep(0.25) or True,
+    )
+
+    atmosphere_id = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
+    ).json()["data"]["id"]
+    run_generation(atmosphere_id)
+
+    assert len(details) >= 2
+    assert all("Waiting for the generator" in detail for detail in details)
+
+
+def test_a_redirect_means_the_generator_is_still_starting(monkeypatch):
+    import api.app.services.generator as generator_module
+    from conftest import FakeResponse
+
+    class Redirect(FakeResponse):
+        status_code = 303
+
+    monkeypatch.setattr(
+        generator_module.requests, "get", lambda url, **kwargs: Redirect({})
+    )
+
+    status, detail, reported = generator_module.probe("https://x.modal.run")
+
+    assert status == "starting"
+    assert reported is None
+
+
+def test_a_starting_generator_is_waited_for(monkeypatch):
+    import api.app.services.generator as generator_module
+
+    answers = iter([("starting", None, None), ("ok", None, {"loaded": True})])
+    monkeypatch.setattr(generator_module, "probe", lambda url: next(answers))
+    monkeypatch.setattr(generator_module.time, "sleep", lambda _s: None)
+
+    seen: list[str] = []
+    assert generator_module.wait_until_ready(
+        "https://x.modal.run", lambda status, _elapsed: seen.append(status)
+    )
+    assert seen == ["starting"]
+
+
+def test_the_probe_does_not_follow_redirects(monkeypatch):
+    import api.app.services.generator as generator_module
+    from conftest import FakeResponse
+
+    kwargs_seen = {}
+
+    class Ok(FakeResponse):
+        status_code = 200
+
+    def capture(url, **kwargs):
+        kwargs_seen.update(kwargs)
+        return Ok({"status": "ok", "loaded": True})
+
+    monkeypatch.setattr(generator_module.requests, "get", capture)
+    generator_module.probe("https://x.modal.run")
+
+    assert kwargs_seen["allow_redirects"] is False
