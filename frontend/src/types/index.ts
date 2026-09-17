@@ -47,7 +47,19 @@ export interface Element {
   audio_url: string | null
 }
 
-export type AtmosphereStatus = 'pending' | 'generating' | 'ready' | 'failed'
+export type AtmosphereStatus = 'pending' | 'generating' | 'awaiting_review' | 'ready' | 'failed'
+
+export type LayerRole = 'bed' | 'texture' | 'event'
+
+export type EventFrequency = 'rare' | 'occasional' | 'frequent'
+
+export interface DecompositionElement {
+  label: string
+  type: 'sound' | 'music'
+  role: LayerRole
+  frequency?: EventFrequency | null
+  prompt: string
+}
 
 export interface AtmosphereTimings {
   decompose_s?: number
@@ -76,6 +88,7 @@ export interface Atmosphere {
   updated_at: string
   timings?: AtmosphereTimings | null
   elements?: Element[] | null
+  decomposition?: DecompositionElement[] | null
 }
 
 export interface PaginatedResponse<T> {

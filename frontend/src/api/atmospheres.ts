@@ -1,4 +1,4 @@
-import type { Atmosphere, PaginatedResponse } from '../types'
+import type { Atmosphere, DecompositionElement, PaginatedResponse } from '../types'
 import { api } from './client'
 
 interface AtmosphereResponse {
@@ -32,11 +32,34 @@ export async function regenerateAtmosphere(id: number): Promise<Atmosphere> {
   return data.data
 }
 
+export async function confirmDecomposition(
+  id: number,
+  elements: DecompositionElement[],
+): Promise<Atmosphere> {
+  const { data } = await api.put<AtmosphereResponse>(
+    `/api/atmospheres/${id}/decomposition`,
+    { elements },
+  )
+  return data.data
+}
+
+export async function reviseDecomposition(
+  id: number,
+  feedback: string,
+  elements: DecompositionElement[],
+): Promise<Atmosphere> {
+  const { data } = await api.post<AtmosphereResponse>(
+    `/api/atmospheres/${id}/decomposition/revise`,
+    { feedback, elements },
+  )
+  return data.data
+}
+
 export async function deleteAtmosphere(id: number): Promise<void> {
   await api.delete(`/api/atmospheres/${id}`)
 }
 
-const TERMINAL: ReadonlyArray<Atmosphere['status']> = ['ready', 'failed']
+const TERMINAL: ReadonlyArray<Atmosphere['status']> = ['ready', 'failed', 'awaiting_review']
 
 export async function pollAtmosphere(
   id: number,

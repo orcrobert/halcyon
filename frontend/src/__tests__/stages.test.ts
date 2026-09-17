@@ -25,6 +25,15 @@ describe('resolveStage', () => {
     expect(stage.detail).toBe('Waiting for the generator to answer')
   })
 
+  it('holds on the decompose step while the layers wait for review', () => {
+    const stage = resolveStage({ ...base, status: 'awaiting_review', current_stage: 'reviewing' })
+
+    expect(stage.index).toBe(STAGES.findIndex((s) => s.key === 'decomposing'))
+    expect(stage.label).toBe('Review')
+    expect(stage.detail).toBe('Waiting for you to review the layers')
+    expect(stage.settled).toBe(false)
+  })
+
   it('does not fall back to the first step once the job is ready', () => {
     const stage = resolveStage({ ...base, status: 'ready' })
 
