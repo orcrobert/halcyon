@@ -162,6 +162,8 @@ function AuthedApp() {
         return
       }
 
+      setView('generating')
+
       const final = await pollAtmosphere(id, {
         signal: controller.signal,
         onTick: (a) => setAtmosphere(a),
@@ -195,7 +197,6 @@ function AuthedApp() {
       localStorage.removeItem(PENDING_KEY)
       return
     }
-    setView('generating')
     activatePollFor(id)
     return () => {
       pollAbortRef.current?.abort()
@@ -334,7 +335,6 @@ function AuthedApp() {
     stop()
     setPlaying(false)
     setHistoryOpen(false)
-    setView('generating')
     activatePollFor(id)
   }, [stop, flushAll, activatePollFor])
 
