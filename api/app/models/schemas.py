@@ -13,6 +13,7 @@ from api.app.config import (
     DEFAULT_DURATION_S,
     MAX_DURATION_S,
     MAX_INTERVAL_S,
+    MAX_REVIEW_LAYERS,
     MIN_DURATION_S,
     MIN_INTERVAL_S,
 )
@@ -238,6 +239,45 @@ class AtmosphereCreate(BaseModel):
     use_events: bool = True
 
 
+class DecompositionElement(BaseModel):
+    label: str = Field(min_length=1, max_length=80)
+    type: Literal["sound", "music"]
+    role: Literal["bed", "texture", "event"] = "texture"
+    frequency: Literal["rare", "occasional", "frequent"] | None = None
+    prompt: str = Field(min_length=1, max_length=1000)
+
+
+def _unique_labels(elements: list[DecompositionElement]) -> list[DecompositionElement]:
+    labels = [element.label.strip().casefold() for element in elements]
+    if len(set(labels)) != len(labels):
+        raise ValueError("Every layer needs a different name.")
+    return elements
+
+
+DecompositionElements = Annotated[
+    list[DecompositionElement],
+    Field(min_length=1, max_length=MAX_REVIEW_LAYERS),
+    AfterValidator(_unique_labels),
+]
+
+
+class DecompositionLayerOut(BaseModel):
+    label: str
+    type: str
+    role: str
+    frequency: str | None = None
+    prompt: str
+
+
+class DecompositionUpdate(BaseModel):
+    elements: DecompositionElements
+
+
+class DecompositionRevise(BaseModel):
+    feedback: str = Field(min_length=1, max_length=2000)
+    elements: DecompositionElements
+
+
 class AtmosphereOut(BaseModel):
     id: int
     title: str | None
@@ -254,6 +294,7 @@ class AtmosphereOut(BaseModel):
     generated_at: Timestamp | None
     timings: dict[str, Any] | None = None
     elements: list[ElementOut] | None = None
+    decomposition: list[DecompositionLayerOut] | None = None
 
 
 class GenerateRequest(BaseModel):

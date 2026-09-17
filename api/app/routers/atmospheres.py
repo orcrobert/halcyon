@@ -8,13 +8,22 @@ from api.app.deps import CurrentUser, SessionDep
 from api.app.models.schemas import (
     AtmosphereCreate,
     AtmosphereOut,
+    DecompositionLayerOut,
+    DecompositionRevise,
+    DecompositionUpdate,
     Envelope,
     Page,
     PageMeta,
 )
-from api.app.models.tables import Atmosphere, User
+from api.app.models.tables import Atmosphere, User, utcnow
 from api.app.routers.elements import serialize_element
 from api.app.services import storage
+from api.app.services.decomposer import (
+    DEFAULT_ROLE,
+    normalize_elements,
+    revise_decomposition,
+)
+from api.app.services.runconfig import resolve_config
 
 router = APIRouter(prefix="/api/atmospheres", tags=["atmospheres"])
 
@@ -71,6 +80,32 @@ def owned_atmosphere(
     return atmosphere
 
 
+def _review_layers(atmosphere: Atmosphere) -> list[DecompositionLayerOut] | None:
+    if atmosphere.status != "awaiting_review":
+        return None
+    return [
+        DecompositionLayerOut(
+            label=str(element.get("label", "")),
+            type=str(element.get("type", "sound")),
+            role=str(element.get("role") or DEFAULT_ROLE),
+            frequency=element.get("frequency"),
+            prompt=str(element.get("prompt", "")),
+        )
+        for element in (atmosphere.decomposed_json or {}).get("elements", [])
+        if isinstance(element, dict)
+    ]
+
+
+def _awaiting_review(session: Session, user: User, atmosphere_id: int) -> Atmosphere:
+    atmosphere = owned_atmosphere(session, user, atmosphere_id)
+    if atmosphere.status != "awaiting_review":
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This atmosphere is not waiting for review.",
+        )
+    return atmosphere
+
+
 def serialize_atmosphere(
     atmosphere: Atmosphere, include_elements: bool = False
 ) -> AtmosphereOut:
@@ -94,6 +129,7 @@ def serialize_atmosphere(
             if include_elements
             else None
         ),
+        decomposition=_review_layers(atmosphere) if include_elements else None,
     )
 
 
@@ -203,6 +239,77 @@ def regenerate(
     request.app.state.worker.submit(fresh.id)
 
     return Envelope(data=serialize_atmosphere(fresh, include_elements=True))
+
+
+@router.put(
+    "/{atmosphere_id}/decomposition", status_code=status.HTTP_202_ACCEPTED
+)
+def confirm_decomposition(
+    atmosphere_id: int,
+    payload: DecompositionUpdate,
+    user: CurrentUser,
+    session: SessionDep,
+    request: Request,
+) -> Envelope[AtmosphereOut]:
+    atmosphere = _awaiting_review(session, user, atmosphere_id)
+
+    elements = normalize_elements(
+        [element.model_dump(exclude_none=True) for element in payload.elements],
+        atmosphere.use_events is not False,
+    )
+    atmosphere.decomposed_json = {
+        "atmosphere": (atmosphere.decomposed_json or {}).get("atmosphere"),
+        "elements": elements,
+    }
+    atmosphere.status = "pending"
+    atmosphere.current_stage = None
+    atmosphere.stage_detail = None
+    atmosphere.progress = 0
+    atmosphere.updated_at = utcnow()
+    session.add(atmosphere)
+    session.commit()
+    session.refresh(atmosphere)
+
+    request.app.state.worker.submit(atmosphere.id)
+
+    return Envelope(data=serialize_atmosphere(atmosphere, include_elements=True))
+
+
+@router.post("/{atmosphere_id}/decomposition/revise")
+def revise(
+    atmosphere_id: int,
+    payload: DecompositionRevise,
+    user: CurrentUser,
+    session: SessionDep,
+) -> Envelope[AtmosphereOut]:
+    atmosphere = _awaiting_review(session, user, atmosphere_id)
+    config = resolve_config(user.preferences, user.generators)
+
+    try:
+        revised = revise_decomposition(
+            atmosphere.prompt,
+            [element.model_dump() for element in payload.elements],
+            payload.feedback.strip(),
+            config,
+            atmosphere.use_events is not False,
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_502_BAD_GATEWAY,
+            detail=f"The language model could not revise the layers: {exc}",
+        )
+
+    atmosphere.decomposed_json = {
+        "atmosphere": (atmosphere.decomposed_json or {}).get("atmosphere")
+        or revised.get("atmosphere"),
+        "elements": revised["elements"],
+    }
+    atmosphere.updated_at = utcnow()
+    session.add(atmosphere)
+    session.commit()
+    session.refresh(atmosphere)
+
+    return Envelope(data=serialize_atmosphere(atmosphere, include_elements=True))
 
 
 @router.get("/{atmosphere_id}")

@@ -1,8 +1,12 @@
 import json
 import re
 
-from api.app.config import ROLE_INTERVALS
-from api.app.services.prompts import default_decomposer_prompt, refiner_prompt
+from api.app.config import MAX_REVIEW_LAYERS, ROLE_INTERVALS
+from api.app.services.prompts import (
+    default_decomposer_prompt,
+    refiner_prompt,
+    reviser_prompt,
+)
 from api.app.services.providers import complete_json
 from api.app.services.runconfig import RunConfig
 
@@ -126,3 +130,49 @@ def refine_element(
         system = system + NO_EVENTS_NOTE
     raw = complete_json(config, system, request)
     return _parse_result(raw, allow_events)["elements"][0]
+
+
+def _dedupe_labels(elements: list[dict]) -> list[dict]:
+    taken: set[str] = set()
+    for element in elements:
+        label = str(element["label"]).strip() or "Layer"
+        candidate, suffix = label, 2
+        while candidate in taken:
+            candidate = f"{label} {suffix}"
+            suffix += 1
+        element["label"] = candidate
+        taken.add(candidate)
+    return elements
+
+
+def revise_decomposition(
+    scene: str,
+    elements: list[dict],
+    feedback: str,
+    config: RunConfig,
+    allow_events: bool = True,
+) -> dict:
+    request = json.dumps(
+        {
+            "scene": scene,
+            "layers": [
+                {
+                    "label": element["label"],
+                    "type": element["type"],
+                    "role": element.get("role", DEFAULT_ROLE),
+                    "frequency": element.get("frequency"),
+                    "prompt": element["prompt"],
+                }
+                for element in elements
+            ],
+            "complaint": feedback,
+        },
+        ensure_ascii=False,
+    )
+    system = reviser_prompt()
+    if not allow_events:
+        system = system + NO_EVENTS_NOTE
+    raw = complete_json(config, system, request)
+    result = _parse_result(raw, allow_events)
+    result["elements"] = _dedupe_labels(result["elements"][:MAX_REVIEW_LAYERS])
+    return result
