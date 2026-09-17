@@ -1,7 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Annotated, Any, Generic, Literal, TypeVar
 
-from pydantic import BaseModel, Field, StringConstraints, model_validator
+from pydantic import (
+    AfterValidator,
+    BaseModel,
+    Field,
+    StringConstraints,
+    model_validator,
+)
 
 from api.app.config import (
     DEFAULT_DURATION_S,
@@ -12,6 +18,13 @@ from api.app.config import (
 )
 
 T = TypeVar("T")
+
+
+def _as_utc(value: datetime) -> datetime:
+    return value.replace(tzinfo=timezone.utc) if value.tzinfo is None else value
+
+
+Timestamp = Annotated[datetime, AfterValidator(_as_utc)]
 
 Email = Annotated[
     str,
@@ -55,8 +68,8 @@ class UserOut(BaseModel):
     id: int
     name: str
     email: str
-    created_at: datetime
-    updated_at: datetime
+    created_at: Timestamp
+    updated_at: Timestamp
 
 
 class AuthResponse(BaseModel):
@@ -122,7 +135,7 @@ class GeneratorOut(BaseModel):
     url: str
     is_active: bool
     last_status: str | None
-    last_checked_at: datetime | None
+    last_checked_at: Timestamp | None
     reported: dict[str, Any] | None
 
 
@@ -234,9 +247,9 @@ class AtmosphereOut(BaseModel):
     current_stage: str | None
     stage_detail: str | None = None
     error: str | None
-    created_at: datetime
-    updated_at: datetime
-    generated_at: datetime | None
+    created_at: Timestamp
+    updated_at: Timestamp
+    generated_at: Timestamp | None
     timings: dict[str, Any] | None = None
     elements: list[ElementOut] | None = None
 

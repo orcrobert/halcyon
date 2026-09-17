@@ -215,3 +215,33 @@ def test_waking_wording_follows_the_host():
     assert waking_detail(_config(generator_kind="modal"), "loading", 40) == (
         "Modal is loading the AudioCraft models (40s)"
     )
+
+
+def test_timestamps_are_served_as_utc(client, auth):
+    body = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
+    ).json()["data"]
+
+    assert body["created_at"].endswith("Z") or "+00:00" in body["created_at"]
+
+
+def test_a_stored_naive_timestamp_is_reported_as_utc(client, auth):
+    from datetime import datetime, timezone
+
+    from api.app.db import session_scope
+    from api.app.models.tables import Atmosphere
+
+    atmosphere_id = client.post(
+        "/api/atmospheres", headers=auth, json={"prompt": "a rainy library"}
+    ).json()["data"]["id"]
+    with session_scope() as session:
+        row = session.get(Atmosphere, atmosphere_id)
+        row.created_at = datetime(2026, 9, 17, 12, 0, 0)
+        session.add(row)
+        session.commit()
+
+    body = client.get(f"/api/atmospheres/{atmosphere_id}", headers=auth).json()["data"]
+
+    assert datetime.fromisoformat(body["created_at"]) == datetime(
+        2026, 9, 17, 12, 0, 0, tzinfo=timezone.utc
+    )
