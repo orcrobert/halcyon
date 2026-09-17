@@ -36,6 +36,11 @@ def _parse_result(raw: str, allow_events: bool = True) -> dict:
     if not isinstance(elements, list) or len(elements) == 0:
         raise ValueError("decomposer response missing or empty 'elements' array")
 
+    normalize_elements(elements, allow_events)
+    return result
+
+
+def normalize_elements(elements: list, allow_events: bool = True) -> list:
     type_map = {
         "audiogen": "sound", "AudioGen": "sound",
         "musicgen": "music", "MusicGen": "music",
@@ -82,7 +87,7 @@ def _parse_result(raw: str, allow_events: bool = True) -> dict:
         else:
             element.pop("frequency", None)
 
-    return result
+    return elements
 
 
 def decompose(prompt: str, config: RunConfig, allow_events: bool = True) -> dict:
