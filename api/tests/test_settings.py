@@ -214,3 +214,19 @@ def test_theme_clears_back_to_the_default(client, auth):
     body = client.put("/api/settings", headers=auth, json={"theme": ""}).json()["data"]
 
     assert body["theme"] is None
+
+
+def test_review_decomposition_defaults_off_and_round_trips(client, auth):
+    assert client.get("/api/settings", headers=auth).json()["data"][
+        "review_decomposition"
+    ] is False
+
+    body = client.put(
+        "/api/settings", headers=auth, json={"review_decomposition": True}
+    ).json()["data"]
+    assert body["review_decomposition"] is True
+
+    body = client.put(
+        "/api/settings", headers=auth, json={"theme": "dusk"}
+    ).json()["data"]
+    assert body["review_decomposition"] is True

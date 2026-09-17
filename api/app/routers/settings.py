@@ -32,6 +32,9 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
         ),
         decomposer_prompt=getattr(preferences, "decomposer_prompt", None),
         theme=getattr(preferences, "theme", None),
+        review_decomposition=bool(
+            getattr(preferences, "review_decomposition", None)
+        ),
         defaults={
             "generator_url": defaults.generator_url,
             "decomposer_provider": defaults.decomposer_provider,
@@ -77,6 +80,9 @@ def update(
         if field in provided:
             value = (provided[field] or "").strip()
             setattr(preferences, field, value or None)
+
+    if "review_decomposition" in provided:
+        preferences.review_decomposition = bool(provided["review_decomposition"])
 
     if "decomposer_api_key" in provided:
         key = (provided["decomposer_api_key"] or "").strip()

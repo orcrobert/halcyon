@@ -114,6 +114,7 @@ export interface Settings {
   decomposer_api_key_set: boolean
   decomposer_prompt: string | null
   theme: string | null
+  review_decomposition: boolean
   defaults: {
     generator_url: string | null
     decomposer_provider: string | null
@@ -189,4 +190,5 @@ export type SettingsUpdate = Partial<{
   decomposer_api_key: string
   decomposer_prompt: string
   theme: string
+  review_decomposition: boolean
 }>
