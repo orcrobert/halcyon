@@ -17,6 +17,7 @@ from api.app.services.generator import WAKE_TICK_S, generate, wait_until_ready
 from api.app.services.runconfig import resolve_config
 from api.app.services.stages import (
     PERSISTING_DETAIL,
+    REVIEW_DETAIL,
     STAGE_PROGRESS,
     decomposing_detail,
     generating_detail,
@@ -76,6 +77,33 @@ def _fail(session: Session, atmosphere: Atmosphere, message: str) -> None:
     atmosphere.current_stage = None
     atmosphere.stage_detail = None
     atmosphere.error = message
+    atmosphere.updated_at = utcnow()
+    session.add(atmosphere)
+    session.commit()
+
+
+def _wants_review(atmosphere: Atmosphere) -> bool:
+    preferences = atmosphere.user.preferences
+    return bool(preferences is not None and preferences.review_decomposition)
+
+
+def _await_review(
+    session: Session,
+    atmosphere: Atmosphere,
+    decomposed: dict,
+    timings: dict[str, float],
+) -> None:
+    atmosphere.decomposed_json = {
+        "atmosphere": decomposed.get("atmosphere"),
+        "elements": decomposed["elements"],
+    }
+    if not atmosphere.title:
+        atmosphere.title = decomposed.get("atmosphere")
+    atmosphere.status = "awaiting_review"
+    atmosphere.current_stage = "reviewing"
+    atmosphere.stage_detail = REVIEW_DETAIL
+    atmosphere.progress = STAGE_PROGRESS["reviewing"]
+    atmosphere.timings_json = timings
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
     session.commit()
@@ -370,12 +398,22 @@ def run_generation(atmosphere_id: int) -> None:
 
         try:
             _set_stage(session, atmosphere, "decomposing", decomposing_detail(config))
-            mark = time.perf_counter()
-            allow_events = atmosphere.use_events is not False
-            decomposed = atmosphere.decomposed_json or decompose(
-                atmosphere.prompt, config, allow_events
-            )
-            timings["decompose_s"] = round(time.perf_counter() - mark, 3)
+            stored = atmosphere.decomposed_json
+            if stored:
+                decomposed = stored
+                reviewed_s = (atmosphere.timings_json or {}).get("decompose_s")
+                if reviewed_s is not None:
+                    timings["decompose_s"] = reviewed_s
+            else:
+                mark = time.perf_counter()
+                decomposed = decompose(
+                    atmosphere.prompt, config, atmosphere.use_events is not False
+                )
+                timings["decompose_s"] = round(time.perf_counter() - mark, 3)
+
+                if _wants_review(atmosphere):
+                    _await_review(session, atmosphere, decomposed, timings)
+                    return
 
             mark = time.perf_counter()
             _wake_generator(session, atmosphere, config)
