@@ -391,6 +391,7 @@ export function useAudioEngine() {
   const ctxRef = useRef<AudioContext | null>(null)
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
+  const bufferCacheRef = useRef<Map<string, AudioBuffer>>(new Map())
   const analyserRef = useRef<AnalyserNode | null>(null)
   const reverbRef = useRef<ConvolverNode | null>(null)
   const limiterRef = useRef<DynamicsCompressorNode | null>(null)
@@ -561,11 +562,14 @@ export function useAudioEngine() {
 
   async function decodeElements(elements: Element[]): Promise<DecodedElement[]> {
     const ctx = getContext()
-    return Promise.all(
+    const cache = bufferCacheRef.current
+    const decoded = await Promise.all(
       elements.map(async (el) => {
         if (!el.audio_url) {
           throw new Error(`Element ${el.label} has no audio_url`)
         }
+        const cached = cache.get(el.audio_url)
+        if (cached) return { el, buffer: cached }
         const res = await fetch(apiUrl(el.audio_url), { headers: authHeaders() })
         if (!res.ok) {
           throw new Error(`Failed to load audio for ${el.label}: ${res.status}`)
@@ -575,6 +579,9 @@ export function useAudioEngine() {
         return { el, buffer }
       })
     )
+    cache.clear()
+    for (const { el, buffer } of decoded) cache.set(el.audio_url!, buffer)
+    return decoded
   }
 
   const load = useCallback(async (elements: Element[]) => {
@@ -809,6 +816,7 @@ export function useAudioEngine() {
     })
     tracksRef.current.clear()
     decodedRef.current = []
+    bufferCacheRef.current.clear()
     volumeStateRef.current.clear()
     eqStateRef.current.clear()
     panStateRef.current.clear()
