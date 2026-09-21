@@ -16,6 +16,7 @@ const MAX_LAYERS = 7
 const NEW_LAYER_EVERY_MS = 2800
 const SLOT_SPACING = (CANVAS_H - 160) / (MAX_LAYERS - 1)
 const SLOT_ORDER = [3, 1, 5, 0, 6, 2, 4]
+const MAX_DPR = 2
 
 interface Layer {
   bornAt: number
@@ -27,12 +28,35 @@ interface Layer {
   amp: number
 }
 
-function GenerationCanvas() {
+function GenerationCanvas({ paused }: { paused: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
   const layersRef = useRef<Layer[]>([])
   const startRef = useRef(0)
   const tRef = useRef(0)
+  const pausedRef = useRef(paused)
+  const resumeRef = useRef<() => void>(() => {})
+
+  useEffect(() => {
+    pausedRef.current = paused
+    if (!paused) resumeRef.current()
+  }, [paused])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const fit = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+      const width = Math.max(1, Math.min(CANVAS_W, Math.round(canvas.clientWidth * dpr)))
+      const height = Math.max(1, Math.round(width * CANVAS_H / CANVAS_W))
+      if (canvas.width !== width) canvas.width = width
+      if (canvas.height !== height) canvas.height = height
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(canvas)
+    return () => observer.disconnect()
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -66,7 +90,7 @@ function GenerationCanvas() {
     }
 
     const draw = () => {
-      rafRef.current = requestAnimationFrame(draw)
+      rafRef.current = pausedRef.current ? 0 : requestAnimationFrame(draw)
       tRef.current += 0.012
       const now = performance.now()
       const ageMs = now - startRef.current
@@ -77,7 +101,9 @@ function GenerationCanvas() {
         layersRef.current.push(spawnLayer(idx * 1337 + Math.floor(ageMs), idx))
       }
 
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      const scale = canvas.width / CANVAS_W
+      ctx.setTransform(scale, 0, 0, scale, 0, 0)
+      ctx.clearRect(0, 0, CANVAS_W, CANVAS_H)
       const breath = 0.85 + 0.15 * Math.sin(tRef.current * 0.6)
 
       for (let li = 0; li < layersRef.current.length; li++) {
@@ -98,7 +124,7 @@ function GenerationCanvas() {
 
         ctx.save()
         ctx.shadowColor = alpha(accent, 60 * fadeIn)
-        ctx.shadowBlur = 28
+        ctx.shadowBlur = 28 * scale
         ctx.strokeStyle = alpha(accent, 55 * fadeIn)
         ctx.lineWidth = 4.8
         ctx.lineCap = 'round'
@@ -129,8 +155,15 @@ function GenerationCanvas() {
       }
     }
 
+    resumeRef.current = () => {
+      if (!rafRef.current) rafRef.current = requestAnimationFrame(draw)
+    }
     draw()
-    return () => cancelAnimationFrame(rafRef.current)
+    return () => {
+      cancelAnimationFrame(rafRef.current)
+      rafRef.current = 0
+      resumeRef.current = () => {}
+    }
   }, [])
 
   return (
@@ -138,7 +171,7 @@ function GenerationCanvas() {
       ref={canvasRef}
       width={CANVAS_W}
       height={CANVAS_H}
-      style={{ display: 'block', width: '100%', height: 'auto' }}
+      style={{ display: 'block', width: '100%', height: 'auto', aspectRatio: `${CANVAS_W} / ${CANVAS_H}` }}
     />
   )
 }
@@ -212,7 +245,7 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
           </p>
         </div>
 
-        <GenerationCanvas />
+        <GenerationCanvas paused={atmosphere.status === 'awaiting_review'} />
 
         <div className="flex flex-col items-center gap-5">
           <StageTracker atmosphere={atmosphere} />
