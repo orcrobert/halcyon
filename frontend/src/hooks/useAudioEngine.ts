@@ -113,7 +113,6 @@ interface TrackNode {
   input: AudioNode
   masterGain: GainNode
   panner: StereoPannerNode
-  convolver: ConvolverNode
   dryGain: GainNode
   wetGain: GainNode
   source: AudioBufferSourceNode | null
@@ -136,7 +135,6 @@ interface TrackChain {
   filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
   masterGain: GainNode
   panner: StereoPannerNode
-  convolver: ConvolverNode
   dryGain: GainNode
   wetGain: GainNode
 }
@@ -233,14 +231,19 @@ function buildImpulseResponse(ctx: BaseAudioContext, random: () => number = Math
   return ir
 }
 
-function createReverb(ctx: BaseAudioContext, depth: number, random: () => number = Math.random): { convolver: ConvolverNode; dryGain: GainNode; wetGain: GainNode } {
+function createReverbBus(ctx: BaseAudioContext, bus: AudioNode, random: () => number = Math.random): ConvolverNode {
   const convolver = ctx.createConvolver()
   convolver.buffer = buildImpulseResponse(ctx, random)
+  convolver.connect(bus)
+  return convolver
+}
+
+function createSends(ctx: BaseAudioContext, depth: number): { dryGain: GainNode; wetGain: GainNode } {
   const dryGain = ctx.createGain()
   const wetGain = ctx.createGain()
   dryGain.gain.value = dryGainFor(depth)
   wetGain.gain.value = wetGainFor(depth)
-  return { convolver, dryGain, wetGain }
+  return { dryGain, wetGain }
 }
 
 function createPanner(ctx: BaseAudioContext, pan: number): StereoPannerNode {
@@ -304,8 +307,8 @@ function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, B
 function buildTrackChain(
   ctx: BaseAudioContext,
   bus: AudioNode,
+  reverb: AudioNode,
   params: ChainParams,
-  random: () => number = Math.random,
 ): TrackChain {
   const filters = createFilters(ctx, params.eq)
   const [lowFilter, , highFilter] = filters
@@ -326,17 +329,16 @@ function buildTrackChain(
   masterGain.gain.value = params.gain
 
   const panner = createPanner(ctx, params.pan)
-  const { convolver, dryGain, wetGain } = createReverb(ctx, params.depth, random)
+  const { dryGain, wetGain } = createSends(ctx, params.depth)
 
   highFilter.connect(masterGain)
   masterGain.connect(panner)
   panner.connect(dryGain)
-  panner.connect(convolver)
-  convolver.connect(wetGain)
+  panner.connect(wetGain)
   dryGain.connect(bus)
-  wetGain.connect(bus)
+  wetGain.connect(reverb)
 
-  return { input: rumble, filters, masterGain, panner, convolver, dryGain, wetGain }
+  return { input: rumble, filters, masterGain, panner, dryGain, wetGain }
 }
 
 function triggerOneShot(
@@ -382,6 +384,7 @@ export function useAudioEngine() {
   const tracksRef = useRef<Map<string, TrackNode>>(new Map())
   const decodedRef = useRef<DecodedElement[]>([])
   const analyserRef = useRef<AnalyserNode | null>(null)
+  const reverbRef = useRef<ConvolverNode | null>(null)
   const limiterRef = useRef<DynamicsCompressorNode | null>(null)
   const volumeStateRef = useRef<Map<string, number>>(new Map())
   const eqStateRef = useRef<Map<string, EQState>>(new Map())
@@ -414,6 +417,7 @@ export function useAudioEngine() {
       analyserRef.current.connect(limiter)
       limiter.connect(ctxRef.current.destination)
       limiterRef.current = limiter
+      reverbRef.current = createReverbBus(ctxRef.current, analyserRef.current)
     }
     return ctxRef.current
   }, [])
@@ -496,8 +500,10 @@ export function useAudioEngine() {
         : (el.pan ?? 0)
       const depth = depthStateRef.current.get(el.label) ?? 0
       const bus = analyserRef.current ?? ctx.destination
+      const reverb = reverbRef.current ?? createReverbBus(ctx, bus)
+      reverbRef.current = reverb
 
-      const chain = buildTrackChain(ctx, bus, {
+      const chain = buildTrackChain(ctx, bus, reverb, {
         eq,
         bands: correctiveBands(el.eq_json ?? undefined),
         gain: trackGain(vol),
@@ -804,6 +810,7 @@ export function useAudioEngine() {
     ctxRef.current?.close()
     ctxRef.current = null
     analyserRef.current = null
+    reverbRef.current = null
     limiterRef.current = null
   }, [stopBinaural, stopScheduler])
 
@@ -841,6 +848,7 @@ export function useAudioEngine() {
 
     const limiter = createMasterLimiter(offline)
     limiter.connect(offline.destination)
+    const reverb = createReverbBus(offline, limiter, mulberry32(EXPORT_SEED >>> 0))
 
     for (const { el, buffer } of decodedRef.current) {
       const liveTrack = tracksRef.current.get(el.label)
@@ -856,13 +864,13 @@ export function useAudioEngine() {
         : (el.pan ?? 0)
 
       const rng = mulberry32((EXPORT_SEED ^ el.id) >>> 0)
-      const chain = buildTrackChain(offline, limiter, {
+      const chain = buildTrackChain(offline, limiter, reverb, {
         eq,
         bands: correctiveBands(el.eq_json ?? undefined),
         gain: liveTrack ? liveTrack.masterGain.gain.value : trackGain(el.volume),
         pan,
         depth: depthStateRef.current.get(el.label) ?? 0,
-      }, rng)
+      })
 
       if (isEvent) {
         const [minS, maxS] = intervalStateRef.current.get(el.label) ?? intervalsFor(el)
