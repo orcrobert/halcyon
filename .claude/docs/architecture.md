@@ -18,10 +18,16 @@ Definitive reference for how the system fits together. Skim
 - **Audio engine**: `hooks/useAudioEngine.ts` is the heart of playback. It
   decodes element WAVs, builds one Web Audio graph per track
   (`source (loops the padded interior) → SoundTouch pitch → rumble HPF →
-  corrective EQ → 3-band slider EQ → gain → panner → reverb send/dry →
+  corrective EQ → 3-band slider EQ → gain → panner → dry/wet sends →
   analyser → limiter → destination`), and exposes imperative setters
   (`setVolume`, `setEQ`, `setPan`, `setDepth`, `setTuning`), an autonomous
   `startAnimate` drift loop, binaural oscillators, and an offline `exportMix`.
+  Every wet send feeds one shared convolver per context rather than one per
+  track. Decoded buffers are cached by `audio_url` (it carries the element
+  version), so a reload only fetches layers that changed. A released track is
+  disconnected once its fade-out ends. The SoundTouch processor never returns
+  `false` from `process()`, so a released track that stays connected keeps
+  rendering for the life of the page.
 - **Persistence of edits**: `hooks/useDebouncedPatcher.ts` batches mix edits and
   `PATCH`es them to the API (250 ms debounce, flush on unload).
 - **API layer** (`api/`): `client.ts` (axios + bearer token injection, 401

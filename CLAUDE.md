@@ -285,6 +285,12 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   derives the loop region as `(buffer.duration - duration_s) / 2` and plays the
   interior. A file with no padding falls back to looping the whole buffer, so
   clips written before this keep working. One-shots are never padded.
+- **Released audio tracks must be disconnected.** The SoundTouch worklet
+  never lets its processor go idle, so a track left connected after release
+  keeps rendering, and each rebuild adds another one. `releaseTrack`
+  disconnects the chain after its fade-out. Layers share one reverb convolver
+  per context through their wet sends, so do not go back to a convolver per
+  track.
 - **Known issues and cleanup targets** are catalogued in
   [`.claude/AUDIT.md`](.claude/AUDIT.md). Read it before large refactors.
 

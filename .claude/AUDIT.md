@@ -60,7 +60,7 @@ Last reviewed against the tree at `refactor/architecture-cleanup`.
   builder, binaural, animate, export) behind the same public surface, one at a
   time, with listening checks between.*
 - 🟢 **`exportMix` duplicates the graph construction in `startFromDecoded`.**
-  Both build filters → gain → reverb → panner in the same order; only the
+  Both build filters → gain → panner → reverb sends in the same order; only the
   context and the parameter sources differ. The shared constants removed the
   numeric drift, but the topology is still written twice. *Safe: extract one
   builder taking a `BaseAudioContext`.*
