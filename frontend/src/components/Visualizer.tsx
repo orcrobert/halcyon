@@ -11,6 +11,10 @@ const BAR_ATTACK = 0.85
 const BAR_RELEASE = 0.16
 const BARS = 56
 const SPATIAL_SMOOTHING = 0.08
+const REFERENCE_W = 1280
+const REFERENCE_H = 128
+const DISPLAY_H = 64
+const MAX_DPR = 2
 
 export function Visualizer({ getAnalyser, playing }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -22,10 +26,27 @@ export function Visualizer({ getAnalyser, playing }: Props) {
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
+    const fit = () => {
+      const dpr = Math.min(window.devicePixelRatio || 1, MAX_DPR)
+      const width = Math.max(1, Math.round(canvas.clientWidth * dpr))
+      const height = Math.max(1, Math.round(DISPLAY_H * dpr))
+      if (canvas.width !== width) canvas.width = width
+      if (canvas.height !== height) canvas.height = height
+    }
+    fit()
+    const observer = new ResizeObserver(fit)
+    observer.observe(canvas)
+    return () => observer.disconnect()
+  }, [])
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
     const accent = token('--color-accent')
+    let data = new Uint8Array(0)
 
     const draw = () => {
       rafRef.current = requestAnimationFrame(draw)
@@ -45,7 +66,7 @@ export function Visualizer({ getAnalyser, playing }: Props) {
 
       if (analyser) {
         const bin = analyser.frequencyBinCount
-        const data = new Uint8Array(bin)
+        if (data.length !== bin) data = new Uint8Array(bin)
         analyser.getByteFrequencyData(data)
         const usable = Math.floor(bin * 0.65)
 
@@ -69,37 +90,33 @@ export function Visualizer({ getAnalyser, playing }: Props) {
 
       if (amp < 0.002) return
 
-      const gap = 4
+      const scale = W / REFERENCE_W
+      const gap = 4 * scale
       const barWidth = Math.max(1, (W - gap * (BARS - 1)) / BARS)
-      const baseline = H - 1
-      const maxBarH = H - 2
+      const baseline = H - H / REFERENCE_H
+      const maxBarH = H - 2 * H / REFERENCE_H
 
-      ctx.save()
-      ctx.shadowColor = alpha(accent, 95 * amp)
-      ctx.shadowBlur = 32
+      ctx.beginPath()
       for (let i = 0; i < BARS; i++) {
         const v = bars[i]
         if (v < 0.005) continue
         const x = i * (barWidth + gap)
         const barH = Math.max(1, v * maxBarH)
-        const top = baseline - barH
-        ctx.fillStyle = alpha(accent, 80 * amp)
-        ctx.fillRect(x, top, barWidth, barH)
+        ctx.rect(x, baseline - barH, barWidth, barH)
       }
+
+      ctx.save()
+      ctx.shadowColor = alpha(accent, 95 * amp)
+      ctx.shadowBlur = 32 * scale
+      ctx.fillStyle = alpha(accent, 80 * amp)
+      ctx.fill()
       ctx.restore()
 
       ctx.save()
       ctx.shadowColor = alpha(accent, 85 * amp)
-      ctx.shadowBlur = 12
-      for (let i = 0; i < BARS; i++) {
-        const v = bars[i]
-        if (v < 0.005) continue
-        const x = i * (barWidth + gap)
-        const barH = Math.max(1, v * maxBarH)
-        const top = baseline - barH
-        ctx.fillStyle = alpha(accent, 95 * amp)
-        ctx.fillRect(x, top, barWidth, barH)
-      }
+      ctx.shadowBlur = 12 * scale
+      ctx.fillStyle = alpha(accent, 95 * amp)
+      ctx.fill()
       ctx.restore()
 
     }
@@ -111,9 +128,9 @@ export function Visualizer({ getAnalyser, playing }: Props) {
   return (
     <canvas
       ref={canvasRef}
-      width={1280}
-      height={128}
-      style={{ width: '100%', maxWidth: '640px', height: '64px', display: 'block' }}
+      width={REFERENCE_W}
+      height={REFERENCE_H}
+      style={{ width: '100%', maxWidth: '640px', height: `${DISPLAY_H}px`, display: 'block' }}
     />
   )
 }
