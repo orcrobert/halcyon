@@ -149,19 +149,19 @@ export function DashboardView({
   const labels = (session.elements ?? []).map(e => e.label)
   const allMutedLocal = labels.length > 0 && labels.every(l => mutedTracks.has(l))
 
-  function handleVolumeChange(label: string, volume: number) {
+  const handleVolumeChange = useCallback((label: string, volume: number) => {
     if (volume > 0) volumeMap.current.set(label, volume)
     onVolumeChange(label, volume)
-  }
+  }, [onVolumeChange])
 
-  function handleMuteChange(label: string, m: boolean) {
+  const handleMuteChange = useCallback((label: string, m: boolean) => {
     setMutedTracks(prev => {
       const next = new Set(prev)
       if (m) next.add(label); else next.delete(label)
       onSetAnimateMuted(next)
       return next
     })
-  }
+  }, [onSetAnimateMuted])
 
   function handleMuteAll() {
     if (allMutedLocal) {

@@ -45,6 +45,24 @@ function eqStateToBands(eq: EQState, existing: EQBand[] | undefined): EQBand[] {
   ]
 }
 
+function sameJson(a: unknown, b: unknown): boolean {
+  return JSON.stringify(a) === JSON.stringify(b)
+}
+
+function reconcileAtmosphere(prev: Atmosphere | null, next: Atmosphere): Atmosphere {
+  if (!prev || prev.id !== next.id) return next
+  if (sameJson(prev, next)) return prev
+  if (!next.elements || !prev.elements) return next
+  const previous = new Map(prev.elements.map((el) => [el.id, el]))
+  return {
+    ...next,
+    elements: next.elements.map((el) => {
+      const old = previous.get(el.id)
+      return old && sameJson(old, el) ? old : el
+    }),
+  }
+}
+
 export default function App() {
   const { state } = useAuth()
 
@@ -173,7 +191,7 @@ function AuthedApp() {
 
       const final = await pollAtmosphere(id, {
         signal: controller.signal,
-        onTick: (a) => setAtmosphere(a),
+        onTick: (a) => setAtmosphere((prev) => reconcileAtmosphere(prev, a)),
       })
 
       if (final.status === 'awaiting_review') return
@@ -240,7 +258,7 @@ function AuthedApp() {
 
         const latest = await getAtmosphere(atmosphereId)
         if (controller.signal.aborted) return
-        setAtmosphere(latest)
+        setAtmosphere((prev) => reconcileAtmosphere(prev, latest))
 
         const busy = (latest.elements ?? []).some((e) => e.status === 'regenerating')
         if (busy) continue
