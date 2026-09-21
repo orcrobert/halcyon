@@ -126,14 +126,20 @@ def _persist(
     started: float,
 ) -> None:
     persist_started = time.perf_counter()
+    encoded = [
+        _stored_audio(element, wav, sr) for element, wav, sr in zip(valid, wavs, srs)
+    ]
+
     atmosphere.elements.clear()
     session.flush()
 
     storage.delete_atmosphere_audio(atmosphere.id)
 
-    for position, (element, wav, sr) in enumerate(zip(valid, wavs, srs)):
+    for position, (element, wav, sr, audio) in enumerate(
+        zip(valid, wavs, srs, encoded)
+    ):
         audio_path = storage.write_element_audio(
-            atmosphere.id, position, element["label"], _stored_audio(element, wav, sr)
+            atmosphere.id, position, element["label"], audio
         )
 
         volume = float(element.get("volume", 0.8))
