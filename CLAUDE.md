@@ -264,6 +264,12 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   twenty specs; `themeVariables()` expands each into the primitive layer in
   OKLab. Add a spec, never a hand-written ramp. The choice lives on
   `UserSettings.theme` and is mirrored to `localStorage` for first paint.
+- **Reduce blur is a per-user flag applied through one root attribute.**
+  `UserSettings.reduce_blur` is mirrored to `localStorage` like the theme, and
+  `effects.ts` sets `data-reduce-blur` on `<html>`. `index.css` then drops every
+  backdrop filter, makes `data-frosted` panels opaque and hides `data-glow`
+  layers, and the canvases skip their shadow blur via `blurReduced()`. A new
+  frosted panel needs `data-frosted`, and a new blur-only glow needs `data-glow`.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and
