@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { alpha, token } from '../theme'
+import { blurReduced } from '../effects'
 
 interface Props {
   getAnalyser: () => AnalyserNode | null
@@ -105,16 +106,20 @@ export function Visualizer({ getAnalyser, playing }: Props) {
         ctx.rect(x, baseline - barH, barWidth, barH)
       }
 
-      ctx.save()
-      ctx.shadowColor = alpha(accent, 95 * amp)
-      ctx.shadowBlur = 32 * scale
-      ctx.fillStyle = alpha(accent, 80 * amp)
-      ctx.fill()
-      ctx.restore()
+      const glow = !blurReduced()
+
+      if (glow) {
+        ctx.save()
+        ctx.shadowColor = alpha(accent, 95 * amp)
+        ctx.shadowBlur = 32 * scale
+        ctx.fillStyle = alpha(accent, 80 * amp)
+        ctx.fill()
+        ctx.restore()
+      }
 
       ctx.save()
       ctx.shadowColor = alpha(accent, 85 * amp)
-      ctx.shadowBlur = 12 * scale
+      ctx.shadowBlur = glow ? 12 * scale : 0
       ctx.fillStyle = alpha(accent, 95 * amp)
       ctx.fill()
       ctx.restore()

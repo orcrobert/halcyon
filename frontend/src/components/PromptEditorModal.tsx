@@ -125,7 +125,7 @@ export function PromptEditorModal({
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 24, pointerEvents: 'none',
       }}>
-        <div style={{
+        <div data-frosted style={{
           width: 'min(1080px, 100%)', height: 'min(760px, 100%)',
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0) scale(1)' : 'translateY(14px) scale(0.98)',

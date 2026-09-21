@@ -98,7 +98,7 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
       transition: 'opacity 0.18s ease, transform 0.18s ease',
       pointerEvents: visible ? 'auto' : 'none',
     }}>
-      <div ref={containerRef} style={{
+      <div data-frosted ref={containerRef} style={{
         background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
         backdropFilter: 'blur(40px) saturate(180%) brightness(1.05)',
         WebkitBackdropFilter: 'blur(40px) saturate(180%) brightness(1.05)',

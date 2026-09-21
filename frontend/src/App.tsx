@@ -22,6 +22,7 @@ import { deleteElement, regenerateElement } from './api/elements'
 import type { Atmosphere, DecompositionElement, EQBand, Element } from './types'
 import { getSettings } from './api/settings'
 import { DEFAULT_THEME, applyTheme, storeTheme } from './themes'
+import { applyReduceBlur, storeReduceBlur } from './effects'
 
 const PENDING_KEY = 'halcyon_pending_atmosphere_id'
 
@@ -103,6 +104,8 @@ function AuthedApp() {
         const active = res.theme ?? DEFAULT_THEME
         applyTheme(active)
         storeTheme(active)
+        applyReduceBlur(res.reduce_blur)
+        storeReduceBlur(res.reduce_blur)
       })
       .catch(() => { /* keep whatever the browser already had */ })
     return () => { cancelled = true }

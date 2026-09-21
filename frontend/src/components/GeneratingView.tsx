@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Atmosphere } from '../types'
 import { alpha, token } from '../theme'
+import { blurReduced } from '../effects'
 import { STAGES, resolveStage } from '../stages'
 
 interface Props {
@@ -124,7 +125,7 @@ function GenerationCanvas({ paused }: { paused: boolean }) {
 
         ctx.save()
         ctx.shadowColor = alpha(accent, 60 * fadeIn)
-        ctx.shadowBlur = 28 * scale
+        ctx.shadowBlur = blurReduced() ? 0 : 28 * scale
         ctx.strokeStyle = alpha(accent, 55 * fadeIn)
         ctx.lineWidth = 4.8
         ctx.lineCap = 'round'

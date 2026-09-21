@@ -228,7 +228,7 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
       }}
     >
       {/* Panel body */}
-      <div style={{
+      <div data-frosted style={{
         background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
         backdropFilter: 'blur(40px) saturate(180%) brightness(1.1)',
         WebkitBackdropFilter: 'blur(40px) saturate(180%) brightness(1.1)',
@@ -296,7 +296,7 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
       </div>
 
       {/* Arrow pointing down toward anchor */}
-      <div style={{
+      <div data-frosted style={{
         position: 'absolute',
         bottom: '-7px',
         left: arrowLeft,

@@ -230,6 +230,7 @@ export function ReviewLayersModal({ atmosphere, onConfirm, onRevise, onDiscard }
       />
 
       <div
+        data-frosted
         className="relative w-full flex flex-col overflow-hidden h-[100dvh] sm:h-auto sm:max-h-[min(88vh,880px)] sm:max-w-[760px] sm:rounded-[20px]"
         style={{
           background: 'color-mix(in srgb, var(--color-surface-sunken) 90%, transparent)',

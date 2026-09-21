@@ -99,7 +99,7 @@ function DiamondMarker({ x, y, glowColor, filterId }: { x: number; y: number; gl
   const d = `M ${x} ${y - s} L ${x + s * 0.55} ${y} L ${x} ${y + s} L ${x - s * 0.55} ${y} Z`
   return (
     <>
-      <path d={d} style={{ fill: glowColor }} opacity="0.9" filter={`url(#${filterId})`} />
+      <path data-glow d={d} style={{ fill: glowColor }} opacity="0.9" filter={`url(#${filterId})`} />
       <path d={d} fill="white" opacity="0.9" />
       <line x1={x - 14} y1={y} x2={x - s * 0.55 - 3} y2={y} strokeWidth="1" opacity="0.5" style={{ stroke: glowColor }} />
       <line x1={x + s * 0.55 + 3} y1={y} x2={x + 14} y2={y} strokeWidth="1" opacity="0.5" style={{ stroke: glowColor }} />
@@ -305,8 +305,8 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
                   </g>
                 )
               })}
-              <path d={pathH} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-bloom)" opacity="0.25" />
-              <path d={pathH} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-soft)" opacity="0.5" />
+              <path data-glow d={pathH} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-bloom)" opacity="0.25" />
+              <path data-glow d={pathH} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-soft)" opacity="0.5" />
               <path d={pathH} stroke="url(#tcm-grad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
               <path d={pathH} strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 80%, transparent)' }} />
               <DiamondMarker x={apexX} y={38} glowColor={glowColor} filterId="tcm-apex" />
@@ -408,8 +408,8 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
               )
             })}
 
-            <path d={pathV} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-bloom)" opacity="0.25" />
-            <path d={pathV} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-soft)" opacity="0.5" />
+            <path data-glow d={pathV} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-bloom)" opacity="0.25" />
+            <path data-glow d={pathV} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-soft)" opacity="0.5" />
             <path d={pathV} stroke="url(#tcd-grad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
             <path d={pathV} strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 80%, transparent)' }} />
 

@@ -185,6 +185,7 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
         {!muted && (
           <div
             aria-hidden
+            data-glow
             style={{
               position: 'absolute',
               left: `${blobX}%`,

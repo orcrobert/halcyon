@@ -77,7 +77,7 @@ export function RegenerateModal({ open, element, submitting, onSubmit, onClose }
         transition: 'opacity 0.22s ease, transform 0.22s ease',
         pointerEvents: visible ? 'auto' : 'none',
       }}>
-        <div ref={containerRef} style={{
+        <div data-frosted ref={containerRef} style={{
           background: 'color-mix(in srgb, var(--color-surface-sunken) 78%, transparent)',
           backdropFilter: 'blur(40px) saturate(180%)',
           WebkitBackdropFilter: 'blur(40px) saturate(180%)',
