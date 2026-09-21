@@ -65,6 +65,7 @@ const REVERB_IR_DURATION_S = 2.5
 const REVERB_IR_DECAY = 3.0
 const SOURCE_RELEASE_S = 0.03
 const TRACK_DISCONNECT_GRACE_S = 0.1
+const ANIMATE_PUSH_INTERVAL_S = 1 / 30
 const LOOP_PAD_MIN_S = 0.005
 
 const LIMITER_THRESHOLD_DB = -4
@@ -748,9 +749,13 @@ export function useAudioEngine() {
       s.phaseDepth = Math.asin(depthTarget) - t0 * s.velDepth
     }
 
+    let lastPush = -Infinity
+
     function tick() {
       animateRafRef.current = requestAnimationFrame(tick)
       const now = performance.now() * 0.001
+      const push = now - lastPush >= ANIMATE_PUSH_INTERVAL_S
+      if (push) lastPush = now
       const ctx = ctxRef.current
       const out = new Map<string, { vol: number; pan: number; depth: number }>()
 
@@ -762,6 +767,7 @@ export function useAudioEngine() {
 
         s.pan   = Math.sin(now * s.velPan   + s.phasePan)
         s.depth = 0.5 + 0.5 * Math.sin(now * s.velDepth + s.phaseDepth)
+        if (!push) continue
 
         const track = tracksRef.current.get(label)
         if (track && ctx && !animateMutedRef.current.has(label)) {
@@ -775,7 +781,7 @@ export function useAudioEngine() {
         out.set(label, { vol: s.vol, pan: s.pan, depth: s.depth })
       }
 
-      animateCallbackRef.current?.(out)
+      if (push) animateCallbackRef.current?.(out)
     }
 
     tick()
