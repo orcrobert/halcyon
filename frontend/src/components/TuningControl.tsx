@@ -125,6 +125,8 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
   const animatingRef = useRef(false)
   const onTuningChangeRef = useRef(onTuningChange)
   useEffect(() => { onTuningChangeRef.current = onTuningChange }, [onTuningChange])
+  const openRef = useRef(open)
+  useEffect(() => { openRef.current = open }, [open])
 
   const rawPosRef = useRef(freqToY(clamped, 400))
   const draggingRef = useRef(false)
@@ -158,7 +160,7 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
     let t = 0
     function tick() {
       t += 0.003
-      setPhase(t)
+      if (openRef.current) setPhase(t)
 
       if (animatingRef.current) {
         const diff = targetFreqRef.current - displayFreqRef.current
@@ -232,10 +234,9 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
   const glowColor = 'var(--color-accent)'
   const apexY = freqToY(shownFreq, trackH)
   const apexX = freqToX(shownFreq, trackW)
-  const pathV = buildWavyLineV(apexY, trackH, phase, seed)
-  const pathH = buildWavyLineH(apexX, trackW, phase, seed, 38, 82)
 
   if (isMobile) {
+    const pathH = buildWavyLineH(apexX, trackW, phase, seed, 38, 82)
     const svgW = trackW + TOP_PAD * 2
     const gradStopPct = ((apexX - TOP_PAD) / trackW * 100).toFixed(1)
 
@@ -337,6 +338,7 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
   }
 
   // desktop
+  const pathV = buildWavyLineV(apexY, trackH, phase, seed)
   const gradStopPct = ((apexY - TOP_PAD) / trackH * 100).toFixed(1)
   const svgH = TOP_PAD + trackH + 20
 
