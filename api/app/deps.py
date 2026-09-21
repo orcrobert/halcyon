@@ -1,3 +1,4 @@
+from datetime import timedelta, timezone
 from typing import Annotated
 
 from fastapi import Depends, Header, HTTPException, status
@@ -8,6 +9,8 @@ from api.app.models.tables import AuthToken, User, utcnow
 from api.app.security import hash_token
 
 SessionDep = Annotated[Session, Depends(get_session)]
+
+TOKEN_TOUCH_INTERVAL = timedelta(seconds=60)
 
 _UNAUTHENTICATED = HTTPException(
     status_code=status.HTTP_401_UNAUTHORIZED,
@@ -35,9 +38,14 @@ def current_user(
     if token is None:
         raise _UNAUTHENTICATED
 
-    token.last_used_at = utcnow()
-    session.add(token)
-    session.commit()
+    now = utcnow()
+    last_used = token.last_used_at
+    if last_used is not None and last_used.tzinfo is None:
+        last_used = last_used.replace(tzinfo=timezone.utc)
+    if last_used is None or now - last_used >= TOKEN_TOUCH_INTERVAL:
+        token.last_used_at = now
+        session.add(token)
+        session.commit()
 
     return token.user
 
