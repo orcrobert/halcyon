@@ -45,6 +45,8 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
     const idle = token('--color-line-active')
     const accent = token('--color-accent')
     const accentBright = token('--color-accent-bright')
+    const outline = alpha(token('--color-bg'), 50)
+    let drawn: [number, number, number, number] | null = null
 
     const draw = () => {
       rafRef.current = requestAnimationFrame(draw)
@@ -52,6 +54,8 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
       const px = pullX.get()
       const py = pullY.get()
       const strength = pullStrength.get()
+      if (drawn && drawn[0] === s && drawn[1] === px && drawn[2] === py && drawn[3] === strength) return
+      drawn = [s, px, py, strength]
       const r = THUMB_R * s
       const cx = CANVAS_SIZE / 2
       const cy = CANVAS_SIZE / 2
@@ -86,7 +90,7 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
       ctx.fillStyle = baseColor
       ctx.fill()
 
-      ctx.strokeStyle = alpha(token('--color-bg'), 50)
+      ctx.strokeStyle = outline
       ctx.lineWidth = 1.5
       ctx.stroke()
     }
