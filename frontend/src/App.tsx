@@ -6,7 +6,7 @@ import { GeneratingView } from './components/GeneratingView'
 import { DashboardView } from './components/DashboardView'
 import { HistoryPanel } from './components/HistoryPanel'
 import { AccountView } from './components/AccountView'
-import { useAudioEngine, type EQState } from './hooks/useAudioEngine'
+import { useAudioEngine, isCanonicalBand, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
 import {
   createAtmosphere,
@@ -23,11 +23,21 @@ const PENDING_KEY = 'halcyon_pending_atmosphere_id'
 
 type View = 'prompt' | 'generating' | 'dashboard' | 'account'
 
-function eqStateToBands(eq: EQState): EQBand[] {
+const EQ_SHELF_Q = 0.7
+const EQ_MID_Q = 1.4
+
+function eqStateToBands(eq: EQState, existing: EQBand[] | undefined): EQBand[] {
+  const corrective = (existing ?? [])
+    .filter((band) => !isCanonicalBand(band))
+    .map((band) => ({
+      ...band,
+      q: band.q ?? (band.type === 'peaking' ? EQ_MID_Q : EQ_SHELF_Q),
+    }))
   return [
-    { type: 'lowshelf', freq: 200, q: 0.7, gain: eq.low },
-    { type: 'peaking', freq: 1000, q: 1.4, gain: eq.mid },
-    { type: 'highshelf', freq: 8000, q: 0.7, gain: eq.high },
+    ...corrective,
+    { type: 'lowshelf', freq: 200, q: EQ_SHELF_Q, gain: eq.low },
+    { type: 'peaking', freq: 1000, q: EQ_MID_Q, gain: eq.mid },
+    { type: 'highshelf', freq: 8000, q: EQ_SHELF_Q, gain: eq.high },
   ]
 }
 
@@ -102,6 +112,14 @@ function AuthedApp() {
     () => (atmosphere?.elements ?? []).map((e) => e.id),
     [atmosphere],
   )
+
+  const labelToBands = useMemo(() => {
+    const map = new Map<string, EQBand[]>()
+    for (const el of atmosphere?.elements ?? []) {
+      map.set(el.label, el.eq_json ?? [])
+    }
+    return map
+  }, [atmosphere])
 
   useEffect(() => {
     playingRef.current = playing
@@ -329,8 +347,10 @@ function AuthedApp() {
   const handleEQChange = useCallback((label: string, eq: EQState) => {
     setEQ(label, eq)
     const id = labelToId.get(label)
-    if (id !== undefined) enqueue(id, { eq_json: eqStateToBands(eq) })
-  }, [setEQ, enqueue, labelToId])
+    if (id !== undefined) {
+      enqueue(id, { eq_json: eqStateToBands(eq, labelToBands.get(label)) })
+    }
+  }, [setEQ, enqueue, labelToId, labelToBands])
 
   const handlePanChange = useCallback((label: string, pan: number) => {
     setPan(label, pan)

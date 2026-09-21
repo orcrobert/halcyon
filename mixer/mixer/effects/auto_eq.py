@@ -65,6 +65,8 @@ _MERGE_FLOOR_DB = -9.0
 # deciding masker vs maskee. Small bump — not a license to dominate.
 _MUSIC_WEIGHT_BONUS = 1.3
 
+_SHELF_Q = 0.7
+
 
 def _hz_to_erb(f: float) -> float:
     return 21.366 * np.log10(1.0 + f * 4.37e-3)
@@ -162,17 +164,24 @@ def _tonal_shape(S: np.ndarray, freqs: np.ndarray, element_type: str) -> list[di
 
     if sub_e > sub_thresh:
         db = -min(6.0, (sub_e - sub_thresh) * 30.0)
-        bands.append({"type": "lowshelf", "freq": 80, "gain": round(db, 1)})
+        bands.append(
+            {"type": "lowshelf", "freq": 80, "gain": round(db, 1), "q": _SHELF_Q}
+        )
 
     if air_e > air_thresh:
         db = -min(6.0, (air_e - air_thresh) * 25.0)
-        bands.append(
-            {"type": "highshelf", "freq": round(air_shelf), "gain": round(db, 1)}
-        )
+        bands.append({
+            "type": "highshelf",
+            "freq": round(air_shelf),
+            "gain": round(db, 1),
+            "q": _SHELF_Q,
+        })
 
     if low_e > _LOW_THRESH and centroid > _LOW_CENTROID_MIN:
         db = -min(4.0, (low_e - _LOW_THRESH) * 15.0)
-        bands.append({"type": "lowshelf", "freq": 200, "gain": round(db, 1)})
+        bands.append(
+            {"type": "lowshelf", "freq": 200, "gain": round(db, 1), "q": _SHELF_Q}
+        )
 
     if hi_mid_e > _HI_MID_THRESH and centroid > _HI_MID_CENTROID_MIN:
         db = -min(4.0, (hi_mid_e - _HI_MID_THRESH) * 12.0)
@@ -236,9 +245,19 @@ def _masking_cuts(
                 continue
             fc = float(fc_key)
             if fc < 300:
-                bands.append({"type": "lowshelf", "freq": fc_key, "gain": round(db, 1)})
+                bands.append({
+                    "type": "lowshelf",
+                    "freq": fc_key,
+                    "gain": round(db, 1),
+                    "q": _SHELF_Q,
+                })
             elif fc > 6000:
-                bands.append({"type": "highshelf", "freq": fc_key, "gain": round(db, 1)})
+                bands.append({
+                    "type": "highshelf",
+                    "freq": fc_key,
+                    "gain": round(db, 1),
+                    "q": _SHELF_Q,
+                })
             else:
                 bands.append({"type": "peaking", "freq": fc_key, "gain": round(db, 1), "q": 1.2})
         result.append(bands)

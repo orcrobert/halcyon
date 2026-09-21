@@ -2,7 +2,7 @@ import os
 import numpy as np
 import soundfile as sf
 
-from mixer.effects.looping import make_loopable
+from mixer.effects.looping import limit_peak, make_loopable
 from mixer.effects.eq import apply_eq, remove_subsonics
 from mixer.effects.auto_eq import auto_eq
 from mixer.effects.events import (
@@ -87,7 +87,7 @@ def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[in
                 continue
         elif not element.get("looped"):
             wav = make_loopable(wav, sr)
-        wavs.append(wav)
+        wavs.append(limit_peak(wav))
         srs.append(sr)
         valid.append(element)
 

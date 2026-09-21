@@ -64,6 +64,7 @@ const REVERB_WET_SEND = 0.6
 const REVERB_IR_DURATION_S = 2.5
 const REVERB_IR_DECAY = 3.0
 const SOURCE_RELEASE_S = 0.03
+const LOOP_PAD_MIN_S = 0.005
 
 const LIMITER_THRESHOLD_DB = -4
 const LIMITER_KNEE_DB = 0
@@ -78,6 +79,8 @@ const EQ_LOW_FREQ_HZ = 200
 const EQ_MID_FREQ_HZ = 1000
 const EQ_MID_Q = 1.4
 const EQ_HIGH_FREQ_HZ = 8000
+const EQ_SHELF_Q = 0.7
+const EQ_MIN_AUDIBLE_DB = 0.1
 
 function trackGain(volume: number): number {
   return volume * TRACK_GAIN_SCALE
@@ -122,6 +125,7 @@ interface TrackNode {
 
 interface ChainParams {
   eq: EQState
+  bands: EQBand[]
   gain: number
   pan: number
   depth: number
@@ -149,15 +153,64 @@ interface BinauralNodes {
   gain: GainNode
 }
 
-function buildEQState(bands: EQBand[] | undefined): EQState {
+function loopRegion(buffer: AudioBuffer, declared: number | null | undefined): number | null {
+  if (!declared || declared <= 0) return null
+  const pad = (buffer.duration - declared) / 2
+  if (pad < LOOP_PAD_MIN_S) return null
+  return pad
+}
+
+function startLoop(src: AudioBufferSourceNode, buffer: AudioBuffer, declared: number | null | undefined) {
+  src.loop = true
+  const pad = loopRegion(buffer, declared)
+  if (pad === null) {
+    src.start()
+    return
+  }
+  src.loopStart = pad
+  src.loopEnd = pad + declared!
+  src.start(0, pad)
+}
+
+export function isCanonicalBand(band: EQBand): boolean {
+  return (
+    (band.type === 'lowshelf' && band.freq === EQ_LOW_FREQ_HZ) ||
+    (band.type === 'peaking' && band.freq === EQ_MID_FREQ_HZ) ||
+    (band.type === 'highshelf' && band.freq === EQ_HIGH_FREQ_HZ)
+  )
+}
+
+export function buildEQState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
   for (const band of bands) {
+    if (!isCanonicalBand(band)) continue
     if (band.type === 'lowshelf') state.low = band.gain
     else if (band.type === 'highshelf') state.high = band.gain
-    else if (band.type === 'peaking') state.mid = band.gain
+    else state.mid = band.gain
   }
   return state
+}
+
+function correctiveBands(bands: EQBand[] | undefined): EQBand[] {
+  if (!bands) return []
+  return bands.filter(
+    (band) => !isCanonicalBand(band) && Math.abs(band.gain) >= EQ_MIN_AUDIBLE_DB,
+  )
+}
+
+function createCorrectiveFilters(
+  ctx: BaseAudioContext,
+  bands: EQBand[],
+): BiquadFilterNode[] {
+  return bands.map((band) => {
+    const filter = ctx.createBiquadFilter()
+    filter.type = band.type
+    filter.frequency.value = band.freq
+    filter.Q.value = band.q ?? (band.type === 'peaking' ? EQ_MID_Q : EQ_SHELF_Q)
+    filter.gain.value = band.gain
+    return filter
+  })
 }
 
 function buildImpulseResponse(ctx: BaseAudioContext, random: () => number = Math.random, duration = REVERB_IR_DURATION_S, decay = REVERB_IR_DECAY): AudioBuffer {
@@ -261,7 +314,13 @@ function buildTrackChain(
   rumble.type = 'highpass'
   rumble.frequency.value = RUMBLE_FREQ_HZ
   rumble.Q.value = RUMBLE_Q
-  rumble.connect(lowFilter)
+
+  const corrective = createCorrectiveFilters(ctx, params.bands)
+  const head: AudioNode = corrective.reduce<AudioNode>((prev, filter) => {
+    prev.connect(filter)
+    return filter
+  }, rumble)
+  head.connect(lowFilter)
 
   const masterGain = ctx.createGain()
   masterGain.gain.value = params.gain
@@ -438,7 +497,13 @@ export function useAudioEngine() {
       const depth = depthStateRef.current.get(el.label) ?? 0
       const bus = analyserRef.current ?? ctx.destination
 
-      const chain = buildTrackChain(ctx, bus, { eq, gain: trackGain(vol), pan, depth })
+      const chain = buildTrackChain(ctx, bus, {
+        eq,
+        bands: correctiveBands(el.eq_json ?? undefined),
+        gain: trackGain(vol),
+        pan,
+        depth,
+      })
 
       if (el.playback === 'oneshot') {
         const [minS, maxS] = intervalStateRef.current.get(el.label) ?? intervalsFor(el)
@@ -465,9 +530,8 @@ export function useAudioEngine() {
 
       const src = ctx.createBufferSource()
       src.buffer = buffer
-      src.loop = true
       src.connect(pitchNode)
-      src.start()
+      startLoop(src, buffer, el.duration_s)
 
       tracksRef.current.set(el.label, {
         ...chain,
@@ -794,6 +858,7 @@ export function useAudioEngine() {
       const rng = mulberry32((EXPORT_SEED ^ el.id) >>> 0)
       const chain = buildTrackChain(offline, limiter, {
         eq,
+        bands: correctiveBands(el.eq_json ?? undefined),
         gain: liveTrack ? liveTrack.masterGain.gain.value : trackGain(el.volume),
         pan,
         depth: depthStateRef.current.get(el.label) ?? 0,
@@ -813,9 +878,8 @@ export function useAudioEngine() {
 
       const src = offline.createBufferSource()
       src.buffer = buffer
-      src.loop = true
       src.connect(offlinePitchNode)
-      src.start()
+      startLoop(src, buffer, el.duration_s)
     }
 
     const rendered = await offline.startRendering()

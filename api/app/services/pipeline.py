@@ -15,6 +15,7 @@ from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
 from api.app.services.generator import generate
 from api.app.services.runconfig import resolve_config
 from mixer.core import analyze
+from mixer.effects.looping import pad_for_looping
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,13 @@ def _fail(session: Session, atmosphere: Atmosphere, message: str) -> None:
     session.commit()
 
 
+def _stored_audio(element: dict, wav, sr) -> bytes:
+    buffer = io.BytesIO()
+    stored = wav if element.get("playback") == "oneshot" else pad_for_looping(wav, sr)
+    sf.write(buffer, stored.T, sr, format="WAV")
+    return buffer.getvalue()
+
+
 def _persist(
     session: Session,
     atmosphere: Atmosphere,
@@ -60,10 +68,8 @@ def _persist(
     storage.delete_atmosphere_audio(atmosphere.id)
 
     for position, (element, wav, sr) in enumerate(zip(valid, wavs, srs)):
-        buffer = io.BytesIO()
-        sf.write(buffer, wav.T, sr, format="WAV")
         audio_path = storage.write_element_audio(
-            atmosphere.id, position, element["label"], buffer.getvalue()
+            atmosphere.id, position, element["label"], _stored_audio(element, wav, sr)
         )
 
         volume = float(element.get("volume", 0.8))
@@ -264,8 +270,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                 for row, payload, wav, sr in mixed:
                     regenerated = row.id == element.id
                     if regenerated:
-                        buffer = io.BytesIO()
-                        sf.write(buffer, wav.T, sr, format="WAV")
+                        audio = _stored_audio(payload, wav, sr)
                         previous_path = row.audio_path
 
                         row.label = _unique_label(
@@ -280,7 +285,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                         row.source = payload.get("source")
                         row.source_json = payload.get("source_json")
                         row.audio_path = storage.write_element_audio(
-                            atmosphere.id, row.position, row.label, buffer.getvalue()
+                            atmosphere.id, row.position, row.label, audio
                         )
                         row.duration_s = round(wav.shape[-1] / sr, 3)
                         row.version = (row.version or 1) + 1
