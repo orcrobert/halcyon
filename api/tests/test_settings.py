@@ -230,3 +230,19 @@ def test_review_decomposition_defaults_off_and_round_trips(client, auth):
         "/api/settings", headers=auth, json={"theme": "dusk"}
     ).json()["data"]
     assert body["review_decomposition"] is True
+
+
+def test_reduce_blur_defaults_off_and_round_trips(client, auth):
+    assert client.get("/api/settings", headers=auth).json()["data"][
+        "reduce_blur"
+    ] is False
+
+    body = client.put(
+        "/api/settings", headers=auth, json={"reduce_blur": True}
+    ).json()["data"]
+    assert body["reduce_blur"] is True
+
+    body = client.put(
+        "/api/settings", headers=auth, json={"theme": "dusk"}
+    ).json()["data"]
+    assert body["reduce_blur"] is True

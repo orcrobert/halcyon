@@ -87,6 +87,7 @@ class SettingsUpdate(BaseModel):
     decomposer_prompt: str | None = Field(default=None, max_length=40000)
     theme: str | None = Field(default=None, max_length=64)
     review_decomposition: bool | None = None
+    reduce_blur: bool | None = None
 
 
 class ProviderOut(BaseModel):
@@ -106,6 +107,7 @@ class SettingsOut(BaseModel):
     decomposer_prompt: str | None
     theme: str | None
     review_decomposition: bool
+    reduce_blur: bool
     defaults: dict[str, str | None]
     providers: list[ProviderOut]
 
