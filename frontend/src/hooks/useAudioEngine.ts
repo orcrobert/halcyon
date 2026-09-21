@@ -64,6 +64,7 @@ const REVERB_WET_SEND = 0.6
 const REVERB_IR_DURATION_S = 2.5
 const REVERB_IR_DECAY = 3.0
 const SOURCE_RELEASE_S = 0.03
+const TRACK_DISCONNECT_GRACE_S = 0.1
 const LOOP_PAD_MIN_S = 0.005
 
 const LIMITER_THRESHOLD_DB = -4
@@ -272,6 +273,12 @@ function stopVoices(track: TrackNode, at: number) {
   track.lane.voices.clear()
 }
 
+function disconnectTrack(track: TrackNode) {
+  try { track.pitchNode?.disconnect() } catch {}
+  try { track.dryGain.disconnect() } catch {}
+  try { track.wetGain.disconnect() } catch {}
+}
+
 function releaseTrack(ctx: BaseAudioContext, track: TrackNode) {
   const t = ctx.currentTime
   track.masterGain.gain.cancelScheduledValues(t)
@@ -279,6 +286,7 @@ function releaseTrack(ctx: BaseAudioContext, track: TrackNode) {
   track.masterGain.gain.linearRampToValueAtTime(0, t + SOURCE_RELEASE_S)
   if (track.source) { try { track.source.stop(t + SOURCE_RELEASE_S) } catch {} }
   stopVoices(track, t + SOURCE_RELEASE_S)
+  window.setTimeout(() => disconnectTrack(track), (SOURCE_RELEASE_S + TRACK_DISCONNECT_GRACE_S) * 1000)
 }
 
 function createFilters(ctx: BaseAudioContext, eq: EQState): [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode] {
