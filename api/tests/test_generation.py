@@ -209,6 +209,7 @@ def test_generation_records_stage_timings(client, auth, ready_atmosphere):
     timings = body["timings"]
     assert set(timings) == {
         "decompose_s",
+        "wake_s",
         "generate_s",
         "mix_s",
         "persist_s",

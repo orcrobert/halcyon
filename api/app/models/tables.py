@@ -109,6 +109,7 @@ class Atmosphere(SQLModel, table=True):
     status: str = Field(default="pending", index=True)
     progress: int = 0
     current_stage: str | None = None
+    stage_detail: str | None = None
     error: str | None = None
     decomposed_json: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSON, nullable=True)

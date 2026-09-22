@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Atmosphere } from '../types'
 import { alpha, token } from '../theme'
+import { STAGES, resolveStage } from '../stages'
 
 interface Props {
   atmosphere: Atmosphere
@@ -142,13 +143,56 @@ function GenerationCanvas() {
   )
 }
 
+function StageTracker({ atmosphere }: { atmosphere: Atmosphere }) {
+  const { index: active, label, detail, settled } = resolveStage(atmosphere)
+
+  return (
+    <div className="flex flex-col items-center gap-3 w-full">
+      <div className="flex items-center gap-1.5 w-full" style={{ maxWidth: '520px' }}>
+        {STAGES.map((stage, i) => (
+          <span
+            key={stage.key}
+            className={`flex-1 rounded-full transition-colors duration-700 ${
+              i < active ? 'bg-accent/60' : i === active ? 'bg-accent-bright animate-pulse' : 'bg-line'
+            }`}
+            style={{ height: 2, animationDuration: '1.8s' }}
+          />
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.18em]">
+        <span className="text-accent-bright/90">{label}</span>
+        {!settled && (
+          <>
+            <span className="text-ink-ghost">·</span>
+            <span className="text-ink-faint tabular-nums">
+              step {active + 1} of {STAGES.length}
+            </span>
+          </>
+        )}
+      </div>
+
+      <p
+        key={detail}
+        className="text-[13px] text-ink-soft text-center leading-relaxed"
+        style={{ maxWidth: '520px', fontWeight: 300, animation: 'fade-in 0.4s ease-out' }}
+      >
+        {detail}
+      </p>
+    </div>
+  )
+}
+
+function elapsedSince(iso: string): number {
+  return Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 1000))
+}
+
 export function GeneratingView({ atmosphere, onCancel }: Props) {
-  const [elapsed, setElapsed] = useState(0)
+  const [elapsed, setElapsed] = useState(() => elapsedSince(atmosphere.created_at))
   useEffect(() => {
-    const start = Date.now()
-    const t = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000)
+    const t = setInterval(() => setElapsed(elapsedSince(atmosphere.created_at)), 1000)
     return () => clearInterval(t)
-  }, [])
+  }, [atmosphere.created_at])
 
   return (
     <div className="relative flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
@@ -170,20 +214,24 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
 
         <GenerationCanvas />
 
-        <div className="flex items-center justify-center gap-5 text-[11px] uppercase tracking-[0.18em]">
-          <div className="flex items-center gap-1.5">
-            {[0, 1, 2].map((i) => (
-              <span
-                key={i}
-                className="w-1 h-1 rounded-full bg-accent-bright/80 animate-pulse"
-                style={{ animationDelay: `${i * 0.18}s`, animationDuration: '1.4s' }}
-              />
-            ))}
+        <div className="flex flex-col items-center gap-5">
+          <StageTracker atmosphere={atmosphere} />
+
+          <div className="flex items-center justify-center gap-5 text-[11px] uppercase tracking-[0.18em]">
+            <div className="flex items-center gap-1.5">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="w-1 h-1 rounded-full bg-accent-bright/80 animate-pulse"
+                  style={{ animationDelay: `${i * 0.18}s`, animationDuration: '1.4s' }}
+                />
+              ))}
+            </div>
+            <span className="text-ink-ghost">·</span>
+            <span className="text-accent-bright/80 tabular-nums">{formatElapsed(elapsed)}</span>
+            <span className="text-ink-ghost">·</span>
+            <span className="text-ink-faint tabular-nums">{atmosphere.duration_s}s layers</span>
           </div>
-          <span className="text-ink-ghost">·</span>
-          <span className="text-accent-bright/80 tabular-nums">{formatElapsed(elapsed)}</span>
-          <span className="text-ink-ghost">·</span>
-          <span className="text-ink-faint tabular-nums">{atmosphere.duration_s}s layers</span>
         </div>
 
         <div className="flex justify-center">

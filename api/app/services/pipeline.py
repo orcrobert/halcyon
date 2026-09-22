@@ -1,6 +1,7 @@
 import io
 import logging
 import tempfile
+import threading
 import time
 from pathlib import Path
 
@@ -12,33 +13,68 @@ from api.app.db import session_scope
 from api.app.models.tables import Atmosphere, Element, utcnow
 from api.app.services import storage
 from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
-from api.app.services.generator import generate
+from api.app.services.generator import WAKE_TICK_S, generate, wait_until_ready
 from api.app.services.runconfig import resolve_config
+from api.app.services.stages import (
+    PERSISTING_DETAIL,
+    STAGE_PROGRESS,
+    decomposing_detail,
+    generating_detail,
+    mixing_detail,
+    waking_detail,
+)
 from mixer.core import analyze
 from mixer.effects.looping import pad_for_looping
 
 logger = logging.getLogger(__name__)
 
-STAGE_PROGRESS = {
-    "decomposing": 10,
-    "generating": 30,
-    "mixing": 70,
-    "persisting": 90,
-}
-
-
-def _set_stage(session: Session, atmosphere: Atmosphere, stage: str) -> None:
+def _set_stage(
+    session: Session, atmosphere: Atmosphere, stage: str, detail: str | None = None
+) -> None:
     atmosphere.status = "generating"
     atmosphere.current_stage = stage
+    atmosphere.stage_detail = detail
     atmosphere.progress = STAGE_PROGRESS[stage]
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
     session.commit()
 
 
+def _set_detail(session: Session, atmosphere: Atmosphere, detail: str) -> None:
+    atmosphere.stage_detail = detail
+    atmosphere.updated_at = utcnow()
+    session.add(atmosphere)
+    session.commit()
+
+
+def _wake_generator(session: Session, atmosphere: Atmosphere, config) -> None:
+    state = {"status": "waiting"}
+
+    def on_wait(probe_status: str, _elapsed_s: int) -> None:
+        state["status"] = probe_status
+
+    _set_stage(session, atmosphere, "waking", waking_detail(config, "waiting", 0))
+
+    started = time.monotonic()
+    probing = threading.Thread(
+        target=wait_until_ready,
+        args=(config.generator_url, on_wait),
+        daemon=True,
+    )
+    probing.start()
+
+    while probing.is_alive():
+        probing.join(WAKE_TICK_S)
+        if not probing.is_alive():
+            break
+        elapsed = int(time.monotonic() - started)
+        _set_detail(session, atmosphere, waking_detail(config, state["status"], elapsed))
+
+
 def _fail(session: Session, atmosphere: Atmosphere, message: str) -> None:
     atmosphere.status = "failed"
     atmosphere.current_stage = None
+    atmosphere.stage_detail = None
     atmosphere.error = message
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
@@ -110,6 +146,7 @@ def _persist(
     }
     atmosphere.status = "ready"
     atmosphere.current_stage = None
+    atmosphere.stage_detail = None
     atmosphere.progress = 100
     atmosphere.error = None
     atmosphere.generated_at = utcnow()
@@ -232,6 +269,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                     atmosphere.use_events is not False,
                 )
 
+            wait_until_ready(config.generator_url)
             mark = time.perf_counter()
             generated = generate(
                 {"elements": [spec]},
@@ -331,7 +369,7 @@ def run_generation(atmosphere_id: int) -> None:
         timings: dict[str, float] = {}
 
         try:
-            _set_stage(session, atmosphere, "decomposing")
+            _set_stage(session, atmosphere, "decomposing", decomposing_detail(config))
             mark = time.perf_counter()
             allow_events = atmosphere.use_events is not False
             decomposed = atmosphere.decomposed_json or decompose(
@@ -339,14 +377,23 @@ def run_generation(atmosphere_id: int) -> None:
             )
             timings["decompose_s"] = round(time.perf_counter() - mark, 3)
 
-            _set_stage(session, atmosphere, "generating")
+            mark = time.perf_counter()
+            _wake_generator(session, atmosphere, config)
+            timings["wake_s"] = round(time.perf_counter() - mark, 3)
+
+            _set_stage(
+                session,
+                atmosphere,
+                "generating",
+                generating_detail(config, decomposed["elements"]),
+            )
             mark = time.perf_counter()
             elements = generate(
                 decomposed, config, atmosphere.duration_s or DEFAULT_DURATION_S
             )
             timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
-            _set_stage(session, atmosphere, "mixing")
+            _set_stage(session, atmosphere, "mixing", mixing_detail(elements))
             mark = time.perf_counter()
             with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:
                 audio_s = 0.0
@@ -363,7 +410,7 @@ def run_generation(atmosphere_id: int) -> None:
                 timings["mix_s"] = round(time.perf_counter() - mark, 3)
                 timings["audio_s"] = round(audio_s, 3)
 
-                _set_stage(session, atmosphere, "persisting")
+                _set_stage(session, atmosphere, "persisting", PERSISTING_DETAIL)
                 atmosphere.decomposed_json = {
                     "atmosphere": decomposed.get("atmosphere"),
                     "elements": [

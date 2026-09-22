@@ -1,5 +1,7 @@
 import base64
 import logging
+import time
+from collections.abc import Callable
 
 import requests
 
@@ -8,6 +10,9 @@ from api.app.services.runconfig import RunConfig
 
 GENERATOR_TIMEOUT_S = 300
 PROBE_TIMEOUT_S = 10
+WAKE_TIMEOUT_S = 120
+WAKE_POLL_S = 3
+WAKE_TICK_S = 2.0
 
 ROLE_CLIP_S = {"bed": BED_CLIP_S, "event": EVENT_CLIP_S}
 
@@ -17,11 +22,14 @@ logger = logging.getLogger(__name__)
 def probe(url: str) -> tuple[str, str | None, dict | None]:
     target = f"{url.rstrip('/')}/"
     try:
-        response = requests.get(target, timeout=PROBE_TIMEOUT_S)
+        response = requests.get(target, timeout=PROBE_TIMEOUT_S, allow_redirects=False)
     except requests.Timeout:
         return "unreachable", "The generator did not answer within 10 seconds.", None
     except requests.RequestException as exc:
         return "unreachable", str(exc), None
+
+    if 300 <= response.status_code < 400:
+        return "starting", "The generator is still starting up.", None
 
     if response.status_code >= 400:
         return "error", f"The generator answered {response.status_code}.", None
@@ -46,6 +54,26 @@ def probe(url: str) -> tuple[str, str | None, dict | None]:
         if key in payload
     }
     return "ok", None, reported or None
+
+
+def wait_until_ready(
+    url: str,
+    on_wait: Callable[[str, int], None] | None = None,
+    timeout_s: int = WAKE_TIMEOUT_S,
+    poll_s: float = WAKE_POLL_S,
+) -> bool:
+    started = time.monotonic()
+    while True:
+        status, _, reported = probe(url)
+        if status == "ok" and (reported or {}).get("loaded", True):
+            return True
+        elapsed = int(time.monotonic() - started)
+        if elapsed >= timeout_s:
+            logger.warning("Generator at %s never reported ready; posting anyway", url)
+            return False
+        if on_wait is not None:
+            on_wait("loading" if status == "ok" else status, elapsed)
+        time.sleep(poll_s)
 
 
 def clip_length(element: dict, duration_s: int) -> int:

@@ -83,6 +83,7 @@ def serialize_atmosphere(
         status=atmosphere.status,
         progress=atmosphere.progress,
         current_stage=atmosphere.current_stage,
+        stage_detail=atmosphere.stage_detail,
         error=atmosphere.error,
         created_at=atmosphere.created_at,
         updated_at=atmosphere.updated_at,

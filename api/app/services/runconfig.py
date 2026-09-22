@@ -15,11 +15,15 @@ class RunConfig:
     decomposer_base_url: str | None
     decomposer_api_key: str | None
     decomposer_prompt: str
+    generator_kind: str = "custom"
+    generator_name: str | None = None
 
 
 def default_config() -> RunConfig:
     return RunConfig(
         generator_url=settings.generator_url,
+        generator_kind="custom",
+        generator_name=None,
         decomposer_provider=settings.decomposer_provider,
         decomposer_model=settings.decomposer_model,
         decomposer_base_url=settings.decomposer_base_url,
@@ -28,15 +32,36 @@ def default_config() -> RunConfig:
     )
 
 
+def active_generator(
+    generators: Sequence[GeneratorProfile] | None = None,
+) -> GeneratorProfile | None:
+    for profile in generators or ():
+        if profile.is_active and profile.url:
+            return profile
+    return None
+
+
 def active_generator_url(
     preferences: UserSettings | None,
     generators: Sequence[GeneratorProfile] | None = None,
 ) -> str:
-    for profile in generators or ():
-        if profile.is_active and profile.url:
-            return profile.url
+    profile = active_generator(generators)
+    if profile is not None:
+        return profile.url
 
     return getattr(preferences, "generator_url", None) or settings.generator_url
+
+
+def _generator_fields(
+    preferences: UserSettings | None,
+    generators: Sequence[GeneratorProfile] | None,
+) -> dict:
+    profile = active_generator(generators)
+    return {
+        "generator_url": active_generator_url(preferences, generators),
+        "generator_kind": profile.kind if profile is not None else "custom",
+        "generator_name": profile.name if profile is not None else None,
+    }
 
 
 def resolve_config(
@@ -49,7 +74,7 @@ def resolve_config(
 
     if preferences is None:
         return RunConfig(
-            generator_url=active_generator_url(None, generators),
+            **_generator_fields(None, generators),
             decomposer_provider=defaults.decomposer_provider,
             decomposer_model=defaults.decomposer_model,
             decomposer_base_url=defaults.decomposer_base_url,
@@ -61,7 +86,7 @@ def resolve_config(
     switched_provider = provider != defaults.decomposer_provider
 
     return RunConfig(
-        generator_url=active_generator_url(preferences, generators),
+        **_generator_fields(preferences, generators),
         decomposer_provider=provider,
         decomposer_model=preferences.decomposer_model
         or (None if switched_provider else defaults.decomposer_model),

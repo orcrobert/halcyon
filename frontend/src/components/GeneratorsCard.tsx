@@ -22,12 +22,14 @@ const INPUT_STYLE: React.CSSProperties = { padding: '9px 12px', fontFamily: 'inh
 
 const STATUS_COLOR: Record<GeneratorStatus, string> = {
   ok: 'var(--color-success)',
+  starting: 'var(--color-warn)',
   unreachable: 'var(--color-danger-bright)',
   error: 'var(--color-warn)',
 }
 
 const STATUS_LABEL: Record<GeneratorStatus, string> = {
   ok: 'Reachable',
+  starting: 'Starting up',
   unreachable: 'Unreachable',
   error: 'Responded with an error',
 }
