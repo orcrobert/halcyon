@@ -351,7 +351,7 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
             <feMerge><feMergeNode in="b1" /><feMergeNode in="b2" /></feMerge>
           </filter>
         </defs>
-        <path d={path} stroke="url(#bw-grad)" strokeWidth="10" fill="none" strokeLinecap="round" filter="url(#bw-glow)" opacity="0.18" />
+        <path data-glow d={path} stroke="url(#bw-grad)" strokeWidth="10" fill="none" strokeLinecap="round" filter="url(#bw-glow)" opacity="0.18" />
         <path d={path} stroke="url(#bw-grad)" strokeWidth="1.2" fill="none" strokeLinecap="round" />
         <path d={path} strokeWidth="0.4" fill="none" strokeLinecap="round" opacity="0.35" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 60%, transparent)' }} />
       </svg>

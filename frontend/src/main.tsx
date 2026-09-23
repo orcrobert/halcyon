@@ -4,8 +4,10 @@ import './index.css'
 import App from './App.tsx'
 import { AuthProvider } from './auth/AuthContext'
 import { applyTheme, storedTheme } from './themes'
+import { applyReduceBlur, storedReduceBlur } from './effects'
 
 applyTheme(storedTheme())
+applyReduceBlur(storedReduceBlur())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

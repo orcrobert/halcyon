@@ -88,3 +88,32 @@ def test_me_returns_the_current_user(client, auth):
 def test_logout_revokes_the_token(client, auth):
     assert client.post("/api/auth/logout", headers=auth).status_code == 204
     assert client.get("/api/auth/me", headers=auth).status_code == 401
+
+
+def test_token_use_is_recorded_at_most_once_a_minute(client, token, auth):
+    from datetime import timedelta
+
+    from sqlmodel import select
+
+    from api.app.db import session_scope
+    from api.app.models.tables import AuthToken
+
+    def last_used():
+        with session_scope() as session:
+            return session.exec(select(AuthToken)).one().last_used_at
+
+    client.get("/api/auth/me", headers=auth)
+    first = last_used()
+    assert first is not None
+
+    client.get("/api/auth/me", headers=auth)
+    assert last_used() == first
+
+    with session_scope() as session:
+        row = session.exec(select(AuthToken)).one()
+        row.last_used_at = first - timedelta(minutes=5)
+        session.add(row)
+        session.commit()
+
+    client.get("/api/auth/me", headers=auth)
+    assert last_used() > first - timedelta(minutes=5)

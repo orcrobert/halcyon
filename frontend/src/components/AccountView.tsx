@@ -7,6 +7,7 @@ import { PromptEditorModal } from './PromptEditorModal'
 import { ThemeCard } from './ThemeCard'
 import { Toggle } from './Toggle'
 import { DEFAULT_THEME, applyTheme, storeTheme, storedTheme } from '../themes'
+import { applyReduceBlur, storeReduceBlur } from '../effects'
 import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
 interface Props {
@@ -75,6 +76,8 @@ export function AccountView({ onBack }: Props) {
         setTheme(active)
         applyTheme(active)
         storeTheme(active)
+        applyReduceBlur(res.reduce_blur)
+        storeReduceBlur(res.reduce_blur)
       })
       .catch((e) => { if (!cancelled) setError(extractErrors(e).message) })
       .finally(() => { if (!cancelled) setLoading(false) })
@@ -119,6 +122,23 @@ export function AccountView({ onBack }: Props) {
       setSettings(await updateSettings({ review_decomposition: next }))
     } catch (e) {
       setSettings((current) => (current ? { ...current, review_decomposition: !next } : current))
+      setError(extractErrors(e).message)
+    }
+  }
+
+  async function handleReduceBlurToggle() {
+    if (!settings) return
+    const next = !settings.reduce_blur
+    setSettings({ ...settings, reduce_blur: next })
+    applyReduceBlur(next)
+    storeReduceBlur(next)
+    setError(null)
+    try {
+      setSettings(await updateSettings({ reduce_blur: next }))
+    } catch (e) {
+      setSettings((current) => (current ? { ...current, reduce_blur: !next } : current))
+      applyReduceBlur(!next)
+      storeReduceBlur(!next)
       setError(extractErrors(e).message)
     }
   }
@@ -246,6 +266,31 @@ export function AccountView({ onBack }: Props) {
             <GeneratorsCard />
 
             <ThemeCard value={theme} onChange={handleTheme} />
+
+            <Card
+              title="Performance"
+              hint="Trade some polish for a smoother interface."
+            >
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.reduce_blur}
+                onClick={handleReduceBlurToggle}
+                className="w-full flex items-center justify-between gap-4 rounded-xl text-left bg-surface-sunken border border-line hover:border-line-hover transition-colors"
+                style={{ padding: '12px 14px', fontFamily: 'inherit' }}
+              >
+                <span className="flex flex-col gap-1 min-w-0">
+                  <span className={`text-[13px] ${settings.reduce_blur ? 'text-ink-bright' : 'text-ink-soft'}`}>
+                    Reduce blur
+                  </span>
+                  <span className="text-[11px] text-ink-faint leading-snug">
+                    Drop the frosted-glass panels and soft glows. Helps when the page stutters, for example
+                    while a language model runs on the same machine and keeps the GPU busy.
+                  </span>
+                </span>
+                <Toggle on={settings.reduce_blur} />
+              </button>
+            </Card>
 
             <Card
               title="Generation"

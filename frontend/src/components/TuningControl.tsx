@@ -99,7 +99,7 @@ function DiamondMarker({ x, y, glowColor, filterId }: { x: number; y: number; gl
   const d = `M ${x} ${y - s} L ${x + s * 0.55} ${y} L ${x} ${y + s} L ${x - s * 0.55} ${y} Z`
   return (
     <>
-      <path d={d} style={{ fill: glowColor }} opacity="0.9" filter={`url(#${filterId})`} />
+      <path data-glow d={d} style={{ fill: glowColor }} opacity="0.9" filter={`url(#${filterId})`} />
       <path d={d} fill="white" opacity="0.9" />
       <line x1={x - 14} y1={y} x2={x - s * 0.55 - 3} y2={y} strokeWidth="1" opacity="0.5" style={{ stroke: glowColor }} />
       <line x1={x + s * 0.55 + 3} y1={y} x2={x + 14} y2={y} strokeWidth="1" opacity="0.5" style={{ stroke: glowColor }} />
@@ -125,6 +125,8 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
   const animatingRef = useRef(false)
   const onTuningChangeRef = useRef(onTuningChange)
   useEffect(() => { onTuningChangeRef.current = onTuningChange }, [onTuningChange])
+  const openRef = useRef(open)
+  useEffect(() => { openRef.current = open }, [open])
 
   const rawPosRef = useRef(freqToY(clamped, 400))
   const draggingRef = useRef(false)
@@ -158,7 +160,7 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
     let t = 0
     function tick() {
       t += 0.003
-      setPhase(t)
+      if (openRef.current) setPhase(t)
 
       if (animatingRef.current) {
         const diff = targetFreqRef.current - displayFreqRef.current
@@ -232,10 +234,9 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
   const glowColor = 'var(--color-accent)'
   const apexY = freqToY(shownFreq, trackH)
   const apexX = freqToX(shownFreq, trackW)
-  const pathV = buildWavyLineV(apexY, trackH, phase, seed)
-  const pathH = buildWavyLineH(apexX, trackW, phase, seed, 38, 82)
 
   if (isMobile) {
+    const pathH = buildWavyLineH(apexX, trackW, phase, seed, 38, 82)
     const svgW = trackW + TOP_PAD * 2
     const gradStopPct = ((apexX - TOP_PAD) / trackW * 100).toFixed(1)
 
@@ -304,8 +305,8 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
                   </g>
                 )
               })}
-              <path d={pathH} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-bloom)" opacity="0.25" />
-              <path d={pathH} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-soft)" opacity="0.5" />
+              <path data-glow d={pathH} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-bloom)" opacity="0.25" />
+              <path data-glow d={pathH} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcm-soft)" opacity="0.5" />
               <path d={pathH} stroke="url(#tcm-grad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
               <path d={pathH} strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 80%, transparent)' }} />
               <DiamondMarker x={apexX} y={38} glowColor={glowColor} filterId="tcm-apex" />
@@ -337,6 +338,7 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
   }
 
   // desktop
+  const pathV = buildWavyLineV(apexY, trackH, phase, seed)
   const gradStopPct = ((apexY - TOP_PAD) / trackH * 100).toFixed(1)
   const svgH = TOP_PAD + trackH + 20
 
@@ -406,8 +408,8 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
               )
             })}
 
-            <path d={pathV} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-bloom)" opacity="0.25" />
-            <path d={pathV} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-soft)" opacity="0.5" />
+            <path data-glow d={pathV} strokeWidth="14" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-bloom)" opacity="0.25" />
+            <path data-glow d={pathV} strokeWidth="5" fill="none" strokeLinecap="round" style={{ stroke: glowColor }} filter="url(#tcd-soft)" opacity="0.5" />
             <path d={pathV} stroke="url(#tcd-grad)" strokeWidth="1.5" fill="none" strokeLinecap="round" />
             <path d={pathV} strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 80%, transparent)' }} />
 

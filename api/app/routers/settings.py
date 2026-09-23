@@ -35,6 +35,7 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
         review_decomposition=bool(
             getattr(preferences, "review_decomposition", None)
         ),
+        reduce_blur=bool(getattr(preferences, "reduce_blur", None)),
         defaults={
             "generator_url": defaults.generator_url,
             "decomposer_provider": defaults.decomposer_provider,
@@ -83,6 +84,9 @@ def update(
 
     if "review_decomposition" in provided:
         preferences.review_decomposition = bool(provided["review_decomposition"])
+
+    if "reduce_blur" in provided:
+        preferences.reduce_blur = bool(provided["reduce_blur"])
 
     if "decomposer_api_key" in provided:
         key = (provided["decomposer_api_key"] or "").strip()

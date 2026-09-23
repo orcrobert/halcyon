@@ -195,7 +195,7 @@ export function BinauralModal({
         transition: 'opacity 0.22s ease, transform 0.22s ease',
         pointerEvents: visible ? 'auto' : 'none',
       }}>
-        <div ref={containerRef} style={{
+        <div data-frosted ref={containerRef} style={{
           width: '100%', height: '100%',
           background: 'color-mix(in srgb, var(--color-surface-sunken) 82%, transparent)',
           backdropFilter: 'blur(48px) saturate(180%)',

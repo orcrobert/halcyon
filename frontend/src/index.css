@@ -116,3 +116,22 @@ input[type="range"].eq-slider::-moz-range-track {
   from { opacity: 0; transform: translateY(3px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+:root[data-reduce-blur] *,
+:root[data-reduce-blur] *::before,
+:root[data-reduce-blur] *::after {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+:root[data-reduce-blur] [data-frosted] {
+  background: var(--color-surface-sunken) !important;
+}
+
+:root[data-reduce-blur] [data-glow] {
+  display: none !important;
+}
+
+:root[data-reduce-blur] svg [filter] {
+  filter: none !important;
+}

@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { memo, useState, useRef } from 'react'
 import type { Element } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { Fader } from './Fader'
@@ -35,7 +35,7 @@ function hashLabel(label: string): number {
   return h >>> 0
 }
 
-export function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onRegenerate, onDelete, deletable }: Props) {
+export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onRegenerate, onDelete, deletable }: Props) {
   const blobSeed = hashLabel(element.label)
   const blobX = 20 + (blobSeed % 60)
   const blobY = 15 + ((blobSeed >> 8) % 70)
@@ -185,6 +185,7 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
         {!muted && (
           <div
             aria-hidden
+            data-glow
             style={{
               position: 'absolute',
               left: `${blobX}%`,
@@ -398,4 +399,4 @@ export function TrackStrip({ element, muted, animatedVolume, animatedPan, animat
       />
     </div>
   )
-}
+})

@@ -128,6 +128,7 @@ export interface Settings {
   decomposer_prompt: string | null
   theme: string | null
   review_decomposition: boolean
+  reduce_blur: boolean
   defaults: {
     generator_url: string | null
     decomposer_provider: string | null
@@ -204,4 +205,5 @@ export type SettingsUpdate = Partial<{
   decomposer_prompt: string
   theme: string
   review_decomposition: boolean
+  reduce_blur: boolean
 }>
