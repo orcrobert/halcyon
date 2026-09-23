@@ -63,7 +63,19 @@ Definitive reference for how the system fits together. Skim
 - **Prompts** (`services/prompts.py`): loads the shipped system prompts from
   `api/prompts/`. `RunConfig.decomposer_prompt` is a user's override of the
   decomposer prompt and falls back to the shipped file when unset. The refiner
-  prompt behind per-layer regeneration is shipped only, not user-editable.
+  prompt behind per-layer regeneration and the reviser prompt behind layer
+  review are shipped only, not user-editable.
+- **Layer review**: with `UserSettings.review_decomposition` on, `run_generation`
+  stops after a fresh decomposition, stores it in `decomposed_json` and parks
+  the atmosphere at `status="awaiting_review"` (`current_stage="reviewing"`),
+  freeing the worker. `AtmosphereOut.decomposition` exposes the layers only in
+  that state. `PUT /{id}/decomposition` takes the edited list, runs it through
+  `normalize_elements` (role → playback and event intervals) and queues the job
+  again; the stored decomposition then skips the LLM. `POST
+  /{id}/decomposition/revise` sends the draft and a note to the reviser prompt
+  synchronously and stores the answer, still awaiting review. Discarding is a
+  plain `DELETE`. A paused atmosphere is not reclaimed on restart, and a new
+  take never pauses because it already carries a decomposition.
 - **Storage** (`services/storage.py`): audio at
   `DATA_DIR/audio/{atmosphere_id}/{position}_{label}.wav`, with path-escape
   checks on read.
@@ -124,6 +136,8 @@ Frontend                    API                          LLM      Generator
    │  poll GET /{id} ───────▶│                            │           │
    │                         │ ── decompose ─────────────▶│           │
    │                         │ ◀─ typed elements ─────────┤           │
+   │                         │ (review on: status=awaiting_review, stop;  │
+   │  PUT /{id}/decomposition│  confirm re-queues, LLM skipped)           │
    │                         │ ── POST /generate ────────────────────▶│
    │                         │ ◀─ wavs (b64) ─────────────────────────┤
    │                         │ mixer.analyze()            │           │
