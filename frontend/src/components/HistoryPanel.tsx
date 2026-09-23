@@ -305,6 +305,7 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
   const isReady = a.status === 'ready'
   const isFailed = a.status === 'failed'
   const isWorking = a.status === 'pending' || a.status === 'generating'
+  const isReviewing = a.status === 'awaiting_review'
 
   if (confirming) {
     return (
@@ -386,7 +387,9 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
             border: `1px solid ${isReady ? 'color-mix(in srgb, var(--color-accent) 15%, transparent)' : isFailed ? 'color-mix(in srgb, var(--color-danger) 15%, transparent)' : 'color-mix(in srgb, var(--color-band-gamma) 15%, transparent)'}`,
           }}
         >
-          {isWorking ? (
+          {isReviewing ? (
+            <span className="w-1.5 h-1.5 rounded-full bg-accent-bright animate-pulse" />
+          ) : isWorking ? (
             <span className="w-1.5 h-1.5 rounded-full bg-warn animate-pulse" />
           ) : isFailed ? (
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-danger-bright/70">
@@ -414,6 +417,7 @@ function HistoryRow({ atmosphere: a, confirming, onOpen, onRequestDelete, onCanc
             })}
             {isReady && a.timings?.total_s != null && ` · built in ${formatBuild(a.timings.total_s)}`}
             {isFailed && (a.error ?? 'Failed')}
+            {isReviewing && 'Awaiting review · click to open'}
             {isWorking && (a.status === 'generating' ? `Generating · ${resolveStage(a).label.toLowerCase()}` : 'Queued · click to follow')}
           </div>
         </div>

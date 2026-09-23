@@ -17,3 +17,7 @@ def default_decomposer_prompt() -> str:
 
 def refiner_prompt() -> str:
     return load_prompt("refiner")
+
+
+def reviser_prompt() -> str:
+    return load_prompt("reviser")

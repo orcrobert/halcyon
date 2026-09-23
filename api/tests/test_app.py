@@ -30,6 +30,8 @@ def test_the_api_surface_is_the_documented_one(client):
         "/api/atmospheres",
         "/api/atmospheres/{atmosphere_id}",
         "/api/atmospheres/{atmosphere_id}/regenerate",
+        "/api/atmospheres/{atmosphere_id}/decomposition",
+        "/api/atmospheres/{atmosphere_id}/decomposition/revise",
         "/api/elements/{element_id}",
         "/api/elements/{element_id}/reset",
         "/api/elements/{element_id}/regenerate",

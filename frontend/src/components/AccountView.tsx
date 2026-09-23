@@ -5,6 +5,7 @@ import { useAuth } from '../auth/context'
 import { GeneratorsCard } from './GeneratorsCard'
 import { PromptEditorModal } from './PromptEditorModal'
 import { ThemeCard } from './ThemeCard'
+import { Toggle } from './Toggle'
 import { DEFAULT_THEME, applyTheme, storeTheme, storedTheme } from '../themes'
 import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
@@ -105,6 +106,19 @@ export function AccountView({ onBack }: Props) {
     try {
       setSettings(await updateSettings({ theme: id }))
     } catch (e) {
+      setError(extractErrors(e).message)
+    }
+  }
+
+  async function handleReviewToggle() {
+    if (!settings) return
+    const next = !settings.review_decomposition
+    setSettings({ ...settings, review_decomposition: next })
+    setError(null)
+    try {
+      setSettings(await updateSettings({ review_decomposition: next }))
+    } catch (e) {
+      setSettings((current) => (current ? { ...current, review_decomposition: !next } : current))
       setError(extractErrors(e).message)
     }
   }
@@ -232,6 +246,31 @@ export function AccountView({ onBack }: Props) {
             <GeneratorsCard />
 
             <ThemeCard value={theme} onChange={handleTheme} />
+
+            <Card
+              title="Generation"
+              hint="How a prompt becomes a soundscape."
+            >
+              <button
+                type="button"
+                role="switch"
+                aria-checked={settings.review_decomposition}
+                onClick={handleReviewToggle}
+                className="w-full flex items-center justify-between gap-4 rounded-xl text-left bg-surface-sunken border border-line hover:border-line-hover transition-colors"
+                style={{ padding: '12px 14px', fontFamily: 'inherit' }}
+              >
+                <span className="flex flex-col gap-1 min-w-0">
+                  <span className={`text-[13px] ${settings.review_decomposition ? 'text-ink-bright' : 'text-ink-soft'}`}>
+                    Review layers before generating
+                  </span>
+                  <span className="text-[11px] text-ink-faint leading-snug">
+                    Pause after the language model splits the scene, so you can edit the layers by hand or ask
+                    it for changes before any audio is rendered.
+                  </span>
+                </span>
+                <Toggle on={settings.review_decomposition} />
+              </button>
+            </Card>
 
             <Card
               title="Decomposer"

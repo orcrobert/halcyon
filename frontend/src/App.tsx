@@ -5,17 +5,21 @@ import { PromptView } from './components/PromptView'
 import { GeneratingView } from './components/GeneratingView'
 import { DashboardView } from './components/DashboardView'
 import { HistoryPanel } from './components/HistoryPanel'
+import { ReviewLayersModal } from './components/ReviewLayersModal'
 import { AccountView } from './components/AccountView'
 import { useAudioEngine, isCanonicalBand, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
 import {
+  confirmDecomposition,
   createAtmosphere,
+  deleteAtmosphere,
   getAtmosphere,
   pollAtmosphere,
   regenerateAtmosphere,
+  reviseDecomposition,
 } from './api/atmospheres'
 import { deleteElement, regenerateElement } from './api/elements'
-import type { Atmosphere, EQBand, Element } from './types'
+import type { Atmosphere, DecompositionElement, EQBand, Element } from './types'
 import { getSettings } from './api/settings'
 import { DEFAULT_THEME, applyTheme, storeTheme } from './themes'
 
@@ -162,12 +166,17 @@ function AuthedApp() {
         return
       }
 
+      localStorage.setItem(PENDING_KEY, String(id))
       setView('generating')
+
+      if (initial.status === 'awaiting_review') return
 
       const final = await pollAtmosphere(id, {
         signal: controller.signal,
         onTick: (a) => setAtmosphere(a),
       })
+
+      if (final.status === 'awaiting_review') return
 
       localStorage.removeItem(PENDING_KEY)
 
@@ -303,6 +312,29 @@ function AuthedApp() {
       setActionError(err instanceof Error ? err.message : 'Could not start a new take.')
     }
   }, [atmosphere, flushAll, stop, activatePollFor])
+
+  const handleConfirmReview = useCallback(async (elements: DecompositionElement[]) => {
+    if (!atmosphere) return
+    const updated = await confirmDecomposition(atmosphere.id, elements)
+    setAtmosphere(updated)
+    activatePollFor(updated.id)
+  }, [atmosphere, activatePollFor])
+
+  const handleReviseReview = useCallback(async (feedback: string, elements: DecompositionElement[]) => {
+    if (!atmosphere) return elements
+    const updated = await reviseDecomposition(atmosphere.id, feedback, elements)
+    setAtmosphere(updated)
+    return updated.decomposition ?? elements
+  }, [atmosphere])
+
+  const handleDiscardReview = useCallback(async () => {
+    if (!atmosphere) return
+    pollAbortRef.current?.abort()
+    await deleteAtmosphere(atmosphere.id)
+    localStorage.removeItem(PENDING_KEY)
+    setAtmosphere(null)
+    setView('prompt')
+  }, [atmosphere])
 
   const handleCancelGenerating = useCallback(() => {
     pollAbortRef.current?.abort()
@@ -445,6 +477,15 @@ function AuthedApp() {
       )}
       {view === 'generating' && atmosphere && (
         <GeneratingView atmosphere={atmosphere} onCancel={handleCancelGenerating} />
+      )}
+      {view === 'generating' && atmosphere?.status === 'awaiting_review' && (
+        <ReviewLayersModal
+          key={atmosphere.id}
+          atmosphere={atmosphere}
+          onConfirm={handleConfirmReview}
+          onRevise={handleReviseReview}
+          onDiscard={handleDiscardReview}
+        />
       )}
       {view === 'dashboard' && atmosphere && (
         <DashboardView

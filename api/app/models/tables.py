@@ -70,6 +70,7 @@ class UserSettings(SQLModel, table=True):
     decomposer_api_key_enc: str | None = None
     decomposer_prompt: str | None = None
     theme: str | None = None
+    review_decomposition: bool | None = None
 
     user: User = Relationship(back_populates="preferences")
 

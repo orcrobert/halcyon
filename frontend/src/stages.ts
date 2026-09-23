@@ -44,6 +44,16 @@ export function resolveStage(a: Source): StageView {
     }
   }
 
+  if (a.status === 'awaiting_review') {
+    const index = STAGES.findIndex((s) => s.key === 'decomposing')
+    return {
+      index,
+      label: 'Review',
+      detail: a.stage_detail ?? 'Waiting for you to review the layers',
+      settled: false,
+    }
+  }
+
   const key = a.status === 'pending' ? 'queued' : a.current_stage ?? 'queued'
   const found = STAGES.findIndex((s) => s.key === key)
   const index = found === -1 ? 0 : found

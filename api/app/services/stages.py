@@ -6,6 +6,7 @@ from api.app.services.runconfig import RunConfig
 
 STAGE_PROGRESS = {
     "decomposing": 10,
+    "reviewing": 15,
     "waking": 20,
     "generating": 30,
     "mixing": 70,
@@ -68,3 +69,5 @@ def mixing_detail(elements: list[dict]) -> str:
 
 
 PERSISTING_DETAIL = "Writing layers to disk"
+
+REVIEW_DETAIL = "Waiting for you to review the layers"

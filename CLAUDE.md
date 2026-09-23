@@ -252,6 +252,14 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   fresh atmosphere, so deleted and rewritten layers stay that way. Generation
   reuses a decomposition the atmosphere already carries instead of calling the
   LLM again. A new take keeps the source atmosphere's `duration_s`.
+- **Layer review is a pause, not a stage of the worker.** With the
+  per-user `review_decomposition` flag on, a fresh decomposition parks the
+  atmosphere at `status: awaiting_review` and the worker moves on. The browser
+  shows `ReviewLayersModal` (edit by hand, or ask the LLM through the shipped
+  `api/prompts/reviser.txt`), then `PUT /api/atmospheres/{id}/decomposition`
+  re-queues it and the stored decomposition skips the LLM; closing the modal
+  deletes the atmosphere. `awaiting_review` is a stop state for polling and is
+  never reclaimed on restart. New takes carry a decomposition and never pause.
 - **Themes are presets over the token ramps.** `frontend/src/themes.ts` holds
   twenty specs; `themeVariables()` expands each into the primitive layer in
   OKLab. Add a spec, never a hand-written ramp. The choice lives on

@@ -47,7 +47,19 @@ export interface Element {
   audio_url: string | null
 }
 
-export type AtmosphereStatus = 'pending' | 'generating' | 'ready' | 'failed'
+export type AtmosphereStatus = 'pending' | 'generating' | 'awaiting_review' | 'ready' | 'failed'
+
+export type LayerRole = 'bed' | 'texture' | 'event'
+
+export type EventFrequency = 'rare' | 'occasional' | 'frequent'
+
+export interface DecompositionElement {
+  label: string
+  type: 'sound' | 'music'
+  role: LayerRole
+  frequency?: EventFrequency | null
+  prompt: string
+}
 
 export interface AtmosphereTimings {
   decompose_s?: number
@@ -76,6 +88,7 @@ export interface Atmosphere {
   updated_at: string
   timings?: AtmosphereTimings | null
   elements?: Element[] | null
+  decomposition?: DecompositionElement[] | null
 }
 
 export interface PaginatedResponse<T> {
@@ -114,6 +127,7 @@ export interface Settings {
   decomposer_api_key_set: boolean
   decomposer_prompt: string | null
   theme: string | null
+  review_decomposition: boolean
   defaults: {
     generator_url: string | null
     decomposer_provider: string | null
@@ -189,4 +203,5 @@ export type SettingsUpdate = Partial<{
   decomposer_api_key: string
   decomposer_prompt: string
   theme: string
+  review_decomposition: boolean
 }>

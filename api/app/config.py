@@ -21,6 +21,7 @@ ROLE_INTERVALS = {
 }
 MIN_INTERVAL_S = 1.0
 MAX_INTERVAL_S = 300.0
+MAX_REVIEW_LAYERS = 12
 
 logger = logging.getLogger(__name__)
 
