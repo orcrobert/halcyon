@@ -22,6 +22,9 @@ ROLE_INTERVALS = {
 MIN_INTERVAL_S = 1.0
 MAX_INTERVAL_S = 300.0
 MAX_REVIEW_LAYERS = 12
+MIN_STYLE_S = 1.5
+MAX_STYLE_S = 4.5
+MAX_STYLE_BYTES = 4 * 1024 * 1024
 
 logger = logging.getLogger(__name__)
 

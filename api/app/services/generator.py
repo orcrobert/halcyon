@@ -47,6 +47,7 @@ def probe(url: str) -> tuple[str, str | None, dict | None]:
         for key in (
             "audiogen_model",
             "musicgen_model",
+            "style_model",
             "duration",
             "max_duration",
             "loaded",
@@ -107,20 +108,27 @@ def _match_audio(replies: list, elements: list[dict]) -> dict[int, bytes]:
     return matched
 
 
-def generate(decomposed: dict, config: RunConfig, duration_s: int) -> list[dict]:
+def generate(
+    decomposed: dict,
+    config: RunConfig,
+    duration_s: int,
+    style: bytes | None = None,
+) -> list[dict]:
     elements = decomposed["elements"]
+    style_b64 = base64.b64encode(style).decode() if style else None
     payload = []
     for index, element in enumerate(elements):
         element["clip_s"] = clip_length(element, duration_s)
-        payload.append(
-            {
-                "index": index,
-                "label": element.get("label", ""),
-                "type": element.get("type", "sound"),
-                "prompt": element.get("prompt", ""),
-                "duration": element["clip_s"],
-            }
-        )
+        entry = {
+            "index": index,
+            "label": element.get("label", ""),
+            "type": element.get("type", "sound"),
+            "prompt": element.get("prompt", ""),
+            "duration": element["clip_s"],
+        }
+        if style_b64 and entry["type"] == "music":
+            entry["style_b64"] = style_b64
+        payload.append(entry)
 
     response = requests.post(
         f"{config.generator_url.rstrip('/')}/generate",

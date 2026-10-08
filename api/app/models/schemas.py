@@ -14,6 +14,7 @@ from api.app.config import (
     MAX_DURATION_S,
     MAX_INTERVAL_S,
     MAX_REVIEW_LAYERS,
+    MAX_STYLE_BYTES,
     MIN_DURATION_S,
     MIN_INTERVAL_S,
 )
@@ -232,6 +233,20 @@ class ElementRegenerate(BaseModel):
     feedback: str | None = Field(default=None, max_length=2000)
 
 
+class StyleReferenceIn(BaseModel):
+    audio_b64: str = Field(min_length=1, max_length=MAX_STYLE_BYTES * 4 // 3 + 4)
+    name: str = Field(default="Reference clip", max_length=255)
+    start_s: float = Field(default=0, ge=0)
+    end_s: float = Field(default=0, ge=0)
+
+
+class StyleReferenceOut(BaseModel):
+    name: str
+    start_s: float
+    end_s: float
+    duration_s: float
+
+
 class AtmosphereCreate(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
     title: str | None = Field(default=None, max_length=255)
@@ -239,6 +254,7 @@ class AtmosphereCreate(BaseModel):
         default=DEFAULT_DURATION_S, ge=MIN_DURATION_S, le=MAX_DURATION_S
     )
     use_events: bool = True
+    style: StyleReferenceIn | None = None
 
 
 class DecompositionElement(BaseModel):
@@ -286,6 +302,7 @@ class AtmosphereOut(BaseModel):
     prompt: str
     duration_s: int
     use_events: bool
+    style: StyleReferenceOut | None = None
     status: str
     progress: int
     current_stage: str | None

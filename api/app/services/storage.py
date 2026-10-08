@@ -38,3 +38,30 @@ def delete_element_audio(relative_path: str) -> None:
 
 def delete_atmosphere_audio(atmosphere_id: int) -> None:
     shutil.rmtree(atmosphere_dir(atmosphere_id), ignore_errors=True)
+
+
+def style_path(atmosphere_id: int) -> Path:
+    return settings.data_path / "styles" / f"{atmosphere_id}.wav"
+
+
+def write_style(atmosphere_id: int, audio: bytes) -> None:
+    path = style_path(atmosphere_id)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(audio)
+
+
+def read_style(atmosphere_id: int) -> bytes | None:
+    path = style_path(atmosphere_id)
+    return path.read_bytes() if path.is_file() else None
+
+
+def copy_style(source_id: int, target_id: int) -> bool:
+    audio = read_style(source_id)
+    if audio is None:
+        return False
+    write_style(target_id, audio)
+    return True
+
+
+def delete_style(atmosphere_id: int) -> None:
+    style_path(atmosphere_id).unlink(missing_ok=True)

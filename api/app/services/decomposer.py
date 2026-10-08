@@ -27,6 +27,19 @@ NO_EVENTS_NOTE = "\n".join([
 ])
 
 
+STYLE_NOTE = "\n".join([
+    "",
+    "---",
+    "",
+    "# OVERRIDE - STYLE REFERENCE ATTACHED",
+    "",
+    "The user attached a short music clip as a style reference. Include at least",
+    'one element with "type": "music". Its sound will follow the clip, so keep',
+    "that music prompt to mood, tempo and role in the scene and do not name a",
+    "genre or instruments that would fight the reference.",
+])
+
+
 def _parse_result(raw: str, allow_events: bool = True) -> dict:
     try:
         result = json.loads(raw)
@@ -94,10 +107,17 @@ def normalize_elements(elements: list, allow_events: bool = True) -> list:
     return elements
 
 
-def decompose(prompt: str, config: RunConfig, allow_events: bool = True) -> dict:
+def decompose(
+    prompt: str,
+    config: RunConfig,
+    allow_events: bool = True,
+    styled: bool = False,
+) -> dict:
     system = config.decomposer_prompt or default_decomposer_prompt()
     if not allow_events:
         system = system + NO_EVENTS_NOTE
+    if styled:
+        system = system + STYLE_NOTE
     raw = complete_json(config, system, f"Scene: {prompt}")
     return _parse_result(raw, allow_events)
 

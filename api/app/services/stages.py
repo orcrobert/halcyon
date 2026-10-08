@@ -49,14 +49,16 @@ def decomposing_detail(config: RunConfig) -> str:
     return f"Asking {provider.label} ({model}) to split the scene into layers"
 
 
-def generating_detail(config: RunConfig, elements: list[dict]) -> str:
+def generating_detail(
+    config: RunConfig, elements: list[dict], styled: bool = False
+) -> str:
     music = sum(1 for element in elements if element.get("type") == "music")
     sounds = len(elements) - music
     parts = []
     if sounds:
         parts.append(f"{sounds} sound{'s' if sounds != 1 else ''}")
     if music:
-        parts.append(f"{music} music")
+        parts.append(f"{music} music{' in the style of your clip' if styled else ''}")
     layers = f"{len(elements)} layer{'s' if len(elements) != 1 else ''}"
     return f"Rendering {layers} on {host_label(config)}: {', '.join(parts)}"
 

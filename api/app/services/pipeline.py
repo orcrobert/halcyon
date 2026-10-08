@@ -276,6 +276,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
         config = resolve_config(
             atmosphere.user.preferences, atmosphere.user.generators
         )
+        style = storage.read_style(atmosphere.id) if atmosphere.style_json else None
 
         started = time.perf_counter()
         timings: dict[str, float] = {}
@@ -309,6 +310,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                 {"elements": [spec]},
                 config,
                 atmosphere.duration_s or DEFAULT_DURATION_S,
+                style,
             )
             timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
@@ -398,6 +400,7 @@ def run_generation(atmosphere_id: int) -> None:
         config = resolve_config(
             atmosphere.user.preferences, atmosphere.user.generators
         )
+        style = storage.read_style(atmosphere.id) if atmosphere.style_json else None
 
         started = time.perf_counter()
         timings: dict[str, float] = {}
@@ -413,7 +416,10 @@ def run_generation(atmosphere_id: int) -> None:
             else:
                 mark = time.perf_counter()
                 decomposed = decompose(
-                    atmosphere.prompt, config, atmosphere.use_events is not False
+                    atmosphere.prompt,
+                    config,
+                    atmosphere.use_events is not False,
+                    style is not None,
                 )
                 timings["decompose_s"] = round(time.perf_counter() - mark, 3)
 
@@ -429,11 +435,14 @@ def run_generation(atmosphere_id: int) -> None:
                 session,
                 atmosphere,
                 "generating",
-                generating_detail(config, decomposed["elements"]),
+                generating_detail(config, decomposed["elements"], style is not None),
             )
             mark = time.perf_counter()
             elements = generate(
-                decomposed, config, atmosphere.duration_s or DEFAULT_DURATION_S
+                decomposed,
+                config,
+                atmosphere.duration_s or DEFAULT_DURATION_S,
+                style,
             )
             timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
