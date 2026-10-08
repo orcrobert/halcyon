@@ -13,6 +13,10 @@ MIN_STYLE_S = 1.5
 MAX_STYLE_S = 4.5
 STYLE_CFG = 3.0
 STYLE_TOP_K = 250
+MIN_STYLE_EVAL_Q = 1
+MAX_STYLE_EVAL_Q = 6
+MIN_STYLE_CFG_BETA = 0.0
+MAX_STYLE_CFG_BETA = 20.0
 
 _UNSAFE = re.compile(r"[^A-Za-z0-9_-]+")
 
@@ -83,8 +87,26 @@ class AudioCraftEngine:
             return self.config.duration
         return max(MIN_DURATION_S, min(MAX_DURATION_S, int(requested)))
 
+    def style_params(self, options: dict[str, Any] | None) -> tuple[int, float]:
+        options = options or {}
+        try:
+            eval_q = int(options.get("style_eval_q", self.config.style_eval_q))
+        except (TypeError, ValueError):
+            eval_q = self.config.style_eval_q
+        try:
+            cfg_beta = float(options.get("style_cfg_beta", self.config.style_cfg_beta))
+        except (TypeError, ValueError):
+            cfg_beta = self.config.style_cfg_beta
+        return (
+            max(MIN_STYLE_EVAL_Q, min(MAX_STYLE_EVAL_Q, eval_q)),
+            max(MIN_STYLE_CFG_BETA, min(MAX_STYLE_CFG_BETA, cfg_beta)),
+        )
+
     def generate(
-        self, elements: list[dict[str, Any]], duration: int | None = None
+        self,
+        elements: list[dict[str, Any]],
+        duration: int | None = None,
+        options: dict[str, Any] | None = None,
     ) -> list[dict[str, Any]]:
         if not self.loaded:
             self.load()
@@ -106,7 +128,11 @@ class AudioCraftEngine:
             if kind == "style":
                 if not self.style_loaded:
                     self.load_style()
-                results.extend(self._generate_style_batch(self._style, group, seconds))
+                results.extend(
+                    self._generate_style_batch(
+                        self._style, group, seconds, self.style_params(options)
+                    )
+                )
                 continue
             model = self._musicgen if kind == "music" else self._audiogen
             results.extend(self._generate_batch(model, group, seconds))
@@ -120,7 +146,11 @@ class AudioCraftEngine:
         return self._encode(model, elements, wavs)
 
     def _generate_style_batch(
-        self, model, elements: list[dict[str, Any]], seconds: int
+        self,
+        model,
+        elements: list[dict[str, Any]],
+        seconds: int,
+        params: tuple[int, float],
     ) -> list[dict[str, Any]]:
         import torch
         from audiocraft.data.audio import audio_read
@@ -136,6 +166,7 @@ class AudioCraftEngine:
                     convert_audio(wav, sr, model.sample_rate, model.audio_channels)
                 )
 
+        eval_q, cfg_beta = params
         frames = min(excerpt.shape[-1] for excerpt in excerpts)
         excerpt_s = max(MIN_STYLE_S, min(MAX_STYLE_S, frames / model.sample_rate))
 
@@ -144,11 +175,9 @@ class AudioCraftEngine:
             use_sampling=True,
             top_k=STYLE_TOP_K,
             cfg_coef=STYLE_CFG,
-            cfg_coef_beta=self.config.style_cfg_beta,
+            cfg_coef_beta=cfg_beta,
         )
-        model.set_style_conditioner_params(
-            eval_q=self.config.style_eval_q, excerpt_length=excerpt_s
-        )
+        model.set_style_conditioner_params(eval_q=eval_q, excerpt_length=excerpt_s)
         wavs = model.generate_with_chroma(
             [e["prompt"] for e in elements],
             torch.stack([excerpt[..., :frames] for excerpt in excerpts]),

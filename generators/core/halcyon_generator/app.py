@@ -10,6 +10,7 @@ from .engine import MAX_DURATION_S, MAX_STYLE_S, MIN_STYLE_S, AudioCraftEngine
 class GenerateRequest(BaseModel):
     elements: list[dict[str, Any]]
     duration: int | None = None
+    options: dict[str, Any] | None = None
 
 
 class GenerateResponse(BaseModel):
@@ -47,7 +48,9 @@ def create_app(
 
     @app.post("/generate", response_model=GenerateResponse)
     def generate(req: GenerateRequest) -> GenerateResponse:
-        return GenerateResponse(elements=resolved.generate(req.elements, req.duration))
+        return GenerateResponse(
+            elements=resolved.generate(req.elements, req.duration, req.options)
+        )
 
     app.state.engine = resolved
     return app

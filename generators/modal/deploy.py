@@ -29,6 +29,7 @@ if LOCAL:
     _load_env_file(REPO_ROOT / ".env")
 
 GPU = os.getenv("HALCYON_MODAL_GPU", "A10G")
+SCALEDOWN_S = int(os.getenv("HALCYON_MODAL_SCALEDOWN", "300"))
 
 image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -60,6 +61,8 @@ image = (
             "STYLE_PRELOAD": os.getenv("STYLE_PRELOAD", "1"),
             "GENERATION_DURATION": os.getenv("GENERATION_DURATION", "10"),
             "GENERATION_LOUDNESS_LUFS": os.getenv("GENERATION_LOUDNESS_LUFS", "-20"),
+            "STYLE_EVAL_Q": os.getenv("STYLE_EVAL_Q", "3"),
+            "STYLE_CFG_BETA": os.getenv("STYLE_CFG_BETA", "5"),
             "GENERATION_DEVICE": "cuda",
         }
     )
@@ -72,7 +75,7 @@ cache = modal.Volume.from_name("halcyon-model-cache", create_if_missing=True)
 @app.cls(
     gpu=GPU,
     volumes={CACHE_DIR: cache},
-    scaledown_window=300,
+    scaledown_window=SCALEDOWN_S,
     startup_timeout=900,
     timeout=900,
     max_containers=1,

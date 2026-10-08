@@ -17,8 +17,9 @@ class StubEngine:
     def load(self):
         self.loaded = True
 
-    def generate(self, elements, duration=None):
+    def generate(self, elements, duration=None, options=None):
         self.durations.append(duration)
+        self.options = options
         return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
 
 
@@ -38,7 +39,8 @@ class RecordingAudioCraftEngine(AudioCraftEngine):
         self.batches.append((model, [e["label"] for e in elements], seconds))
         return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
 
-    def _generate_style_batch(self, model, elements, seconds):
+    def _generate_style_batch(self, model, elements, seconds, params):
+        self.style_params_used = params
         return self._generate_batch(model, elements, seconds)
 
 
@@ -233,3 +235,34 @@ def test_without_preload_the_style_model_waits_for_a_styled_request():
 
     assert engine.loaded
     assert not engine.style_loaded
+
+
+def test_generate_forwards_request_options_to_the_engine():
+    engine = StubEngine()
+    elements = [{"label": "theme", "type": "music", "prompt": "piano"}]
+
+    client(engine).post(
+        "/generate", json={"elements": elements, "options": {"style_eval_q": 5}}
+    )
+
+    assert engine.options == {"style_eval_q": 5}
+
+
+def test_style_options_override_the_configured_defaults_within_range():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(style_eval_q=3, style_cfg_beta=5.0))
+
+    assert engine.style_params(None) == (3, 5.0)
+    assert engine.style_params({"style_eval_q": 6, "style_cfg_beta": 2}) == (6, 2.0)
+    assert engine.style_params({"style_eval_q": 40, "style_cfg_beta": -1}) == (6, 0.0)
+    assert engine.style_params({"style_eval_q": "x"}) == (3, 5.0)
+
+
+def test_a_styled_batch_uses_the_request_options():
+    engine = RecordingAudioCraftEngine(GeneratorConfig())
+
+    engine.generate(
+        [{"label": "theme", "type": "music", "style_b64": STYLE}],
+        options={"style_eval_q": 1, "style_cfg_beta": 7.5},
+    )
+
+    assert engine.style_params_used == (1, 7.5)
