@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from .config import GeneratorConfig
-from .engine import MAX_DURATION_S, AudioCraftEngine
+from .engine import MAX_DURATION_S, MAX_STYLE_S, MIN_STYLE_S, AudioCraftEngine
 
 
 class GenerateRequest(BaseModel):
@@ -34,6 +34,9 @@ def create_app(
             "loaded": resolved.loaded,
             "audiogen_model": resolved.config.audiogen_model,
             "musicgen_model": resolved.config.musicgen_model,
+            "style_model": resolved.config.style_model or None,
+            "style_loaded": resolved.style_loaded,
+            "style_excerpt": [MIN_STYLE_S, MAX_STYLE_S],
             "duration": resolved.config.duration,
             "max_duration": MAX_DURATION_S,
         }

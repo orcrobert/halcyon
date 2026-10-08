@@ -11,6 +11,7 @@ class StubEngine:
     def __init__(self):
         self.config = GeneratorConfig()
         self.loaded = True
+        self.style_loaded = False
         self.durations = []
 
     def load(self):
@@ -30,9 +31,15 @@ class RecordingAudioCraftEngine(AudioCraftEngine):
         self._audiogen = "audiogen"
         self._musicgen = "musicgen"
 
+    def load_style(self):
+        self._style = "style"
+
     def _generate_batch(self, model, elements, seconds):
         self.batches.append((model, [e["label"] for e in elements], seconds))
         return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
+
+    def _generate_style_batch(self, model, elements, seconds):
+        return self._generate_batch(model, elements, seconds)
 
 
 def client(engine=None):
@@ -160,3 +167,51 @@ def test_unknown_element_keys_survive_the_round_trip():
     returned = RecordingAudioCraftEngine(GeneratorConfig()).generate(elements)
 
     assert [e["index"] for e in returned] == [0, 1]
+
+
+STYLE = base64.b64encode(b"RIFF").decode()
+
+
+def test_home_reports_the_style_model():
+    body = client().get("/").json()
+
+    assert body["style_model"] == "facebook/musicgen-style"
+    assert body["style_loaded"] is False
+
+
+def test_music_with_a_style_reference_goes_to_the_style_model():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(duration=10))
+
+    returned = engine.generate(
+        [
+            {"label": "drone", "type": "music", "duration": 10},
+            {"label": "theme", "type": "music", "duration": 10, "style_b64": STYLE},
+            {"label": "rain", "type": "sound", "duration": 10, "style_b64": STYLE},
+        ]
+    )
+
+    assert engine.batches == [
+        ("musicgen", ["drone"], 10),
+        ("style", ["theme"], 10),
+        ("audiogen", ["rain"], 10),
+    ]
+    assert "style_b64" not in next(e for e in returned if e["label"] == "rain")
+
+
+def test_the_style_model_is_loaded_only_when_needed():
+    engine = RecordingAudioCraftEngine(GeneratorConfig())
+
+    engine.generate([{"label": "drone", "type": "music"}])
+    assert not engine.style_loaded
+
+    engine.generate([{"label": "theme", "type": "music", "style_b64": STYLE}])
+    assert engine.style_loaded
+
+
+def test_a_style_reference_is_ignored_without_a_style_model():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(style_model=""))
+
+    engine.generate([{"label": "theme", "type": "music", "style_b64": STYLE}])
+
+    assert engine.batches == [("musicgen", ["theme"], 10)]
+    assert not engine.style_loaded
