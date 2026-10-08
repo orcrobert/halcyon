@@ -270,6 +270,17 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   backdrop filter, makes `data-frosted` panels opaque and hides `data-glow`
   layers, and the canvases skip their shadow blur via `blurReduced()`. A new
   frosted panel needs `data-frosted`, and a new blur-only glow needs `data-glow`.
+- **A style clip conditions music layers through MusicGen-Style.** The prompt
+  view lets the user upload audio and crop a 1.5–4.5 s excerpt
+  (`StyleClipModal`, maths in `hooks/styleClip.ts`); the browser renders it to a
+  32 kHz mono WAV and sends it as `style` on `POST /api/atmospheres`. The API
+  stores it at `DATA_DIR/styles/{atmosphere}.wav` (outside the audio folder,
+  which `_persist` wipes) with metadata on `Atmosphere.style_json`, adds
+  `STYLE_NOTE` to the decomposer prompt so the scene has a music layer, and
+  attaches `style_b64` to every `music` element sent to the generator —
+  including single-layer regenerations and new takes, which copy the clip. The
+  generator loads `STYLE_MODEL` lazily on the first styled request and falls
+  back to plain MusicGen when it has none. Without a clip nothing changes.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and

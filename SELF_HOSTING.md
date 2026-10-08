@@ -125,6 +125,11 @@ a stub for testing.
   fallback for elements that carry none.
 - A generator that ignores both `duration` fields still works — it just always
   produces its own configured length.
+- When the user attached a style clip, every `"music"` element also carries
+  `style_b64`: a base64 mono WAV of 1.5–4.5 s. Generate that element with
+  MusicGen-Style (`facebook/musicgen-style`) so it takes on the clip's sound.
+  The excerpt is a reference, not a part of the output. A generator without a
+  style model ignores the field and generates from the prompt alone.
 
 **Response** — echo each element back with base64-encoded WAV bytes added:
 
@@ -138,6 +143,7 @@ a stub for testing.
 ```
 
 - `audio_b64` must be the base64 encoding of a complete WAV file.
+- Do not echo `style_b64` back; it is only an input.
 - Keep `index` (or at least `label`); the API matches replies by `index`, then
   by `label`, then by position. Elements that come back without `audio_b64` are
   dropped and the rest of the mix goes ahead.

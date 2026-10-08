@@ -34,6 +34,7 @@ The config cell sets the same environment variables every other host uses:
 |----------|---------|
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` |
+| `STYLE_MODEL` | `facebook/musicgen-style` |
 | `GENERATION_DURATION` | `10` |
 | `GENERATION_LOUDNESS_LUFS` | `-20` |
 

@@ -52,6 +52,7 @@ The model settings are baked into the image instead:
 |----------|---------|---------|
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` | model for `type: sound` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` | model for `type: music` |
+| `STYLE_MODEL` | `facebook/musicgen-style` | model for music with a style clip, loaded on first use; blank disables it |
 | `GENERATION_DURATION` | `10` | seconds per element |
 | `GENERATION_LOUDNESS_LUFS` | `-20` | loudness each clip is normalised to |
 
