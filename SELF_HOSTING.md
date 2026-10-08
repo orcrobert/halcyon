@@ -54,6 +54,8 @@ runtimes rely on.
 | `SECRET_KEY` | encrypts stored API keys; auto-generated if blank |
 | `ALLOW_REGISTRATION` | set `false` to close signups once your users exist |
 | `FRONTEND_ORIGIN` | only for running the dev server against a remote API |
+| `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET` | optional instance Modal token for deploying from the account page |
+| `GENERATORS_DIR` | where `generators/` lives; set to `/app/generators` in the image |
 
 Every decomposer value is an **instance default**. Each user can override the
 provider, model, base URL, API key, and system prompt from their account page,
@@ -149,6 +151,9 @@ a stub for testing.
   dropped and the rest of the mix goes ahead.
 - Batching by length pays off: generating four elements at 4 s costs far less
   than four at 30 s on an autoregressive model.
+- A top-level `options` object may carry tuning for this request:
+  `style_eval_q` (1–6) and `style_cfg_beta` for styled music. Ignore what you do
+  not support.
 - The API waits up to **300 s** per request, so a generator that honours long
   durations should still fit a whole batch inside that budget.
 - There is no auth between the API and the generator by default — run the

@@ -11,6 +11,19 @@ the very first container pays the download.
 
 ## Deploy
 
+### From the app
+
+Open **Account → Audio generator → Modal → Deploy**, save a Modal token (from
+[modal.com/settings/tokens](https://modal.com/settings/tokens)), pick the GPU and
+models, and press **Create and deploy**. The API runs the same `modal deploy`
+below, shows its log, and fills in the URL when it finishes. Changing a
+deployment option afterwards marks it as waiting for a redeploy, and a toast
+stays on screen with a **Redeploy** button until you run one. Per-request
+options (style closeness, prompt weight) apply on the next generation without
+a redeploy.
+
+### From a terminal
+
 ```bash
 pip install modal
 modal setup
@@ -58,6 +71,7 @@ The model settings are baked into the image instead:
 | `STYLE_PRELOAD` | `1` | load the style model in `@modal.enter()` so its weights land in the cached volume; `0` loads it on the first styled request instead |
 | `GENERATION_DURATION` | `10` | seconds per element |
 | `GENERATION_LOUDNESS_LUFS` | `-20` | loudness each clip is normalised to |
+| `HALCYON_MODAL_SCALEDOWN` | `300` | seconds an idle container waits before scaling to zero |
 
 ```bash
 HALCYON_MODAL_GPU=T4 MUSICGEN_MODEL=facebook/musicgen-medium \
