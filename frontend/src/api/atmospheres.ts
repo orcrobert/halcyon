@@ -1,4 +1,4 @@
-import type { Atmosphere, DecompositionElement, PaginatedResponse } from '../types'
+import type { Atmosphere, DecompositionElement, PaginatedResponse, StyleReferenceUpload } from '../types'
 import { api } from './client'
 
 interface AtmosphereResponse {
@@ -15,6 +15,7 @@ export async function createAtmosphere(payload: {
   title?: string
   duration_s?: number
   use_events?: boolean
+  style?: StyleReferenceUpload
 }): Promise<Atmosphere> {
   const { data } = await api.post<AtmosphereResponse>('/api/atmospheres', payload)
   return data.data

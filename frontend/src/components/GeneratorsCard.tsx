@@ -37,7 +37,7 @@ const STATUS_LABEL: Record<GeneratorStatus, string> = {
 function reportOf(generator: Generator | undefined): string | null {
   const reported = generator?.reported
   if (!reported) return null
-  const models = [reported.audiogen_model, reported.musicgen_model]
+  const models = [reported.audiogen_model, reported.musicgen_model, reported.style_model]
     .filter(Boolean)
     .map((m) => (m as string).split('/').pop())
   if (!models.length) return null

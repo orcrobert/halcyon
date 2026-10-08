@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef, type KeyboardEvent } from 'react'
+import { useState, useEffect, useRef, type ChangeEvent, type KeyboardEvent } from 'react'
 import { Logo } from './Logo'
 import { Toggle } from './Toggle'
+import { StyleClipModal } from './StyleClipModal'
+import { MAX_STYLE_FILE_BYTES, type Selection, type StyleClip } from '../hooks/styleClip'
 
 export const DEFAULT_DURATION_S = 10
 
@@ -12,7 +14,7 @@ const DURATION_CHOICES: { seconds: number; hint: string }[] = [
 ]
 
 interface Props {
-  onSubmit: (prompt: string, durationS: number, useEvents: boolean) => void
+  onSubmit: (prompt: string, durationS: number, useEvents: boolean, style: StyleClip | null) => void
   loading: boolean
   error: string | null
   onOpenAccount?: () => void
@@ -26,11 +28,13 @@ interface OptionsMenuProps {
   useEvents: boolean
   onDurationChange: (seconds: number) => void
   onUseEventsChange: (value: boolean) => void
+  styleName: string | null
+  onPickStyle: () => void
   disabled: boolean
 }
 
 function OptionsMenu({
-  durationS, useEvents, onDurationChange, onUseEventsChange, disabled,
+  durationS, useEvents, onDurationChange, onUseEventsChange, styleName, onPickStyle, disabled,
 }: OptionsMenuProps) {
   const [open, setOpen] = useState(false)
   const [lengthOpen, setLengthOpen] = useState(false)
@@ -38,7 +42,7 @@ function OptionsMenu({
   const rootRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const expanded = open && !disabled
-  const customised = durationS !== DEFAULT_DURATION_S || !useEvents
+  const customised = durationS !== DEFAULT_DURATION_S || !useEvents || styleName !== null
 
   useEffect(() => {
     if (!expanded) return
@@ -171,6 +175,31 @@ function OptionsMenu({
               </span>
             </span>
             <Toggle on={useEvents} />
+          </button>
+
+          <div className="bg-line" style={{ height: 1, margin: '6px 10px' }} />
+
+          <button
+            type="button"
+            onClick={() => {
+              setOpen(false)
+              setLengthOpen(false)
+              onPickStyle()
+            }}
+            className="w-full flex items-center justify-between gap-3 rounded-lg text-left hover:bg-wash/[0.04] transition"
+            style={{ padding: '8px 10px', fontFamily: 'inherit' }}
+          >
+            <span className="flex flex-col min-w-0">
+              <span className={`text-[13px] ${styleName ? 'text-ink-bright' : 'text-ink-soft'}`}>
+                Style clip
+              </span>
+              <span className="text-[10.5px] text-ink-faint leading-snug truncate">
+                {styleName ?? 'Music in the style of a clip you upload'}
+              </span>
+            </span>
+            <span className="text-[12px] text-ink-faint flex-shrink-0">
+              {styleName ? 'Change' : 'Add'}
+            </span>
           </button>
 
           {lengthOpen && (
@@ -359,14 +388,93 @@ function BreathingWave({ pulseKey, pulseSeq }: BreathingWaveProps) {
   )
 }
 
+interface StyleChipProps {
+  style: StyleClip
+  disabled: boolean
+  onEdit: () => void
+  onRemove: () => void
+}
+
+function StyleChip({ style, disabled, onEdit, onRemove }: StyleChipProps) {
+  return (
+    <span
+      className="flex items-center rounded-full border min-w-0"
+      style={{
+        height: 30,
+        borderColor: 'color-mix(in srgb, var(--color-accent) 40%, transparent)',
+        background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)',
+        opacity: disabled ? 0.5 : 1,
+      }}
+    >
+      <button
+        type="button"
+        onClick={onEdit}
+        disabled={disabled}
+        title={`Style: ${style.name} — click to change the excerpt`}
+        aria-label={`Edit style excerpt from ${style.name}`}
+        className="flex items-center gap-1.5 min-w-0 h-full disabled:cursor-not-allowed"
+        style={{ padding: '0 4px 0 10px', fontFamily: 'inherit', color: 'var(--color-accent-soft)' }}
+      >
+        <svg className="flex-shrink-0" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 18V5l12-2v13" />
+          <circle cx="6" cy="18" r="3" />
+          <circle cx="18" cy="16" r="3" />
+        </svg>
+        <span className="text-[11.5px] truncate" style={{ maxWidth: 120 }}>{style.name}</span>
+        <span className="text-[11px] tabular-nums text-ink-faint flex-shrink-0">
+          {(style.end - style.start).toFixed(1)}s
+        </span>
+      </button>
+      <button
+        type="button"
+        onClick={onRemove}
+        disabled={disabled}
+        aria-label="Remove style clip"
+        title="Remove style clip"
+        className="flex items-center justify-center h-full text-ink-faint hover:text-ink transition disabled:cursor-not-allowed flex-shrink-0"
+        style={{ width: 26, fontFamily: 'inherit' }}
+      >
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+          <line x1="6" y1="6" x2="18" y2="18" />
+          <line x1="18" y1="6" x2="6" y2="18" />
+        </svg>
+      </button>
+    </span>
+  )
+}
+
 export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHistory }: Props) {
   const [prompt, setPrompt] = useState('')
   const [durationS, setDurationS] = useState(DEFAULT_DURATION_S)
   const [useEvents, setUseEvents] = useState(true)
   const [pulse, setPulse] = useState({ key: '', seq: 0 })
+  const [style, setStyle] = useState<StyleClip | null>(null)
+  const [crop, setCrop] = useState<{ file: File; initial: Selection | null } | null>(null)
+  const [styleError, setStyleError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   function submit() {
-    if (prompt.trim() && !loading) onSubmit(prompt.trim(), durationS, useEvents)
+    if (prompt.trim() && !loading) onSubmit(prompt.trim(), durationS, useEvents, style)
+  }
+
+  function pickStyle() {
+    setStyleError(null)
+    fileInputRef.current?.click()
+  }
+
+  function onStyleFile(e: ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    if (file.size > MAX_STYLE_FILE_BYTES) {
+      setStyleError('That file is too large. Pick a clip under 100 MB.')
+      return
+    }
+    setCrop({ file, initial: null })
+  }
+
+  function closeCrop() {
+    setCrop(null)
   }
 
   function handleKeyDown(e: KeyboardEvent<HTMLTextAreaElement>) {
@@ -437,9 +545,21 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
                   useEvents={useEvents}
                   onDurationChange={setDurationS}
                   onUseEventsChange={setUseEvents}
+                  styleName={style?.name ?? null}
+                  onPickStyle={pickStyle}
                   disabled={loading}
                 />
-                <span className="text-[11px] text-ink-ghost truncate">Shift + Enter for new line</span>
+                {style && (
+                  <StyleChip
+                    style={style}
+                    disabled={loading}
+                    onEdit={() => setCrop({ file: style.file, initial: { start: style.start, end: style.end } })}
+                    onRemove={() => setStyle(null)}
+                  />
+                )}
+                <span className={`text-[11px] text-ink-ghost truncate ${style ? 'hidden sm:inline' : ''}`}>
+                  Shift + Enter for new line
+                </span>
               </div>
               <button
                 onClick={submit}
@@ -475,7 +595,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
             </div>
           </div>
 
-          {error && <p className="text-center text-danger text-sm">{error}</p>}
+          {(styleError ?? error) && <p className="text-center text-danger text-sm">{styleError ?? error}</p>}
           {loading && (
             <p className="text-center text-ink-muted text-sm">
               Decomposing prompt and generating audio — this takes ~30 seconds...
@@ -486,6 +606,27 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
         {!loading && <BreathingWave pulseKey={pulse.key} pulseSeq={pulse.seq} />}
 
       </div>
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="audio/*,.mp3,.wav,.ogg,.flac,.m4a,.aac"
+        onChange={onStyleFile}
+        className="hidden"
+        aria-hidden
+        tabIndex={-1}
+      />
+
+      <StyleClipModal
+        open={crop !== null}
+        file={crop?.file ?? null}
+        initial={crop?.initial ?? null}
+        onConfirm={(clip) => {
+          setStyle(clip)
+          setCrop(null)
+        }}
+        onClose={closeCrop}
+      />
     </div>
   )
 }

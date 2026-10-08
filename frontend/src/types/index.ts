@@ -72,12 +72,27 @@ export interface AtmosphereTimings {
   regenerate?: Omit<AtmosphereTimings, 'regenerate'>
 }
 
+export interface StyleReference {
+  name: string
+  start_s: number
+  end_s: number
+  duration_s: number
+}
+
+export interface StyleReferenceUpload {
+  audio_b64: string
+  name: string
+  start_s: number
+  end_s: number
+}
+
 export interface Atmosphere {
   id: number
   title: string | null
   prompt: string
   duration_s: number
   use_events: boolean
+  style?: StyleReference | null
   status: AtmosphereStatus
   progress: number
   current_stage: string | null
@@ -146,6 +161,8 @@ export type GeneratorStatus = 'ok' | 'starting' | 'unreachable' | 'error'
 export interface GeneratorReport {
   audiogen_model?: string
   musicgen_model?: string
+  style_model?: string | null
+  style_loaded?: boolean
   duration?: number
   max_duration?: number
   loaded?: boolean

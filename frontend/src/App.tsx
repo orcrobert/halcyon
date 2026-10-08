@@ -9,6 +9,7 @@ import { ReviewLayersModal } from './components/ReviewLayersModal'
 import { AccountView } from './components/AccountView'
 import { useAudioEngine, isCanonicalBand, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
+import type { StyleClip } from './hooks/styleClip'
 import {
   confirmDecomposition,
   createAtmosphere,
@@ -233,11 +234,23 @@ function AuthedApp() {
     }
   }, [activatePollFor])
 
-  const handleGenerate = useCallback(async (prompt: string, durationS: number, useEvents: boolean) => {
+  const handleGenerate = useCallback(async (
+    prompt: string,
+    durationS: number,
+    useEvents: boolean,
+    style: StyleClip | null,
+  ) => {
     setSubmitting(true)
     setError(null)
     try {
-      const created = await createAtmosphere({ prompt, duration_s: durationS, use_events: useEvents })
+      const created = await createAtmosphere({
+        prompt,
+        duration_s: durationS,
+        use_events: useEvents,
+        style: style
+          ? { audio_b64: style.audioB64, name: style.name, start_s: style.start, end_s: style.end }
+          : undefined,
+      })
       localStorage.setItem(PENDING_KEY, String(created.id))
       setAtmosphere(created)
       setView('generating')
