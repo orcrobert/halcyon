@@ -89,6 +89,8 @@ class SettingsUpdate(BaseModel):
     theme: str | None = Field(default=None, max_length=64)
     review_decomposition: bool | None = None
     reduce_blur: bool | None = None
+    modal_token_id: str | None = Field(default=None, max_length=255)
+    modal_token_secret: str | None = Field(default=None, max_length=255)
 
 
 class ProviderOut(BaseModel):
@@ -109,6 +111,8 @@ class SettingsOut(BaseModel):
     theme: str | None
     review_decomposition: bool
     reduce_blur: bool
+    modal_token_id: str | None
+    modal_token_set: bool
     defaults: dict[str, str | None]
     providers: list[ProviderOut]
 
@@ -143,6 +147,46 @@ class GeneratorOut(BaseModel):
     last_status: str | None
     last_checked_at: Timestamp | None
     reported: dict[str, Any] | None
+    options: dict[str, Any]
+    pending_changes: list[str]
+    deploy_status: str | None
+    deploy_error: str | None
+    deploy_log: str | None
+    deploy_started_at: Timestamp | None
+    deployed_at: Timestamp | None
+
+
+class GeneratorOptionsUpdate(BaseModel):
+    options: dict[str, Any]
+
+
+class ModalGeneratorCreate(BaseModel):
+    name: str = Field(default="Modal", min_length=1, max_length=60)
+
+
+class OptionChoiceOut(BaseModel):
+    value: str
+    label: str
+
+
+class GeneratorOptionSpecOut(BaseModel):
+    key: str
+    label: str
+    hint: str
+    kind: Literal["choice", "toggle", "number"]
+    scope: Literal["deploy", "request"]
+    default: Any
+    choices: list[OptionChoiceOut]
+    minimum: float | None
+    maximum: float | None
+    step: float | None
+    unit: str | None
+    hosts: list[str]
+
+
+class DeployCapabilityOut(BaseModel):
+    available: bool
+    credentials: Literal["user", "instance"] | None
 
 
 class GeneratorProbe(BaseModel):
@@ -164,6 +208,8 @@ class GeneratorListOut(BaseModel):
     active_url: str
     instance_default_url: str
     kinds: list[GeneratorKindOut]
+    option_specs: list[GeneratorOptionSpecOut]
+    deploy: DeployCapabilityOut
 
 
 class EQBand(BaseModel):

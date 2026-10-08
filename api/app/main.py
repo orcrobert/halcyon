@@ -10,6 +10,7 @@ from api.app.config import settings
 from api.app.db import init_db
 from api.app.routers import atmospheres, auth, elements, generators
 from api.app.routers import settings as settings_router
+from api.app.services.modal_deploy import DeployRunner, reclaim_deploys
 from api.app.services.pipeline import regenerate_element, run_generation
 from api.app.worker import GenerationWorker, reclaim_interrupted
 
@@ -24,9 +25,14 @@ async def lifespan(app: FastAPI):
     if reclaimed:
         logger.warning("Marked %s interrupted job(s) as failed", reclaimed)
 
+    stranded = reclaim_deploys()
+    if stranded:
+        logger.warning("Marked %s interrupted deploy(s) as failed", stranded)
+
     worker = GenerationWorker(run_generation, regenerate_element)
     worker.start()
     app.state.worker = worker
+    app.state.deployer = DeployRunner()
 
     yield
 

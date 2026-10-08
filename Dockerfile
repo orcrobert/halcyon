@@ -31,6 +31,7 @@ ENV PYTHONUNBUFFERED=1 \
     PATH="/opt/venv/bin:$PATH" \
     DATA_DIR=/data \
     FRONTEND_DIST=/app/frontend/dist \
+    GENERATORS_DIR=/app/generators \
     NUMBA_CACHE_DIR=/tmp/numba-cache \
     MPLCONFIGDIR=/tmp/matplotlib
 
@@ -42,6 +43,8 @@ RUN useradd --system --create-home --uid 1000 halcyon
 
 COPY --from=python-build /opt/venv /opt/venv
 COPY --from=frontend /build/dist /app/frontend/dist
+COPY generators/core /app/generators/core
+COPY generators/modal/deploy.py /app/generators/modal/deploy.py
 
 RUN mkdir -p /data && chown halcyon:halcyon /data
 

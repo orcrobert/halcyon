@@ -17,6 +17,7 @@ PLAIN_FIELDS = (
     "decomposer_base_url",
     "decomposer_prompt",
     "theme",
+    "modal_token_id",
 )
 
 
@@ -36,6 +37,8 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
             getattr(preferences, "review_decomposition", None)
         ),
         reduce_blur=bool(getattr(preferences, "reduce_blur", None)),
+        modal_token_id=getattr(preferences, "modal_token_id", None),
+        modal_token_set=bool(getattr(preferences, "modal_token_secret_enc", None)),
         defaults={
             "generator_url": defaults.generator_url,
             "decomposer_provider": defaults.decomposer_provider,
@@ -91,6 +94,10 @@ def update(
     if "decomposer_api_key" in provided:
         key = (provided["decomposer_api_key"] or "").strip()
         preferences.decomposer_api_key_enc = encrypt_secret(key) if key else None
+
+    if "modal_token_secret" in provided:
+        secret = (provided["modal_token_secret"] or "").strip()
+        preferences.modal_token_secret_enc = encrypt_secret(secret) if secret else None
 
     session.add(preferences)
     session.commit()

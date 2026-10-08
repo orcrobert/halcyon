@@ -42,6 +42,10 @@ class Settings(BaseSettings):
         validation_alias=AliasChoices("DECOMPOSER_API_KEY", "GEMINI_API_KEY"),
     )
 
+    modal_token_id: str | None = None
+    modal_token_secret: str | None = None
+    generators_dir: str = "generators"
+
     data_dir: str = "data"
     secret_key: str | None = None
     allow_registration: bool = True
@@ -86,6 +90,12 @@ class Settings(BaseSettings):
     @property
     def database_path(self) -> Path:
         return self.data_path / "halcyon.db"
+
+    @property
+    def modal_deploy_script(self) -> Path:
+        path = Path(self.generators_dir)
+        root = path if path.is_absolute() else REPO_ROOT / path
+        return root / "modal" / "deploy.py"
 
     @property
     def frontend_dist_path(self) -> Path:

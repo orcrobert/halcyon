@@ -72,6 +72,8 @@ class UserSettings(SQLModel, table=True):
     theme: str | None = None
     review_decomposition: bool | None = None
     reduce_blur: bool | None = None
+    modal_token_id: str | None = None
+    modal_token_secret_enc: str | None = None
 
     user: User = Relationship(back_populates="preferences")
 
@@ -92,6 +94,21 @@ class GeneratorProfile(SQLModel, table=True):
     )
     reported_json: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSON, nullable=True)
+    )
+    options_json: dict[str, Any] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
+    deployed_json: dict[str, Any] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
+    deploy_status: str | None = None
+    deploy_error: str | None = None
+    deploy_log: str | None = None
+    deploy_started_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
+    )
+    deployed_at: datetime | None = Field(
+        default=None, sa_column=Column(DateTime(timezone=True), nullable=True)
     )
     created_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
     updated_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())

@@ -130,9 +130,13 @@ def generate(
             entry["style_b64"] = style_b64
         payload.append(entry)
 
+    body: dict = {"elements": payload, "duration": duration_s}
+    if config.generator_options:
+        body["options"] = config.generator_options
+
     response = requests.post(
         f"{config.generator_url.rstrip('/')}/generate",
-        json={"elements": payload, "duration": duration_s},
+        json=body,
         timeout=GENERATOR_TIMEOUT_S,
     )
     response.raise_for_status()
