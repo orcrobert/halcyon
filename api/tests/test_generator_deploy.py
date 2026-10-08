@@ -308,3 +308,17 @@ def test_interrupted_deploys_are_marked_failed_on_boot(client, auth, deployer, d
     after = client.get("/api/generators", headers=auth).json()["data"]["generators"][0]
     assert after["deploy_status"] == "failed"
     assert after["deploy_error"] == INTERRUPTED
+
+
+def test_a_new_modal_generator_keeps_the_options_it_was_created_with(
+    client, auth, deployer, deploy_script
+):
+    save_token(client, auth)
+
+    response = client.post(
+        "/api/generators/modal", headers=auth, json={"options": {"gpu": "T4"}}
+    )
+
+    generator = response.json()["data"]["generators"][0]
+    assert generator["options"]["gpu"] == "T4"
+    assert generator["pending_changes"] == ["gpu"]

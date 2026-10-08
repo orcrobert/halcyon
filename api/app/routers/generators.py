@@ -277,9 +277,20 @@ def create_modal(
             detail="You already have a Modal generator. Redeploy it instead.",
         )
     _reject_duplicate_name(payload.name, user, session)
+    try:
+        options = validate("modal", payload.options)
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)
+        )
 
     profile = GeneratorProfile(
-        user_id=user.id, name=payload.name, kind="modal", url="", is_active=False
+        user_id=user.id,
+        name=payload.name,
+        kind="modal",
+        url="",
+        is_active=False,
+        options_json=options or None,
     )
     session.add(profile)
     session.commit()

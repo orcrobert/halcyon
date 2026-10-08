@@ -162,6 +162,7 @@ class GeneratorOptionsUpdate(BaseModel):
 
 class ModalGeneratorCreate(BaseModel):
     name: str = Field(default="Modal", min_length=1, max_length=60)
+    options: dict[str, Any] = Field(default_factory=dict)
 
 
 class OptionChoiceOut(BaseModel):
