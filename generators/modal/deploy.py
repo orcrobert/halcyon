@@ -57,6 +57,7 @@ image = (
             "AUDIOGEN_MODEL": os.getenv("AUDIOGEN_MODEL", "facebook/audiogen-medium"),
             "MUSICGEN_MODEL": os.getenv("MUSICGEN_MODEL", "facebook/musicgen-large"),
             "STYLE_MODEL": os.getenv("STYLE_MODEL", "facebook/musicgen-style"),
+            "STYLE_PRELOAD": os.getenv("STYLE_PRELOAD", "1"),
             "GENERATION_DURATION": os.getenv("GENERATION_DURATION", "10"),
             "GENERATION_LOUDNESS_LUFS": os.getenv("GENERATION_LOUDNESS_LUFS", "-20"),
             "GENERATION_DEVICE": "cuda",

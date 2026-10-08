@@ -90,6 +90,7 @@ Configuration is environment-only, and identical on every host:
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` |
 | `STYLE_MODEL` | `facebook/musicgen-style` |
+| `STYLE_PRELOAD` | off (`1` on Modal) |
 | `GENERATION_DURATION` | `10` |
 | `GENERATION_DEVICE` | `cuda` |
 | `PORT` | `8000` |

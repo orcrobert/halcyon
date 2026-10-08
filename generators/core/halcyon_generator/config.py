@@ -9,6 +9,7 @@ class GeneratorConfig:
     style_model: str = "facebook/musicgen-style"
     style_eval_q: int = 3
     style_cfg_beta: float = 5.0
+    style_preload: bool = False
     duration: int = 10
     loudness_lufs: float = -20.0
     device: str = "cuda"
@@ -22,6 +23,8 @@ class GeneratorConfig:
             style_model=os.getenv("STYLE_MODEL", cls.style_model),
             style_eval_q=int(os.getenv("STYLE_EVAL_Q", cls.style_eval_q)),
             style_cfg_beta=float(os.getenv("STYLE_CFG_BETA", cls.style_cfg_beta)),
+            style_preload=os.getenv("STYLE_PRELOAD", "").strip().lower()
+            in ("1", "true", "yes"),
             duration=int(os.getenv("GENERATION_DURATION", cls.duration)),
             loudness_lufs=float(os.getenv("GENERATION_LOUDNESS_LUFS", cls.loudness_lufs)),
             device=os.getenv("GENERATION_DEVICE", cls.device),

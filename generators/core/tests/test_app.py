@@ -27,7 +27,7 @@ class RecordingAudioCraftEngine(AudioCraftEngine):
         super().__init__(config)
         self.batches = []
 
-    def load(self):
+    def _load_models(self):
         self._audiogen = "audiogen"
         self._musicgen = "musicgen"
 
@@ -214,4 +214,22 @@ def test_a_style_reference_is_ignored_without_a_style_model():
     engine.generate([{"label": "theme", "type": "music", "style_b64": STYLE}])
 
     assert engine.batches == [("musicgen", ["theme"], 10)]
+    assert not engine.style_loaded
+
+
+def test_preloading_makes_the_style_model_part_of_loaded():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(style_preload=True))
+
+    engine.load()
+
+    assert engine.style_loaded
+    assert engine.loaded
+
+
+def test_without_preload_the_style_model_waits_for_a_styled_request():
+    engine = RecordingAudioCraftEngine(GeneratorConfig())
+
+    engine.load()
+
+    assert engine.loaded
     assert not engine.style_loaded

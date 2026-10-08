@@ -44,7 +44,9 @@ HALCYON_MODAL_GPU=T4
 | `A100`, `A100-80GB`, `L40S`, `H100` | faster, more expensive |
 
 Both models together need about 8 GB, so a T4 is fine — you are trading
-generation time for cost, not capability.
+generation time for cost, not capability. The style model adds a third
+MusicGen and a MERT encoder on top; on a T4 either set `STYLE_PRELOAD=0` or
+drop `MUSICGEN_MODEL` to medium.
 
 The model settings are baked into the image instead:
 
@@ -52,7 +54,8 @@ The model settings are baked into the image instead:
 |----------|---------|---------|
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` | model for `type: sound` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` | model for `type: music` |
-| `STYLE_MODEL` | `facebook/musicgen-style` | model for music with a style clip, loaded on first use; blank disables it |
+| `STYLE_MODEL` | `facebook/musicgen-style` | model for music with a style clip; blank disables it |
+| `STYLE_PRELOAD` | `1` | load the style model in `@modal.enter()` so its weights land in the cached volume; `0` loads it on the first styled request instead |
 | `GENERATION_DURATION` | `10` | seconds per element |
 | `GENERATION_LOUDNESS_LUFS` | `-20` | loudness each clip is normalised to |
 

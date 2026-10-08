@@ -32,6 +32,11 @@ class AudioCraftEngine:
         self._style = None
 
     def load(self) -> None:
+        self._load_models()
+        if self.config.style_preload and self.supports_style:
+            self.load_style()
+
+    def _load_models(self) -> None:
         from audiocraft.models import AudioGen, MusicGen
 
         self._audiogen = AudioGen.get_pretrained(
@@ -46,7 +51,10 @@ class AudioCraftEngine:
 
     @property
     def loaded(self) -> bool:
-        return self._audiogen is not None and self._musicgen is not None
+        base = self._audiogen is not None and self._musicgen is not None
+        if self.config.style_preload and self.supports_style:
+            return base and self._style is not None
+        return base
 
     @property
     def style_loaded(self) -> bool:

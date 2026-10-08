@@ -279,8 +279,10 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   `STYLE_NOTE` to the decomposer prompt so the scene has a music layer, and
   attaches `style_b64` to every `music` element sent to the generator —
   including single-layer regenerations and new takes, which copy the clip. The
-  generator loads `STYLE_MODEL` lazily on the first styled request and falls
-  back to plain MusicGen when it has none. Without a clip nothing changes.
+  generator loads `STYLE_MODEL` on the first styled request, or in
+  `load()` when `STYLE_PRELOAD` is set (the Modal default, so the weights are
+  committed to the cache volume), and falls back to plain MusicGen when it has
+  none. Without a clip nothing changes.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and
