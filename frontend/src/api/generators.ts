@@ -1,6 +1,7 @@
 import type {
   GeneratorCreate,
   GeneratorList,
+  GeneratorOptionValue,
   GeneratorProbe,
   GeneratorUpdate,
 } from '../types'
@@ -36,5 +37,25 @@ export async function testGenerator(id: number): Promise<GeneratorProbe> {
 
 export async function deleteGenerator(id: number): Promise<GeneratorList> {
   const { data } = await api.delete<{ data: GeneratorList }>(`/api/generators/${id}`)
+  return data.data
+}
+
+export async function updateGeneratorOptions(
+  id: number,
+  options: Record<string, GeneratorOptionValue | null>,
+): Promise<GeneratorList> {
+  const { data } = await api.put<{ data: GeneratorList }>(`/api/generators/${id}/options`, { options })
+  return data.data
+}
+
+export async function deployGenerator(id: number): Promise<GeneratorList> {
+  const { data } = await api.post<{ data: GeneratorList }>(`/api/generators/${id}/deploy`)
+  return data.data
+}
+
+export async function createModalGenerator(
+  options: Record<string, GeneratorOptionValue>,
+): Promise<GeneratorList> {
+  const { data } = await api.post<{ data: GeneratorList }>('/api/generators/modal', { options })
   return data.data
 }

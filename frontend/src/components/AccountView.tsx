@@ -12,6 +12,7 @@ import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
 
 interface Props {
   onBack: () => void
+  initialSection?: SectionId
 }
 
 interface Draft {
@@ -21,7 +22,7 @@ interface Draft {
   decomposer_api_key: string
 }
 
-type SectionId = 'model' | 'generator' | 'appearance' | 'account'
+export type SectionId = 'model' | 'generator' | 'appearance' | 'account'
 
 interface Section {
   id: SectionId
@@ -129,7 +130,7 @@ function initials(name: string, email: string): string {
   return (letters || source[0] || '?').toUpperCase()
 }
 
-export function AccountView({ onBack }: Props) {
+export function AccountView({ onBack, initialSection = 'model' }: Props) {
   const { state, logout } = useAuth()
   const [settings, setSettings] = useState<Settings | null>(null)
   const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT)
@@ -142,7 +143,7 @@ export function AccountView({ onBack }: Props) {
   const [promptSaving, setPromptSaving] = useState(false)
   const [promptError, setPromptError] = useState<string | null>(null)
   const [theme, setTheme] = useState<string>(storedTheme)
-  const [section, setSection] = useState<SectionId>('model')
+  const [section, setSection] = useState<SectionId>(initialSection)
   const tabRefs = useRef<Partial<Record<SectionId, HTMLButtonElement | null>>>({})
 
   useEffect(() => {

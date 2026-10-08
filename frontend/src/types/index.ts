@@ -144,6 +144,8 @@ export interface Settings {
   theme: string | null
   review_decomposition: boolean
   reduce_blur: boolean
+  modal_token_id: string | null
+  modal_token_set: boolean
   defaults: {
     generator_url: string | null
     decomposer_provider: string | null
@@ -168,6 +170,10 @@ export interface GeneratorReport {
   loaded?: boolean
 }
 
+export type GeneratorOptionValue = string | number | boolean
+
+export type DeployStatus = 'deploying' | 'ready' | 'failed'
+
 export interface Generator {
   id: number
   name: string
@@ -177,6 +183,33 @@ export interface Generator {
   last_status: GeneratorStatus | null
   last_checked_at: string | null
   reported: GeneratorReport | null
+  options: Record<string, GeneratorOptionValue>
+  pending_changes: string[]
+  deploy_status: DeployStatus | null
+  deploy_error: string | null
+  deploy_log: string | null
+  deploy_started_at: string | null
+  deployed_at: string | null
+}
+
+export interface GeneratorOptionSpec {
+  key: string
+  label: string
+  hint: string
+  kind: 'choice' | 'toggle' | 'number'
+  scope: 'deploy' | 'request'
+  default: GeneratorOptionValue
+  choices: { value: string; label: string }[]
+  minimum: number | null
+  maximum: number | null
+  step: number | null
+  unit: string | null
+  hosts: GeneratorKind[]
+}
+
+export interface DeployCapability {
+  available: boolean
+  credentials: 'user' | 'instance' | null
 }
 
 export interface GeneratorHost {
@@ -192,6 +225,8 @@ export interface GeneratorList {
   active_url: string
   instance_default_url: string
   kinds: GeneratorHost[]
+  option_specs: GeneratorOptionSpec[]
+  deploy: DeployCapability
 }
 
 export interface GeneratorProbe {
@@ -223,4 +258,6 @@ export type SettingsUpdate = Partial<{
   theme: string
   review_decomposition: boolean
   reduce_blur: boolean
+  modal_token_id: string
+  modal_token_secret: string
 }>
