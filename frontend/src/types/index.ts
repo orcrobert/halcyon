@@ -136,6 +136,7 @@ export interface DecomposerProvider {
   suggested_models: string[]
   key_label: string
   key_hint: string | null
+  available: boolean
 }
 
 export interface Settings {

@@ -5,7 +5,12 @@ from api.app.models.schemas import Envelope, ProviderOut, SettingsOut, SettingsU
 from api.app.models.tables import UserSettings
 from api.app.security import encrypt_secret
 from api.app.services.prompts import default_decomposer_prompt
-from api.app.services.providers import available_providers, get_provider
+from api.app.services.providers import (
+    PROVIDERS,
+    Provider,
+    available_providers,
+    get_provider,
+)
 from api.app.services.runconfig import default_config
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
@@ -21,8 +26,17 @@ PLAIN_FIELDS = (
 )
 
 
+def _listed_providers(preferences: UserSettings | None) -> list[Provider]:
+    listed = available_providers()
+    saved = PROVIDERS.get(getattr(preferences, "decomposer_provider", None) or "")
+    if saved is not None and saved not in listed:
+        listed.append(saved)
+    return listed
+
+
 def _serialize(preferences: UserSettings | None) -> SettingsOut:
     defaults = default_config()
+    enabled = available_providers()
     return SettingsOut(
         generator_url=getattr(preferences, "generator_url", None),
         decomposer_provider=getattr(preferences, "decomposer_provider", None),
@@ -57,8 +71,9 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
                 suggested_models=list(provider.suggested_models),
                 key_label=provider.key_label,
                 key_hint=provider.key_hint,
+                available=provider in enabled,
             )
-            for provider in available_providers()
+            for provider in _listed_providers(preferences)
         ],
     )
 
