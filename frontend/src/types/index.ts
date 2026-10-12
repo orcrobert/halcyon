@@ -168,6 +168,7 @@ export interface GeneratorReport {
   duration?: number
   max_duration?: number
   loaded?: boolean
+  gpu?: string | null
 }
 
 export type GeneratorOptionValue = string | number | boolean

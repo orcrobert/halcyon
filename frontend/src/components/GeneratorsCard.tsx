@@ -46,7 +46,9 @@ function reportOf(generator: Generator | undefined): string | null {
     .filter(Boolean)
     .map((m) => (m as string).split('/').pop())
   if (!models.length) return null
-  return `${models.join(' · ')}${reported.duration ? ` · ${reported.duration}s` : ''}`
+  return [models.join(' · '), reported.duration ? `${reported.duration}s` : null, reported.gpu]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 export function GeneratorsCard() {
