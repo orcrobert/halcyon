@@ -179,6 +179,7 @@ function GenerationCanvas({ paused }: { paused: boolean }) {
 
 function StageTracker({ atmosphere }: { atmosphere: Atmosphere }) {
   const { index: active, label, detail, settled } = resolveStage(atmosphere)
+  const detailKey = detail.replace(/\s*\(\d+s\)$/, '')
 
   return (
     <div className="flex flex-col items-center gap-3 w-full">
@@ -207,7 +208,7 @@ function StageTracker({ atmosphere }: { atmosphere: Atmosphere }) {
       </div>
 
       <p
-        key={detail}
+        key={detailKey}
         className="text-[13px] text-ink-soft text-center leading-relaxed"
         style={{ maxWidth: '520px', fontWeight: 300, animation: 'fade-in 0.4s ease-out' }}
       >
