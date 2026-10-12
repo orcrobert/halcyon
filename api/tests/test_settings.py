@@ -255,7 +255,7 @@ def test_cli_providers_appear_with_model_suggestions_when_allowed(client, auth, 
     body = client.get("/api/settings", headers=auth).json()["data"]
     listed = {p["key"]: p for p in body["providers"]}
 
-    assert listed["claude_cli"]["uses_api_key"] is False
+    assert listed["claude_cli"]["key_label"] == "Login token"
     assert listed["claude_cli"]["uses_base_url"] is False
     assert "opus" in listed["claude_cli"]["suggested_models"]
 

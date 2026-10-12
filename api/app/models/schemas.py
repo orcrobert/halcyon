@@ -100,8 +100,9 @@ class ProviderOut(BaseModel):
     default_base_url: str | None
     requires_api_key: bool
     uses_base_url: bool
-    uses_api_key: bool
     suggested_models: list[str]
+    key_label: str
+    key_hint: str | None
 
 
 class SettingsOut(BaseModel):

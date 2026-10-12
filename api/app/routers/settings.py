@@ -54,8 +54,9 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
                 default_base_url=provider.default_base_url,
                 requires_api_key=provider.requires_api_key,
                 uses_base_url=provider.uses_base_url,
-                uses_api_key=provider.uses_api_key,
                 suggested_models=list(provider.suggested_models),
+                key_label=provider.key_label,
+                key_hint=provider.key_hint,
             )
             for provider in available_providers()
         ],

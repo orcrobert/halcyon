@@ -133,8 +133,9 @@ export interface DecomposerProvider {
   default_base_url: string | null
   requires_api_key: boolean
   uses_base_url: boolean
-  uses_api_key: boolean
   suggested_models: string[]
+  key_label: string
+  key_hint: string | null
 }
 
 export interface Settings {

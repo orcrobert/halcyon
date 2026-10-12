@@ -283,3 +283,35 @@ def test_codex_cli_failure_reports_stderr(monkeypatch, cli_enabled):
 
     with pytest.raises(ValueError, match="not logged in"):
         providers.complete_json(_config(decomposer_provider="codex_cli"), "system", "x")
+
+
+def test_claude_cli_passes_a_stored_login_token(monkeypatch, cli_enabled):
+    fake_env = {}
+
+    def run(args, **kwargs):
+        fake_env.update(kwargs.get("env") or {})
+        return subprocess.CompletedProcess(args, 0, json.dumps({"result": "{}"}), "")
+
+    monkeypatch.setattr(providers.subprocess, "run", run)
+
+    providers.complete_json(
+        _config(decomposer_provider="claude_cli", decomposer_api_key="sk-ant-oat01-x"),
+        "system",
+        "x",
+    )
+
+    assert fake_env["CLAUDE_CODE_OAUTH_TOKEN"] == "sk-ant-oat01-x"
+
+
+def test_claude_cli_without_a_token_inherits_the_server_login(monkeypatch, cli_enabled):
+    seen = {}
+
+    def run(args, **kwargs):
+        seen["env"] = kwargs.get("env")
+        return subprocess.CompletedProcess(args, 0, json.dumps({"result": "{}"}), "")
+
+    monkeypatch.setattr(providers.subprocess, "run", run)
+
+    providers.complete_json(_config(decomposer_provider="claude_cli"), "system", "x")
+
+    assert seen["env"] is None

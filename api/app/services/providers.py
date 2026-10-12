@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 import tempfile
@@ -25,9 +26,11 @@ class Provider:
     requires_api_key: bool
     complete: Callable[[RunConfig, str, str], str]
     uses_base_url: bool = True
-    uses_api_key: bool = True
     local_cli: bool = False
     suggested_models: tuple[str, ...] = ()
+    key_label: str = "API key"
+    key_hint: str | None = None
+    key_env: str | None = None
 
 
 def _model(config: RunConfig, provider: "Provider") -> str:
@@ -111,13 +114,20 @@ def _complete_openai(config: RunConfig, system_prompt: str, user_prompt: str) ->
 
 
 def _run_cli(
-    provider: "Provider", args: list[str], stdin: str, workdir: str
+    provider: "Provider",
+    args: list[str],
+    stdin: str,
+    workdir: str,
+    config: RunConfig,
 ) -> subprocess.CompletedProcess:
     binary = shutil.which(args[0])
     if binary is None:
         raise ValueError(
             f"{provider.label} needs the `{args[0]}` command on the server's PATH."
         )
+    env = None
+    if provider.key_env and config.decomposer_api_key:
+        env = {**os.environ, provider.key_env: config.decomposer_api_key.strip()}
     try:
         return subprocess.run(
             [binary, *args[1:]],
@@ -126,6 +136,7 @@ def _run_cli(
             text=True,
             timeout=CLI_TIMEOUT_S,
             cwd=workdir,
+            env=env,
         )
     except subprocess.TimeoutExpired:
         raise ValueError(f"{provider.label} did not answer within {CLI_TIMEOUT_S}s.")
@@ -154,6 +165,7 @@ def _complete_claude_cli(config: RunConfig, system_prompt: str, user_prompt: str
             ],
             user_prompt,
             workdir,
+            config,
         )
 
     try:
@@ -184,6 +196,7 @@ def _complete_codex_cli(config: RunConfig, system_prompt: str, user_prompt: str)
             ],
             f"{system_prompt}\n\n---\n\n{user_prompt}",
             workdir,
+            config,
         )
         text = reply.read_text().strip() if reply.exists() else ""
 
@@ -226,9 +239,14 @@ PROVIDERS: dict[str, Provider] = {
         requires_api_key=False,
         complete=_complete_claude_cli,
         uses_base_url=False,
-        uses_api_key=False,
         local_cli=True,
         suggested_models=("sonnet", "opus", "haiku", "fable"),
+        key_label="Login token",
+        key_hint=(
+            "Run claude setup-token on any machine and paste the result. "
+            "Leave empty if the server's CLI is already logged in."
+        ),
+        key_env="CLAUDE_CODE_OAUTH_TOKEN",
     ),
     "codex_cli": Provider(
         key="codex_cli",
@@ -238,8 +256,12 @@ PROVIDERS: dict[str, Provider] = {
         requires_api_key=False,
         complete=_complete_codex_cli,
         uses_base_url=False,
-        uses_api_key=False,
         local_cli=True,
+        key_hint=(
+            "An OpenAI API key. Leave empty if the server's CLI is already "
+            "logged in with codex login."
+        ),
+        key_env="CODEX_API_KEY",
     ),
 }
 
