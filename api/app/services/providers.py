@@ -1,11 +1,19 @@
+import json
+import shutil
+import subprocess
+import tempfile
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Callable
 
 import requests
 
+from api.app.config import settings
 from api.app.services.runconfig import RunConfig
 
 REQUEST_TIMEOUT_S = 120
+CLI_TIMEOUT_S = 240
+CLI_ERROR_TAIL = 600
 
 
 @dataclass(frozen=True)
@@ -16,10 +24,14 @@ class Provider:
     default_base_url: str | None
     requires_api_key: bool
     complete: Callable[[RunConfig, str, str], str]
+    uses_base_url: bool = True
+    uses_api_key: bool = True
+    local_cli: bool = False
+    suggested_models: tuple[str, ...] = ()
 
 
 def _model(config: RunConfig, provider: "Provider") -> str:
-    return config.decomposer_model or provider.default_model
+    return (config.decomposer_model or "").strip() or provider.default_model
 
 
 def _base_url(config: RunConfig, provider: "Provider") -> str:
@@ -98,6 +110,88 @@ def _complete_openai(config: RunConfig, system_prompt: str, user_prompt: str) ->
     return response.json()["choices"][0]["message"]["content"].strip()
 
 
+def _run_cli(
+    provider: "Provider", args: list[str], stdin: str, workdir: str
+) -> subprocess.CompletedProcess:
+    binary = shutil.which(args[0])
+    if binary is None:
+        raise ValueError(
+            f"{provider.label} needs the `{args[0]}` command on the server's PATH."
+        )
+    try:
+        return subprocess.run(
+            [binary, *args[1:]],
+            input=stdin,
+            capture_output=True,
+            text=True,
+            timeout=CLI_TIMEOUT_S,
+            cwd=workdir,
+        )
+    except subprocess.TimeoutExpired:
+        raise ValueError(f"{provider.label} did not answer within {CLI_TIMEOUT_S}s.")
+
+
+def _cli_failure(provider: "Provider", result: subprocess.CompletedProcess) -> ValueError:
+    detail = (result.stderr.strip() or result.stdout.strip())[-CLI_ERROR_TAIL:]
+    return ValueError(f"{provider.label} failed: {detail or f'exit code {result.returncode}'}")
+
+
+def _complete_claude_cli(config: RunConfig, system_prompt: str, user_prompt: str) -> str:
+    provider = PROVIDERS["claude_cli"]
+    with tempfile.TemporaryDirectory(prefix="halcyon-claude-") as workdir:
+        result = _run_cli(
+            provider,
+            [
+                "claude",
+                "-p",
+                "--model", _model(config, provider),
+                "--system-prompt", system_prompt,
+                "--tools", "",
+                "--output-format", "json",
+                "--no-session-persistence",
+                "--setting-sources", "",
+                "--strict-mcp-config",
+            ],
+            user_prompt,
+            workdir,
+        )
+
+    try:
+        payload = json.loads(result.stdout)
+    except json.JSONDecodeError:
+        raise _cli_failure(provider, result)
+    if payload.get("is_error") or not isinstance(payload.get("result"), str):
+        raise ValueError(f"{provider.label} failed: {payload.get('result') or 'no result'}")
+    return payload["result"].strip()
+
+
+def _complete_codex_cli(config: RunConfig, system_prompt: str, user_prompt: str) -> str:
+    provider = PROVIDERS["codex_cli"]
+    model = _model(config, provider)
+    with tempfile.TemporaryDirectory(prefix="halcyon-codex-") as workdir:
+        reply = Path(workdir) / "reply.txt"
+        result = _run_cli(
+            provider,
+            [
+                "codex",
+                "exec",
+                "--skip-git-repo-check",
+                "--sandbox", "read-only",
+                "--color", "never",
+                *(["--model", model] if model else []),
+                "--output-last-message", str(reply),
+                "-",
+            ],
+            f"{system_prompt}\n\n---\n\n{user_prompt}",
+            workdir,
+        )
+        text = reply.read_text().strip() if reply.exists() else ""
+
+    if result.returncode != 0 or not text:
+        raise _cli_failure(provider, result)
+    return text
+
+
 PROVIDERS: dict[str, Provider] = {
     "gemini": Provider(
         key="gemini",
@@ -106,6 +200,7 @@ PROVIDERS: dict[str, Provider] = {
         default_base_url=None,
         requires_api_key=True,
         complete=_complete_gemini,
+        uses_base_url=False,
     ),
     "ollama": Provider(
         key="ollama",
@@ -123,16 +218,50 @@ PROVIDERS: dict[str, Provider] = {
         requires_api_key=True,
         complete=_complete_openai,
     ),
+    "claude_cli": Provider(
+        key="claude_cli",
+        label="Claude Code (local CLI)",
+        default_model="sonnet",
+        default_base_url=None,
+        requires_api_key=False,
+        complete=_complete_claude_cli,
+        uses_base_url=False,
+        uses_api_key=False,
+        local_cli=True,
+        suggested_models=("sonnet", "opus", "haiku", "fable"),
+    ),
+    "codex_cli": Provider(
+        key="codex_cli",
+        label="Codex (local CLI)",
+        default_model="",
+        default_base_url=None,
+        requires_api_key=False,
+        complete=_complete_codex_cli,
+        uses_base_url=False,
+        uses_api_key=False,
+        local_cli=True,
+    ),
 }
+
+
+def available_providers() -> list[Provider]:
+    return [
+        provider
+        for provider in PROVIDERS.values()
+        if settings.decomposer_allow_cli or not provider.local_cli
+    ]
 
 
 def get_provider(key: str) -> Provider:
     provider = PROVIDERS.get(key.strip().lower())
-    if provider is None:
-        raise ValueError(
-            f"Unknown decomposer provider {key!r}. "
-            f"Choose one of: {', '.join(sorted(PROVIDERS))}."
-        )
+    if provider is None or provider not in available_providers():
+        names = ", ".join(sorted(p.key for p in available_providers()))
+        if provider is not None:
+            raise ValueError(
+                f"{provider.label} is disabled on this server. "
+                f"Set DECOMPOSER_ALLOW_CLI=true to enable it, or choose one of: {names}."
+            )
+        raise ValueError(f"Unknown decomposer provider {key!r}. Choose one of: {names}.")
     return provider
 
 

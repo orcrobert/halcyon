@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 import pytest
 
@@ -155,3 +156,130 @@ def test_decompose_extracts_json_from_chatty_models(monkeypatch):
     )
 
     assert decompose("rain", _config())["atmosphere"] == "Test"
+
+
+class _FakeCli:
+    def __init__(self, stdout: str = "", returncode: int = 0, stderr: str = "", reply: str | None = None) -> None:
+        self.stdout = stdout
+        self.returncode = returncode
+        self.stderr = stderr
+        self.reply = reply
+        self.args: list[str] | None = None
+        self.input: str | None = None
+        self.cwd: str | None = None
+
+    def __call__(self, args, **kwargs):
+        self.args = args
+        self.input = kwargs.get("input")
+        self.cwd = kwargs.get("cwd")
+        if self.reply is not None:
+            path = args[args.index("--output-last-message") + 1]
+            with open(path, "w") as handle:
+                handle.write(self.reply)
+        return subprocess.CompletedProcess(args, self.returncode, self.stdout, self.stderr)
+
+
+@pytest.fixture
+def cli_enabled(monkeypatch):
+    monkeypatch.setattr(providers.settings, "decomposer_allow_cli", True)
+    monkeypatch.setattr(providers.shutil, "which", lambda name: f"/usr/bin/{name}")
+
+
+def _flag(args: list[str], name: str) -> str:
+    return args[args.index(name) + 1]
+
+
+def test_cli_providers_are_hidden_unless_enabled(monkeypatch):
+    monkeypatch.setattr(providers.settings, "decomposer_allow_cli", False)
+
+    assert "claude_cli" not in {p.key for p in providers.available_providers()}
+    with pytest.raises(ValueError, match="DECOMPOSER_ALLOW_CLI"):
+        providers.get_provider("claude_cli")
+
+
+def test_claude_cli_passes_the_chosen_model_and_prompts(monkeypatch, cli_enabled):
+    fake = _FakeCli(stdout=json.dumps({"is_error": False, "result": json.dumps(RESULT)}))
+    monkeypatch.setattr(providers.subprocess, "run", fake)
+
+    raw = providers.complete_json(
+        _config(decomposer_provider="claude_cli", decomposer_model="opus"),
+        "system",
+        "Scene: rain",
+    )
+
+    assert json.loads(raw) == RESULT
+    assert fake.args[0] == "/usr/bin/claude"
+    assert _flag(fake.args, "--model") == "opus"
+    assert _flag(fake.args, "--system-prompt") == "system"
+    assert _flag(fake.args, "--tools") == ""
+    assert fake.input == "Scene: rain"
+
+
+def test_claude_cli_defaults_to_sonnet(monkeypatch, cli_enabled):
+    fake = _FakeCli(stdout=json.dumps({"is_error": False, "result": "{}"}))
+    monkeypatch.setattr(providers.subprocess, "run", fake)
+
+    providers.complete_json(_config(decomposer_provider="claude_cli"), "system", "Scene: rain")
+
+    assert _flag(fake.args, "--model") == "sonnet"
+
+
+def test_claude_cli_surfaces_its_own_error(monkeypatch, cli_enabled):
+    fake = _FakeCli(
+        stdout=json.dumps({"is_error": True, "result": "Model not available"}),
+        returncode=1,
+    )
+    monkeypatch.setattr(providers.subprocess, "run", fake)
+
+    with pytest.raises(ValueError, match="Model not available"):
+        providers.complete_json(_config(decomposer_provider="claude_cli"), "system", "x")
+
+
+def test_claude_cli_surfaces_plain_text_failures(monkeypatch, cli_enabled):
+    fake = _FakeCli(stdout="There's an issue with the selected model", returncode=1)
+    monkeypatch.setattr(providers.subprocess, "run", fake)
+
+    with pytest.raises(ValueError, match="issue with the selected model"):
+        providers.complete_json(_config(decomposer_provider="claude_cli"), "system", "x")
+
+
+def test_missing_cli_binary_explains_itself(monkeypatch):
+    monkeypatch.setattr(providers.settings, "decomposer_allow_cli", True)
+    monkeypatch.setattr(providers.shutil, "which", lambda name: None)
+
+    with pytest.raises(ValueError, match="`claude` command"):
+        providers.complete_json(_config(decomposer_provider="claude_cli"), "system", "x")
+
+
+def test_codex_cli_reads_the_last_message(monkeypatch, cli_enabled):
+    fake = _FakeCli(reply=json.dumps(RESULT))
+    monkeypatch.setattr(providers.subprocess, "run", fake)
+
+    raw = providers.complete_json(
+        _config(decomposer_provider="codex_cli", decomposer_model="gpt-5-codex"),
+        "system",
+        "Scene: rain",
+    )
+
+    assert json.loads(raw) == RESULT
+    assert fake.args[:2] == ["/usr/bin/codex", "exec"]
+    assert _flag(fake.args, "--model") == "gpt-5-codex"
+    assert _flag(fake.args, "--sandbox") == "read-only"
+    assert fake.input.startswith("system") and fake.input.endswith("Scene: rain")
+
+
+def test_codex_cli_uses_its_configured_model_when_blank(monkeypatch, cli_enabled):
+    fake = _FakeCli(reply="{}")
+    monkeypatch.setattr(providers.subprocess, "run", fake)
+
+    providers.complete_json(_config(decomposer_provider="codex_cli"), "system", "x")
+
+    assert "--model" not in fake.args
+
+
+def test_codex_cli_failure_reports_stderr(monkeypatch, cli_enabled):
+    fake = _FakeCli(returncode=1, stderr="not logged in")
+    monkeypatch.setattr(providers.subprocess, "run", fake)
+
+    with pytest.raises(ValueError, match="not logged in"):
+        providers.complete_json(_config(decomposer_provider="codex_cli"), "system", "x")
