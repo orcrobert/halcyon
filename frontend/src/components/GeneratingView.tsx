@@ -265,6 +265,12 @@ export function GeneratingView({ atmosphere, onCancel }: Props) {
             <span className="text-accent-bright/80 tabular-nums">{formatElapsed(elapsed)}</span>
             <span className="text-ink-ghost">·</span>
             <span className="text-ink-faint tabular-nums">{atmosphere.duration_s}s layers</span>
+            {atmosphere.style && (
+              <>
+                <span className="text-ink-ghost">·</span>
+                <span className="text-accent-bright/70" title={`Music follows ${atmosphere.style.name}`}>styled music</span>
+              </>
+            )}
           </div>
         </div>
 

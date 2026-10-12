@@ -311,6 +311,7 @@ export function ReviewLayersModal({ atmosphere, onConfirm, onRevise, onDiscard }
                   layer={layer}
                   index={index}
                   allowEvents={allowEvents}
+                  styleName={atmosphere.style?.name ?? null}
                   highlighted={highlighted.has(layer.key)}
                   canRemove={layers.length > 1}
                   disabled={locked}
@@ -490,6 +491,7 @@ interface LayerCardProps {
   layer: DraftLayer
   index: number
   allowEvents: boolean
+  styleName: string | null
   highlighted: boolean
   canRemove: boolean
   disabled: boolean
@@ -497,7 +499,7 @@ interface LayerCardProps {
   onRemove: () => void
 }
 
-function LayerCard({ layer, index, allowEvents, highlighted, canRemove, disabled, onChange, onRemove }: LayerCardProps) {
+function LayerCard({ layer, index, allowEvents, styleName, highlighted, canRemove, disabled, onChange, onRemove }: LayerCardProps) {
   const role = ROLES.find((r) => r.key === layer.role) ?? ROLES[1]
   const tagColor = layer.role === 'event'
     ? 'var(--color-tag-event)'
@@ -594,6 +596,9 @@ function LayerCard({ layer, index, allowEvents, highlighted, canRemove, disabled
         {role.hint}
         {layer.role !== 'event' && layer.type === 'music' && ' · music always evolves'}
         {layer.type === 'sound' && layer.role !== 'event' && !allowEvents && ' · events are off for this scene'}
+        {layer.type === 'music' && styleName && (
+          <span className="text-accent-bright/80" title={styleName}> · follows your style clip</span>
+        )}
       </p>
     </section>
   )

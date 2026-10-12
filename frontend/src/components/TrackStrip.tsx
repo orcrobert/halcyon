@@ -24,6 +24,7 @@ interface Props {
   onRegenerate: (element: Element) => void
   onDelete: (element: Element) => void
   deletable: boolean
+  styleName?: string | null
 }
 
 function hashLabel(label: string): number {
@@ -35,7 +36,7 @@ function hashLabel(label: string): number {
   return h >>> 0
 }
 
-export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onRegenerate, onDelete, deletable }: Props) {
+export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVolume, animatedPan, animatedDepth, onVolumeChange, onMuteChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onRegenerate, onDelete, deletable, styleName }: Props) {
   const blobSeed = hashLabel(element.label)
   const blobX = 20 + (blobSeed % 60)
   const blobY = 15 + ((blobSeed >> 8) % 70)
@@ -132,6 +133,11 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
         {element.clip_s != null && (
           <p style={{ fontSize: '10px', color: 'var(--color-ink-faint)', lineHeight: '1.5', margin: '6px 0 0 0', fontFamily: 'inherit' }}>
             {element.clip_s}s loop
+          </p>
+        )}
+        {isMusic && styleName && (
+          <p style={{ fontSize: '10px', color: 'var(--color-accent-bright)', lineHeight: '1.5', margin: '6px 0 0 0', fontFamily: 'inherit' }}>
+            Follows your style clip · {styleName}
           </p>
         )}
         {failed && element.error && (
@@ -320,8 +326,11 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
               : isMusic ? 'bg-tag-music/10 text-tag-music'
               : 'bg-tag-sound/10 text-tag-sound'
           }`}
-          style={{ padding: '4px 10px' }}
+          style={{ padding: '4px 10px', display: 'inline-flex', alignItems: 'center', gap: '5px' }}
         >
+          {isMusic && styleName && !muted && (
+            <span className="rounded-full bg-accent-bright" style={{ width: 4, height: 4 }} />
+          )}
           {isEvent ? 'event' : isMusic ? 'music' : 'sound'}
         </span>
 

@@ -400,6 +400,7 @@ export function DashboardView({
                 key={`${el.id}:${el.version}`}
                 element={el}
                 deletable={(session.elements ?? []).length > 1}
+                styleName={session.style?.name ?? null}
                 onRegenerate={setRegenerating}
                 onDelete={onDeleteElement}
                 muted={mutedTracks.has(el.label)}
