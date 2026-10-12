@@ -1,6 +1,8 @@
 services:
   halcyon:
-    build: .
+    build:
+      context: .
+      target: ${HALCYON_TARGET:-runtime}
     image: halcyon:latest
     restart: unless-stopped
     ports:
@@ -11,6 +13,8 @@ services:
       DECOMPOSER_MODEL: ${DECOMPOSER_MODEL:-}
       DECOMPOSER_BASE_URL: ${DECOMPOSER_BASE_URL:-}
       DECOMPOSER_API_KEY: ${DECOMPOSER_API_KEY:-}
+      DECOMPOSER_ALLOW_CLI: ${DECOMPOSER_ALLOW_CLI:-false}
+      CLAUDE_CODE_OAUTH_TOKEN: ${CLAUDE_CODE_OAUTH_TOKEN:-}
       SECRET_KEY: ${SECRET_KEY:-}
       ALLOW_REGISTRATION: ${ALLOW_REGISTRATION:-true}
       MODAL_TOKEN_ID: ${MODAL_TOKEN_ID:-}

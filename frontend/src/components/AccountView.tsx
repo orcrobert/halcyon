@@ -304,7 +304,7 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
   }
 
   const user = state.status === 'authed' ? state.user : null
-  const showBaseUrl = provider ? provider.key !== 'gemini' : false
+  const showBaseUrl = provider?.uses_base_url ?? false
   const dirty = isDirty(draft, settings)
   const active = SECTIONS.find((s) => s.id === section) ?? SECTIONS[0]
 
@@ -477,7 +477,8 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                         label="Model"
                         name="halcyon-decomposer-model"
                         value={draft.decomposer_model}
-                        placeholder={provider?.default_model ?? ''}
+                        placeholder={provider?.default_model || 'CLI default'}
+                        suggestions={provider?.suggested_models}
                         onChange={(v) => set('decomposer_model', v)}
                       />
                     </div>
@@ -494,7 +495,7 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
 
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center justify-between gap-2">
-                        <span className={LABEL_CLASS}>API key</span>
+                        <span className={LABEL_CLASS}>{provider?.key_label ?? 'API key'}</span>
                         {settings.decomposer_api_key_set && (
                           <button
                             onClick={handleClearKey}
@@ -541,9 +542,11 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                         )}
                       </div>
                       <p className="text-[11.5px] text-ink-faint leading-relaxed">
-                        {provider?.requires_api_key
-                          ? 'Stored encrypted and never shown again.'
-                          : 'Optional for local servers.'}
+                        {provider?.key_hint
+                          ? `${provider.key_hint} Stored encrypted and never shown again.`
+                          : provider?.requires_api_key
+                            ? 'Stored encrypted and never shown again.'
+                            : 'Optional for local servers.'}
                       </p>
                     </div>
 
@@ -754,20 +757,24 @@ function Field({
   name,
   value,
   placeholder,
+  suggestions,
   onChange,
 }: {
   label: string
   name: string
   value: string
   placeholder: string
+  suggestions?: string[]
   onChange: (value: string) => void
 }) {
+  const listId = suggestions?.length ? `${name}-suggestions` : undefined
   return (
     <label className="flex flex-col gap-2 min-w-0">
       <span className={LABEL_CLASS}>{label}</span>
       <input
         type="text"
         name={name}
+        list={listId}
         spellCheck={false}
         autoComplete="off"
         data-lpignore="true"
@@ -779,6 +786,11 @@ function Field({
         className={INPUT_CLASS}
         style={INPUT_STYLE}
       />
+      {listId && (
+        <datalist id={listId}>
+          {suggestions?.map((model) => <option key={model} value={model} />)}
+        </datalist>
+      )}
     </label>
   )
 }

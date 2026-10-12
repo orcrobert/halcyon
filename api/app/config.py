@@ -41,6 +41,7 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("DECOMPOSER_API_KEY", "GEMINI_API_KEY"),
     )
+    decomposer_allow_cli: bool = False
 
     modal_token_id: str | None = None
     modal_token_secret: str | None = None

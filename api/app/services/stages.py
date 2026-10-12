@@ -46,6 +46,8 @@ def decomposing_detail(config: RunConfig) -> str:
     if provider is None:
         return f"Asking {config.decomposer_provider} to split the scene into layers"
     model = config.decomposer_model or provider.default_model
+    if not model:
+        return f"Asking {provider.label} to split the scene into layers"
     return f"Asking {provider.label} ({model}) to split the scene into layers"
 
 

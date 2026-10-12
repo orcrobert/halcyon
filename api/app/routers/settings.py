@@ -5,7 +5,7 @@ from api.app.models.schemas import Envelope, ProviderOut, SettingsOut, SettingsU
 from api.app.models.tables import UserSettings
 from api.app.security import encrypt_secret
 from api.app.services.prompts import default_decomposer_prompt
-from api.app.services.providers import PROVIDERS, get_provider
+from api.app.services.providers import available_providers, get_provider
 from api.app.services.runconfig import default_config
 
 router = APIRouter(prefix="/api/settings", tags=["settings"])
@@ -53,8 +53,12 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
                 default_model=provider.default_model,
                 default_base_url=provider.default_base_url,
                 requires_api_key=provider.requires_api_key,
+                uses_base_url=provider.uses_base_url,
+                suggested_models=list(provider.suggested_models),
+                key_label=provider.key_label,
+                key_hint=provider.key_hint,
             )
-            for provider in PROVIDERS.values()
+            for provider in available_providers()
         ],
     )
 

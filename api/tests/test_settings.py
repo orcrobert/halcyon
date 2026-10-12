@@ -246,3 +246,30 @@ def test_reduce_blur_defaults_off_and_round_trips(client, auth):
         "/api/settings", headers=auth, json={"theme": "dusk"}
     ).json()["data"]
     assert body["reduce_blur"] is True
+
+
+def test_cli_providers_appear_with_model_suggestions_when_allowed(client, auth, monkeypatch):
+    from api.app.services import providers
+
+    monkeypatch.setattr(providers.settings, "decomposer_allow_cli", True)
+    body = client.get("/api/settings", headers=auth).json()["data"]
+    listed = {p["key"]: p for p in body["providers"]}
+
+    assert listed["claude_cli"]["key_label"] == "Login token"
+    assert listed["claude_cli"]["uses_base_url"] is False
+    assert "opus" in listed["claude_cli"]["suggested_models"]
+
+    response = client.put(
+        "/api/settings",
+        headers=auth,
+        json={"decomposer_provider": "claude_cli", "decomposer_model": "haiku"},
+    )
+    assert response.json()["data"]["decomposer_model"] == "haiku"
+
+
+def test_cli_providers_cannot_be_chosen_when_disallowed(client, auth):
+    response = client.put(
+        "/api/settings", headers=auth, json={"decomposer_provider": "claude_cli"}
+    )
+
+    assert response.status_code == 422

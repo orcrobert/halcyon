@@ -45,7 +45,8 @@ runtimes rely on.
 
 | Variable | Purpose |
 |----------|---------|
-| `DECOMPOSER_PROVIDER` | `gemini`, `ollama`, or `openai` |
+| `DECOMPOSER_PROVIDER` | `gemini`, `ollama`, `openai`, `claude_cli`, or `codex_cli` |
+| `DECOMPOSER_ALLOW_CLI` | `true` offers the two CLI providers; off by default |
 | `DECOMPOSER_MODEL` | model id; blank uses the provider's default |
 | `DECOMPOSER_BASE_URL` | endpoint; blank uses the provider's default |
 | `DECOMPOSER_API_KEY` | key for the provider (not needed for local servers) |
@@ -77,7 +78,64 @@ there; the instance value is only used by users who have saved none.
 | `ollama` | any local Ollama host | no |
 | `openai` | any OpenAI-compatible `/chat/completions` endpoint — OpenAI, Groq, OpenRouter, Together, DeepSeek, vLLM, LM Studio, llama.cpp | usually |
 
+| `claude_cli` | Claude Code installed on the server, using its login | no |
+| `codex_cli` | Codex CLI installed on the server, using its login | no |
+
 For a fully offline install, run Ollama and set `DECOMPOSER_PROVIDER=ollama`.
+
+### Decomposing through a local CLI
+
+On a personal machine or server you can skip API keys and let Claude Code or
+Codex do the decomposition under the subscription they are logged in with. The
+API runs the CLI once per request, non-interactively, in an empty temporary
+directory: Claude Code with every tool disabled and no settings or MCP servers
+loaded, Codex in its read-only sandbox.
+
+The CLI providers are hidden until `DECOMPOSER_ALLOW_CLI=true`. Every user of
+the instance then runs on the server's login, so leave it off on a shared
+instance; a subscription login is meant for its owner, not for serving others.
+
+The model field is passed straight through as `--model`. For Claude Code that
+is an alias (`sonnet`, `opus`, `haiku`) or a full model id, defaulting to
+`sonnet`; for Codex any model your account can use, defaulting to whatever
+`~/.codex/config.toml` sets. A model the account cannot use fails the
+generation with the CLI's own message.
+
+**Logging in from the account page**: with Claude Code selected, the key
+field becomes *Login token*. Run `claude setup-token` on any machine with a
+browser and paste the result; it is stored encrypted like an API key and handed
+to the CLI as `CLAUDE_CODE_OAUTH_TOKEN`. With Codex selected, the field takes an
+OpenAI API key, handed over as `CODEX_API_KEY`. Leave it empty to use whatever
+login the server's CLI already has.
+
+**Running the API directly** (`uvicorn`): install the CLI, log in once as the
+user that runs the API (`claude`, then `/login`; or `codex login`), and set
+`DECOMPOSER_ALLOW_CLI=true`.
+
+**Running in Docker**: build the `runtime-cli` target, which adds Node, Claude
+Code and Codex to the image, and pass a login in:
+
+```bash
+claude setup-token
+```
+
+```bash
+# .env
+HALCYON_TARGET=runtime-cli
+DECOMPOSER_ALLOW_CLI=true
+CLAUDE_CODE_OAUTH_TOKEN=<token from setup-token>
+```
+
+```bash
+docker compose up -d --build
+```
+
+Codex has no token variable; copy an existing login onto the data volume
+instead, where the image points `CODEX_HOME`:
+
+```bash
+docker compose cp ~/.codex/auth.json halcyon:/data/cli/codex/auth.json
+```
 
 ### Secrets
 
