@@ -24,6 +24,10 @@ COPY api/ ./api/
 RUN --mount=type=cache,target=/root/.cache/pip pip install .
 
 
+FROM node:24-slim AS cli
+RUN npm install -g --prefix /opt/cli @anthropic-ai/claude-code @openai/codex
+
+
 FROM python:3.11-slim AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
@@ -57,3 +61,15 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
     CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8001/health').read()"
 
 CMD ["uvicorn", "api.app.main:app", "--host", "0.0.0.0", "--port", "8001"]
+
+
+FROM runtime AS runtime-cli
+
+ENV PATH="/opt/cli/bin:$PATH" \
+    CLAUDE_CONFIG_DIR=/data/cli/claude \
+    CODEX_HOME=/data/cli/codex
+
+COPY --from=cli /usr/local/bin/node /usr/local/bin/node
+COPY --from=cli /opt/cli /opt/cli
+
+CMD ["sh", "-c", "mkdir -p \"$CLAUDE_CONFIG_DIR\" \"$CODEX_HOME\" && exec uvicorn api.app.main:app --host 0.0.0.0 --port 8001"]
