@@ -101,6 +101,13 @@ is an alias (`sonnet`, `opus`, `haiku`) or a full model id, defaulting to
 `~/.codex/config.toml` sets. A model the account cannot use fails the
 generation with the CLI's own message.
 
+**Logging in from the account page**: with Claude Code selected, the key
+field becomes *Login token*. Run `claude setup-token` on any machine with a
+browser and paste the result; it is stored encrypted like an API key and handed
+to the CLI as `CLAUDE_CODE_OAUTH_TOKEN`. With Codex selected, the field takes an
+OpenAI API key, handed over as `CODEX_API_KEY`. Leave it empty to use whatever
+login the server's CLI already has.
+
 **Running the API directly** (`uvicorn`): install the CLI, log in once as the
 user that runs the API (`claude`, then `/login`; or `codex login`), and set
 `DECOMPOSER_ALLOW_CLI=true`.
