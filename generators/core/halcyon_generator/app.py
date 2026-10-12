@@ -4,12 +4,13 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 from .config import GeneratorConfig
-from .engine import MAX_DURATION_S, AudioCraftEngine
+from .engine import MAX_DURATION_S, MAX_STYLE_S, MIN_STYLE_S, AudioCraftEngine
 
 
 class GenerateRequest(BaseModel):
     elements: list[dict[str, Any]]
     duration: int | None = None
+    options: dict[str, Any] | None = None
 
 
 class GenerateResponse(BaseModel):
@@ -34,8 +35,12 @@ def create_app(
             "loaded": resolved.loaded,
             "audiogen_model": resolved.config.audiogen_model,
             "musicgen_model": resolved.config.musicgen_model,
+            "style_model": resolved.config.style_model or None,
+            "style_loaded": resolved.style_loaded,
+            "style_excerpt": [MIN_STYLE_S, MAX_STYLE_S],
             "duration": resolved.config.duration,
             "max_duration": MAX_DURATION_S,
+            "gpu": getattr(resolved, "gpu", None),
         }
 
     @app.get("/health")
@@ -44,7 +49,9 @@ def create_app(
 
     @app.post("/generate", response_model=GenerateResponse)
     def generate(req: GenerateRequest) -> GenerateResponse:
-        return GenerateResponse(elements=resolved.generate(req.elements, req.duration))
+        return GenerateResponse(
+            elements=resolved.generate(req.elements, req.duration, req.options)
+        )
 
     app.state.engine = resolved
     return app

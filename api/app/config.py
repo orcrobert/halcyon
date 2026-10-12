@@ -22,6 +22,9 @@ ROLE_INTERVALS = {
 MIN_INTERVAL_S = 1.0
 MAX_INTERVAL_S = 300.0
 MAX_REVIEW_LAYERS = 12
+MIN_STYLE_S = 1.5
+MAX_STYLE_S = 4.5
+MAX_STYLE_BYTES = 4 * 1024 * 1024
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +41,10 @@ class Settings(BaseSettings):
         default=None,
         validation_alias=AliasChoices("DECOMPOSER_API_KEY", "GEMINI_API_KEY"),
     )
+
+    modal_token_id: str | None = None
+    modal_token_secret: str | None = None
+    generators_dir: str = "generators"
 
     data_dir: str = "data"
     secret_key: str | None = None
@@ -83,6 +90,12 @@ class Settings(BaseSettings):
     @property
     def database_path(self) -> Path:
         return self.data_path / "halcyon.db"
+
+    @property
+    def modal_deploy_script(self) -> Path:
+        path = Path(self.generators_dir)
+        root = path if path.is_absolute() else REPO_ROOT / path
+        return root / "modal" / "deploy.py"
 
     @property
     def frontend_dist_path(self) -> Path:

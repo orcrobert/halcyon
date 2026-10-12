@@ -270,6 +270,39 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   backdrop filter, makes `data-frosted` panels opaque and hides `data-glow`
   layers, and the canvases skip their shadow blur via `blurReduced()`. A new
   frosted panel needs `data-frosted`, and a new blur-only glow needs `data-glow`.
+- **A style clip conditions music layers through MusicGen-Style.** The prompt
+  view lets the user upload audio and crop a 1.5–4.5 s excerpt
+  (`StyleClipModal`, maths in `hooks/styleClip.ts`); the browser renders it to a
+  32 kHz mono WAV and sends it as `style` on `POST /api/atmospheres`. The API
+  stores it at `DATA_DIR/styles/{atmosphere}.wav` (outside the audio folder,
+  which `_persist` wipes) with metadata on `Atmosphere.style_json`, adds
+  `STYLE_NOTE` to the decomposer prompt so the scene has a music layer, and
+  attaches `style_b64` to every `music` element sent to the generator —
+  including single-layer regenerations and new takes, which copy the clip. The
+  generator loads `STYLE_MODEL` on the first styled request, or in
+  `load()` when `STYLE_PRELOAD` is set (the Modal default, so the weights are
+  committed to the cache volume), and falls back to plain MusicGen when it has
+  none. Without a clip nothing changes.
+- **Generator options are declared once, in `services/generator_options.py`.**
+  Each `OptionSpec` has a scope. `deploy` options (GPU, models, style preload,
+  fallback length, loudness, idle shutdown) only apply to Modal and become env
+  vars for `modal deploy`. `request` options (style closeness, prompt weight)
+  travel as `options` on every `POST /generate` through
+  `RunConfig.generator_options`. The account page renders whatever specs the API
+  lists, so a new option needs only a spec plus the code that reads it.
+  `GeneratorProfile.options_json` holds the user's values and `deployed_json`
+  the deploy options at the last successful deploy; `pending_changes` is the
+  diff, and a missing `deployed_json` counts as the defaults.
+- **Modal deploys run from the API.** `services/modal_deploy.py` runs
+  `python -m modal deploy generators/modal/deploy.py` on its own thread per
+  generator (never on the generation worker), with the user's encrypted Modal
+  token or the instance `MODAL_TOKEN_ID`/`MODAL_TOKEN_SECRET`, streams the log
+  onto the row, and takes the `*.modal.run` URL from the output. The Docker image
+  ships `generators/core` and `deploy.py` under `GENERATORS_DIR`. A deploy left
+  `deploying` at boot is marked failed. In the browser, `hooks/generatorStore.ts`
+  is the one copy of the generator list; `DeployToast` stays on screen while a
+  redeploy is pending, running or failed, and polls only while one runs. It sets
+  `--deploy-toast-offset` so the page and the dashboard's error bar clear it.
 - **Mixing params are computed from audio, never from the LLM.** Do not add
   LLM-suggested EQ/volume/pan — that path was tried and removed (thesis ch4).
 - **Two mixing engines exist**: the Python `mixer` (used at generation time) and

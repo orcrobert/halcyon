@@ -14,6 +14,7 @@ from api.app.config import (
     MAX_DURATION_S,
     MAX_INTERVAL_S,
     MAX_REVIEW_LAYERS,
+    MAX_STYLE_BYTES,
     MIN_DURATION_S,
     MIN_INTERVAL_S,
 )
@@ -88,6 +89,8 @@ class SettingsUpdate(BaseModel):
     theme: str | None = Field(default=None, max_length=64)
     review_decomposition: bool | None = None
     reduce_blur: bool | None = None
+    modal_token_id: str | None = Field(default=None, max_length=255)
+    modal_token_secret: str | None = Field(default=None, max_length=255)
 
 
 class ProviderOut(BaseModel):
@@ -108,6 +111,8 @@ class SettingsOut(BaseModel):
     theme: str | None
     review_decomposition: bool
     reduce_blur: bool
+    modal_token_id: str | None
+    modal_token_set: bool
     defaults: dict[str, str | None]
     providers: list[ProviderOut]
 
@@ -142,6 +147,47 @@ class GeneratorOut(BaseModel):
     last_status: str | None
     last_checked_at: Timestamp | None
     reported: dict[str, Any] | None
+    options: dict[str, Any]
+    pending_changes: list[str]
+    deploy_status: str | None
+    deploy_error: str | None
+    deploy_log: str | None
+    deploy_started_at: Timestamp | None
+    deployed_at: Timestamp | None
+
+
+class GeneratorOptionsUpdate(BaseModel):
+    options: dict[str, Any]
+
+
+class ModalGeneratorCreate(BaseModel):
+    name: str = Field(default="Modal", min_length=1, max_length=60)
+    options: dict[str, Any] = Field(default_factory=dict)
+
+
+class OptionChoiceOut(BaseModel):
+    value: str
+    label: str
+
+
+class GeneratorOptionSpecOut(BaseModel):
+    key: str
+    label: str
+    hint: str
+    kind: Literal["choice", "toggle", "number"]
+    scope: Literal["deploy", "request"]
+    default: Any
+    choices: list[OptionChoiceOut]
+    minimum: float | None
+    maximum: float | None
+    step: float | None
+    unit: str | None
+    hosts: list[str]
+
+
+class DeployCapabilityOut(BaseModel):
+    available: bool
+    credentials: Literal["user", "instance"] | None
 
 
 class GeneratorProbe(BaseModel):
@@ -163,6 +209,8 @@ class GeneratorListOut(BaseModel):
     active_url: str
     instance_default_url: str
     kinds: list[GeneratorKindOut]
+    option_specs: list[GeneratorOptionSpecOut]
+    deploy: DeployCapabilityOut
 
 
 class EQBand(BaseModel):
@@ -232,6 +280,20 @@ class ElementRegenerate(BaseModel):
     feedback: str | None = Field(default=None, max_length=2000)
 
 
+class StyleReferenceIn(BaseModel):
+    audio_b64: str = Field(min_length=1, max_length=MAX_STYLE_BYTES * 4 // 3 + 4)
+    name: str = Field(default="Reference clip", max_length=255)
+    start_s: float = Field(default=0, ge=0)
+    end_s: float = Field(default=0, ge=0)
+
+
+class StyleReferenceOut(BaseModel):
+    name: str
+    start_s: float
+    end_s: float
+    duration_s: float
+
+
 class AtmosphereCreate(BaseModel):
     prompt: str = Field(min_length=1, max_length=2000)
     title: str | None = Field(default=None, max_length=255)
@@ -239,6 +301,7 @@ class AtmosphereCreate(BaseModel):
         default=DEFAULT_DURATION_S, ge=MIN_DURATION_S, le=MAX_DURATION_S
     )
     use_events: bool = True
+    style: StyleReferenceIn | None = None
 
 
 class DecompositionElement(BaseModel):
@@ -286,6 +349,7 @@ class AtmosphereOut(BaseModel):
     prompt: str
     duration_s: int
     use_events: bool
+    style: StyleReferenceOut | None = None
     status: str
     progress: int
     current_stage: str | None

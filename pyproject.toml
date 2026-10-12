@@ -19,6 +19,7 @@ dependencies = [
     "sqlmodel>=0.0.22",
     "pwdlib[argon2]>=0.2",
     "cryptography>=42.0",
+    "modal>=1.0",
     "halcyon-mixer",
 ]
 

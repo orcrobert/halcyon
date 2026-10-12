@@ -400,6 +400,7 @@ export function DashboardView({
                 key={`${el.id}:${el.version}`}
                 element={el}
                 deletable={(session.elements ?? []).length > 1}
+                styleName={session.style?.name ?? null}
                 onRegenerate={setRegenerating}
                 onDelete={onDeleteElement}
                 muted={mutedTracks.has(el.label)}
@@ -424,7 +425,7 @@ export function DashboardView({
           style={{
             position: 'fixed',
             left: '50%',
-            bottom: 28,
+            bottom: 'calc(28px + var(--deploy-toast-offset, 0px))',
             transform: 'translateX(-50%)',
             zIndex: 9997,
             display: 'flex',

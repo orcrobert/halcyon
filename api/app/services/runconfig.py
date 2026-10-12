@@ -1,9 +1,10 @@
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from api.app.config import settings
 from api.app.models.tables import GeneratorProfile, UserSettings
 from api.app.security import decrypt_secret
+from api.app.services.generator_options import request_options
 from api.app.services.prompts import default_decomposer_prompt
 
 
@@ -17,6 +18,7 @@ class RunConfig:
     decomposer_prompt: str
     generator_kind: str = "custom"
     generator_name: str | None = None
+    generator_options: dict = field(default_factory=dict)
 
 
 def default_config() -> RunConfig:
@@ -61,6 +63,11 @@ def _generator_fields(
         "generator_url": active_generator_url(preferences, generators),
         "generator_kind": profile.kind if profile is not None else "custom",
         "generator_name": profile.name if profile is not None else None,
+        "generator_options": (
+            request_options(profile.kind, profile.options_json)
+            if profile is not None
+            else {}
+        ),
     }
 
 

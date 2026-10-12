@@ -2,16 +2,21 @@ import { useEffect, useState } from 'react'
 import {
   activateGenerator,
   createGenerator,
+  createModalGenerator,
   deleteGenerator,
-  listGenerators,
+  deployGenerator,
   testGenerator,
   updateGenerator,
+  updateGeneratorOptions,
 } from '../api/generators'
+import { updateSettings } from '../api/settings'
 import { extractErrors } from '../api/errors'
+import { refreshGenerators, setGenerators, useGenerators } from '../hooks/generatorStore'
+import { GeneratorOptionsPanel } from './GeneratorOptionsPanel'
 import type {
   Generator,
   GeneratorHost,
-  GeneratorList,
+  GeneratorOptionValue,
   GeneratorProbe,
   GeneratorStatus,
 } from '../types'
@@ -37,25 +42,29 @@ const STATUS_LABEL: Record<GeneratorStatus, string> = {
 function reportOf(generator: Generator | undefined): string | null {
   const reported = generator?.reported
   if (!reported) return null
-  const models = [reported.audiogen_model, reported.musicgen_model]
+  const models = [reported.audiogen_model, reported.musicgen_model, reported.style_model]
     .filter(Boolean)
     .map((m) => (m as string).split('/').pop())
   if (!models.length) return null
-  return `${models.join(' · ')}${reported.duration ? ` · ${reported.duration}s` : ''}`
+  return [models.join(' · '), reported.duration ? `${reported.duration}s` : null, reported.gpu]
+    .filter(Boolean)
+    .join(' · ')
 }
 
 export function GeneratorsCard() {
-  const [list, setList] = useState<GeneratorList | null>(null)
-  const [loading, setLoading] = useState(true)
+  const list = useGenerators()
+  const [loading, setLoading] = useState(list === null)
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [probes, setProbes] = useState<Record<number, GeneratorProbe>>({})
   const [drafts, setDrafts] = useState<Record<string, string>>({})
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
+  const [modalDraft, setModalDraft] = useState<Record<string, GeneratorOptionValue>>({})
+  const setList = setGenerators
 
   useEffect(() => {
     let cancelled = false
-    listGenerators()
-      .then((res) => { if (!cancelled) setList(res) })
+    refreshGenerators()
       .catch((e) => { if (!cancelled) setError(extractErrors(e).message) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
@@ -114,8 +123,46 @@ export function GeneratorsCard() {
     const result = await run(host.key, () => testGenerator(existing.id))
     if (!result) return
     setProbes((p) => ({ ...p, [existing.id]: result }))
-    const refreshed = await listGenerators().catch(() => null)
-    if (refreshed) setList(refreshed)
+    await refreshGenerators().catch(() => null)
+  }
+
+  async function handleOption(host: GeneratorHost, key: string, value: GeneratorOptionValue | null) {
+    const existing = saved(host)
+    if (!existing) {
+      setModalDraft((d) => {
+        const copy = { ...d }
+        if (value === null) delete copy[key]
+        else copy[key] = value
+        return copy
+      })
+      return
+    }
+    const next = await run(host.key, () => updateGeneratorOptions(existing.id, { [key]: value }))
+    if (next) setList(next)
+  }
+
+  async function handleDeploy(host: GeneratorHost) {
+    const existing = saved(host)
+    const next = await run(host.key, () =>
+      existing ? deployGenerator(existing.id) : createModalGenerator(modalDraft),
+    )
+    if (!next) return
+    setList(next)
+    if (!existing) setModalDraft({})
+  }
+
+  async function handleSaveToken(host: GeneratorHost, tokenId: string, tokenSecret: string) {
+    const ok = await run(host.key, () =>
+      updateSettings({ modal_token_id: tokenId, modal_token_secret: tokenSecret }),
+    )
+    if (!ok) return false
+    await refreshGenerators().catch(() => null)
+    return true
+  }
+
+  async function handleRemoveToken(host: GeneratorHost) {
+    const ok = await run(host.key, () => updateSettings({ modal_token_id: '', modal_token_secret: '' }))
+    if (ok) await refreshGenerators().catch(() => null)
   }
 
   async function handleClear(host: GeneratorHost) {
@@ -163,6 +210,11 @@ export function GeneratorsCard() {
             const draft = draftFor(host)
             const dirty = draft.trim() !== '' && draft.trim() !== (existing?.url ?? '')
             const working = busy === host.key
+            const hasOptions = host.key === 'modal' || existing !== undefined
+            const open = expanded[host.key] ?? false
+            const attention = existing
+              ? existing.pending_changes.length > 0 || existing.deploy_status === 'failed' || existing.deploy_status === 'deploying'
+              : false
 
             return (
               <div
@@ -177,9 +229,9 @@ export function GeneratorsCard() {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={() => handleSelect(host)}
-                    disabled={!existing || active || working}
+                    disabled={!existing?.url || active || working}
                     aria-label={`Use ${host.label}`}
-                    title={existing ? `Use ${host.label}` : 'Add a URL first'}
+                    title={existing?.url ? `Use ${host.label}` : 'Add a URL first'}
                     className="shrink-0 rounded-full border transition disabled:cursor-default"
                     style={{
                       width: '15px',
@@ -214,8 +266,32 @@ export function GeneratorsCard() {
                     </p>
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-3">
-                    {existing && (
+                  <div className="flex shrink-0 items-center gap-3 flex-wrap justify-end">
+                    {hasOptions && (
+                      <button
+                        onClick={() => setExpanded((e) => ({ ...e, [host.key]: !open }))}
+                        aria-expanded={open}
+                        className="relative flex items-center gap-1 text-[11.5px] text-ink-muted hover:text-ink-soft transition"
+                        style={{ fontFamily: 'inherit' }}
+                      >
+                        {host.key === 'modal' ? 'Deploy' : 'Options'}
+                        <svg
+                          width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                          strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"
+                          style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.18s ease' }}
+                        >
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                        {attention && !open && (
+                          <span
+                            aria-hidden
+                            className="absolute rounded-full"
+                            style={{ width: 5, height: 5, top: -2, right: -6, background: 'var(--color-warn)' }}
+                          />
+                        )}
+                      </button>
+                    )}
+                    {existing?.url && (
                       <button
                         onClick={() => handleTest(host)}
                         disabled={working}
@@ -284,6 +360,21 @@ export function GeneratorsCard() {
                   <p className="text-[11.5px] text-danger-bright/90 leading-relaxed" style={{ marginTop: '8px' }}>
                     {probe.detail}
                   </p>
+                )}
+
+                {hasOptions && open && (
+                  <GeneratorOptionsPanel
+                    kind={host.key}
+                    generator={existing}
+                    specs={list.option_specs}
+                    deploy={list.deploy}
+                    busy={working}
+                    draftOptions={modalDraft}
+                    onChange={(key, value) => void handleOption(host, key, value)}
+                    onDeploy={() => void handleDeploy(host)}
+                    onSaveToken={(id, secret) => handleSaveToken(host, id, secret)}
+                    onRemoveToken={() => void handleRemoveToken(host)}
+                  />
                 )}
               </div>
             )

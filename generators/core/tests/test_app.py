@@ -11,13 +11,15 @@ class StubEngine:
     def __init__(self):
         self.config = GeneratorConfig()
         self.loaded = True
+        self.style_loaded = False
         self.durations = []
 
     def load(self):
         self.loaded = True
 
-    def generate(self, elements, duration=None):
+    def generate(self, elements, duration=None, options=None):
         self.durations.append(duration)
+        self.options = options
         return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
 
 
@@ -26,13 +28,20 @@ class RecordingAudioCraftEngine(AudioCraftEngine):
         super().__init__(config)
         self.batches = []
 
-    def load(self):
+    def _load_models(self):
         self._audiogen = "audiogen"
         self._musicgen = "musicgen"
+
+    def load_style(self):
+        self._style = "style"
 
     def _generate_batch(self, model, elements, seconds):
         self.batches.append((model, [e["label"] for e in elements], seconds))
         return [{**e, "audio_b64": base64.b64encode(b"RIFF").decode()} for e in elements]
+
+    def _generate_style_batch(self, model, elements, seconds, params):
+        self.style_params_used = params
+        return self._generate_batch(model, elements, seconds)
 
 
 def client(engine=None):
@@ -45,6 +54,20 @@ def test_home_reports_the_configured_models():
     assert body["audiogen_model"] == "facebook/audiogen-medium"
     assert body["duration"] == 10
     assert body["max_duration"] == MAX_DURATION_S
+    assert body["gpu"] is None
+
+
+def test_home_reports_the_gpu_the_engine_names():
+    engine = StubEngine()
+    engine.gpu = "NVIDIA A10G"
+
+    assert client(engine).get("/").json()["gpu"] == "NVIDIA A10G"
+
+
+def test_the_engine_names_no_gpu_without_cuda():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(device="cpu"))
+
+    assert engine.gpu is None
 
 
 def test_generate_echoes_elements_with_audio():
@@ -160,3 +183,100 @@ def test_unknown_element_keys_survive_the_round_trip():
     returned = RecordingAudioCraftEngine(GeneratorConfig()).generate(elements)
 
     assert [e["index"] for e in returned] == [0, 1]
+
+
+STYLE = base64.b64encode(b"RIFF").decode()
+
+
+def test_home_reports_the_style_model():
+    body = client().get("/").json()
+
+    assert body["style_model"] == "facebook/musicgen-style"
+    assert body["style_loaded"] is False
+
+
+def test_music_with_a_style_reference_goes_to_the_style_model():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(duration=10))
+
+    returned = engine.generate(
+        [
+            {"label": "drone", "type": "music", "duration": 10},
+            {"label": "theme", "type": "music", "duration": 10, "style_b64": STYLE},
+            {"label": "rain", "type": "sound", "duration": 10, "style_b64": STYLE},
+        ]
+    )
+
+    assert engine.batches == [
+        ("musicgen", ["drone"], 10),
+        ("style", ["theme"], 10),
+        ("audiogen", ["rain"], 10),
+    ]
+    assert "style_b64" not in next(e for e in returned if e["label"] == "rain")
+
+
+def test_the_style_model_is_loaded_only_when_needed():
+    engine = RecordingAudioCraftEngine(GeneratorConfig())
+
+    engine.generate([{"label": "drone", "type": "music"}])
+    assert not engine.style_loaded
+
+    engine.generate([{"label": "theme", "type": "music", "style_b64": STYLE}])
+    assert engine.style_loaded
+
+
+def test_a_style_reference_is_ignored_without_a_style_model():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(style_model=""))
+
+    engine.generate([{"label": "theme", "type": "music", "style_b64": STYLE}])
+
+    assert engine.batches == [("musicgen", ["theme"], 10)]
+    assert not engine.style_loaded
+
+
+def test_preloading_makes_the_style_model_part_of_loaded():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(style_preload=True))
+
+    engine.load()
+
+    assert engine.style_loaded
+    assert engine.loaded
+
+
+def test_without_preload_the_style_model_waits_for_a_styled_request():
+    engine = RecordingAudioCraftEngine(GeneratorConfig())
+
+    engine.load()
+
+    assert engine.loaded
+    assert not engine.style_loaded
+
+
+def test_generate_forwards_request_options_to_the_engine():
+    engine = StubEngine()
+    elements = [{"label": "theme", "type": "music", "prompt": "piano"}]
+
+    client(engine).post(
+        "/generate", json={"elements": elements, "options": {"style_eval_q": 5}}
+    )
+
+    assert engine.options == {"style_eval_q": 5}
+
+
+def test_style_options_override_the_configured_defaults_within_range():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(style_eval_q=3, style_cfg_beta=5.0))
+
+    assert engine.style_params(None) == (3, 5.0)
+    assert engine.style_params({"style_eval_q": 6, "style_cfg_beta": 2}) == (6, 2.0)
+    assert engine.style_params({"style_eval_q": 40, "style_cfg_beta": -1}) == (6, 0.0)
+    assert engine.style_params({"style_eval_q": "x"}) == (3, 5.0)
+
+
+def test_a_styled_batch_uses_the_request_options():
+    engine = RecordingAudioCraftEngine(GeneratorConfig())
+
+    engine.generate(
+        [{"label": "theme", "type": "music", "style_b64": STYLE}],
+        options={"style_eval_q": 1, "style_cfg_beta": 7.5},
+    )
+
+    assert engine.style_params_used == (1, 7.5)

@@ -4,8 +4,11 @@
 !mixer/
 !frontend/
 !pyproject.toml
+!generators/core/
+!generators/modal/deploy.py
 
 api/tests/
+generators/core/tests/
 frontend/node_modules/
 frontend/dist/
 mixer/models/

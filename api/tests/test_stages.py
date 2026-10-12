@@ -358,3 +358,22 @@ def test_the_probe_does_not_follow_redirects(monkeypatch):
     generator_module.probe("https://x.modal.run")
 
     assert kwargs_seen["allow_redirects"] is False
+
+
+def test_the_probe_passes_the_reported_gpu_through(monkeypatch):
+    import api.app.services.generator as generator_module
+    from conftest import FakeResponse
+
+    class Ok(FakeResponse):
+        status_code = 200
+
+    monkeypatch.setattr(
+        generator_module.requests,
+        "get",
+        lambda url, **kwargs: Ok({"status": "ok", "loaded": True, "gpu": "NVIDIA A10G"}),
+    )
+
+    status, _, reported = generator_module.probe("https://x.modal.run")
+
+    assert status == "ok"
+    assert reported["gpu"] == "NVIDIA A10G"

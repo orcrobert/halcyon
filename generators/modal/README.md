@@ -11,6 +11,19 @@ the very first container pays the download.
 
 ## Deploy
 
+### From the app
+
+Open **Account → Audio generator → Modal → Deploy**, save a Modal token (from
+[modal.com/settings/tokens](https://modal.com/settings/tokens)), pick the GPU and
+models, and press **Create and deploy**. The API runs the same `modal deploy`
+below, shows its log, and fills in the URL when it finishes. Changing a
+deployment option afterwards marks it as waiting for a redeploy, and a toast
+stays on screen with a **Redeploy** button until you run one. Per-request
+options (style closeness, prompt weight) apply on the next generation without
+a redeploy.
+
+### From a terminal
+
 ```bash
 pip install modal
 modal setup
@@ -44,7 +57,9 @@ HALCYON_MODAL_GPU=T4
 | `A100`, `A100-80GB`, `L40S`, `H100` | faster, more expensive |
 
 Both models together need about 8 GB, so a T4 is fine — you are trading
-generation time for cost, not capability.
+generation time for cost, not capability. The style model adds a third
+MusicGen and a MERT encoder on top; on a T4 either set `STYLE_PRELOAD=0` or
+drop `MUSICGEN_MODEL` to medium.
 
 The model settings are baked into the image instead:
 
@@ -52,8 +67,11 @@ The model settings are baked into the image instead:
 |----------|---------|---------|
 | `AUDIOGEN_MODEL` | `facebook/audiogen-medium` | model for `type: sound` |
 | `MUSICGEN_MODEL` | `facebook/musicgen-large` | model for `type: music` |
+| `STYLE_MODEL` | `facebook/musicgen-style` | model for music with a style clip; blank disables it |
+| `STYLE_PRELOAD` | `1` | load the style model in `@modal.enter()` so its weights land in the cached volume; `0` loads it on the first styled request instead |
 | `GENERATION_DURATION` | `10` | seconds per element |
 | `GENERATION_LOUDNESS_LUFS` | `-20` | loudness each clip is normalised to |
+| `HALCYON_MODAL_SCALEDOWN` | `300` | seconds an idle container waits before scaling to zero |
 
 ```bash
 HALCYON_MODAL_GPU=T4 MUSICGEN_MODEL=facebook/musicgen-medium \

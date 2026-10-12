@@ -6,9 +6,11 @@ import { GeneratingView } from './components/GeneratingView'
 import { DashboardView } from './components/DashboardView'
 import { HistoryPanel } from './components/HistoryPanel'
 import { ReviewLayersModal } from './components/ReviewLayersModal'
-import { AccountView } from './components/AccountView'
+import { AccountView, type SectionId } from './components/AccountView'
+import { DeployToast } from './components/DeployToast'
 import { useAudioEngine, isCanonicalBand, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
+import type { StyleClip } from './hooks/styleClip'
 import {
   confirmDecomposition,
   createAtmosphere,
@@ -90,6 +92,7 @@ function AuthedApp() {
   const [playing, setPlaying] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
   const [accountReturnView, setAccountReturnView] = useState<View>('prompt')
+  const [accountSection, setAccountSection] = useState<{ id: SectionId; key: number }>({ id: 'model', key: 0 })
   const [binauralActive, setBinauralActive] = useState(false)
   const [binauralBeatHz, setBinauralBeatHz] = useState(8)
   const [binauralLeftHz, setBinauralLeftHz] = useState(200)
@@ -233,11 +236,23 @@ function AuthedApp() {
     }
   }, [activatePollFor])
 
-  const handleGenerate = useCallback(async (prompt: string, durationS: number, useEvents: boolean) => {
+  const handleGenerate = useCallback(async (
+    prompt: string,
+    durationS: number,
+    useEvents: boolean,
+    style: StyleClip | null,
+  ) => {
     setSubmitting(true)
     setError(null)
     try {
-      const created = await createAtmosphere({ prompt, duration_s: durationS, use_events: useEvents })
+      const created = await createAtmosphere({
+        prompt,
+        duration_s: durationS,
+        use_events: useEvents,
+        style: style
+          ? { audio_b64: style.audioB64, name: style.name, start_s: style.start, end_s: style.end }
+          : undefined,
+      })
       localStorage.setItem(PENDING_KEY, String(created.id))
       setAtmosphere(created)
       setView('generating')
@@ -480,7 +495,10 @@ function AuthedApp() {
   }, [view, atmosphere, handlePlayPause])
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg)' }}>
+    <div
+      className="min-h-screen"
+      style={{ background: 'var(--color-bg)', paddingBottom: 'var(--deploy-toast-offset, 0px)' }}
+    >
       {view === 'prompt' && (
         <PromptView
           onSubmit={handleGenerate}
@@ -488,13 +506,18 @@ function AuthedApp() {
           error={error}
           onOpenAccount={() => {
             setAccountReturnView('prompt')
+            setAccountSection((s) => ({ id: 'model', key: s.key + 1 }))
             setView('account')
           }}
           onOpenHistory={() => setHistoryOpen(true)}
         />
       )}
       {view === 'account' && (
-        <AccountView onBack={() => setView(accountReturnView)} />
+        <AccountView
+          key={accountSection.key}
+          initialSection={accountSection.id}
+          onBack={() => setView(accountReturnView)}
+        />
       )}
       {view === 'generating' && atmosphere && (
         <GeneratingView atmosphere={atmosphere} onCancel={handleCancelGenerating} />
@@ -540,6 +563,13 @@ function AuthedApp() {
           onBinauralRightHz={handleBinauralRightHz}
         />
       )}
+      <DeployToast
+        onOpenSettings={() => {
+          if (view !== 'account') setAccountReturnView(view)
+          setAccountSection((s) => ({ id: 'generator', key: s.key + 1 }))
+          setView('account')
+        }}
+      />
       <HistoryPanel
         open={historyOpen}
         onClose={() => setHistoryOpen(false)}

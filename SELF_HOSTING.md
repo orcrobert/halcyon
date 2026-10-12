@@ -54,6 +54,8 @@ runtimes rely on.
 | `SECRET_KEY` | encrypts stored API keys; auto-generated if blank |
 | `ALLOW_REGISTRATION` | set `false` to close signups once your users exist |
 | `FRONTEND_ORIGIN` | only for running the dev server against a remote API |
+| `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET` | optional instance Modal token for deploying from the account page |
+| `GENERATORS_DIR` | where `generators/` lives; set to `/app/generators` in the image |
 
 Every decomposer value is an **instance default**. Each user can override the
 provider, model, base URL, API key, and system prompt from their account page,
@@ -125,6 +127,11 @@ a stub for testing.
   fallback for elements that carry none.
 - A generator that ignores both `duration` fields still works — it just always
   produces its own configured length.
+- When the user attached a style clip, every `"music"` element also carries
+  `style_b64`: a base64 mono WAV of 1.5–4.5 s. Generate that element with
+  MusicGen-Style (`facebook/musicgen-style`) so it takes on the clip's sound.
+  The excerpt is a reference, not a part of the output. A generator without a
+  style model ignores the field and generates from the prompt alone.
 
 **Response** — echo each element back with base64-encoded WAV bytes added:
 
@@ -138,11 +145,15 @@ a stub for testing.
 ```
 
 - `audio_b64` must be the base64 encoding of a complete WAV file.
+- Do not echo `style_b64` back; it is only an input.
 - Keep `index` (or at least `label`); the API matches replies by `index`, then
   by `label`, then by position. Elements that come back without `audio_b64` are
   dropped and the rest of the mix goes ahead.
 - Batching by length pays off: generating four elements at 4 s costs far less
   than four at 30 s on an autoregressive model.
+- A top-level `options` object may carry tuning for this request:
+  `style_eval_q` (1–6) and `style_cfg_beta` for styled music. Ignore what you do
+  not support.
 - The API waits up to **300 s** per request, so a generator that honours long
   durations should still fit a whole batch inside that budget.
 - There is no auth between the API and the generator by default — run the
