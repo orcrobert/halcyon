@@ -193,11 +193,14 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   `user_settings.generator_url` (legacy, still honoured) and then the instance
   `GENERATOR_URL`. Anything resolving a generator must go through
   `resolve_config`, never read `settings.generator_url` directly.
-- **The decomposer is any LLM.** `DECOMPOSER_PROVIDER` is `gemini`, `ollama`, or
-  `openai` (any OpenAI-compatible endpoint). Providers live in
+- **The decomposer is any LLM.** `DECOMPOSER_PROVIDER` is `gemini`, `ollama`,
+  `openai` (any OpenAI-compatible endpoint), or `claude_cli`/`codex_cli`, which
+  shell out to a logged-in CLI on the server. Providers live in
   `api/app/services/providers.py`; add one there and it appears in the account
   panel automatically. Every setting is a per-user override of the `.env`
-  default, resolved by `services/runconfig.py`.
+  default, resolved by `services/runconfig.py`. CLI providers (`local_cli`) are
+  filtered out by `available_providers()` unless `DECOMPOSER_ALLOW_CLI` is set,
+  since they run every user on the server's own login.
 - **The decomposer system prompt is per-user too.** `api/prompts/decomposer.txt`
   is the shipped default; `UserSettings.decomposer_prompt` overrides it and the
   account page edits it. Read it through `RunConfig.decomposer_prompt`, never by
