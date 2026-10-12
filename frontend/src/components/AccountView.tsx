@@ -304,7 +304,8 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
   }
 
   const user = state.status === 'authed' ? state.user : null
-  const showBaseUrl = provider ? provider.key !== 'gemini' : false
+  const showBaseUrl = provider?.uses_base_url ?? false
+  const showApiKey = provider?.uses_api_key ?? true
   const dirty = isDirty(draft, settings)
   const active = SECTIONS.find((s) => s.id === section) ?? SECTIONS[0]
 
@@ -477,7 +478,8 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                         label="Model"
                         name="halcyon-decomposer-model"
                         value={draft.decomposer_model}
-                        placeholder={provider?.default_model ?? ''}
+                        placeholder={provider?.default_model || 'CLI default'}
+                        suggestions={provider?.suggested_models}
                         onChange={(v) => set('decomposer_model', v)}
                       />
                     </div>
@@ -492,60 +494,68 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                       />
                     )}
 
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className={LABEL_CLASS}>API key</span>
-                        {settings.decomposer_api_key_set && (
-                          <button
-                            onClick={handleClearKey}
-                            disabled={saving}
-                            className="text-[11px] text-ink-muted hover:text-danger-bright transition disabled:opacity-40"
-                            style={{ fontFamily: 'inherit' }}
-                          >
-                            Remove
-                          </button>
-                        )}
+                    {showApiKey && (
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className={LABEL_CLASS}>API key</span>
+                          {settings.decomposer_api_key_set && (
+                            <button
+                              onClick={handleClearKey}
+                              disabled={saving}
+                              className="text-[11px] text-ink-muted hover:text-danger-bright transition disabled:opacity-40"
+                              style={{ fontFamily: 'inherit' }}
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            name="halcyon-decomposer-secret"
+                            autoComplete="off"
+                            spellCheck={false}
+                            autoCorrect="off"
+                            autoCapitalize="off"
+                            data-lpignore="true"
+                            data-1p-ignore
+                            data-bwignore
+                            data-form-type="other"
+                            value={draft.decomposer_api_key}
+                            onChange={(e) => set('decomposer_api_key', e.target.value)}
+                            placeholder={settings.decomposer_api_key_set ? 'Stored — type to replace' : 'Not set'}
+                            className={INPUT_CLASS}
+                            style={{
+                              ...INPUT_STYLE,
+                              paddingRight: '58px',
+                              WebkitTextSecurity: revealKey ? 'none' : 'disc',
+                              textSecurity: revealKey ? 'none' : 'disc',
+                            } as React.CSSProperties}
+                          />
+                          {draft.decomposer_api_key && (
+                            <button
+                              type="button"
+                              onClick={() => setRevealKey((v) => !v)}
+                              className="absolute inset-y-0 right-0 flex items-center text-[11px] text-ink-faint hover:text-ink-soft transition-colors"
+                              style={{ paddingRight: '13px', fontFamily: 'inherit' }}
+                            >
+                              {revealKey ? 'Hide' : 'Show'}
+                            </button>
+                          )}
+                        </div>
+                        <p className="text-[11.5px] text-ink-faint leading-relaxed">
+                          {provider?.requires_api_key
+                            ? 'Stored encrypted and never shown again.'
+                            : 'Optional for local servers.'}
+                        </p>
                       </div>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          name="halcyon-decomposer-secret"
-                          autoComplete="off"
-                          spellCheck={false}
-                          autoCorrect="off"
-                          autoCapitalize="off"
-                          data-lpignore="true"
-                          data-1p-ignore
-                          data-bwignore
-                          data-form-type="other"
-                          value={draft.decomposer_api_key}
-                          onChange={(e) => set('decomposer_api_key', e.target.value)}
-                          placeholder={settings.decomposer_api_key_set ? 'Stored — type to replace' : 'Not set'}
-                          className={INPUT_CLASS}
-                          style={{
-                            ...INPUT_STYLE,
-                            paddingRight: '58px',
-                            WebkitTextSecurity: revealKey ? 'none' : 'disc',
-                            textSecurity: revealKey ? 'none' : 'disc',
-                          } as React.CSSProperties}
-                        />
-                        {draft.decomposer_api_key && (
-                          <button
-                            type="button"
-                            onClick={() => setRevealKey((v) => !v)}
-                            className="absolute inset-y-0 right-0 flex items-center text-[11px] text-ink-faint hover:text-ink-soft transition-colors"
-                            style={{ paddingRight: '13px', fontFamily: 'inherit' }}
-                          >
-                            {revealKey ? 'Hide' : 'Show'}
-                          </button>
-                        )}
-                      </div>
+                    )}
+
+                    {provider && !showApiKey && (
                       <p className="text-[11.5px] text-ink-faint leading-relaxed">
-                        {provider?.requires_api_key
-                          ? 'Stored encrypted and never shown again.'
-                          : 'Optional for local servers.'}
+                        Runs the CLI on the server under its own login. Any model name the CLI accepts works here.
                       </p>
-                    </div>
+                    )}
 
                     <div
                       className="flex flex-wrap items-center justify-end gap-3"
@@ -754,20 +764,24 @@ function Field({
   name,
   value,
   placeholder,
+  suggestions,
   onChange,
 }: {
   label: string
   name: string
   value: string
   placeholder: string
+  suggestions?: string[]
   onChange: (value: string) => void
 }) {
+  const listId = suggestions?.length ? `${name}-suggestions` : undefined
   return (
     <label className="flex flex-col gap-2 min-w-0">
       <span className={LABEL_CLASS}>{label}</span>
       <input
         type="text"
         name={name}
+        list={listId}
         spellCheck={false}
         autoComplete="off"
         data-lpignore="true"
@@ -779,6 +793,11 @@ function Field({
         className={INPUT_CLASS}
         style={INPUT_STYLE}
       />
+      {listId && (
+        <datalist id={listId}>
+          {suggestions?.map((model) => <option key={model} value={model} />)}
+        </datalist>
+      )}
     </label>
   )
 }
