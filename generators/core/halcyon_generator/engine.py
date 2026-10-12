@@ -65,6 +65,17 @@ class AudioCraftEngine:
         return self._style is not None
 
     @property
+    def gpu(self) -> str | None:
+        if not self.config.device.startswith("cuda"):
+            return None
+        try:
+            import torch
+
+            return torch.cuda.get_device_name(self.config.device)
+        except Exception:
+            return None
+
+    @property
     def supports_style(self) -> bool:
         return bool(self.config.style_model)
 

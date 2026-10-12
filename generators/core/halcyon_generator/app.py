@@ -40,6 +40,7 @@ def create_app(
             "style_excerpt": [MIN_STYLE_S, MAX_STYLE_S],
             "duration": resolved.config.duration,
             "max_duration": MAX_DURATION_S,
+            "gpu": getattr(resolved, "gpu", None),
         }
 
     @app.get("/health")

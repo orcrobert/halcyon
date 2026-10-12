@@ -54,6 +54,20 @@ def test_home_reports_the_configured_models():
     assert body["audiogen_model"] == "facebook/audiogen-medium"
     assert body["duration"] == 10
     assert body["max_duration"] == MAX_DURATION_S
+    assert body["gpu"] is None
+
+
+def test_home_reports_the_gpu_the_engine_names():
+    engine = StubEngine()
+    engine.gpu = "NVIDIA A10G"
+
+    assert client(engine).get("/").json()["gpu"] == "NVIDIA A10G"
+
+
+def test_the_engine_names_no_gpu_without_cuda():
+    engine = RecordingAudioCraftEngine(GeneratorConfig(device="cpu"))
+
+    assert engine.gpu is None
 
 
 def test_generate_echoes_elements_with_audio():

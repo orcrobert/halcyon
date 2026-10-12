@@ -51,6 +51,7 @@ def probe(url: str) -> tuple[str, str | None, dict | None]:
             "duration",
             "max_duration",
             "loaded",
+            "gpu",
         )
         if key in payload
     }
