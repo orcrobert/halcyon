@@ -468,9 +468,16 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                           style={INPUT_STYLE}
                         >
                           {settings.providers.map((p) => (
-                            <option key={p.key} value={p.key}>{p.label}</option>
+                            <option key={p.key} value={p.key} disabled={!p.available}>
+                              {p.available ? p.label : `${p.label} (unavailable on this server)`}
+                            </option>
                           ))}
                         </select>
+                        {provider && !provider.available && (
+                          <span className="text-[11.5px] text-danger-bright leading-relaxed">
+                            Turned off on this server. Pick another provider, or set DECOMPOSER_ALLOW_CLI=true and rebuild.
+                          </span>
+                        )}
                       </label>
 
                       <Field

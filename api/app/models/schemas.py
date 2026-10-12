@@ -103,6 +103,7 @@ class ProviderOut(BaseModel):
     suggested_models: list[str]
     key_label: str
     key_hint: str | None
+    available: bool
 
 
 class SettingsOut(BaseModel):

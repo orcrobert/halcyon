@@ -273,3 +273,21 @@ def test_cli_providers_cannot_be_chosen_when_disallowed(client, auth):
     )
 
     assert response.status_code == 422
+
+
+def test_a_saved_provider_turned_off_later_is_listed_as_unavailable(
+    client, auth, monkeypatch
+):
+    from api.app.services import providers
+
+    monkeypatch.setattr(providers.settings, "decomposer_allow_cli", True)
+    client.put("/api/settings", headers=auth, json={"decomposer_provider": "claude_cli"})
+    monkeypatch.setattr(providers.settings, "decomposer_allow_cli", False)
+
+    body = client.get("/api/settings", headers=auth).json()["data"]
+    listed = {p["key"]: p for p in body["providers"]}
+
+    assert body["decomposer_provider"] == "claude_cli"
+    assert listed["claude_cli"]["available"] is False
+    assert listed["gemini"]["available"] is True
+    assert "codex_cli" not in listed
