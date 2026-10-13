@@ -1,0 +1,4223 @@
+[
+ {
+  "scene": "synthetic: rain over pad",
+  "layers": [
+   {
+    "label": "pad",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -1.0,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -0.8,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 0.78,
+    "masked_before": 0.0,
+    "masked_after": 0.0001,
+    "masked_masking_only": 0.0001,
+    "collided_before": 0.0019,
+    "collided_after": 0.0024,
+    "collided_masking_only": 0.0024,
+    "margin_before_db": 17.12,
+    "margin_after_db": 16.44
+   },
+   {
+    "label": "rain",
+    "type": "sound",
+    "role": "bed",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 5000,
+      "gain": -0.1,
+      "q": 0.8
+     }
+    ],
+    "eq_loss_db": 0.04,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 274.15,
+    "margin_after_db": 274.11
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "synthetic: wind under cello",
+  "layers": [
+   {
+    "label": "wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 0,
+    "volume": 0.733,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.001,
+    "collided_after": 0.0008,
+    "collided_masking_only": 0.0008,
+    "margin_before_db": 24.58,
+    "margin_after_db": 24.7
+   },
+   {
+    "label": "cello",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.178,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -0.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.46,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 272.76,
+    "margin_after_db": 272.48
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "synthetic: room hum, pad, birds",
+  "layers": [
+   {
+    "label": "pad",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 40.81,
+    "margin_after_db": 40.85
+   },
+   {
+    "label": "birds",
+    "type": "sound",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.2,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 5000,
+      "gain": -4.0,
+      "q": 0.8
+     },
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -2.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 3.13,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 129.84,
+    "margin_after_db": 125.8
+   },
+   {
+    "label": "hum",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "highshelf",
+      "freq": 11271,
+      "gain": -2.4,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 16000,
+      "gain": -1.6,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 283.05,
+    "margin_after_db": 283.05
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "synthetic: three beds and a cello",
+  "layers": [
+   {
+    "label": "wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 0,
+    "volume": 0.595,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.8,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -2.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -0.6,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.51,
+    "masked_before": 0.0061,
+    "masked_after": 0.0076,
+    "masked_masking_only": 0.0076,
+    "collided_before": 0.1512,
+    "collided_after": 0.1698,
+    "collided_masking_only": 0.1698,
+    "margin_before_db": 6.93,
+    "margin_after_db": 5.28
+   },
+   {
+    "label": "rain",
+    "type": "sound",
+    "role": "bed",
+    "rank": 1,
+    "volume": 0.403,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 5000,
+      "gain": -0.1,
+      "q": 0.8
+     }
+    ],
+    "eq_loss_db": 0.04,
+    "masked_before": 0.0086,
+    "masked_after": 0.0025,
+    "masked_masking_only": 0.0025,
+    "collided_before": 0.0512,
+    "collided_after": 0.0318,
+    "collided_masking_only": 0.0318,
+    "margin_before_db": 64.57,
+    "margin_after_db": 64.71
+   },
+   {
+    "label": "cello",
+    "type": "music",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.362,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -1.7,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -0.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 3.0,
+    "masked_before": 0.0155,
+    "masked_after": 0.0138,
+    "masked_masking_only": 0.0138,
+    "collided_before": 0.0155,
+    "collided_after": 0.0138,
+    "collided_masking_only": 0.0138,
+    "margin_before_db": 25.53,
+    "margin_after_db": 24.97
+   },
+   {
+    "label": "hum",
+    "type": "sound",
+    "role": "bed",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.9,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.0,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 13432,
+      "gain": -1.6,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 4.09,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 283.05,
+    "margin_after_db": 278.92
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#5: blood meridian full ambience, by cormac mcarthy.",
+  "layers": [
+   {
+    "label": "Wind Whistle",
+    "type": "sound",
+    "role": null,
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -1.2,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 4.23,
+    "masked_before": 0.0043,
+    "masked_after": 0.0081,
+    "masked_masking_only": 0.0081,
+    "collided_before": 0.0267,
+    "collided_after": 0.0443,
+    "collided_masking_only": 0.0443,
+    "margin_before_db": 31.75,
+    "margin_after_db": 34.34
+   },
+   {
+    "label": "Ambient Drones",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 2.04,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 277.0,
+    "margin_after_db": 275.97
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#6: lovecraft dread. cosmic horror incoming. peacefu",
+  "layers": [
+   {
+    "label": "Music",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.738,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0077,
+    "masked_after": 0.0076,
+    "masked_masking_only": 0.0076,
+    "collided_before": 0.039,
+    "collided_after": 0.0389,
+    "collided_masking_only": 0.0389,
+    "margin_before_db": 32.03,
+    "margin_after_db": 32.21
+   },
+   {
+    "label": "Ambient Drone",
+    "type": "sound",
+    "role": null,
+    "rank": 1,
+    "volume": 0.3,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0014,
+    "masked_after": 0.0011,
+    "masked_masking_only": 0.0011,
+    "collided_before": 0.0019,
+    "collided_after": 0.0018,
+    "collided_masking_only": 0.0018,
+    "margin_before_db": 60.81,
+    "margin_after_db": 61.04
+   },
+   {
+    "label": "Distant Ambient Room Tone",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -1.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -1.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 5545,
+      "gain": -1.7,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.19,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 266.29,
+    "margin_after_db": 265.54
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#7: Stephen King, The gunslinger ambience. Book. non",
+  "layers": [
+   {
+    "label": "Sustained distant thunder",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.355,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -3.1,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.6,
+    "masked_before": 0.1167,
+    "masked_after": 0.087,
+    "masked_masking_only": 0.087,
+    "collided_before": 0.2149,
+    "collided_after": 0.1815,
+    "collided_masking_only": 0.1815,
+    "margin_before_db": 7.36,
+    "margin_after_db": 8.5
+   },
+   {
+    "label": "Sustained synthesizer drone",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.423,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.6,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -1.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -1.1,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 2.11,
+    "masked_before": 0.0024,
+    "masked_after": 0.0023,
+    "masked_masking_only": 0.0023,
+    "collided_before": 0.0081,
+    "collided_after": 0.0088,
+    "collided_masking_only": 0.0088,
+    "margin_before_db": 21.87,
+    "margin_after_db": 20.68
+   },
+   {
+    "label": "Smooth Desert Ambiance",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 0.455,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -0.6,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -2.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 4.29,
+    "masked_before": 0.0098,
+    "masked_after": 0.0127,
+    "masked_masking_only": 0.0127,
+    "collided_before": 0.0298,
+    "collided_after": 0.0381,
+    "collided_masking_only": 0.0381,
+    "margin_before_db": 20.36,
+    "margin_after_db": 20.64
+   },
+   {
+    "label": "Distant wind",
+    "type": "sound",
+    "role": null,
+    "rank": 3,
+    "volume": 0.172,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -0.6,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 3.21,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 267.1,
+    "margin_after_db": 265.35
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#8: an 80's engineer is at the end of time, choosing",
+  "layers": [
+   {
+    "label": "80s Synth Simple Melody",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0029,
+    "masked_after": 0.0014,
+    "masked_masking_only": 0.0014,
+    "collided_before": 0.017,
+    "collided_after": 0.0092,
+    "collided_masking_only": 0.0092,
+    "margin_before_db": 19.91,
+    "margin_after_db": 20.96
+   },
+   {
+    "label": "Distant Reverb",
+    "type": "sound",
+    "role": null,
+    "rank": 1,
+    "volume": 0.344,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.9,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 2.64,
+    "masked_before": 0.0065,
+    "masked_after": 0.0122,
+    "masked_masking_only": 0.0122,
+    "collided_before": 0.0158,
+    "collided_after": 0.0289,
+    "collided_masking_only": 0.0289,
+    "margin_before_db": 5.06,
+    "margin_after_db": 2.24
+   },
+   {
+    "label": "80s Synth Pad",
+    "type": "music",
+    "role": null,
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -0.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -1.5,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -1.9,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.1,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 276.94,
+    "margin_after_db": 276.86
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#9: dunes of Arrakis. soft, not harsh at all, melanc",
+  "layers": [
+   {
+    "label": "Melancholic middle eastern drone",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.725,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.017,
+    "masked_after": 0.0094,
+    "masked_masking_only": 0.0094,
+    "collided_before": 0.075,
+    "collided_after": 0.0431,
+    "collided_masking_only": 0.0431,
+    "margin_before_db": 2.95,
+    "margin_after_db": 5.3
+   },
+   {
+    "label": "Sparse wind ambience",
+    "type": "sound",
+    "role": null,
+    "rank": 1,
+    "volume": 0.372,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.3,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 2.22,
+    "masked_before": 0.0018,
+    "masked_after": 0.0005,
+    "masked_masking_only": 0.0005,
+    "collided_before": 0.0402,
+    "collided_after": 0.0225,
+    "collided_masking_only": 0.0225,
+    "margin_before_db": 23.65,
+    "margin_after_db": 21.62
+   },
+   {
+    "label": "Distant hum of ornithopters",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -2.1,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 6.62,
+    "masked_before": 0.195,
+    "masked_after": 0.2355,
+    "masked_masking_only": 0.2355,
+    "collided_before": 0.5563,
+    "collided_after": 0.4935,
+    "collided_masking_only": 0.4935,
+    "margin_before_db": 34.58,
+    "margin_after_db": 34.54
+   },
+   {
+    "label": "Deep sand drone",
+    "type": "sound",
+    "role": null,
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 3.78,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 273.89,
+    "margin_after_db": 272.73
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#10: something that sounds like stranger things seaso",
+  "layers": [
+   {
+    "label": "Neon Synth Melody",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.659,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 2.92,
+    "masked_before": 0.0203,
+    "masked_after": 0.0231,
+    "masked_masking_only": 0.0231,
+    "collided_before": 0.0782,
+    "collided_after": 0.0924,
+    "collided_masking_only": 0.0924,
+    "margin_before_db": 8.11,
+    "margin_after_db": 9.33
+   },
+   {
+    "label": "Synth Pad Swells",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.551,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.3,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 802,
+      "gain": -2.5,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -2.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -2.5,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.74,
+    "masked_before": 0.0002,
+    "masked_after": 0.0002,
+    "masked_masking_only": 0.0002,
+    "collided_before": 0.0029,
+    "collided_after": 0.0015,
+    "collided_masking_only": 0.0015,
+    "margin_before_db": 30.01,
+    "margin_after_db": 28.95
+   },
+   {
+    "label": "Distant Crickets",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 0.164,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.84,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 261.53,
+    "margin_after_db": 258.98
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#11: something that sounds like stranger things seaso",
+  "layers": [
+   {
+    "label": "Neon Synth Melody",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.56,
+    "masked_before": 0.0073,
+    "masked_after": 0.0091,
+    "masked_masking_only": 0.0091,
+    "collided_before": 0.0359,
+    "collided_after": 0.0437,
+    "collided_masking_only": 0.0437,
+    "margin_before_db": 12.19,
+    "margin_after_db": 12.36
+   },
+   {
+    "label": "Synth Pad Swells",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.335,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -1.8,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 0.44,
+    "masked_before": 0.0001,
+    "masked_after": 0.0001,
+    "masked_masking_only": 0.0001,
+    "collided_before": 0.0001,
+    "collided_after": 0.0001,
+    "collided_masking_only": 0.0001,
+    "margin_before_db": 33.85,
+    "margin_after_db": 33.48
+   },
+   {
+    "label": "Distant Crickets",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 0.211,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 5000,
+      "gain": -4.0,
+      "q": 0.8
+     }
+    ],
+    "eq_loss_db": 3.5,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 263.29,
+    "margin_after_db": 257.36
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#12: the witcher!",
+  "layers": [
+   {
+    "label": "Melancholic Witcher Tone",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.708,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0028,
+    "masked_after": 0.0021,
+    "masked_masking_only": 0.0021,
+    "collided_before": 0.0192,
+    "collided_after": 0.0148,
+    "collided_masking_only": 0.0148,
+    "margin_before_db": 18.42,
+    "margin_after_db": 19.2
+   },
+   {
+    "label": "Wilderness Ambience",
+    "type": "sound",
+    "role": null,
+    "rank": 1,
+    "volume": 0.178,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 5000,
+      "gain": -2.9,
+      "q": 0.8
+     }
+    ],
+    "eq_loss_db": 1.47,
+    "masked_before": 0.0127,
+    "masked_after": 0.0175,
+    "masked_masking_only": 0.0175,
+    "collided_before": 0.0296,
+    "collided_after": 0.0383,
+    "collided_masking_only": 0.0383,
+    "margin_before_db": 6.93,
+    "margin_after_db": 6.38
+   },
+   {
+    "label": "Witcher Footsteps",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 0.487,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -1.1,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 5545,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -1.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.71,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 260.87,
+    "margin_after_db": 260.14
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#13: dark medieval slavic",
+  "layers": [
+   {
+    "label": "Muffled Cello",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.53,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0107,
+    "masked_after": 0.0073,
+    "masked_masking_only": 0.0073,
+    "collided_before": 0.0585,
+    "collided_after": 0.0378,
+    "collided_masking_only": 0.0378,
+    "margin_before_db": 15.55,
+    "margin_after_db": 16.6
+   },
+   {
+    "label": "Ambient Drone",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.17,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -1.6,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.7,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.19,
+    "masked_before": 0.0747,
+    "masked_after": 0.0634,
+    "masked_masking_only": 0.0634,
+    "collided_before": 0.2109,
+    "collided_after": 0.2096,
+    "collided_masking_only": 0.2096,
+    "margin_before_db": 7.21,
+    "margin_after_db": 8.2
+   },
+   {
+    "label": "Ambient Room Tone",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 0.293,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.0,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -1.0,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -1.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -3.1,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -2.0,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -2.9,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -2.1,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 4.18,
+    "masked_before": 0.0349,
+    "masked_after": 0.0652,
+    "masked_masking_only": 0.0652,
+    "collided_before": 0.0968,
+    "collided_after": 0.1744,
+    "collided_masking_only": 0.1744,
+    "margin_before_db": 15.46,
+    "margin_after_db": 10.65
+   },
+   {
+    "label": "Distant Chant",
+    "type": "music",
+    "role": null,
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -4.1,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 9451,
+      "gain": -4.9,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.86,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 270.46,
+    "margin_after_db": 269.8
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#14: the witcher!",
+  "layers": [
+   {
+    "label": "Melancholic Witcher Tone",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.555,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0006,
+    "masked_after": 0.0003,
+    "masked_masking_only": 0.0003,
+    "collided_before": 0.0027,
+    "collided_after": 0.0022,
+    "collided_masking_only": 0.0022,
+    "margin_before_db": 15.93,
+    "margin_after_db": 16.57
+   },
+   {
+    "label": "Wilderness Ambience",
+    "type": "sound",
+    "role": null,
+    "rank": 1,
+    "volume": 0.174,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -2.0,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 6000,
+      "gain": -2.2,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.44,
+    "masked_before": 0.0334,
+    "masked_after": 0.0274,
+    "masked_masking_only": 0.0274,
+    "collided_before": 0.1042,
+    "collided_after": 0.088,
+    "collided_masking_only": 0.088,
+    "margin_before_db": 10.66,
+    "margin_after_db": 11.53
+   },
+   {
+    "label": "Witcher Footsteps",
+    "type": "sound",
+    "role": null,
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.3,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.6,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -0.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -0.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -1.3,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 5.91,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 256.5,
+    "margin_after_db": 255.32
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#15: blood meridian book. judge holden cooking up new",
+  "layers": [
+   {
+    "label": "Creaking leather chair",
+    "type": "sound",
+    "role": null,
+    "rank": 0,
+    "volume": 0.56,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0341,
+    "masked_after": 0.0099,
+    "masked_masking_only": 0.0099,
+    "collided_before": 0.1474,
+    "collided_after": 0.0631,
+    "collided_masking_only": 0.0631,
+    "margin_before_db": 11.44,
+    "margin_after_db": 13.9
+   },
+   {
+    "label": "Piano Melody (Ominous)",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.205,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -2.5,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.9,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -1.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.1,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 3.24,
+    "masked_before": 0.0561,
+    "masked_after": 0.0374,
+    "masked_masking_only": 0.0374,
+    "collided_before": 0.1773,
+    "collided_after": 0.1302,
+    "collided_masking_only": 0.1302,
+    "margin_before_db": 6.29,
+    "margin_after_db": 7.11
+   },
+   {
+    "label": "Dissonant string drone",
+    "type": "music",
+    "role": null,
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.6,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -1.1,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -1.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.1,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 9451,
+      "gain": -2.5,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2670,
+      "gain": -0.5,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 6.16,
+    "masked_before": 0.021,
+    "masked_after": 0.037,
+    "masked_masking_only": 0.037,
+    "collided_before": 0.1144,
+    "collided_after": 0.1365,
+    "collided_masking_only": 0.1365,
+    "margin_before_db": 3.99,
+    "margin_after_db": 2.78
+   },
+   {
+    "label": "Crackling fire",
+    "type": "sound",
+    "role": null,
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.9,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -4.3,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -1.2,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -0.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 802,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 7.06,
+    "masked_before": 0.0323,
+    "masked_after": 0.0387,
+    "masked_masking_only": 0.0387,
+    "collided_before": 0.1101,
+    "collided_after": 0.1378,
+    "collided_masking_only": 0.1378,
+    "margin_before_db": 13.37,
+    "margin_after_db": 11.15
+   },
+   {
+    "label": "Soft breaths",
+    "type": "sound",
+    "role": null,
+    "rank": 4,
+    "volume": 0.301,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -2.5,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2670,
+      "gain": -3.8,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 4.92,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 250.03,
+    "margin_after_db": 248.89
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#20: satans lair",
+  "layers": [
+   {
+    "label": "Distant Ambient Drone",
+    "type": "sound",
+    "role": "bed",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -0.6,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -3.0,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -1.1,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.05,
+    "masked_before": 0.0019,
+    "masked_after": 0.0003,
+    "masked_masking_only": 0.0003,
+    "collided_before": 0.0082,
+    "collided_after": 0.0031,
+    "collided_masking_only": 0.0031,
+    "margin_before_db": 34.86,
+    "margin_after_db": 35.56
+   },
+   {
+    "label": "Creaking and Groaning",
+    "type": "sound",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 5.4,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 274.02,
+    "margin_after_db": 270.63
+   }
+  ],
+  "events": [
+   {
+    "label": "Echoing Footsteps",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -4.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -3.5,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.7,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ]
+   },
+   {
+    "label": "Distant Whispering",
+    "bands": []
+   }
+  ]
+ },
+ {
+  "scene": "#21: Satan's Lair",
+  "layers": [
+   {
+    "label": "Dark, ominous piano",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -2.9,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.64,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0013,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 31.76,
+    "margin_after_db": 32.76
+   },
+   {
+    "label": "Chilling wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -4.2,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -3.7,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.1,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -1.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 6.41,
+    "masked_before": 0.0231,
+    "masked_after": 0.0366,
+    "masked_masking_only": 0.0366,
+    "collided_before": 0.1342,
+    "collided_after": 0.1584,
+    "collided_masking_only": 0.1584,
+    "margin_before_db": 17.01,
+    "margin_after_db": 17.03
+   },
+   {
+    "label": "Subterranean drips",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 6.84,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 262.35,
+    "margin_after_db": 257.23
+   }
+  ],
+  "events": [
+   {
+    "label": "Groaning rocks",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.1,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -1.4,
+      "q": 1.2
+     }
+    ]
+   },
+   {
+    "label": "Distant growls",
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 802,
+      "gain": -5.0,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -2.7,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.5,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -2.2,
+      "q": 1.2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#22: lucifer's fall",
+  "layers": [
+   {
+    "label": "Sustained Organ Drone",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.733,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0003,
+    "masked_after": 0.0001,
+    "masked_masking_only": 0.0001,
+    "collided_before": 0.0036,
+    "collided_after": 0.0013,
+    "collided_masking_only": 0.0013,
+    "margin_before_db": 32.8,
+    "margin_after_db": 34.07
+   },
+   {
+    "label": "Distant Falling",
+    "type": "sound",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.346,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.8,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 5545,
+      "gain": -4.2,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -0.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 2.76,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 264.0,
+    "margin_after_db": 262.6
+   }
+  ],
+  "events": [
+   {
+    "label": "Occasional Gargoyle Growl",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.0,
+      "q": 0.7
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#23: the dark tower, book 1: the gunslinger",
+  "layers": [
+   {
+    "label": "Distant storm",
+    "type": "sound",
+    "role": "bed",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.004,
+    "masked_after": 0.0034,
+    "masked_masking_only": 0.0034,
+    "collided_before": 0.0095,
+    "collided_after": 0.0078,
+    "collided_masking_only": 0.0078,
+    "margin_before_db": 26.35,
+    "margin_after_db": 26.95
+   },
+   {
+    "label": "Melancholic Cowboy Ballad",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -1.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.3,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 9451,
+      "gain": -2.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.83,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 263.33,
+    "margin_after_db": 262.22
+   }
+  ],
+  "events": [
+   {
+    "label": "Wind howling",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -1.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -2.5,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -1.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -1.1,
+      "q": 1.2
+     }
+    ]
+   },
+   {
+    "label": "Distant thunder",
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -1.8,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -1.5,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -0.5,
+      "q": 1.2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#24: A vast, sun-scorched desert stretches endlessly ",
+  "layers": [
+   {
+    "label": "Sparse Piano Notes",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0101,
+    "masked_after": 0.0025,
+    "masked_masking_only": 0.0025,
+    "collided_before": 0.0472,
+    "collided_after": 0.021,
+    "collided_masking_only": 0.021,
+    "margin_before_db": 9.42,
+    "margin_after_db": 10.51
+   },
+   {
+    "label": "Keening Wind",
+    "type": "sound",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 802,
+      "gain": -1.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 3.71,
+    "masked_before": 0.1674,
+    "masked_after": 0.0938,
+    "masked_masking_only": 0.0938,
+    "collided_before": 0.5129,
+    "collided_after": 0.3911,
+    "collided_masking_only": 0.3911,
+    "margin_before_db": 19.6,
+    "margin_after_db": 21.86
+   },
+   {
+    "label": "Tectonic Hum",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.3,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -1.6,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -2.8,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 5.31,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 266.29,
+    "margin_after_db": 262.64
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#25: A vast, sun-scorched desert stretches endlessly ",
+  "layers": [
+   {
+    "label": "Piano",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.728,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0074,
+    "masked_after": 0.004,
+    "masked_masking_only": 0.004,
+    "collided_before": 0.0324,
+    "collided_after": 0.0213,
+    "collided_masking_only": 0.0213,
+    "margin_before_db": 11.16,
+    "margin_after_db": 11.88
+   },
+   {
+    "label": "Guitar",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.232,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.18,
+    "masked_before": 0.0154,
+    "masked_after": 0.008,
+    "masked_masking_only": 0.008,
+    "collided_before": 0.1067,
+    "collided_after": 0.0644,
+    "collided_masking_only": 0.0644,
+    "margin_before_db": 12.38,
+    "margin_after_db": 12.43
+   },
+   {
+    "label": "Wind",
+    "type": "sound",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.6,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -0.6,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -2.6,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 4.38,
+    "masked_before": 0.0057,
+    "masked_after": 0.0102,
+    "masked_masking_only": 0.0102,
+    "collided_before": 0.0808,
+    "collided_after": 0.1005,
+    "collided_masking_only": 0.1005,
+    "margin_before_db": 13.85,
+    "margin_after_db": 13.94
+   },
+   {
+    "label": "Tectonic hum",
+    "type": "sound",
+    "role": "bed",
+    "rank": 3,
+    "volume": 0.198,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -3.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 4.11,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 261.48,
+    "margin_after_db": 260.48
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#26: A vast, sun-scorched desert stretches endlessly ",
+  "layers": [
+   {
+    "label": "Guitar",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.708,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -1.6,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.2,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -0.6,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 3.15,
+    "masked_before": 0.0084,
+    "masked_after": 0.0176,
+    "masked_masking_only": 0.0176,
+    "collided_before": 0.0513,
+    "collided_after": 0.1199,
+    "collided_masking_only": 0.1199,
+    "margin_before_db": 7.77,
+    "margin_after_db": 6.29
+   },
+   {
+    "label": "Piano",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.227,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -5.5,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.55,
+    "masked_before": 0.0027,
+    "masked_after": 0.0014,
+    "masked_masking_only": 0.0014,
+    "collided_before": 0.0461,
+    "collided_after": 0.017,
+    "collided_masking_only": 0.017,
+    "margin_before_db": 13.63,
+    "margin_after_db": 14.19
+   },
+   {
+    "label": "Wind",
+    "type": "sound",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.4,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.1,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2670,
+      "gain": -1.4,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 4.28,
+    "masked_before": 0.0379,
+    "masked_after": 0.0405,
+    "masked_masking_only": 0.0405,
+    "collided_before": 0.1602,
+    "collided_after": 0.1911,
+    "collided_masking_only": 0.1911,
+    "margin_before_db": 11.71,
+    "margin_after_db": 13.48
+   },
+   {
+    "label": "Tectonic hum",
+    "type": "sound",
+    "role": "bed",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 3.9,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 267.01,
+    "margin_after_db": 265.6
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#27: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Cello Line",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0137,
+    "masked_after": 0.0121,
+    "masked_masking_only": 0.0121,
+    "collided_before": 0.0695,
+    "collided_after": 0.0657,
+    "collided_masking_only": 0.0657,
+    "margin_before_db": 7.73,
+    "margin_after_db": 8.42
+   },
+   {
+    "label": "Droning Orchestral Undertow",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.519,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -1.0,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -1.0,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -4.9,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 9451,
+      "gain": -3.6,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 16000,
+      "gain": -1.3,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.11,
+    "masked_before": 0.0014,
+    "masked_after": 0.0001,
+    "masked_masking_only": 0.0001,
+    "collided_before": 0.004,
+    "collided_after": 0.0012,
+    "collided_masking_only": 0.0012,
+    "margin_before_db": 23.77,
+    "margin_after_db": 24.05
+   },
+   {
+    "label": "Irregular Percussion",
+    "type": "sound",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.1,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -1.9,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -0.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2670,
+      "gain": -2.4,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 6.46,
+    "masked_before": 0.0502,
+    "masked_after": 0.061,
+    "masked_masking_only": 0.061,
+    "collided_before": 0.1887,
+    "collided_after": 0.2256,
+    "collided_masking_only": 0.2256,
+    "margin_before_db": 12.75,
+    "margin_after_db": 12.18
+   },
+   {
+    "label": "Desert Wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.8,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -1.1,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -1.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 6.9,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 261.81,
+    "margin_after_db": 258.13
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#28: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Cello line",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.472,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0184,
+    "masked_after": 0.0075,
+    "masked_masking_only": 0.0075,
+    "collided_before": 0.1247,
+    "collided_after": 0.0522,
+    "collided_masking_only": 0.0522,
+    "margin_before_db": 5.79,
+    "margin_after_db": 9.05
+   },
+   {
+    "label": "Droning orchestra",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.327,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -0.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -3.2,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 5545,
+      "gain": -2.3,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 1825,
+      "gain": -2.5,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 3.07,
+    "masked_before": 0.0125,
+    "masked_after": 0.0102,
+    "masked_masking_only": 0.0102,
+    "collided_before": 0.0396,
+    "collided_after": 0.0329,
+    "collided_masking_only": 0.0329,
+    "margin_before_db": 5.48,
+    "margin_after_db": 8.76
+   },
+   {
+    "label": "Deep irregular snare",
+    "type": "music",
+    "role": null,
+    "rank": 2,
+    "volume": 0.159,
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -0.5,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -2.7,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.46,
+    "masked_before": 0.0217,
+    "masked_after": 0.0108,
+    "masked_masking_only": 0.0108,
+    "collided_before": 0.0642,
+    "collided_after": 0.0394,
+    "collided_masking_only": 0.0394,
+    "margin_before_db": -0.52,
+    "margin_after_db": 3.04
+   },
+   {
+    "label": "Desert wind",
+    "type": "sound",
+    "role": "texture",
+    "rank": 3,
+    "volume": 0.172,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -3.8,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -3.8,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -0.9,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -2.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -2.4,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -2.1,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -2.1,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 5.46,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 267.96,
+    "margin_after_db": 263.23
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#29: A sickly, phosphorescent green hum emanates from",
+  "layers": [
+   {
+    "label": "Cold, Dissonant Choir",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0001,
+    "masked_after": 0.0001,
+    "masked_masking_only": 0.0001,
+    "collided_before": 0.0008,
+    "collided_after": 0.0005,
+    "collided_masking_only": 0.0005,
+    "margin_before_db": 26.54,
+    "margin_after_db": 28.43
+   },
+   {
+    "label": "Phosphorescent Green Hum",
+    "type": "sound",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -0.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -2.8,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -2.7,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 2.56,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 268.62,
+    "margin_after_db": 267.05
+   }
+  ],
+  "events": [
+   {
+    "label": "City's Heartbeat",
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -2.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -2.3,
+      "q": 1.2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#30: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Cello Line",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.788,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -2.3,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -0.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 5545,
+      "gain": -0.7,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -1.0,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 13432,
+      "gain": -1.4,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.43,
+    "masked_before": 0.0136,
+    "masked_after": 0.0206,
+    "masked_masking_only": 0.0206,
+    "collided_before": 0.0433,
+    "collided_after": 0.0538,
+    "collided_masking_only": 0.0538,
+    "margin_before_db": 6.62,
+    "margin_after_db": 5.09
+   },
+   {
+    "label": "Droning Orchestral Undertow",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.379,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0015,
+    "masked_after": 0.0013,
+    "masked_masking_only": 0.0013,
+    "collided_before": 0.0067,
+    "collided_after": 0.0048,
+    "collided_masking_only": 0.0048,
+    "margin_before_db": 24.59,
+    "margin_after_db": 25.17
+   },
+   {
+    "label": "Irregular Percussion",
+    "type": "sound",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.173,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.6,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 2.71,
+    "masked_before": 0.0486,
+    "masked_after": 0.0429,
+    "masked_masking_only": 0.0429,
+    "collided_before": 0.1213,
+    "collided_after": 0.0978,
+    "collided_masking_only": 0.0978,
+    "margin_before_db": 5.73,
+    "margin_after_db": 6.03
+   },
+   {
+    "label": "Desert Wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.6,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -2.3,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 3.57,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 256.65,
+    "margin_after_db": 255.59
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#33: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Cello Line",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0005,
+    "masked_after": 0.0005,
+    "masked_masking_only": 0.0005,
+    "collided_before": 0.0026,
+    "collided_after": 0.0023,
+    "collided_masking_only": 0.0023,
+    "margin_before_db": 21.26,
+    "margin_after_db": 21.89
+   },
+   {
+    "label": "String Undertow",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -4.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2670,
+      "gain": -2.0,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -1.0,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 9451,
+      "gain": -4.4,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.43,
+    "masked_before": 0.0134,
+    "masked_after": 0.0065,
+    "masked_masking_only": 0.0065,
+    "collided_before": 0.0818,
+    "collided_after": 0.0493,
+    "collided_masking_only": 0.0493,
+    "margin_before_db": 7.38,
+    "margin_after_db": 8.18
+   },
+   {
+    "label": "Desert Wind",
+    "type": "sound",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.2,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -2.3,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -1.1,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 4.36,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 262.95,
+    "margin_after_db": 261.45
+   }
+  ],
+  "events": [
+   {
+    "label": "Distant Percussion",
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 5000,
+      "gain": -3.9,
+      "q": 0.8
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -5.0,
+      "q": 1.2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#34: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Dark Cello Line",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.708,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0085,
+    "masked_after": 0.0057,
+    "masked_masking_only": 0.0057,
+    "collided_before": 0.0394,
+    "collided_after": 0.03,
+    "collided_masking_only": 0.03,
+    "margin_before_db": 10.15,
+    "margin_after_db": 13.04
+   },
+   {
+    "label": "Dark Droning Orchestral Undertow",
+    "type": "music",
+    "role": null,
+    "rank": 1,
+    "volume": 0.254,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -0.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -2.0,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -3.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -0.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -3.6,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -5.1,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 11271,
+      "gain": -4.4,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.34,
+    "masked_before": 0.0064,
+    "masked_after": 0.0068,
+    "masked_masking_only": 0.0068,
+    "collided_before": 0.0369,
+    "collided_after": 0.0435,
+    "collided_masking_only": 0.0435,
+    "margin_before_db": 15.37,
+    "margin_after_db": 12.65
+   },
+   {
+    "label": "Desert Wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -1.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 5545,
+      "gain": -5.5,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -2.0,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.45,
+    "masked_before": 0.0387,
+    "masked_after": 0.0104,
+    "masked_masking_only": 0.0104,
+    "collided_before": 0.1665,
+    "collided_after": 0.073,
+    "collided_masking_only": 0.073,
+    "margin_before_db": 14.36,
+    "margin_after_db": 14.67
+   },
+   {
+    "label": "Irregular Percussion",
+    "type": "sound",
+    "role": "texture",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -1.4,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 4.37,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 254.14,
+    "margin_after_db": 251.99
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#35: A deserted Parisian street at 3am, rain on cobbl",
+  "layers": [
+   {
+    "label": "Droning string",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.769,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -0.9,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -0.8,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 0.45,
+    "masked_before": 0.0077,
+    "masked_after": 0.0064,
+    "masked_masking_only": 0.0064,
+    "collided_before": 0.0288,
+    "collided_after": 0.0236,
+    "collided_masking_only": 0.0236,
+    "margin_before_db": 10.73,
+    "margin_after_db": 11.22
+   },
+   {
+    "label": "Hurdy-gurdy",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.333,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0188,
+    "masked_after": 0.0039,
+    "masked_masking_only": 0.0039,
+    "collided_before": 0.0937,
+    "collided_after": 0.0234,
+    "collided_masking_only": 0.0234,
+    "margin_before_db": 7.3,
+    "margin_after_db": 9.61
+   },
+   {
+    "label": "Outside sounds",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.9,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -1.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -1.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -4.3,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -1.7,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -2.3,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 5.72,
+    "masked_before": 0.0388,
+    "masked_after": 0.0453,
+    "masked_masking_only": 0.0453,
+    "collided_before": 0.3234,
+    "collided_after": 0.417,
+    "collided_masking_only": 0.417,
+    "margin_before_db": 7.58,
+    "margin_after_db": 8.32
+   },
+   {
+    "label": "Garret resonance",
+    "type": "sound",
+    "role": "bed",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -2.4,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 5.9,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 57.43,
+    "margin_after_db": 55.63
+   },
+   {
+    "label": "Rain on cobblestones",
+    "type": "sound",
+    "role": "bed",
+    "rank": 4,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 248.56,
+    "margin_after_db": 248.56
+   }
+  ],
+  "events": [
+   {
+    "label": "Scraping bow",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -0.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -2.8,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -2.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 996,
+      "gain": -1.5,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 1825,
+      "gain": -1.3,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -3.0,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -3.7,
+      "q": 0.7
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#36: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Orchestral undertow",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.15,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0848,
+    "masked_after": 0.0177,
+    "masked_masking_only": 0.0177,
+    "collided_before": 0.3226,
+    "collided_after": 0.1493,
+    "collided_masking_only": 0.1493,
+    "margin_before_db": 7.47,
+    "margin_after_db": 8.64
+   },
+   {
+    "label": "Desert wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -9.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -2.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 4.87,
+    "masked_before": 0.0621,
+    "masked_after": 0.0478,
+    "masked_masking_only": 0.0478,
+    "collided_before": 0.314,
+    "collided_after": 0.3337,
+    "collided_masking_only": 0.3337,
+    "margin_before_db": 6.29,
+    "margin_after_db": 5.79
+   },
+   {
+    "label": "Canyon ambience",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.7,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -3.2,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2670,
+      "gain": -0.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -3.7,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 5.21,
+    "masked_before": 0.0001,
+    "masked_after": 0.0005,
+    "masked_masking_only": 0.0005,
+    "collided_before": 0.0027,
+    "collided_after": 0.0077,
+    "collided_masking_only": 0.0077,
+    "margin_before_db": 20.3,
+    "margin_after_db": 19.27
+   },
+   {
+    "label": "Cellos descending",
+    "type": "music",
+    "role": "texture",
+    "rank": 3,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -5.6,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 16000,
+      "gain": -2.6,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.62,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 247.44,
+    "margin_after_db": 247.01
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#37: lucifer's fall",
+  "layers": [
+   {
+    "label": "Infernal wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0002,
+    "masked_after": 0.0002,
+    "masked_masking_only": 0.0002,
+    "collided_before": 0.0005,
+    "collided_after": 0.0005,
+    "collided_masking_only": 0.0005,
+    "margin_before_db": 29.79,
+    "margin_after_db": 30.06
+   },
+   {
+    "label": "Demonic chant",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -2.1,
+      "q": 0.7
+     },
+     {
+      "type": "highshelf",
+      "freq": 7919,
+      "gain": -1.2,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 1.69,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 264.41,
+    "margin_after_db": 263.21
+   }
+  ],
+  "events": [
+   {
+    "label": "Burning pyres",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.6,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -1.4,
+      "q": 0.7
+     }
+    ]
+   },
+   {
+    "label": "Sulfuric hiss",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.6,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -0.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -2.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -3.8,
+      "q": 1.2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#38: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Dark Undertow",
+    "type": "music",
+    "role": null,
+    "rank": 0,
+    "volume": 0.708,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0138,
+    "masked_after": 0.01,
+    "masked_masking_only": 0.01,
+    "collided_before": 0.0592,
+    "collided_after": 0.041,
+    "collided_masking_only": 0.041,
+    "margin_before_db": 11.14,
+    "margin_after_db": 11.97
+   },
+   {
+    "label": "Soft Settling Stones",
+    "type": "sound",
+    "role": null,
+    "rank": 1,
+    "volume": 0.489,
+    "bands": [
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -1.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0432,
+    "masked_after": 0.0358,
+    "masked_masking_only": 0.0358,
+    "collided_before": 0.0879,
+    "collided_after": 0.0778,
+    "collided_masking_only": 0.0778,
+    "margin_before_db": -14.97,
+    "margin_after_db": -13.64
+   },
+   {
+    "label": "Cello Line",
+    "type": "music",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.27,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.5,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.83,
+    "masked_before": 0.0042,
+    "masked_after": 0.003,
+    "masked_masking_only": 0.003,
+    "collided_before": 0.0216,
+    "collided_after": 0.0131,
+    "collided_masking_only": 0.0131,
+    "margin_before_db": 11.2,
+    "margin_after_db": 11.94
+   },
+   {
+    "label": "Desert Wind",
+    "type": "sound",
+    "role": "texture",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -5.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -0.6,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -2.1,
+      "q": 1.2
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1500,
+      "gain": -1.9,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 3.56,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 266.29,
+    "margin_after_db": 263.75
+   }
+  ],
+  "events": [
+   {
+    "label": "Distant Percussion",
+    "bands": [
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -3.8,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -1.1,
+      "q": 0.7
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#39: A vast carrion silence broken only by the low mo",
+  "layers": [
+   {
+    "label": "Orchestral drone",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.505,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.008,
+    "masked_after": 0.0052,
+    "masked_masking_only": 0.0052,
+    "collided_before": 0.0432,
+    "collided_after": 0.0412,
+    "collided_masking_only": 0.0412,
+    "margin_before_db": 14.78,
+    "margin_after_db": 15.82
+   },
+   {
+    "label": "Cello line",
+    "type": "music",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.386,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -1.4,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -1.9,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 0.88,
+    "masked_before": 0.0009,
+    "masked_after": 0.0008,
+    "masked_masking_only": 0.0008,
+    "collided_before": 0.0025,
+    "collided_after": 0.0025,
+    "collided_masking_only": 0.0025,
+    "margin_before_db": 10.99,
+    "margin_after_db": 11.18
+   },
+   {
+    "label": "Desert wind",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.155,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 1825,
+      "gain": -2.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 2670,
+      "gain": -2.8,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -6.1,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -4.9,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 3.83,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 257.11,
+    "margin_after_db": 256.7
+   }
+  ],
+  "events": [
+   {
+    "label": "Distant percussion",
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.0,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -2.0,
+      "q": 1.2
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "scene": "#40: egyptian ambience",
+  "layers": [
+   {
+    "label": "Egyptian Music Reference",
+    "type": "music",
+    "role": "texture",
+    "rank": 0,
+    "volume": 0.773,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.0001,
+    "masked_after": 0.0001,
+    "masked_masking_only": 0.0001,
+    "collided_before": 0.0059,
+    "collided_after": 0.0022,
+    "collided_masking_only": 0.0022,
+    "margin_before_db": 18.06,
+    "margin_after_db": 18.67
+   },
+   {
+    "label": "Distant Call to Prayer",
+    "type": "sound",
+    "role": "texture",
+    "rank": 1,
+    "volume": 0.199,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -4.2,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 802,
+      "gain": -0.6,
+      "q": 1.2
+     }
+    ],
+    "eq_loss_db": 1.07,
+    "masked_before": 0.0496,
+    "masked_after": 0.0146,
+    "masked_masking_only": 0.0146,
+    "collided_before": 0.2486,
+    "collided_after": 0.1309,
+    "collided_masking_only": 0.1309,
+    "margin_before_db": 12.77,
+    "margin_after_db": 12.71
+   },
+   {
+    "label": "Night Desert Ambiance",
+    "type": "sound",
+    "role": "bed",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -8.3,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 4.52,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 259.77,
+    "margin_after_db": 259.07
+   }
+  ],
+  "events": []
+ },
+ {
+  "scene": "#41: egyptian ambience",
+  "layers": [
+   {
+    "label": "Nile water against hull",
+    "type": "sound",
+    "role": "bed",
+    "rank": 0,
+    "volume": 1.0,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 289,
+      "gain": -0.7,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 502,
+      "gain": -2.9,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 639,
+      "gain": -2.5,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -1.7,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -3.6,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -2.9,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 3.3,
+    "masked_before": 0.0164,
+    "masked_after": 0.0355,
+    "masked_masking_only": 0.0355,
+    "collided_before": 0.0682,
+    "collided_after": 0.1286,
+    "collided_masking_only": 0.1286,
+    "margin_before_db": 5.22,
+    "margin_after_db": 2.92
+   },
+   {
+    "label": "Distant city murmur",
+    "type": "sound",
+    "role": "bed",
+    "rank": 1,
+    "volume": 0.223,
+    "bands": [],
+    "eq_loss_db": 0.0,
+    "masked_before": 0.1139,
+    "masked_after": 0.0579,
+    "masked_masking_only": 0.0579,
+    "collided_before": 0.2433,
+    "collided_after": 0.2151,
+    "collided_masking_only": 0.2151,
+    "margin_before_db": 14.32,
+    "margin_after_db": 14.81
+   },
+   {
+    "label": "Meditative pad",
+    "type": "music",
+    "role": "texture",
+    "rank": 2,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -6.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 207,
+      "gain": -2.8,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 386,
+      "gain": -1.3,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 9451,
+      "gain": -0.8,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 2.95,
+    "masked_before": 0.0221,
+    "masked_after": 0.0188,
+    "masked_masking_only": 0.0188,
+    "collided_before": 0.0952,
+    "collided_after": 0.0965,
+    "collided_masking_only": 0.0965,
+    "margin_before_db": 11.44,
+    "margin_after_db": 10.35
+   },
+   {
+    "label": "Desert wind over dunes",
+    "type": "sound",
+    "role": "bed",
+    "rank": 3,
+    "volume": 0.15,
+    "bands": [
+     {
+      "type": "lowshelf",
+      "freq": 80,
+      "gain": -7.0,
+      "q": 0.7
+     },
+     {
+      "type": "lowshelf",
+      "freq": 138,
+      "gain": -2.2,
+      "q": 0.7
+     },
+     {
+      "type": "peaking",
+      "freq": 3862,
+      "gain": -1.8,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -0.5,
+      "q": 0.7
+     }
+    ],
+    "eq_loss_db": 4.67,
+    "masked_before": 0.0,
+    "masked_after": 0.0,
+    "masked_masking_only": 0.0,
+    "collided_before": 0.0,
+    "collided_after": 0.0,
+    "collided_masking_only": 0.0,
+    "margin_before_db": 259.89,
+    "margin_after_db": 256.41
+   }
+  ],
+  "events": [
+   {
+    "label": "Donkey bray",
+    "bands": [
+     {
+      "type": "peaking",
+      "freq": 1227,
+      "gain": -4.2,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 2211,
+      "gain": -1.8,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 3215,
+      "gain": -1.6,
+      "q": 1.2
+     },
+     {
+      "type": "peaking",
+      "freq": 4631,
+      "gain": -4.1,
+      "q": 1.2
+     },
+     {
+      "type": "highshelf",
+      "freq": 6630,
+      "gain": -1.8,
+      "q": 0.7
+     }
+    ]
+   }
+  ]
+ }
+]
