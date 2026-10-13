@@ -51,13 +51,10 @@ Last reviewed against `main` at `0895eff` (October 2026).
 
 ## Test coverage
 
-- 🟡 **`auto_eq` and `volume` have almost no direct tests.**
-  `mixer/tests/test_eq.py` pins the RBJ filters and checks only that every
-  `auto_eq` band has a positive Q; `assign_volumes` has no test of its own. The
-  two modules that carry the most tuning — masking cuts and perceptual level
-  assignment — are otherwise exercised through `analyze`, which asserts shape,
-  not behaviour. *Safe and high value: pin their output for synthetic inputs
-  before touching the DSP.*
+- 🟡 **`volume` has no direct tests.** Masking cuts are covered by
+  `mixer/tests/test_masking.py`, but perceptual level assignment is only
+  exercised through `analyze`, which asserts shape, not behaviour. *Safe and
+  high value: pin its output for synthetic inputs before touching it.*
 - 🟡 **API tests read the developer's `.env`.** `Settings` loads the repo-root
   `.env`, and `api/tests/conftest.py` does not isolate it, so a local
   `DECOMPOSER_ALLOW_CLI=true` fails `test_settings.py` (CLI providers appear,

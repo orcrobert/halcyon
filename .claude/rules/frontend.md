@@ -39,6 +39,10 @@ Pure scheduling and maths helpers (`hooks/eventScheduler.ts`,
   three sliders read and write only the 200/1k/8k bands and carry the rest
   through. Never collapse the list to three bands: that throws the auto-EQ away
   and reapplies its gains at the wrong frequencies.
+  The sliders start at 0 because they are an offset on top of the mixer. The EQ
+  panel draws the mixer's bands as a response curve (`hooks/eqResponse.ts`)
+  and lists each with its `source` (`tone` or `masking`), which the PATCH
+  schema keeps.
 - **Stored loop clips carry padding the player must skip.** A decoder
   resampling a clip to the device rate starves at the first and last sample, so
   a seam that is clean in the file arrives as a tick once per loop, worst on the

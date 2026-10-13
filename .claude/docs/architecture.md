@@ -136,7 +136,7 @@ Definitive reference for how the system fits together. Skim
 Public API in `mixer/mixer/core.py`:
 - `analyze(elements)` → makes each clip loopable, or for `playback: "oneshot"`
   trims it to its envelope and drops it if nothing survives, computes
-  per-element EQ
+  draft volumes, then per-element EQ against them
   (`effects/auto_eq.py`), volume (`effects/volume.py`), and spatial pan/depth
   (`effects/spatial.py`); annotates the element dicts in place.
 - `mix_to_file(elements, path)` → renders a single mixed WAV (resample → EQ →
@@ -144,9 +144,20 @@ Public API in `mixer/mixer/core.py`:
 
 Effects:
 - **`auto_eq.py`**: ERB-band analysis with A-weighting; two stages — *tonal
-  shaping* (tame sub/air/boxy/harsh per element type) and *masking cuts*
-  (pairwise spreading-function masking, music weighted slightly higher) — merged
-  into a compact EQ band list per element.
+  shaping* (tame sub/air/boxy/harsh per element type) and *masking cuts* —
+  merged into a compact EQ band list per element. Masking runs at mix level:
+  `analyze` first places every layer without EQ and hands those draft volumes
+  in. Each layer gets a priority, its A-weighted level plus a role bonus
+  (texture +6 dB, bed 0, event −6, music +2). For every pair, the
+  spreading-function threshold of the lower-priority layer is compared with
+  the higher one's salient bands; where the important layer falls within
+  `_UNMASK_MARGIN_DB` of being masked, the band of the lesser layer that
+  contributes most is cut by the deficit (capped). Collisions deeper than
+  `_MAX_DEFICIT_DB` are left to the volume stage. Events never cause a cut.
+  Adjacent cut bands become one peaking filter, and each layer's total masking
+  loss is held to `_MASKING_BUDGET_DB`. Every band carries `source`
+  (`tone`, `masking`, `both`), which the EQ panel shows. The before/after
+  benchmark is `experiments/masking_eq/`.
 - **`volume.py`**: perceptual weighting (mid energy, onset density, bandwidth,
   type) → target dB per element relative to the loudest-weighted anchor, minus a
   spectral-overlap penalty, clamped to a gain range.
