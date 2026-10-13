@@ -57,6 +57,7 @@ Key variables:
 | `DATA_DIR` | database, generated audio, and the encryption key |
 | `SECRET_KEY` | encrypts stored API keys; auto-generated if blank |
 | `ALLOW_REGISTRATION` | set `false` to close signups |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | the administrator who creates and sets up other accounts |
 
 These are only defaults. Each user can override the decomposer and generator
 from the in-app account panel.

@@ -54,6 +54,7 @@ runtimes rely on.
 | `DATA_DIR` | SQLite database, generated audio, and the encryption key |
 | `SECRET_KEY` | encrypts stored API keys; auto-generated if blank |
 | `ALLOW_REGISTRATION` | set `false` to close signups once your users exist |
+| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | the administrator account; see [Managing users](#managing-users) |
 | `FRONTEND_ORIGIN` | only for running the dev server against a remote API |
 | `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET` | optional instance Modal token for deploying from the account page |
 | `GENERATORS_DIR` | where `generators/` lives; set to `/app/generators` in the image |
@@ -149,6 +150,34 @@ openssl rand -hex 32
 
 Losing the key does not lose atmospheres — only stored API keys, which users can
 re-enter.
+
+### Managing users
+
+An instance you run for other people usually wants one administrator who hands
+out accounts, rather than open signups:
+
+```bash
+ADMIN_EMAIL=you@example.com
+ADMIN_PASSWORD=a-long-first-password
+ALLOW_REGISTRATION=false
+```
+
+On boot the account with `ADMIN_EMAIL` is made an administrator. If it does not
+exist yet it is created with `ADMIN_PASSWORD`, which is read only that once;
+change it in the app afterwards. Leave `ADMIN_PASSWORD` blank to promote an
+account that already exists.
+
+Administrators get a **Users** section in the account page. From there they
+create accounts, change a user's name, email or password (a new password signs
+them out everywhere), grant or remove admin access, and delete an account with
+all of its soundscapes. Opening an account also shows its decomposer settings,
+API key, Modal token and generators, so you can set someone up completely before
+they first sign in. Stored keys stay write-only there too. An administrator
+cannot remove their own admin access or delete their own account, so the
+instance always keeps one.
+
+With `ALLOW_REGISTRATION=false` the sign-in page drops its sign-up link and tells
+visitors to ask their administrator.
 
 ---
 
