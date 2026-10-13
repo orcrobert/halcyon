@@ -1,7 +1,7 @@
 from datetime import timedelta, timezone
 from typing import Annotated
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, Header, HTTPException, Request, status
 from sqlmodel import Session, select
 
 from api.app.db import get_session
@@ -51,3 +51,37 @@ def current_user(
 
 
 CurrentUser = Annotated[User, Depends(current_user)]
+
+
+def current_admin(user: CurrentUser) -> User:
+    if not user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only an administrator can do that.",
+        )
+    return user
+
+
+CurrentAdmin = Annotated[User, Depends(current_admin)]
+
+
+def managed_user(user_id: int, session: SessionDep, _admin: CurrentAdmin) -> User:
+    user = session.get(User, user_id)
+    if user is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
+    return user
+
+
+ManagedUser = Annotated[User, Depends(managed_user)]
+
+
+def account_owner(request: Request, session: SessionDep, viewer: CurrentUser) -> User:
+    target = str(request.path_params.get("user_id", ""))
+    if not target:
+        return viewer
+    return managed_user(
+        int(target) if target.isdigit() else 0, session, current_admin(viewer)
+    )
+
+
+AccountOwner = Annotated[User, Depends(account_owner)]

@@ -205,6 +205,16 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   is the shipped default; `UserSettings.decomposer_prompt` overrides it and the
   account page edits it. Read it through `RunConfig.decomposer_prompt`, never by
   loading the file directly.
+- **Administrators manage other accounts through the same routers.**
+  The first account to register is the admin, and `ensure_admin` promotes the
+  oldest account on boot when none is. With `ALLOW_REGISTRATION=false` the first
+  account can still register (`registration_open`). The settings and generator
+  routers are mounted at `/api/settings`, `/api/generators` and again under
+  `/api/admin/users/{user_id}/`; their handlers take `AccountOwner`, never
+  `CurrentUser`, so one code path serves both. A new settings or generator
+  route gets the admin variant for free, and must scope by that `user`. In the
+  browser `GeneratorsCard` and `DecomposerCard` take an optional `userId` for
+  the same reason. An admin cannot demote or delete themselves.
 - **Per-user API keys are encrypted at rest** and must never be returned by the
   API — expose `decomposer_api_key_set: bool`, never the value.
 - **Soundscape length is per atmosphere.** `Atmosphere.duration_s` is chosen in

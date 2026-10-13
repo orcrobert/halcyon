@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Request, status
 from sqlmodel import select
 
-from api.app.deps import CurrentUser, SessionDep
+from api.app.deps import AccountOwner, SessionDep
 from api.app.models.schemas import (
     DeployCapabilityOut,
     Envelope,
@@ -33,7 +33,7 @@ from api.app.services.modal_deploy import (
 )
 from api.app.services.runconfig import default_config, resolve_config
 
-router = APIRouter(prefix="/api/generators", tags=["generators"])
+router = APIRouter(tags=["generators"])
 
 
 def _serialize(profile: GeneratorProfile) -> GeneratorOut:
@@ -161,14 +161,14 @@ def _reject_duplicate_name(
 
 
 @router.get("")
-def index(user: CurrentUser, session: SessionDep) -> Envelope[GeneratorListOut]:
+def index(user: AccountOwner, session: SessionDep) -> Envelope[GeneratorListOut]:
     _adopt_legacy_url(user, session)
     return Envelope(data=_listing(user, session))
 
 
 @router.post("", status_code=status.HTTP_201_CREATED)
 def store(
-    payload: GeneratorCreate, user: CurrentUser, session: SessionDep
+    payload: GeneratorCreate, user: AccountOwner, session: SessionDep
 ) -> Envelope[GeneratorListOut]:
     get_host(payload.kind)
     _reject_duplicate_name(payload.name, user, session)
@@ -195,7 +195,7 @@ def store(
 def update(
     generator_id: int,
     payload: GeneratorUpdate,
-    user: CurrentUser,
+    user: AccountOwner,
     session: SessionDep,
 ) -> Envelope[GeneratorListOut]:
     profile = _owned(generator_id, user, session)
@@ -262,7 +262,7 @@ def _start_deploy(
 @router.post("/modal", status_code=status.HTTP_202_ACCEPTED)
 def create_modal(
     payload: ModalGeneratorCreate,
-    user: CurrentUser,
+    user: AccountOwner,
     session: SessionDep,
     request: Request,
 ) -> Envelope[GeneratorListOut]:
@@ -304,7 +304,7 @@ def create_modal(
 def update_options(
     generator_id: int,
     payload: GeneratorOptionsUpdate,
-    user: CurrentUser,
+    user: AccountOwner,
     session: SessionDep,
 ) -> Envelope[GeneratorListOut]:
     profile = _owned(generator_id, user, session)
@@ -335,7 +335,7 @@ def update_options(
 @router.post("/{generator_id}/deploy", status_code=status.HTTP_202_ACCEPTED)
 def deploy(
     generator_id: int,
-    user: CurrentUser,
+    user: AccountOwner,
     session: SessionDep,
     request: Request,
 ) -> Envelope[GeneratorListOut]:
@@ -346,7 +346,7 @@ def deploy(
 
 @router.post("/{generator_id}/activate")
 def activate(
-    generator_id: int, user: CurrentUser, session: SessionDep
+    generator_id: int, user: AccountOwner, session: SessionDep
 ) -> Envelope[GeneratorListOut]:
     profile = _owned(generator_id, user, session)
     if not profile.url:
@@ -365,7 +365,7 @@ def activate(
 
 @router.post("/{generator_id}/test")
 def test(
-    generator_id: int, user: CurrentUser, session: SessionDep
+    generator_id: int, user: AccountOwner, session: SessionDep
 ) -> Envelope[GeneratorProbe]:
     profile = _owned(generator_id, user, session)
     if not profile.url:
@@ -386,7 +386,7 @@ def test(
 
 @router.delete("/{generator_id}")
 def destroy(
-    generator_id: int, user: CurrentUser, session: SessionDep
+    generator_id: int, user: AccountOwner, session: SessionDep
 ) -> Envelope[GeneratorListOut]:
     profile = _owned(generator_id, user, session)
     was_active = profile.is_active

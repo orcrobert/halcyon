@@ -4,6 +4,7 @@ from typing import Annotated, Any, Generic, Literal, TypeVar
 from pydantic import (
     AfterValidator,
     BaseModel,
+    BeforeValidator,
     Field,
     StringConstraints,
     model_validator,
@@ -66,10 +67,14 @@ class LoginRequest(BaseModel):
     password: str
 
 
+Flag = Annotated[bool, BeforeValidator(bool)]
+
+
 class UserOut(BaseModel):
     id: int
     name: str
     email: str
+    is_admin: Flag = False
     created_at: Timestamp
     updated_at: Timestamp
 
@@ -77,6 +82,30 @@ class UserOut(BaseModel):
 class AuthResponse(BaseModel):
     data: UserOut
     token: str
+
+
+class AuthOptionsOut(BaseModel):
+    registration: bool
+
+
+class AdminUserCreate(BaseModel):
+    name: str = Field(min_length=1, max_length=255)
+    email: Email
+    password: str = Field(min_length=8, max_length=255)
+    is_admin: bool = False
+
+
+class AdminUserUpdate(BaseModel):
+    name: str | None = Field(default=None, min_length=1, max_length=255)
+    email: Email | None = None
+    password: str | None = Field(default=None, min_length=8, max_length=255)
+    is_admin: bool | None = None
+
+
+class AdminUserOut(UserOut):
+    atmospheres: int
+    generators: int
+    last_active_at: Timestamp | None
 
 
 class SettingsUpdate(BaseModel):

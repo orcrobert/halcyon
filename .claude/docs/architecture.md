@@ -44,7 +44,17 @@ Definitive reference for how the system fits together. Skim
   nullable columns that appeared after a database was first created. Anything
   beyond an additive column still needs a hand-written migration.
 - **Auth**: opaque bearer tokens, SHA-256 hashed in `auth_tokens`. Passwords are
-  argon2 via `pwdlib`. `deps.py` exposes the `CurrentUser` dependency.
+  argon2 via `pwdlib`. `deps.py` exposes the `CurrentUser` dependency, plus
+  `CurrentAdmin`, `ManagedUser` and `AccountOwner` for the admin routes.
+- **Admin** (`routers/admin.py`, `services/accounts.py`): `User.is_admin` marks
+  an administrator: the first account to register, or the oldest account,
+  promoted on boot when there is none.
+  `/api/admin/users` lists, creates, edits and deletes accounts. The settings
+  and generator routers have no prefix of their own and are mounted twice in
+  `main.py`: at `/api/settings` and `/api/generators`, and under
+  `/api/admin/users/{user_id}/`. Their handlers take `AccountOwner`, which is
+  the caller on the first mount and, on the second, the account named by
+  `user_id` once the caller is checked to be an admin.
 - **Domain** (`models/tables.py`): `User` has many `Atmosphere`, each with many
   `Element` ordered by `position`. Status, progress, current stage and the
   requested `duration_s` (the loop length asked of the generator) live on the
@@ -53,7 +63,8 @@ Definitive reference for how the system fits together. Skim
   `Element.playback`/`clip_s`/`interval_min_s`/`interval_max_s` describe how a
   layer repeats, and `source`/`source_json` where its audio came from. `original_*` columns on `Element` store the mixer's computed
   defaults so the UI can reset. `UserSettings` holds per-user provider config.
-- **Routers**: `auth.py`, `settings.py`, `atmospheres.py`, `elements.py`. Every
+- **Routers**: `auth.py`, `admin.py`, `settings.py`, `generators.py`,
+  `atmospheres.py`, `elements.py`. Every
   query is scoped to the current user; a foreign id returns 404, not 403.
 - **Generation**: `AtmosphereController`-equivalent `store` creates the row and
   hands the id to `worker.GenerationWorker`, a single daemon thread consuming a

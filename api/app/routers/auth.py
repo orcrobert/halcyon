@@ -2,9 +2,9 @@ from fastapi import APIRouter, Header, HTTPException, Response, status
 from sqlmodel import select
 from typing import Annotated
 
-from api.app.config import settings
 from api.app.deps import CurrentUser, SessionDep
 from api.app.models.schemas import (
+    AuthOptionsOut,
     AuthResponse,
     Envelope,
     LoginRequest,
@@ -12,7 +12,14 @@ from api.app.models.schemas import (
     UserOut,
 )
 from api.app.models.tables import AuthToken, User
-from api.app.security import hash_password, hash_token, issue_token, verify_password
+from api.app.security import hash_token, issue_token, verify_password
+from api.app.services.accounts import (
+    create_user,
+    email_in_use,
+    find_by_email,
+    has_admin,
+    registration_open,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -24,36 +31,39 @@ def _authenticate(session: SessionDep, user: User) -> AuthResponse:
     return AuthResponse(data=UserOut.model_validate(user, from_attributes=True), token=token)
 
 
+@router.get("/options")
+def options(session: SessionDep) -> Envelope[AuthOptionsOut]:
+    return Envelope(data=AuthOptionsOut(registration=registration_open(session)))
+
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, session: SessionDep) -> AuthResponse:
-    if not settings.allow_registration:
+    if not registration_open(session):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Registration is disabled on this instance.",
         )
 
-    email = payload.email.lower()
-    if session.exec(select(User).where(User.email == email)).first():
+    if email_in_use(session, payload.email):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="That email address is already registered.",
         )
 
-    user = User(
-        name=payload.name,
-        email=email,
-        password_hash=hash_password(payload.password),
+    user = create_user(
+        session,
+        payload.name,
+        payload.email,
+        payload.password,
+        is_admin=not has_admin(session),
     )
-    session.add(user)
-    session.commit()
-    session.refresh(user)
 
     return _authenticate(session, user)
 
 
 @router.post("/login")
 def login(payload: LoginRequest, session: SessionDep) -> AuthResponse:
-    user = session.exec(select(User).where(User.email == payload.email.lower())).first()
+    user = find_by_email(session, payload.email)
 
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(

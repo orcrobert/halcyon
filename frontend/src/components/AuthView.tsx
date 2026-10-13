@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { options as authOptions } from '../api/auth'
 import { extractErrors, type ValidationErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
 import { Logo } from './Logo'
@@ -77,6 +78,19 @@ export function AuthView() {
   const [submitting, setSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<ValidationErrors>({})
+  const [registration, setRegistration] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    authOptions()
+      .then((res) => {
+        if (cancelled) return
+        setRegistration(res.registration)
+        if (!res.registration) setMode('login')
+      })
+      .catch(() => undefined)
+    return () => { cancelled = true }
+  }, [])
 
   async function onSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
@@ -183,13 +197,17 @@ export function AuthView() {
             </div>
 
             <div className="flex items-center justify-between" style={{ padding: '0 28px 20px 28px' }}>
-              <button
-                type="button"
-                onClick={() => switchMode(isRegister ? 'login' : 'register')}
-                className="text-[11px] text-ink-ghost hover:text-ink-dim transition-colors"
-              >
-                {isRegister ? 'Have an account? Sign in' : 'New here? Sign up'}
-              </button>
+              {registration ? (
+                <button
+                  type="button"
+                  onClick={() => switchMode(isRegister ? 'login' : 'register')}
+                  className="text-[11px] text-ink-ghost hover:text-ink-dim transition-colors"
+                >
+                  {isRegister ? 'Have an account? Sign in' : 'New here? Sign up'}
+                </button>
+              ) : (
+                <span className="text-[11px] text-ink-ghost">Ask your administrator for an account.</span>
+              )}
               <button
                 type="submit"
                 disabled={submitting}

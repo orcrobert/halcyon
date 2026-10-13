@@ -1,4 +1,4 @@
-import type { User } from '../types'
+import type { AuthOptions, User } from '../types'
 import { api } from './client'
 import { setToken } from './token'
 
@@ -38,6 +38,11 @@ export async function logout(): Promise<void> {
   } finally {
     setToken(null)
   }
+}
+
+export async function options(): Promise<AuthOptions> {
+  const { data } = await api.get<{ data: AuthOptions }>('/api/auth/options')
+  return data.data
 }
 
 export async function me(): Promise<User | null> {

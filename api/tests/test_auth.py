@@ -32,17 +32,19 @@ def test_register_rejects_short_password(client):
     assert response.status_code == 422
 
 
-def test_register_can_be_disabled(client, monkeypatch):
+def test_register_can_be_disabled(client, register, monkeypatch):
     from api.app.config import settings
 
+    register()
     monkeypatch.setattr(settings, "allow_registration", False)
 
     response = client.post(
         "/api/auth/register",
-        json={"name": "Ambient Fan", "email": "fan@halcyon.test", "password": "hunter2hunter2"},
+        json={"name": "Ambient Fan", "email": "late@halcyon.test", "password": "hunter2hunter2"},
     )
 
     assert response.status_code == 403
+    assert client.get("/api/auth/options").json()["data"] == {"registration": False}
 
 
 def test_login_succeeds_with_correct_credentials(client, register):

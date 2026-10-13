@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   activateGenerator,
   createGenerator,
   createModalGenerator,
   deleteGenerator,
   deployGenerator,
+  listGenerators,
   testGenerator,
   updateGenerator,
   updateGeneratorOptions,
@@ -16,6 +17,7 @@ import { GeneratorOptionsPanel } from './GeneratorOptionsPanel'
 import type {
   Generator,
   GeneratorHost,
+  GeneratorList,
   GeneratorOptionValue,
   GeneratorProbe,
   GeneratorStatus,
@@ -51,8 +53,12 @@ function reportOf(generator: Generator | undefined): string | null {
     .join(' · ')
 }
 
-export function GeneratorsCard() {
-  const list = useGenerators()
+const DEPLOY_POLL_MS = 3000
+
+export function GeneratorsCard({ userId }: { userId?: number }) {
+  const shared = useGenerators()
+  const [managed, setManaged] = useState<GeneratorList | null>(null)
+  const list = userId === undefined ? shared : managed
   const [loading, setLoading] = useState(list === null)
   const [busy, setBusy] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -60,15 +66,30 @@ export function GeneratorsCard() {
   const [drafts, setDrafts] = useState<Record<string, string>>({})
   const [expanded, setExpanded] = useState<Record<string, boolean>>({})
   const [modalDraft, setModalDraft] = useState<Record<string, GeneratorOptionValue>>({})
-  const setList = setGenerators
+  const setList = userId === undefined ? setGenerators : setManaged
+
+  const refresh = useCallback(async () => {
+    if (userId === undefined) return refreshGenerators()
+    const next = await listGenerators(userId)
+    setManaged(next)
+    return next
+  }, [userId])
 
   useEffect(() => {
     let cancelled = false
-    refreshGenerators()
+    refresh()
       .catch((e) => { if (!cancelled) setError(extractErrors(e).message) })
       .finally(() => { if (!cancelled) setLoading(false) })
     return () => { cancelled = true }
-  }, [])
+  }, [refresh])
+
+  const deploying = userId !== undefined && (managed?.generators ?? []).some((g) => g.deploy_status === 'deploying')
+
+  useEffect(() => {
+    if (!deploying) return
+    const poll = window.setInterval(() => { refresh().catch(() => undefined) }, DEPLOY_POLL_MS)
+    return () => window.clearInterval(poll)
+  }, [deploying, refresh])
 
   async function run<T>(key: string, action: () => Promise<T>): Promise<T | null> {
     setBusy(key)
@@ -98,8 +119,8 @@ export function GeneratorsCard() {
 
     const next = await run(host.key, () =>
       existing
-        ? updateGenerator(existing.id, { url })
-        : createGenerator({ name: host.label, url, kind: host.key }),
+        ? updateGenerator(existing.id, { url }, userId)
+        : createGenerator({ name: host.label, url, kind: host.key }, userId),
     )
     if (!next) return
     setList(next)
@@ -113,17 +134,17 @@ export function GeneratorsCard() {
   async function handleSelect(host: GeneratorHost) {
     const existing = saved(host)
     if (!existing || existing.is_active) return
-    const next = await run(host.key, () => activateGenerator(existing.id))
+    const next = await run(host.key, () => activateGenerator(existing.id, userId))
     if (next) setList(next)
   }
 
   async function handleTest(host: GeneratorHost) {
     const existing = saved(host)
     if (!existing) return
-    const result = await run(host.key, () => testGenerator(existing.id))
+    const result = await run(host.key, () => testGenerator(existing.id, userId))
     if (!result) return
     setProbes((p) => ({ ...p, [existing.id]: result }))
-    await refreshGenerators().catch(() => null)
+    await refresh().catch(() => null)
   }
 
   async function handleOption(host: GeneratorHost, key: string, value: GeneratorOptionValue | null) {
@@ -137,14 +158,14 @@ export function GeneratorsCard() {
       })
       return
     }
-    const next = await run(host.key, () => updateGeneratorOptions(existing.id, { [key]: value }))
+    const next = await run(host.key, () => updateGeneratorOptions(existing.id, { [key]: value }, userId))
     if (next) setList(next)
   }
 
   async function handleDeploy(host: GeneratorHost) {
     const existing = saved(host)
     const next = await run(host.key, () =>
-      existing ? deployGenerator(existing.id) : createModalGenerator(modalDraft),
+      existing ? deployGenerator(existing.id, userId) : createModalGenerator(modalDraft, userId),
     )
     if (!next) return
     setList(next)
@@ -153,22 +174,22 @@ export function GeneratorsCard() {
 
   async function handleSaveToken(host: GeneratorHost, tokenId: string, tokenSecret: string) {
     const ok = await run(host.key, () =>
-      updateSettings({ modal_token_id: tokenId, modal_token_secret: tokenSecret }),
+      updateSettings({ modal_token_id: tokenId, modal_token_secret: tokenSecret }, userId),
     )
     if (!ok) return false
-    await refreshGenerators().catch(() => null)
+    await refresh().catch(() => null)
     return true
   }
 
   async function handleRemoveToken(host: GeneratorHost) {
-    const ok = await run(host.key, () => updateSettings({ modal_token_id: '', modal_token_secret: '' }))
-    if (ok) await refreshGenerators().catch(() => null)
+    const ok = await run(host.key, () => updateSettings({ modal_token_id: '', modal_token_secret: '' }, userId))
+    if (ok) await refresh().catch(() => null)
   }
 
   async function handleClear(host: GeneratorHost) {
     const existing = saved(host)
     if (!existing) return
-    const next = await run(host.key, () => deleteGenerator(existing.id))
+    const next = await run(host.key, () => deleteGenerator(existing.id, userId))
     if (!next) return
     setList(next)
     setDrafts((d) => {
