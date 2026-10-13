@@ -72,7 +72,9 @@ def update(
     changes = payload.model_dump(exclude_unset=True)
 
     if "eq_json" in changes and changes["eq_json"] is not None:
-        changes["eq_json"] = [band.model_dump() for band in payload.eq_json]
+        changes["eq_json"] = [
+            band.model_dump(exclude_none=True) for band in payload.eq_json
+        ]
 
     for field, value in changes.items():
         setattr(element, field, value)

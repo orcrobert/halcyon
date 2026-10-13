@@ -238,6 +238,7 @@ def _stored_payload(element: Element) -> dict | None:
         "label": element.label,
         "type": element.type,
         "prompt": element.prompt,
+        "role": _stored_spec(element.atmosphere, element.label)["role"],
         "playback": element.playback or "loop",
         "file": str(path),
         "looped": True,

@@ -223,6 +223,7 @@ class EQBand(BaseModel):
     freq: float = Field(gt=0)
     gain: float
     q: float = Field(gt=0)
+    source: Literal["tone", "masking", "both"] | None = None
 
 
 class ElementOriginal(BaseModel):
