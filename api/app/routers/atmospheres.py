@@ -402,6 +402,25 @@ def show(
     return Envelope(data=serialize_atmosphere(atmosphere, include_elements=True))
 
 
+@router.post("/{atmosphere_id}/quality/dismiss")
+def dismiss_quality(
+    atmosphere_id: int, user: CurrentUser, session: SessionDep
+) -> Envelope[AtmosphereOut]:
+    atmosphere = owned_atmosphere(session, user, atmosphere_id)
+
+    for element in atmosphere.elements:
+        if element.quality_json:
+            element.quality_dismissed = True
+            session.add(element)
+
+    atmosphere.updated_at = utcnow()
+    session.add(atmosphere)
+    session.commit()
+    session.refresh(atmosphere)
+
+    return Envelope(data=serialize_atmosphere(atmosphere, include_elements=True))
+
+
 @router.delete("/{atmosphere_id}", status_code=status.HTTP_204_NO_CONTENT)
 def destroy(atmosphere_id: int, user: CurrentUser, session: SessionDep) -> Response:
     atmosphere = owned_atmosphere(session, user, atmosphere_id)

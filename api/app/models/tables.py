@@ -179,6 +179,10 @@ class Element(SQLModel, table=True):
     source_json: dict[str, Any] | None = Field(
         default=None, sa_column=Column(JSON, nullable=True)
     )
+    quality_json: list[dict[str, Any]] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
+    quality_dismissed: bool | None = None
 
     volume: float = 0.8
     pan: float = 0.0

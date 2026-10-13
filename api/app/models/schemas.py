@@ -232,6 +232,17 @@ class ElementOriginal(BaseModel):
     eq_json: list[dict[str, Any]] | None
 
 
+class QualityIssue(BaseModel):
+    check: Literal["clipping", "burst", "dropout", "harsh", "seam"]
+    value: float
+    limit: float
+
+
+class ElementQuality(BaseModel):
+    issues: list[QualityIssue]
+    dismissed: bool
+
+
 class ElementOut(BaseModel):
     id: int
     label: str
@@ -248,6 +259,7 @@ class ElementOut(BaseModel):
     interval_max_s: float | None
     source: str
     source_json: dict[str, Any] | None
+    quality: ElementQuality | None
     volume: float
     pan: float
     depth: float

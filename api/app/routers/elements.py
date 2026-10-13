@@ -7,6 +7,7 @@ from api.app.models.schemas import (
     ElementMixUpdate,
     ElementOriginal,
     ElementOut,
+    ElementQuality,
     ElementRegenerate,
     Envelope,
 )
@@ -33,6 +34,14 @@ def serialize_element(element: Element) -> ElementOut:
         interval_max_s=element.interval_max_s,
         source=element.source or "generated",
         source_json=element.source_json,
+        quality=(
+            ElementQuality(
+                issues=element.quality_json,
+                dismissed=bool(element.quality_dismissed),
+            )
+            if element.quality_json is not None
+            else None
+        ),
         volume=element.volume,
         pan=element.pan,
         depth=element.depth,
