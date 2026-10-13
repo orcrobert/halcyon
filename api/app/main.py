@@ -84,7 +84,7 @@ app.include_router(elements.router)
 
 
 def mount_frontend(target: FastAPI) -> None:
-    dist = settings.frontend_dist_path
+    dist = settings.frontend_dist_path.resolve()
     if not (dist / "index.html").is_file():
         logger.info("No frontend build at %s; serving the API only", dist)
         return
@@ -93,8 +93,8 @@ def mount_frontend(target: FastAPI) -> None:
 
     @target.get("/{path:path}", include_in_schema=False)
     def spa(path: str) -> FileResponse:
-        candidate = dist / path
-        if path and candidate.is_file():
+        candidate = (dist / path).resolve()
+        if path and candidate.is_relative_to(dist) and candidate.is_file():
             return FileResponse(candidate)
         return FileResponse(dist / "index.html")
 

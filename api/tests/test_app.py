@@ -106,3 +106,28 @@ def test_missing_frontend_build_leaves_the_api_alone(tmp_path, monkeypatch):
 
     with TestClient(app) as test_client:
         assert test_client.get("/").status_code == 404
+
+
+def test_frontend_route_does_not_serve_files_outside_the_build(tmp_path, monkeypatch):
+    from api.app.config import settings
+    from api.app.main import mount_frontend
+
+    dist = tmp_path / "dist"
+    (dist / "assets").mkdir(parents=True)
+    (dist / "index.html").write_text("<!doctype html><title>Halcyon</title>")
+    (tmp_path / "secret.key").write_text("do-not-leak")
+    (dist / "escape.txt").symlink_to(tmp_path / "secret.key")
+    monkeypatch.setattr(settings, "frontend_dist", str(dist))
+
+    app = FastAPI()
+    mount_frontend(app)
+
+    with TestClient(app) as test_client:
+        for path in (
+            "/%2e%2e/secret.key",
+            "/..%2fsecret.key",
+            "/assets/%2e%2e/%2e%2e/secret.key",
+            "/escape.txt",
+        ):
+            response = test_client.get(path)
+            assert "do-not-leak" not in response.text, path
