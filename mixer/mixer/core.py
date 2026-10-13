@@ -70,6 +70,48 @@ def _is_event(element: dict) -> bool:
     return element.get("playback") == "oneshot"
 
 
+def _place(
+    valid: list[dict],
+    wavs: list[np.ndarray],
+    srs: list[int],
+    spatial: bool,
+) -> tuple[list[float], list[tuple[float, float]]]:
+    loop_idx = [i for i, element in enumerate(valid) if not _is_event(element)]
+    event_idx = [i for i, element in enumerate(valid) if _is_event(element)]
+
+    volumes: list[float] = [0.0] * len(valid)
+    placement: list[tuple[float, float]] = [(0.0, 0.0)] * len(valid)
+
+    if loop_idx:
+        loop_volumes = assign_volumes(
+            [valid[i] for i in loop_idx],
+            [wavs[i] for i in loop_idx],
+            [srs[i] for i in loop_idx],
+        )
+        for slot, i in enumerate(loop_idx):
+            volumes[i] = loop_volumes[slot]
+        if spatial:
+            loop_spatial = assign_spatial([(wavs[i], srs[i]) for i in loop_idx])
+            for slot, i in enumerate(loop_idx):
+                placement[i] = loop_spatial[slot]
+
+    if event_idx:
+        anchor = max(
+            (
+                rms_db(wavs[i]) + 20.0 * np.log10(max(volumes[i], 1e-9))
+                for i in loop_idx
+            ),
+            default=None,
+        )
+        events = place_events([wavs[i] for i in event_idx], anchor)
+        for slot, i in enumerate(event_idx):
+            volume, pan, depth = events[slot]
+            volumes[i] = volume
+            placement[i] = (pan, depth)
+
+    return volumes, placement
+
+
 def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[int]]:
     wavs: list[np.ndarray] = []
     srs: list[int] = []
@@ -94,7 +136,8 @@ def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[in
     if not valid:
         return valid, wavs, srs
 
-    eq_bands_per_element = auto_eq(wavs, srs, valid)
+    draft_volumes, _ = _place(valid, wavs, srs, spatial=False)
+    eq_bands_per_element = auto_eq(wavs, srs, valid, draft_volumes)
     for element, eq_bands in zip(valid, eq_bands_per_element):
         element["eq_json"] = eq_bands
 
@@ -102,37 +145,7 @@ def analyze(elements: list[dict]) -> tuple[list[dict], list[np.ndarray], list[in
         apply_eq(wav, sr, bands)
         for wav, sr, bands in zip(wavs, srs, eq_bands_per_element)
     ]
-
-    loop_idx = [i for i, element in enumerate(valid) if not _is_event(element)]
-    event_idx = [i for i, element in enumerate(valid) if _is_event(element)]
-
-    volumes: list[float] = [0.0] * len(valid)
-    spatial: list[tuple[float, float]] = [(0.0, 0.0)] * len(valid)
-
-    if loop_idx:
-        loop_volumes = assign_volumes(
-            [valid[i] for i in loop_idx],
-            [eqd_wavs[i] for i in loop_idx],
-            [srs[i] for i in loop_idx],
-        )
-        loop_spatial = assign_spatial([(eqd_wavs[i], srs[i]) for i in loop_idx])
-        for slot, i in enumerate(loop_idx):
-            volumes[i] = loop_volumes[slot]
-            spatial[i] = loop_spatial[slot]
-
-    if event_idx:
-        anchor = max(
-            (
-                rms_db(eqd_wavs[i]) + 20.0 * np.log10(max(volumes[i], 1e-9))
-                for i in loop_idx
-            ),
-            default=None,
-        )
-        placements = place_events([eqd_wavs[i] for i in event_idx], anchor)
-        for slot, i in enumerate(event_idx):
-            volume, pan, depth = placements[slot]
-            volumes[i] = volume
-            spatial[i] = (pan, depth)
+    volumes, spatial = _place(valid, eqd_wavs, srs, spatial=True)
 
     for element, vol, (pan, depth) in zip(valid, volumes, spatial):
         element["volume"] = vol
