@@ -36,6 +36,7 @@ export interface EQBand {
   freq: number
   gain: number
   q?: number
+  source?: 'tone' | 'masking' | 'both'
 }
 
 export type ElementStatus = 'ready' | 'regenerating' | 'sourcing' | 'failed'
