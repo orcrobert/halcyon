@@ -317,7 +317,15 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   every one of them into a biquad chain. The three at 200/1k/8k are reserved for
   the user's sliders, which read and write only those and carry the rest
   through. Never collapse the list to three bands — that silently throws the
-  auto-EQ away and reapplies its gains at the wrong frequencies.
+  auto-EQ away and reapplies its gains at the wrong frequencies. The sliders
+  start at 0 because they are an offset on top of the mixer; the EQ panel draws
+  the mixer's bands as a response curve and lists each with its `source`
+  (`tone` or `masking`), which the PATCH schema keeps.
+- **Masking cuts follow role and loudness.** `auto_eq` takes the draft
+  volumes `analyze` computes before EQ and the element `role`, cuts only the
+  less important layer of a colliding pair, and never lets an event cause a
+  cut. Anything that calls `analyze` must pass `role` on every element,
+  including stored layers during a regeneration.
 - **Stored loop clips carry padding the player must skip.** A decoder
   resampling a clip to the device rate starves at the first and last sample, so
   a seam that is clean in the file arrives as a tick once per loop — worst on
