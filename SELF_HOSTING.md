@@ -53,8 +53,7 @@ runtimes rely on.
 | `GENERATOR_URL` | base URL of your generator (legacy alias: `COLAB_URL`) |
 | `DATA_DIR` | SQLite database, generated audio, and the encryption key |
 | `SECRET_KEY` | encrypts stored API keys; auto-generated if blank |
-| `ALLOW_REGISTRATION` | set `false` to close signups once your users exist |
-| `ADMIN_EMAIL`, `ADMIN_PASSWORD` | the administrator account; see [Managing users](#managing-users) |
+| `ALLOW_REGISTRATION` | set `false` to close signups; see [Managing users](#managing-users) |
 | `FRONTEND_ORIGIN` | only for running the dev server against a remote API |
 | `MODAL_TOKEN_ID`, `MODAL_TOKEN_SECRET` | optional instance Modal token for deploying from the account page |
 | `GENERATORS_DIR` | where `generators/` lives; set to `/app/generators` in the image |
@@ -153,19 +152,12 @@ re-enter.
 
 ### Managing users
 
-An instance you run for other people usually wants one administrator who hands
-out accounts, rather than open signups:
-
-```bash
-ADMIN_EMAIL=you@example.com
-ADMIN_PASSWORD=a-long-first-password
-ALLOW_REGISTRATION=false
-```
-
-On boot the account with `ADMIN_EMAIL` is made an administrator. If it does not
-exist yet it is created with `ADMIN_PASSWORD`, which is read only that once;
-change it in the app afterwards. Leave `ADMIN_PASSWORD` blank to promote an
-account that already exists.
+The first account created on a server is its administrator. On a server that
+already has accounts, the oldest one is made administrator on the next boot if
+none exists yet. To hand out accounts yourself instead of leaving signups open,
+set `ALLOW_REGISTRATION=false`: the very first account can still register, so a
+fresh server is never locked out, and everyone after that is created by an
+administrator.
 
 Administrators get a **Users** section in the account page. From there they
 create accounts, change a user's name, email or password (a new password signs

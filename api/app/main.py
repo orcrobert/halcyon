@@ -22,9 +22,9 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     init_db()
 
-    admin_change = ensure_admin()
-    if admin_change:
-        logger.warning("Admin account %s from ADMIN_EMAIL", admin_change)
+    promoted = ensure_admin()
+    if promoted:
+        logger.warning("Made %s the administrator as the oldest account", promoted)
 
     reclaimed = reclaim_interrupted()
     if reclaimed:

@@ -1,7 +1,6 @@
 import pytest
 
-ADMIN_EMAIL = "root@halcyon.test"
-ADMIN_PASSWORD = "correct-horse-battery"
+ROOT_EMAIL = "root@halcyon.test"
 
 
 class RecordingDeployer:
@@ -23,14 +22,8 @@ def login(client, email, password="hunter2hunter2"):
 
 
 @pytest.fixture
-def admin(client, monkeypatch):
-    from api.app.config import settings
-    from api.app.services.accounts import ensure_admin
-
-    monkeypatch.setattr(settings, "admin_email", ADMIN_EMAIL)
-    monkeypatch.setattr(settings, "admin_password", ADMIN_PASSWORD)
-    assert ensure_admin() == "created"
-    return login(client, ADMIN_EMAIL, ADMIN_PASSWORD)
+def admin(register):
+    return {"Authorization": f"Bearer {register(email=ROOT_EMAIL, name='Root')}"}
 
 
 @pytest.fixture
@@ -44,39 +37,51 @@ def member(client, admin):
     return response.json()["data"]
 
 
-def test_admin_email_creates_an_admin_on_boot(client, admin):
-    me = client.get("/api/auth/me", headers=admin).json()["data"]
+def test_the_first_account_is_the_admin(client, admin, register):
+    second = {"Authorization": f"Bearer {register(email='second@halcyon.test')}"}
 
-    assert me["email"] == ADMIN_EMAIL
-    assert me["is_admin"] is True
+    assert client.get("/api/auth/me", headers=admin).json()["data"]["is_admin"] is True
+    assert client.get("/api/auth/me", headers=second).json()["data"]["is_admin"] is False
+    assert client.get("/api/admin/users", headers=second).status_code == 403
 
 
-def test_admin_email_promotes_an_existing_account(client, register, monkeypatch):
+def test_the_first_account_can_register_with_registration_closed(client, monkeypatch):
     from api.app.config import settings
+
+    monkeypatch.setattr(settings, "allow_registration", False)
+
+    assert client.get("/api/auth/options").json()["data"] == {"registration": True}
+    first = client.post(
+        "/api/auth/register",
+        json={"name": "Root", "email": ROOT_EMAIL, "password": "hunter2hunter2"},
+    )
+    second = client.post(
+        "/api/auth/register",
+        json={"name": "Late", "email": "late@halcyon.test", "password": "hunter2hunter2"},
+    )
+
+    assert first.status_code == 201
+    assert first.json()["data"]["is_admin"] is True
+    assert second.status_code == 403
+    assert client.get("/api/auth/options").json()["data"] == {"registration": False}
+
+
+def test_boot_promotes_the_oldest_account_when_there_is_no_admin(client, register):
+    from api.app.db import session_scope
+    from api.app.models.tables import User
     from api.app.services.accounts import ensure_admin
 
-    token = register(email="owner@halcyon.test")
-    monkeypatch.setattr(settings, "admin_email", "Owner@Halcyon.test")
+    oldest = {"Authorization": f"Bearer {register(email='first@halcyon.test')}"}
+    register(email="second@halcyon.test")
+    with session_scope() as session:
+        for user in session.query(User).all():
+            user.is_admin = None
+            session.add(user)
+        session.commit()
 
-    assert ensure_admin() == "promoted"
+    assert ensure_admin() == "first@halcyon.test"
     assert ensure_admin() is None
-    me = client.get("/api/auth/me", headers={"Authorization": f"Bearer {token}"})
-    assert me.json()["data"]["is_admin"] is True
-
-
-def test_admin_email_without_a_password_creates_nothing(client, monkeypatch):
-    from api.app.config import settings
-    from api.app.services.accounts import ensure_admin
-
-    monkeypatch.setattr(settings, "admin_email", ADMIN_EMAIL)
-    monkeypatch.setattr(settings, "admin_password", None)
-
-    assert ensure_admin() is None
-
-
-def test_registered_users_are_not_admins(client, auth):
-    assert client.get("/api/auth/me", headers=auth).json()["data"]["is_admin"] is False
-    assert client.get("/api/admin/users", headers=auth).status_code == 403
+    assert client.get("/api/auth/me", headers=oldest).json()["data"]["is_admin"] is True
 
 
 def test_admin_creates_an_account_that_can_sign_in(client, member):
@@ -115,7 +120,7 @@ def test_admin_cannot_reuse_an_email(client, admin, member):
 def test_listing_shows_every_account(client, admin, member):
     users = client.get("/api/admin/users", headers=admin).json()["data"]
 
-    assert [u["email"] for u in users] == [ADMIN_EMAIL, "listener@halcyon.test"]
+    assert [u["email"] for u in users] == [ROOT_EMAIL, "listener@halcyon.test"]
     assert users[0]["last_active_at"] is not None
 
 

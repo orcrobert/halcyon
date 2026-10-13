@@ -47,7 +47,8 @@ Definitive reference for how the system fits together. Skim
   argon2 via `pwdlib`. `deps.py` exposes the `CurrentUser` dependency, plus
   `CurrentAdmin`, `ManagedUser` and `AccountOwner` for the admin routes.
 - **Admin** (`routers/admin.py`, `services/accounts.py`): `User.is_admin` marks
-  an administrator, created or promoted from `ADMIN_EMAIL` on boot.
+  an administrator: the first account to register, or the oldest account,
+  promoted on boot when there is none.
   `/api/admin/users` lists, creates, edits and deletes accounts. The settings
   and generator routers have no prefix of their own and are mounted twice in
   `main.py`: at `/api/settings` and `/api/generators`, and under

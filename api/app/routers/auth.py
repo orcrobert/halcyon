@@ -2,7 +2,6 @@ from fastapi import APIRouter, Header, HTTPException, Response, status
 from sqlmodel import select
 from typing import Annotated
 
-from api.app.config import settings
 from api.app.deps import CurrentUser, SessionDep
 from api.app.models.schemas import (
     AuthOptionsOut,
@@ -14,7 +13,13 @@ from api.app.models.schemas import (
 )
 from api.app.models.tables import AuthToken, User
 from api.app.security import hash_token, issue_token, verify_password
-from api.app.services.accounts import create_user, email_in_use, find_by_email
+from api.app.services.accounts import (
+    create_user,
+    email_in_use,
+    find_by_email,
+    has_admin,
+    registration_open,
+)
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -27,13 +32,13 @@ def _authenticate(session: SessionDep, user: User) -> AuthResponse:
 
 
 @router.get("/options")
-def options() -> Envelope[AuthOptionsOut]:
-    return Envelope(data=AuthOptionsOut(registration=settings.allow_registration))
+def options(session: SessionDep) -> Envelope[AuthOptionsOut]:
+    return Envelope(data=AuthOptionsOut(registration=registration_open(session)))
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, session: SessionDep) -> AuthResponse:
-    if not settings.allow_registration:
+    if not registration_open(session):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Registration is disabled on this instance.",
@@ -45,7 +50,13 @@ def register(payload: RegisterRequest, session: SessionDep) -> AuthResponse:
             detail="That email address is already registered.",
         )
 
-    user = create_user(session, payload.name, payload.email, payload.password)
+    user = create_user(
+        session,
+        payload.name,
+        payload.email,
+        payload.password,
+        is_admin=not has_admin(session),
+    )
 
     return _authenticate(session, user)
 

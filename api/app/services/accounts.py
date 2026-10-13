@@ -1,5 +1,3 @@
-import logging
-
 from sqlmodel import Session, select
 
 from api.app.config import settings
@@ -7,10 +5,6 @@ from api.app.db import session_scope
 from api.app.models.tables import Atmosphere, AuthToken, User
 from api.app.security import hash_password
 from api.app.services import storage
-
-logger = logging.getLogger(__name__)
-
-ADMIN_NAME = "Admin"
 
 
 def find_by_email(session: Session, email: str) -> User | None:
@@ -54,27 +48,26 @@ def delete_user(session: Session, user: User) -> None:
         storage.delete_style(atmosphere_id)
 
 
+def has_users(session: Session) -> bool:
+    return session.exec(select(User.id).limit(1)).first() is not None
+
+
+def has_admin(session: Session) -> bool:
+    return session.exec(select(User.id).where(User.is_admin).limit(1)).first() is not None
+
+
+def registration_open(session: Session) -> bool:
+    return settings.allow_registration or not has_users(session)
+
+
 def ensure_admin() -> str | None:
-    email = (settings.admin_email or "").strip().lower()
-    if not email:
-        return None
-
     with session_scope() as session:
-        user = find_by_email(session, email)
-        if user is None:
-            if not settings.admin_password:
-                logger.warning(
-                    "ADMIN_EMAIL=%s has no account and ADMIN_PASSWORD is empty, "
-                    "so no admin was created.",
-                    email,
-                )
-                return None
-            create_user(session, ADMIN_NAME, email, settings.admin_password, is_admin=True)
-            return "created"
-
-        if user.is_admin:
+        if has_admin(session):
             return None
-        user.is_admin = True
-        session.add(user)
+        oldest = session.exec(select(User).order_by(User.created_at, User.id)).first()
+        if oldest is None:
+            return None
+        oldest.is_admin = True
+        session.add(oldest)
         session.commit()
-        return "promoted"
+        return oldest.email

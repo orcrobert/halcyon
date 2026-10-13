@@ -365,7 +365,7 @@ function ProfileCard({
         label="Administrator"
         description={
           isSelf
-            ? 'You cannot remove your own admin access. Ask another administrator, or change ADMIN_EMAIL.'
+            ? 'You cannot remove your own admin access. Another administrator can.'
             : 'Can create, edit and delete every account on this server, including their keys and generators.'
         }
       />
