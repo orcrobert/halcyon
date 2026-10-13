@@ -51,7 +51,13 @@ async def lifespan(app: FastAPI):
     worker.stop()
 
 
-app = FastAPI(title="Halcyon", lifespan=lifespan)
+app = FastAPI(
+    title="Halcyon",
+    lifespan=lifespan,
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 
 if settings.frontend_origin:
     app.add_middleware(

@@ -6,15 +6,21 @@ def test_health_needs_no_auth(client):
     assert client.get("/health").json() == {"status": "ok", "version": "dev"}
 
 
+def test_interactive_api_docs_are_not_served(client):
+    assert "swagger-ui" not in client.get("/docs").text
+    assert "redoc" not in client.get("/redoc").text
+    assert '"openapi"' not in client.get("/openapi.json").text
+
+
 def test_legacy_generate_endpoint_is_gone(client):
-    paths = client.get("/openapi.json").json()["paths"]
+    paths = client.app.openapi()["paths"]
 
     assert "/generate" not in paths
     assert client.post("/generate", json={"prompt": "rain"}).status_code != 200
 
 
 def test_the_api_surface_is_the_documented_one(client):
-    paths = set(client.get("/openapi.json").json()["paths"])
+    paths = set(client.app.openapi()["paths"])
 
     assert paths == {
         "/health",
