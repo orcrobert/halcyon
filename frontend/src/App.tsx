@@ -8,7 +8,7 @@ import { HistoryPanel } from './components/HistoryPanel'
 import { ReviewLayersModal } from './components/ReviewLayersModal'
 import { AccountView, type SectionId } from './components/AccountView'
 import { DeployToast } from './components/DeployToast'
-import { useAudioEngine, isCanonicalBand, type EQState } from './hooks/useAudioEngine'
+import { useAudioEngine, isCanonicalBand, sliderBands, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
 import type { StyleClip } from './hooks/styleClip'
 import {
@@ -40,12 +40,7 @@ function eqStateToBands(eq: EQState, existing: EQBand[] | undefined): EQBand[] {
       ...band,
       q: band.q ?? (band.type === 'peaking' ? EQ_MID_Q : EQ_SHELF_Q),
     }))
-  return [
-    ...corrective,
-    { type: 'lowshelf', freq: 200, q: EQ_SHELF_Q, gain: eq.low },
-    { type: 'peaking', freq: 1000, q: EQ_MID_Q, gain: eq.mid },
-    { type: 'highshelf', freq: 8000, q: EQ_SHELF_Q, gain: eq.high },
-  ]
+  return [...corrective, ...sliderBands(eq)]
 }
 
 function sameJson(a: unknown, b: unknown): boolean {

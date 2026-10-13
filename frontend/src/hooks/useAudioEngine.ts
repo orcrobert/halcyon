@@ -180,6 +180,14 @@ export function isCanonicalBand(band: EQBand): boolean {
   )
 }
 
+export function sliderBands(eq: EQState): EQBand[] {
+  return [
+    { type: 'lowshelf', freq: EQ_LOW_FREQ_HZ, q: EQ_SHELF_Q, gain: eq.low },
+    { type: 'peaking', freq: EQ_MID_FREQ_HZ, q: EQ_MID_Q, gain: eq.mid },
+    { type: 'highshelf', freq: EQ_HIGH_FREQ_HZ, q: EQ_SHELF_Q, gain: eq.high },
+  ]
+}
+
 export function buildEQState(bands: EQBand[] | undefined): EQState {
   const state: EQState = { low: 0, mid: 0, high: 0 }
   if (!bands) return state
@@ -192,7 +200,7 @@ export function buildEQState(bands: EQBand[] | undefined): EQState {
   return state
 }
 
-function correctiveBands(bands: EQBand[] | undefined): EQBand[] {
+export function correctiveBands(bands: EQBand[] | undefined): EQBand[] {
   if (!bands) return []
   return bands.filter(
     (band) => !isCanonicalBand(band) && Math.abs(band.gain) >= EQ_MIN_AUDIBLE_DB,

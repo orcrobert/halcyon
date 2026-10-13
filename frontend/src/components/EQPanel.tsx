@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { createPortal } from 'react-dom'
-import { isCanonicalBand, type EQState } from '../hooks/useAudioEngine'
+import { correctiveBands, isCanonicalBand, type EQState } from '../hooks/useAudioEngine'
+import { EQResponse } from './EQResponse'
 import type { EQBand } from '../types'
 
 interface Props {
@@ -128,12 +129,13 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
 
 export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onClose }: Props) {
   const [eq, setEq] = useState<EQState>(() => buildInitialState(initialBands))
+  const mixerBands = useMemo(() => correctiveBands(initialBands), [initialBands])
   const [mounted, setMounted] = useState(false)
   const [visible, setVisible] = useState(false)
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const [arrowLeft, setArrowLeft] = useState('50%')
   const panelRef = useRef<HTMLDivElement>(null)
-  const PANEL_HEIGHT = 360 // approx, used for positioning
+  const PANEL_HEIGHT = 560
 
   function getPanelWidth() {
     return Math.min(340, window.innerWidth - 24)
@@ -149,7 +151,8 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
     let left = anchorCenterX - pw / 2
     left = Math.max(12, Math.min(left, window.innerWidth - pw - 12))
 
-    const top = Math.max(12, anchorTop - PANEL_HEIGHT - 16)
+    const height = panelRef.current?.offsetHeight || PANEL_HEIGHT
+    const top = Math.max(12, anchorTop - height - 16)
 
     const arrowX = anchorCenterX - left
     const clampedArrow = Math.max(20, Math.min(arrowX, pw - 20))
@@ -272,6 +275,8 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
             Reset
           </button>
         </div>
+
+        <EQResponse mixerBands={mixerBands} eq={eq} />
 
         {/* Sliders */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
