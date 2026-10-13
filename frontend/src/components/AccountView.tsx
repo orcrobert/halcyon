@@ -1,28 +1,24 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { getSettings, updateSettings } from '../api/settings'
 import { extractErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
+import { Card, SwitchRow } from './AccountCard'
+import { DecomposerCard } from './DecomposerCard'
 import { GeneratorsCard } from './GeneratorsCard'
 import { PromptEditorModal } from './PromptEditorModal'
+import { UsersPanel } from './UsersPanel'
+import { AVATAR_STYLE, LABEL_CLASS, initials } from './accountStyles'
 import { ThemeCard } from './ThemeCard'
-import { Toggle } from './Toggle'
 import { DEFAULT_THEME, applyTheme, storeTheme, storedTheme } from '../themes'
 import { applyReduceBlur, storeReduceBlur } from '../effects'
-import type { DecomposerProvider, Settings, SettingsUpdate } from '../types'
+import type { Settings } from '../types'
 
 interface Props {
   onBack: () => void
   initialSection?: SectionId
 }
 
-interface Draft {
-  decomposer_provider: string
-  decomposer_model: string
-  decomposer_base_url: string
-  decomposer_api_key: string
-}
-
-export type SectionId = 'model' | 'generator' | 'appearance' | 'account'
+export type SectionId = 'model' | 'generator' | 'appearance' | 'account' | 'users'
 
 interface Section {
   id: SectionId
@@ -85,60 +81,29 @@ const SECTIONS: Section[] = [
       </>
     ),
   },
+  {
+    id: 'users',
+    label: 'Users',
+    caption: 'Accounts on this server',
+    title: 'Users',
+    hint: 'Create accounts and set up their keys, Modal token and generators for them.',
+    icon: (
+      <>
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+        <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ),
+  },
 ]
-
-const EMPTY_DRAFT: Draft = {
-  decomposer_provider: '',
-  decomposer_model: '',
-  decomposer_base_url: '',
-  decomposer_api_key: '',
-}
-
-const INPUT_CLASS =
-  'w-full bg-surface-sunken border border-line rounded-xl text-ink placeholder:text-ink-ghost text-[13.5px] outline-none focus:border-accent/45 transition-colors'
-const INPUT_STYLE: React.CSSProperties = { padding: '11px 13px', fontFamily: 'inherit' }
-const LABEL_CLASS = 'text-[10px] uppercase tracking-[0.18em] text-ink-faint font-semibold'
-const AVATAR_STYLE: React.CSSProperties = {
-  background: 'linear-gradient(150deg, color-mix(in srgb, var(--color-accent) 20%, transparent), color-mix(in srgb, var(--color-accent) 5%, transparent))',
-  border: '1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)',
-}
-
-function toDraft(settings: Settings): Draft {
-  return {
-    decomposer_provider: settings.decomposer_provider ?? settings.defaults.decomposer_provider ?? '',
-    decomposer_model: settings.decomposer_model ?? '',
-    decomposer_base_url: settings.decomposer_base_url ?? '',
-    decomposer_api_key: '',
-  }
-}
-
-function isDirty(draft: Draft, settings: Settings | null): boolean {
-  if (!settings) return false
-  const stored = toDraft(settings)
-  return (
-    draft.decomposer_provider !== stored.decomposer_provider ||
-    draft.decomposer_model.trim() !== stored.decomposer_model ||
-    draft.decomposer_base_url.trim() !== stored.decomposer_base_url ||
-    draft.decomposer_api_key.trim() !== ''
-  )
-}
-
-function initials(name: string, email: string): string {
-  const source = name.trim() || email.trim()
-  const parts = source.split(/[\s@._-]+/).filter(Boolean)
-  const letters = parts.slice(0, 2).map((p) => p[0]).join('')
-  return (letters || source[0] || '?').toUpperCase()
-}
 
 export function AccountView({ onBack, initialSection = 'model' }: Props) {
   const { state, logout } = useAuth()
   const [settings, setSettings] = useState<Settings | null>(null)
-  const [draft, setDraft] = useState<Draft>(EMPTY_DRAFT)
+  const [dirty, setDirty] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
-  const [revealKey, setRevealKey] = useState(false)
   const [promptOpen, setPromptOpen] = useState(false)
   const [promptSaving, setPromptSaving] = useState(false)
   const [promptError, setPromptError] = useState<string | null>(null)
@@ -154,7 +119,6 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
       .then((res) => {
         if (cancelled) return
         setSettings(res)
-        setDraft(toDraft(res))
         const active = res.theme ?? DEFAULT_THEME
         setTheme(active)
         applyTheme(active)
@@ -175,15 +139,6 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onBack, promptOpen])
 
-  const set = useCallback((field: keyof Draft, value: string) => {
-    setDraft((d) => ({ ...d, [field]: value }))
-    setSaved(false)
-  }, [])
-
-  const provider: DecomposerProvider | undefined = settings?.providers.find(
-    (p) => p.key === draft.decomposer_provider,
-  )
-
   function selectSection(id: SectionId) {
     if (id === section) return
     setSection(id)
@@ -192,12 +147,12 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
 
   function handleTabKey(e: React.KeyboardEvent<HTMLButtonElement>, index: number) {
     const step = { ArrowDown: 1, ArrowRight: 1, ArrowUp: -1, ArrowLeft: -1 }[e.key]
-    let target: number | null = step ? (index + step + SECTIONS.length) % SECTIONS.length : null
+    let target: number | null = step ? (index + step + sections.length) % sections.length : null
     if (e.key === 'Home') target = 0
-    if (e.key === 'End') target = SECTIONS.length - 1
+    if (e.key === 'End') target = sections.length - 1
     if (target === null) return
     e.preventDefault()
-    const next = SECTIONS[target].id
+    const next = sections[target].id
     selectSection(next)
     tabRefs.current[next]?.focus()
   }
@@ -244,32 +199,6 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
     }
   }
 
-  async function handleSave() {
-    if (!settings) return
-    setSaving(true)
-    setError(null)
-
-    const patch: SettingsUpdate = {
-      decomposer_provider: draft.decomposer_provider,
-      decomposer_model: draft.decomposer_model.trim(),
-      decomposer_base_url: draft.decomposer_base_url.trim(),
-    }
-    if (draft.decomposer_api_key.trim()) {
-      patch.decomposer_api_key = draft.decomposer_api_key.trim()
-    }
-
-    try {
-      const next = await updateSettings(patch)
-      setSettings(next)
-      setDraft(toDraft(next))
-      setSaved(true)
-    } catch (e) {
-      setError(extractErrors(e).message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
   async function handleSavePrompt(text: string) {
     if (!settings) return
     setPromptSaving(true)
@@ -289,24 +218,9 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
     }
   }
 
-  async function handleClearKey() {
-    setSaving(true)
-    setError(null)
-    try {
-      const next = await updateSettings({ decomposer_api_key: '' })
-      setSettings(next)
-      setDraft(toDraft(next))
-    } catch (e) {
-      setError(extractErrors(e).message)
-    } finally {
-      setSaving(false)
-    }
-  }
-
   const user = state.status === 'authed' ? state.user : null
-  const showBaseUrl = provider?.uses_base_url ?? false
-  const dirty = isDirty(draft, settings)
-  const active = SECTIONS.find((s) => s.id === section) ?? SECTIONS[0]
+  const sections = SECTIONS.filter((s) => s.id !== 'users' || user?.is_admin)
+  const active = sections.find((s) => s.id === section) ?? sections[0]
 
   return (
     <div className="relative min-h-screen w-full">
@@ -364,8 +278,8 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                 scrollbarWidth: 'none',
               }}
             >
-                {SECTIONS.map((s, i) => {
-                  const selected = s.id === section
+                {sections.map((s, i) => {
+                  const selected = s.id === active.id
                   const flagged = s.id === 'model' && dirty
                   return (
                     <button
@@ -451,134 +365,8 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
 
             {!loading && settings && (
               <>
-                <Panel id="model" active={section}>
-                  <Card
-                    title="Decomposer"
-                    hint="The language model that turns your prompt into layered elements."
-                  >
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <label className="flex flex-col gap-2 min-w-0">
-                        <span className={LABEL_CLASS}>Provider</span>
-                        <select
-                          name="halcyon-decomposer-provider"
-                          autoComplete="off"
-                          value={draft.decomposer_provider}
-                          onChange={(e) => set('decomposer_provider', e.target.value)}
-                          className={INPUT_CLASS}
-                          style={INPUT_STYLE}
-                        >
-                          {settings.providers.map((p) => (
-                            <option key={p.key} value={p.key} disabled={!p.available}>
-                              {p.available ? p.label : `${p.label} (unavailable on this server)`}
-                            </option>
-                          ))}
-                        </select>
-                        {provider && !provider.available && (
-                          <span className="text-[11.5px] text-danger-bright leading-relaxed">
-                            Turned off on this server. Pick another provider, or set DECOMPOSER_ALLOW_CLI=true and rebuild.
-                          </span>
-                        )}
-                      </label>
-
-                      <Field
-                        label="Model"
-                        name="halcyon-decomposer-model"
-                        value={draft.decomposer_model}
-                        placeholder={provider?.default_model || 'CLI default'}
-                        suggestions={provider?.suggested_models}
-                        onChange={(v) => set('decomposer_model', v)}
-                      />
-                    </div>
-
-                    {showBaseUrl && (
-                      <Field
-                        label="Base URL"
-                        name="halcyon-decomposer-base-url"
-                        value={draft.decomposer_base_url}
-                        placeholder={provider?.default_base_url ?? ''}
-                        onChange={(v) => set('decomposer_base_url', v)}
-                      />
-                    )}
-
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-between gap-2">
-                        <span className={LABEL_CLASS}>{provider?.key_label ?? 'API key'}</span>
-                        {settings.decomposer_api_key_set && (
-                          <button
-                            onClick={handleClearKey}
-                            disabled={saving}
-                            className="text-[11px] text-ink-muted hover:text-danger-bright transition disabled:opacity-40"
-                            style={{ fontFamily: 'inherit' }}
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          name="halcyon-decomposer-secret"
-                          autoComplete="off"
-                          spellCheck={false}
-                          autoCorrect="off"
-                          autoCapitalize="off"
-                          data-lpignore="true"
-                          data-1p-ignore
-                          data-bwignore
-                          data-form-type="other"
-                          value={draft.decomposer_api_key}
-                          onChange={(e) => set('decomposer_api_key', e.target.value)}
-                          placeholder={settings.decomposer_api_key_set ? 'Stored — type to replace' : 'Not set'}
-                          className={INPUT_CLASS}
-                          style={{
-                            ...INPUT_STYLE,
-                            paddingRight: '58px',
-                            WebkitTextSecurity: revealKey ? 'none' : 'disc',
-                            textSecurity: revealKey ? 'none' : 'disc',
-                          } as React.CSSProperties}
-                        />
-                        {draft.decomposer_api_key && (
-                          <button
-                            type="button"
-                            onClick={() => setRevealKey((v) => !v)}
-                            className="absolute inset-y-0 right-0 flex items-center text-[11px] text-ink-faint hover:text-ink-soft transition-colors"
-                            style={{ paddingRight: '13px', fontFamily: 'inherit' }}
-                          >
-                            {revealKey ? 'Hide' : 'Show'}
-                          </button>
-                        )}
-                      </div>
-                      <p className="text-[11.5px] text-ink-faint leading-relaxed">
-                        {provider?.key_hint
-                          ? `${provider.key_hint} Stored encrypted and never shown again.`
-                          : provider?.requires_api_key
-                            ? 'Stored encrypted and never shown again.'
-                            : 'Optional for local servers.'}
-                      </p>
-                    </div>
-
-                    <div
-                      className="flex flex-wrap items-center justify-end gap-3"
-                      style={{ paddingTop: '16px', borderTop: '1px solid var(--color-line-soft)' }}
-                    >
-                      <span className="text-[11.5px] text-ink-faint flex-1">
-                        {dirty ? 'Unsaved changes' : saved ? 'All changes saved' : ''}
-                      </span>
-                      <button
-                        onClick={handleSave}
-                        disabled={saving || !dirty}
-                        className="text-[13px] font-medium text-wash rounded-xl transition disabled:opacity-50"
-                        style={{
-                          padding: '10px 20px',
-                          background: 'var(--color-accent-deep)',
-                          fontFamily: 'inherit',
-                          boxShadow: '0 0 0 1px color-mix(in srgb, var(--color-accent) 35%, transparent), 0 6px 18px color-mix(in srgb, var(--color-accent) 20%, transparent)',
-                        }}
-                      >
-                        {saving ? 'Saving…' : 'Save changes'}
-                      </button>
-                    </div>
-                  </Card>
+                <Panel id="model" active={active.id}>
+                  <DecomposerCard settings={settings} onSaved={setSettings} onDirtyChange={setDirty} />
 
                   <Card
                     title="Instructions"
@@ -616,11 +404,11 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                   </Card>
                 </Panel>
 
-                <Panel id="generator" active={section}>
+                <Panel id="generator" active={active.id}>
                   <GeneratorsCard />
                 </Panel>
 
-                <Panel id="appearance" active={section}>
+                <Panel id="appearance" active={active.id}>
                   <ThemeCard value={theme} onChange={handleTheme} />
 
                   <Card
@@ -636,7 +424,7 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                   </Card>
                 </Panel>
 
-                <Panel id="account" active={section}>
+                <Panel id="account" active={active.id}>
                   <Card title="Profile" hint="The name and email this account was created with.">
                     <div className="flex items-center gap-4 min-w-0">
                       <div
@@ -669,6 +457,12 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                     </div>
                   </Card>
                 </Panel>
+
+                {user?.is_admin && (
+                  <Panel id="users" active={active.id}>
+                    <UsersPanel />
+                  </Panel>
+                )}
               </>
             )}
           </main>
@@ -706,98 +500,11 @@ function Panel({ id, active, children }: { id: SectionId; active: SectionId; chi
   )
 }
 
-function Card({ title, hint, children }: { title: string; hint: string; children: React.ReactNode }) {
-  return (
-    <section
-      className="rounded-2xl border border-surface-hover bg-surface flex flex-col gap-4"
-      style={{ padding: '22px', boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 30%, transparent)' }}
-    >
-      <div>
-        <h2 className="text-[14px] font-semibold text-ink tracking-tight">{title}</h2>
-        <p className="text-[11.5px] text-ink-faint leading-relaxed" style={{ marginTop: '4px' }}>{hint}</p>
-      </div>
-      {children}
-    </section>
-  )
-}
-
-function SwitchRow({
-  on,
-  onToggle,
-  label,
-  description,
-}: {
-  on: boolean
-  onToggle: () => void
-  label: string
-  description: string
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={on}
-      onClick={onToggle}
-      className="w-full flex items-center justify-between gap-4 rounded-xl text-left bg-surface-sunken border border-line hover:border-line-hover transition-colors"
-      style={{ padding: '12px 14px', fontFamily: 'inherit' }}
-    >
-      <span className="flex flex-col gap-1 min-w-0">
-        <span className={`text-[13px] ${on ? 'text-ink-bright' : 'text-ink-soft'}`}>{label}</span>
-        <span className="text-[11px] text-ink-faint leading-snug">{description}</span>
-      </span>
-      <Toggle on={on} />
-    </button>
-  )
-}
-
 function ReadOnly({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-1.5 min-w-0">
       <span className={LABEL_CLASS}>{label}</span>
       <span className="text-[13.5px] text-ink-soft truncate">{value}</span>
     </div>
-  )
-}
-
-function Field({
-  label,
-  name,
-  value,
-  placeholder,
-  suggestions,
-  onChange,
-}: {
-  label: string
-  name: string
-  value: string
-  placeholder: string
-  suggestions?: string[]
-  onChange: (value: string) => void
-}) {
-  const listId = suggestions?.length ? `${name}-suggestions` : undefined
-  return (
-    <label className="flex flex-col gap-2 min-w-0">
-      <span className={LABEL_CLASS}>{label}</span>
-      <input
-        type="text"
-        name={name}
-        list={listId}
-        spellCheck={false}
-        autoComplete="off"
-        data-lpignore="true"
-        data-1p-ignore
-        data-form-type="other"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className={INPUT_CLASS}
-        style={INPUT_STYLE}
-      />
-      {listId && (
-        <datalist id={listId}>
-          {suggestions?.map((model) => <option key={model} value={model} />)}
-        </datalist>
-      )}
-    </label>
   )
 }

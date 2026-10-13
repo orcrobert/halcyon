@@ -2,8 +2,33 @@ export interface User {
   id: number
   name: string
   email: string
+  is_admin: boolean
   created_at: string
   updated_at: string
+}
+
+export interface AuthOptions {
+  registration: boolean
+}
+
+export interface ManagedUser extends User {
+  atmospheres: number
+  generators: number
+  last_active_at: string | null
+}
+
+export interface ManagedUserCreate {
+  name: string
+  email: string
+  password: string
+  is_admin: boolean
+}
+
+export interface ManagedUserUpdate {
+  name?: string
+  email?: string
+  password?: string
+  is_admin?: boolean
 }
 
 export interface EQBand {
