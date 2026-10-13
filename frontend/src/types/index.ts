@@ -17,6 +17,19 @@ export type ElementStatus = 'ready' | 'regenerating' | 'sourcing' | 'failed'
 
 export type ElementPlayback = 'loop' | 'oneshot'
 
+export type QualityCheck = 'clipping' | 'burst' | 'dropout' | 'harsh' | 'seam'
+
+export interface QualityIssue {
+  check: QualityCheck
+  value: number
+  limit: number
+}
+
+export interface ElementQuality {
+  issues: QualityIssue[]
+  dismissed: boolean
+}
+
 export interface Element {
   id: number
   label: string
@@ -33,6 +46,7 @@ export interface Element {
   interval_max_s: number | null
   source: string
   source_json: Record<string, unknown> | null
+  quality: ElementQuality | null
   volume: number
   pan: number
   depth: number

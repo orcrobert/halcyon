@@ -18,7 +18,7 @@ export const STAGES: Stage[] = [
   { key: 'decomposing', label: 'Decompose', fallback: 'Splitting the scene into layers' },
   { key: 'waking', label: 'Wake generator', fallback: 'Waiting for the generator to answer' },
   { key: 'generating', label: 'Generate', fallback: 'Rendering the layers' },
-  { key: 'mixing', label: 'Mix', fallback: 'Analysing loudness, EQ, placement and loop points' },
+  { key: 'mixing', label: 'Mix', fallback: 'Analysing quality, loudness, EQ, placement and loop points' },
   { key: 'persisting', label: 'Save', fallback: 'Writing layers to disk' },
 ]
 

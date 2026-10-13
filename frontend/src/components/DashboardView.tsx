@@ -7,6 +7,8 @@ import { TuningControl } from './TuningControl'
 import { BinauralModal } from './BinauralModal'
 import { PromptModal } from './PromptModal'
 import { RegenerateModal } from './RegenerateModal'
+import { QualityModal } from './QualityModal'
+import { anyBusy, flaggedLayers } from '../quality'
 
 export interface AnimatedValues { vol: number; pan: number; depth: number }
 
@@ -109,6 +111,7 @@ interface Props {
   onRegenerateElement: (element: Element, feedback: string) => Promise<void>
   onDeleteElement: (element: Element) => Promise<void>
   onRegenerateScene: () => Promise<void>
+  onQualityChoice: (rerender: Element[]) => Promise<void>
   actionError: string | null
   onDismissActionError: () => void
   onStartAnimate: (cb: (values: Map<string, AnimatedValues>) => void) => void
@@ -127,7 +130,7 @@ interface Props {
 export function DashboardView({
   session, playing, getAnalyser, onPlayPause,
   onVolumeChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onTuningChange,
-  onExport, onReset, onRegenerateElement, onDeleteElement, onRegenerateScene,
+  onExport, onReset, onRegenerateElement, onDeleteElement, onRegenerateScene, onQualityChoice,
   actionError, onDismissActionError,
   onStartAnimate, onStopAnimate, onSetAnimateMuted,
   onBinauralToggle, onBinauralPreset, onBinauralLeftHz, onBinauralRightHz,
@@ -139,6 +142,7 @@ export function DashboardView({
   const [regenerating, setRegenerating] = useState<Element | null>(null)
   const [submittingRegen, setSubmittingRegen] = useState(false)
   const [sceneRegenerating, setSceneRegenerating] = useState(false)
+  const [qualitySubmitting, setQualitySubmitting] = useState(false)
   const [mutedTracks, setMutedTracks] = useState<Set<string>>(new Set())
   const [animating, setAnimating] = useState(false)
   const [animatedValues, setAnimatedValues] = useState<Map<string, AnimatedValues>>(new Map())
@@ -199,6 +203,22 @@ export function DashboardView({
       setSceneRegenerating(false)
     }
   }, [onRegenerateScene])
+
+  const flagged = flaggedLayers(session.elements)
+  const qualityOpen = flagged.length > 0 && !anyBusy(session.elements) && regenerating === null
+
+  const handleQualityChoice = useCallback(async (rerender: Element[]) => {
+    setQualitySubmitting(true)
+    try {
+      await onQualityChoice(rerender)
+    } finally {
+      setQualitySubmitting(false)
+    }
+  }, [onQualityChoice])
+
+  const handleQualityKeep = useCallback(() => {
+    void handleQualityChoice([])
+  }, [handleQualityChoice])
 
   const handleToggleAnimate = useCallback(() => {
     if (animating) {
@@ -472,6 +492,14 @@ export function DashboardView({
         submitting={submittingRegen}
         onSubmit={handleRegenerateSubmit}
         onClose={() => setRegenerating(null)}
+      />
+
+      <QualityModal
+        open={qualityOpen}
+        layers={flagged}
+        submitting={qualitySubmitting}
+        onRerender={handleQualityChoice}
+        onKeep={handleQualityKeep}
       />
 
       <BinauralModal
