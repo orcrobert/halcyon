@@ -22,6 +22,7 @@ class User(SQLModel, table=True):
     name: str
     email: str = Field(index=True, unique=True)
     password_hash: str
+    is_admin: bool | None = Field(default=False)
     created_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
     updated_at: datetime = Field(default_factory=utcnow, sa_column=_timestamp_column())
 

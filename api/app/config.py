@@ -50,6 +50,8 @@ class Settings(BaseSettings):
     data_dir: str = "data"
     secret_key: str | None = None
     allow_registration: bool = True
+    admin_email: str | None = None
+    admin_password: str | None = None
     frontend_origin: str = ""
     frontend_dist: str = "frontend/dist"
 

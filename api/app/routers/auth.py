@@ -5,6 +5,7 @@ from typing import Annotated
 from api.app.config import settings
 from api.app.deps import CurrentUser, SessionDep
 from api.app.models.schemas import (
+    AuthOptionsOut,
     AuthResponse,
     Envelope,
     LoginRequest,
@@ -12,7 +13,8 @@ from api.app.models.schemas import (
     UserOut,
 )
 from api.app.models.tables import AuthToken, User
-from api.app.security import hash_password, hash_token, issue_token, verify_password
+from api.app.security import hash_token, issue_token, verify_password
+from api.app.services.accounts import create_user, email_in_use, find_by_email
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
 
@@ -24,6 +26,11 @@ def _authenticate(session: SessionDep, user: User) -> AuthResponse:
     return AuthResponse(data=UserOut.model_validate(user, from_attributes=True), token=token)
 
 
+@router.get("/options")
+def options() -> Envelope[AuthOptionsOut]:
+    return Envelope(data=AuthOptionsOut(registration=settings.allow_registration))
+
+
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 def register(payload: RegisterRequest, session: SessionDep) -> AuthResponse:
     if not settings.allow_registration:
@@ -32,28 +39,20 @@ def register(payload: RegisterRequest, session: SessionDep) -> AuthResponse:
             detail="Registration is disabled on this instance.",
         )
 
-    email = payload.email.lower()
-    if session.exec(select(User).where(User.email == email)).first():
+    if email_in_use(session, payload.email):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail="That email address is already registered.",
         )
 
-    user = User(
-        name=payload.name,
-        email=email,
-        password_hash=hash_password(payload.password),
-    )
-    session.add(user)
-    session.commit()
-    session.refresh(user)
+    user = create_user(session, payload.name, payload.email, payload.password)
 
     return _authenticate(session, user)
 
 
 @router.post("/login")
 def login(payload: LoginRequest, session: SessionDep) -> AuthResponse:
-    user = session.exec(select(User).where(User.email == payload.email.lower())).first()
+    user = find_by_email(session, payload.email)
 
     if user is None or not verify_password(payload.password, user.password_hash):
         raise HTTPException(

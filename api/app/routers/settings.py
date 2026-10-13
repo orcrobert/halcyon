@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 
-from api.app.deps import CurrentUser, SessionDep
+from api.app.deps import AccountOwner, SessionDep
 from api.app.models.schemas import Envelope, ProviderOut, SettingsOut, SettingsUpdate
 from api.app.models.tables import UserSettings
 from api.app.security import encrypt_secret
@@ -13,7 +13,7 @@ from api.app.services.providers import (
 )
 from api.app.services.runconfig import default_config
 
-router = APIRouter(prefix="/api/settings", tags=["settings"])
+router = APIRouter(tags=["settings"])
 
 PLAIN_FIELDS = (
     "generator_url",
@@ -79,13 +79,13 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
 
 
 @router.get("")
-def show(user: CurrentUser) -> Envelope[SettingsOut]:
+def show(user: AccountOwner) -> Envelope[SettingsOut]:
     return Envelope(data=_serialize(user.preferences))
 
 
 @router.put("")
 def update(
-    payload: SettingsUpdate, user: CurrentUser, session: SessionDep
+    payload: SettingsUpdate, user: AccountOwner, session: SessionDep
 ) -> Envelope[SettingsOut]:
     provided = payload.model_dump(exclude_unset=True)
 

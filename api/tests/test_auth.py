@@ -43,6 +43,7 @@ def test_register_can_be_disabled(client, monkeypatch):
     )
 
     assert response.status_code == 403
+    assert client.get("/api/auth/options").json()["data"] == {"registration": False}
 
 
 def test_login_succeeds_with_correct_credentials(client, register):
