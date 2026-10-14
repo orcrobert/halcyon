@@ -50,6 +50,19 @@ def test_patch_accepts_eq_bands(client, auth, element):
     assert body["eq_json"] == bands
 
 
+def test_patch_keeps_where_a_mixer_band_came_from(client, auth, element):
+    bands = [
+        {"type": "peaking", "freq": 520, "gain": -2.4, "q": 1.36, "source": "masking"},
+        {"type": "lowshelf", "freq": 200, "gain": 0.0, "q": 0.7},
+    ]
+
+    body = client.patch(
+        f"/api/elements/{element['id']}", headers=auth, json={"eq_json": bands}
+    ).json()["data"]
+
+    assert body["eq_json"] == bands
+
+
 @pytest.mark.parametrize(
     "payload",
     [
@@ -62,6 +75,7 @@ def test_patch_accepts_eq_bands(client, auth, element):
         {"tuning_hz": 900},
         {"eq_json": [{"type": "notch", "freq": 200, "gain": 0, "q": 1}]},
         {"eq_json": [{"type": "peaking", "freq": -10, "gain": 0, "q": 1}]},
+        {"eq_json": [{"type": "peaking", "freq": 500, "gain": 0, "q": 1, "source": "llm"}]},
     ],
 )
 def test_patch_rejects_out_of_range_values(client, auth, element, payload):

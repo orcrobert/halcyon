@@ -167,6 +167,27 @@ def test_the_whole_mix_is_recomputed_without_retrimming_the_others(
     assert after.original_eq_json is not None
 
 
+def test_the_mixer_sees_every_layer_with_its_role(
+    client, auth, stub_pipeline, elements, monkeypatch
+):
+    from api.app.services import pipeline
+
+    seen: list[dict] = []
+    real = pipeline.analyze
+
+    def spy(payloads):
+        seen.extend(dict(p) for p in payloads)
+        return real(payloads)
+
+    monkeypatch.setattr(pipeline, "analyze", spy)
+    pipeline.regenerate_element(elements[0]["id"], None)
+
+    assert {p["label"]: p["role"] for p in seen} == {
+        "Rain on glass": "bed",
+        "Warm drone": "texture",
+    }
+
+
 def test_a_manual_mix_edit_survives_a_neighbour_regenerating(
     client, auth, stub_pipeline, elements
 ):

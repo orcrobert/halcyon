@@ -41,12 +41,10 @@ Last reviewed against the tree at `refactor/architecture-cleanup`.
 
 ## Test coverage
 
-- 🟡 **`auto_eq` and `volume` have no direct tests.** `mixer/tests/test_core.py`
-  covers `analyze`, `mix_to_file`, `apply_pan`, `assign_spatial`, and
-  `make_loopable`, but the two modules that carry the most tuning — masking cuts
-  and perceptual level assignment — are only exercised through `analyze`, which
-  asserts shape, not behaviour. *Safe and high value: pin their output for
-  synthetic inputs before touching the DSP.*
+- 🟡 **`volume` has no direct tests.** Masking cuts are covered by
+  `mixer/tests/test_masking.py`, but perceptual level assignment is only
+  exercised through `analyze`, which asserts shape, not behaviour. *Safe and
+  high value: pin its output for synthetic inputs before touching it.*
 - 🟢 **No frontend tests at all.** The audio engine is verified by ear. Even a
   couple of jsdom tests over the pure helpers (`buildEQState`, `trackGain`,
   `dryGainFor`/`wetGainFor`, `audioBufferToWav` headers) would catch the

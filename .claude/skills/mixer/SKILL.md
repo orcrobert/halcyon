@@ -37,8 +37,9 @@ this surface. Keep it stable or update all callers in the same change.
 
 ## The pipeline (what runs, in order)
 
-`analyze`: loopable (`looping.make_loopable`) → `auto_eq.auto_eq` (tonal shaping
-+ masking cuts) → `volume.assign_volumes` (perceptual weighting − overlap
+`analyze`: loopable (`looping.make_loopable`) → draft volumes without EQ →
+`auto_eq.auto_eq` (tonal shaping + role-and-loudness masking cuts at those
+volumes) → `volume.assign_volumes` (perceptual weighting − overlap
 penalty) → `spatial.assign_spatial` (reach→pan, loudness/HF/onset→depth).
 
 ## Testing DSP changes

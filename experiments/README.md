@@ -8,6 +8,7 @@ experiment and holds its own code, data and write-up.
 |-----------|----------|---------|
 | [`llm_eval/`](llm_eval/) | Which LLM decomposes a scene prompt most reliably? | Mistral and Gemini Flash usable; Llama 3.1 breaks the output schema |
 | [`spatial_model/`](spatial_model/) | Can stereo placement be learned from audio features? | Negative — the learned model did not beat the heuristic; the mixer stays rule-based |
+| [`masking_eq/`](masking_eq/) | Does a role-and-loudness masking EQ unmask the important layer? | Same unmasking as before at lower cost: fewer, shallower cuts, priority layer left alone |
 
 ## llm_eval
 
@@ -39,3 +40,14 @@ python experiments/spatial_model/train_mlp.py
 
 The `.pkl` artifacts these write under `mixer/models/` are experiment outputs and
 are not loaded at runtime. See [`spatial_model/README.md`](spatial_model/README.md).
+
+## masking_eq
+
+Before/after benchmark for the masking stage of `auto_eq`, on synthetic scenes
+and on stored atmospheres exported from a running instance. Details and the
+result table are in [`masking_eq/README.md`](masking_eq/README.md).
+
+```
+python experiments/masking_eq/run.py --name masking --scenes corpus/scenes.json
+python experiments/masking_eq/compare.py baseline masking
+```
