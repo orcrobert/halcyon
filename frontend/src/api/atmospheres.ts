@@ -56,6 +56,13 @@ export async function reviseDecomposition(
   return data.data
 }
 
+export async function dismissQuality(id: number): Promise<Atmosphere> {
+  const { data } = await api.post<AtmosphereResponse>(
+    `/api/atmospheres/${id}/quality/dismiss`,
+  )
+  return data.data
+}
+
 export async function deleteAtmosphere(id: number): Promise<void> {
   await api.delete(`/api/atmospheres/${id}`)
 }

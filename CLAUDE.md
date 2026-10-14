@@ -255,6 +255,19 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   shipped `api/prompts/refiner.txt`) first, without it the stored prompt is
   regenerated as-is and no LLM is called. `Element.status` drives the UI, and
   `Element.version` busts the browser's audio cache.
+- **Every generated clip is checked, and re-rendering is the user's call.**
+  `services/quality.py` `check_results` runs `mixer/effects/quality.py`
+  `inspect_clip` over each reply before the mix: silence, clipping, bursts,
+  dropouts in a bed, presence-band harshness and the level/colour step across
+  the loop seam. Silent or unreadable clips are dropped (all of them failing
+  fails the run). Anything else is kept and stored on `Element.quality_json`.
+  The worker never retries on its own. The dashboard's `QualityModal` lists the
+  flagged layers, and the user either re-renders them through the normal
+  single-layer regenerate or keeps them (`POST
+  /api/atmospheres/{id}/quality/dismiss` sets `quality_dismissed`). A
+  regeneration re-checks its layer and clears the dismissal. Thresholds are
+  `QUALITY_*` constants. To calibrate them, run `python -m scripts.check_clips
+  <folder>` over real clips.
 - **Regeneration re-runs the whole mix.** `analyze()` runs over every layer so
   the new clip is placed against its neighbours. Stored clips go back in marked
   `looped` so only the new one is trimmed to a loop point. Recomputed values

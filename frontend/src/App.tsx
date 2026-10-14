@@ -15,6 +15,7 @@ import {
   confirmDecomposition,
   createAtmosphere,
   deleteAtmosphere,
+  dismissQuality,
   getAtmosphere,
   pollAtmosphere,
   regenerateAtmosphere,
@@ -316,6 +317,19 @@ function AuthedApp() {
     }
   }, [atmosphere, forget, watchRegeneration])
 
+  const handleQualityChoice = useCallback(async (rerender: Element[]) => {
+    if (!atmosphere) return
+    setActionError(null)
+    try {
+      const updated = await dismissQuality(atmosphere.id)
+      setAtmosphere((prev) => reconcileAtmosphere(prev, updated))
+    } catch (err) {
+      setActionError(err instanceof Error ? err.message : 'Could not save your choice.')
+      return
+    }
+    for (const element of rerender) await handleRegenerateElement(element, '')
+  }, [atmosphere, handleRegenerateElement])
+
   const handleDeleteElement = useCallback(async (element: Element) => {
     setActionError(null)
     try {
@@ -548,6 +562,7 @@ function AuthedApp() {
           onRegenerateElement={handleRegenerateElement}
           onDeleteElement={handleDeleteElement}
           onRegenerateScene={handleRegenerateScene}
+          onQualityChoice={handleQualityChoice}
           actionError={actionError}
           onDismissActionError={() => setActionError(null)}
           onStartAnimate={startAnimate}

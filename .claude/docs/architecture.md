@@ -61,7 +61,9 @@ Definitive reference for how the system fits together. Skim
   atmosphere itself, alongside `timings_json` (seconds per pipeline stage);
   `Element.status`/`error`/`version` track a single layer being regenerated.
   `Element.playback`/`clip_s`/`interval_min_s`/`interval_max_s` describe how a
-  layer repeats, and `source`/`source_json` where its audio came from. `original_*` columns on `Element` store the mixer's computed
+  layer repeats, and `source`/`source_json` where its audio came from.
+  `quality_json` holds the issues the quality check found in the clip and
+  `quality_dismissed` whether the user chose to keep it. `original_*` columns on `Element` store the mixer's computed
   defaults so the UI can reset. `UserSettings` holds per-user provider config.
 - **Routers**: `auth.py`, `admin.py`, `settings.py`, `generators.py`,
   `atmospheres.py`, `elements.py`. Every
@@ -93,6 +95,11 @@ Definitive reference for how the system fits together. Skim
   synchronously and stores the answer, still awaiting review. Discarding is a
   plain `DELETE`. A paused atmosphere is not reclaimed on restart, and a new
   take never pauses because it already carries a decomposition.
+- **Quality check** (`services/quality.py`): `check_results` sits between
+  `generate` and `analyze` in both `run_generation` and `regenerate_element`.
+  It decodes each reply, runs `inspect_clip`, drops silent or unreadable clips
+  and tags the rest with their issues. It never re-renders anything itself.
+  The browser asks first, and a re-render is an ordinary element regeneration.
 - **Storage** (`services/storage.py`): audio at
   `DATA_DIR/audio/{atmosphere_id}/{position}_{label}.wav`, with path-escape
   checks on read.
@@ -125,6 +132,13 @@ Effects:
   `librosa` is missing.
 - **`looping.py`**: cross-correlation loop-point search + equal-power crossfade
   so every clip loops seamlessly (infinite playback).
+- **`quality.py`**: `inspect_clip(wav, sr, role, playback, looped)` checks a
+  raw generated clip. All clips get silent peak and flat-top clipping. Loops
+  also get a 50 ms frame-level burst over the median (bed 15 dB, texture
+  24 dB), a dropout run (beds only), a 2–5 kHz energy share, and the level and
+  spectral-shape step between the end of the loop and the point where its
+  crossfade settles. It returns a list of `{check, value, limit}`, empty when
+  clean. It reads only and never changes the clip. Not called by `analyze`.
 
 ### `colab/` — reference generator
 Runs AudioGen (sound) and MusicGen (music) from Meta's AudioCraft, exposes
@@ -157,6 +171,7 @@ Frontend                    API                          LLM      Generator
    │  PUT /{id}/decomposition│  confirm re-queues, LLM skipped)           │
    │                         │ ── POST /generate ────────────────────▶│
    │                         │ ◀─ wavs (b64) ─────────────────────────┤
+   │                         │ quality check (drop silent)│           │
    │                         │ mixer.analyze()            │           │
    │                         │ write wavs + element rows  │           │
    │◀─ ready + elements ─────┤ status=ready               │           │

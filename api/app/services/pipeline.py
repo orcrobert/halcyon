@@ -14,6 +14,7 @@ from api.app.models.tables import Atmosphere, Element, utcnow
 from api.app.services import storage
 from api.app.services.decomposer import DEFAULT_ROLE, decompose, refine_element
 from api.app.services.generator import WAKE_TICK_S, generate, wait_until_ready
+from api.app.services.quality import check_results
 from api.app.services.runconfig import resolve_config
 from api.app.services.stages import (
     PERSISTING_DETAIL,
@@ -162,6 +163,7 @@ def _persist(
                 interval_max_s=element.get("interval_max_s"),
                 source=element.get("source"),
                 source_json=element.get("source_json"),
+                quality_json=element.get("quality"),
                 volume=volume,
                 pan=pan,
                 depth=depth,
@@ -306,11 +308,13 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
 
             wait_until_ready(config.generator_url)
             mark = time.perf_counter()
-            generated = generate(
-                {"elements": [spec]},
-                config,
-                atmosphere.duration_s or DEFAULT_DURATION_S,
-                style,
+            generated = check_results(
+                generate(
+                    {"elements": [spec]},
+                    config,
+                    atmosphere.duration_s or DEFAULT_DURATION_S,
+                    style,
+                )
             )
             timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
@@ -358,6 +362,8 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                         row.interval_max_s = payload.get("interval_max_s")
                         row.source = payload.get("source")
                         row.source_json = payload.get("source_json")
+                        row.quality_json = generated[0].get("quality")
+                        row.quality_dismissed = None
                         row.audio_path = storage.write_element_audio(
                             atmosphere.id, row.position, row.label, audio
                         )
@@ -438,11 +444,13 @@ def run_generation(atmosphere_id: int) -> None:
                 generating_detail(config, decomposed["elements"], style is not None),
             )
             mark = time.perf_counter()
-            elements = generate(
-                decomposed,
-                config,
-                atmosphere.duration_s or DEFAULT_DURATION_S,
-                style,
+            elements = check_results(
+                generate(
+                    decomposed,
+                    config,
+                    atmosphere.duration_s or DEFAULT_DURATION_S,
+                    style,
+                )
             )
             timings["generate_s"] = round(time.perf_counter() - mark, 3)
 
@@ -467,7 +475,11 @@ def run_generation(atmosphere_id: int) -> None:
                 atmosphere.decomposed_json = {
                     "atmosphere": decomposed.get("atmosphere"),
                     "elements": [
-                        {k: v for k, v in element.items() if k != "file"}
+                        {
+                            k: v
+                            for k, v in element.items()
+                            if k not in ("file", "quality")
+                        }
                         for element in valid
                     ],
                 }

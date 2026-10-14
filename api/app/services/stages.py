@@ -68,7 +68,7 @@ def generating_detail(
 def mixing_detail(elements: list[dict]) -> str:
     return (
         f"Analysing {len(elements)} clip{'s' if len(elements) != 1 else ''}: "
-        "loudness, EQ, placement, loop points"
+        "quality, loudness, EQ, placement, loop points"
     )
 
 
