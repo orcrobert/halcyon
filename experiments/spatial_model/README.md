@@ -18,6 +18,6 @@ beat the heuristic — so the shipped mixer uses the rule-based approach in
 `train_mlp.py` use paths relative to the working directory, so run them from the
 repo root.
 
-Kept for reproducibility and because the thesis documents the comparison. The
+Kept for reproducibility and as the record of the comparison. The
 `.pkl` artifacts under `mixer/models/` are outputs of this experiment and are not
 loaded at runtime.

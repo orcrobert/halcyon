@@ -2,11 +2,11 @@
 
 The cleanup backlog. Tagged by severity (🔴 high / 🟡 medium / 🟢 low) and by
 whether a fix is **safe** (behaviour-preserving) or **risky** (could change
-behaviour — this is a thesis project and the audio path has no browser tests).
+behaviour — the audio path is verified by ear and has no browser tests).
 
 Nothing here blocks the app. These are quality, correctness, and hygiene items.
 
-Last reviewed against the tree at `refactor/architecture-cleanup`.
+Last reviewed against `main` at `822c5ed` (October 2026).
 
 ---
 
@@ -19,15 +19,17 @@ Last reviewed against the tree at `refactor/architecture-cleanup`.
   *Risky: decide deliberately whether binaural is part of the mix or an overlay,
   then make playback and export agree.*
 - 🟡 **A generator failure is terminal.** `GenerationWorker` runs each
-  atmosphere once; any exception marks it `failed`. Against a Colab+ngrok link
-  that drops routinely, one transient error loses the whole run. *Risky:
+  atmosphere once; any exception marks it `failed`. The `waking` stage now
+  waits out a cold start, and flagged clips are re-rendered by the user, not
+  the worker, but a transient error mid-`POST /generate` (a dropped ngrok
+  tunnel, a Modal container restart) still loses the whole run. *Risky:
   retries with backoff change failure semantics and re-spend GPU time; decide
   deliberately rather than drifting into it.*
 - 🟢 **The two mixing engines can drift in loudness.** The Python mixer
   peak-normalizes in `mix_to_file`; the browser runs live playback and
   `exportMix` through the same −4 dB 20:1 limiter. A backend mix and a browser
   export of the same atmosphere will still not match. Their *parameter*
-  conventions are pinned (EQ 200/1k/8k, pan −1..1, depth 0..1, and the shared
+  conventions are pinned (the `eq_json` band list, pan −1..1, depth 0..1, and the shared
   constants at the top of `useAudioEngine.ts`), but the gain stage is not.
   *Risky: align intentionally and document which chain is canonical.*
 - 🟢 **The pitch worklet drops frames when tuning is off 440 Hz.**
@@ -41,40 +43,39 @@ Last reviewed against the tree at `refactor/architecture-cleanup`.
 
 ## Test coverage
 
-- 🟡 **`auto_eq` and `volume` have no direct tests.** `mixer/tests/test_core.py`
-  covers `analyze`, `mix_to_file`, `apply_pan`, `assign_spatial`, and
-  `make_loopable`, but the two modules that carry the most tuning — masking cuts
-  and perceptual level assignment — are only exercised through `analyze`, which
-  asserts shape, not behaviour. *Safe and high value: pin their output for
-  synthetic inputs before touching the DSP.*
-- 🟢 **No frontend tests at all.** The audio engine is verified by ear. Even a
-  couple of jsdom tests over the pure helpers (`buildEQState`, `trackGain`,
-  `dryGainFor`/`wetGainFor`, `audioBufferToWav` headers) would catch the
-  drift class of bug the constants refactor was aimed at.
+- 🟡 **`auto_eq` and `volume` have almost no direct tests.**
+  `mixer/tests/test_eq.py` pins the RBJ filters and checks only that every
+  `auto_eq` band has a positive Q; `assign_volumes` has no test of its own. The
+  two modules that carry the most tuning — masking cuts and perceptual level
+  assignment — are otherwise exercised through `analyze`, which asserts shape,
+  not behaviour. *Safe and high value: pin their output for synthetic inputs
+  before touching the DSP.*
+- 🟡 **API tests read the developer's `.env`.** `Settings` loads the repo-root
+  `.env`, and `api/tests/conftest.py` does not isolate it, so a local
+  `DECOMPOSER_ALLOW_CLI=true` fails `test_settings.py` (CLI providers appear,
+  a CLI choice is accepted). CI has no `.env` and passes. *Safe: point the test
+  settings at no env file, or pin the instance defaults in an autouse fixture.*
+- 🟢 **The audio engine's helpers are untested.** Vitest covers the pure
+  modules (`eventScheduler`, `styleClip`, quality and stage text), but nothing
+  in `useAudioEngine.ts` itself. Tests over `buildEQState`, `trackGain`,
+  `dryGainFor`/`wetGainFor`, the loop-region maths and `audioBufferToWav`
+  headers would catch the drift class of bug between the two engines.
 
 ## Frontend maintainability
 
-- 🟡 **`useAudioEngine.ts` is a ~530-line monolith** doing decode, graph
-  construction, EQ, pan, reverb, tuning, binaural, the animate loop, and offline
-  export in one hook. *Risky but high value: extract cohesive units (graph
-  builder, binaural, animate, export) behind the same public surface, one at a
-  time, with listening checks between.*
-- 🟢 **`exportMix` duplicates the graph construction in `startFromDecoded`.**
-  Both build filters → gain → panner → reverb sends in the same order; only the
-  context and the parameter sources differ. The shared constants removed the
-  numeric drift, but the topology is still written twice. *Safe: extract one
-  builder taking a `BaseAudioContext`.*
-
-## Repo hygiene
-
-- 🟡 **`backend/` is an untracked leftover of the removed Laravel app.** Still on
-  disk locally with a `vendor/` tree and its own `.env`. Gitignored by nothing —
-  it is simply untracked, so it is one `git add -A` away from being committed,
-  secrets included. *Safe: delete it locally once you have confirmed nothing in
-  it is wanted.*
-- 🟢 **Local `.DS_Store` files and macOS "keep both" duplicates**
-  (`favicon 2.svg`, `index 2.html`) litter `frontend/public/` and `frontend/dist/`.
-  Gitignored, but worth cleaning.
+- 🟡 **`useAudioEngine.ts` is a ~930-line monolith** doing decode, graph
+  construction, EQ, pan, reverb, tuning, binaural, event scheduling, the
+  animate loop, and offline export in one hook. *Risky but high value: extract
+  cohesive units (binaural, event lanes, animate, export) behind the same
+  public surface, one at a time, with listening checks between.*
+- 🟡 **About 100 comments in `frontend/src` break the no-comments rule.** Most
+  are JSX section labels (`{/* ... */}`) in `EQPanel`, `SpatialModal`,
+  `SpatialPad`, `DashboardView`, `PanKnob`, `BinauralModal`, `TrackStrip`,
+  `HistoryPanel` and `TuningControl`, plus three in `useAudioEngine.ts` and one
+  in `index.css`. Three sit in otherwise-empty `catch` blocks (`App.tsx:114`,
+  `api/token.ts:28`, `themes.ts:395`), where ESLint's `no-empty` needs the body
+  to be non-empty, so those need a real statement or a named no-op instead of
+  just being deleted. *Safe: strip them in one `refactor:` commit and run lint.*
 
 ---
 
@@ -127,9 +128,15 @@ Kept as a record of what the earlier audits called for.
   heuristic.
 
 **Hygiene**
+- ✅ The untracked `backend/` leftover of the Laravel app and the macOS
+  "keep both" duplicates in `frontend/public/` are gone.
+- ✅ `exportMix` and live playback build each track through one
+  `buildTrackChain` taking a `BaseAudioContext`, so the topology is written
+  once.
 - ✅ Root `README.md` and `LICENSE` exist; `frontend/README.md` documents this
   project instead of the Vite template.
 - ✅ Duplicated frontend audio constants (`* 0.5` gain scale, reverb
   coefficients, EQ frequencies) are named at the top of `useAudioEngine.ts`.
-- ✅ CI runs lint, typecheck, build, and both pytest suites on every push and
-  pull request (`.github/workflows/ci.yml`).
+- ✅ CI runs ruff, both pytest suites, the generator core tests, frontend lint,
+  typecheck, vitest and build, and boots the image, on every push to `main`
+  (`.github/workflows/ci.yml`). Pull requests do not run CI by choice.

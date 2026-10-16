@@ -1,7 +1,7 @@
 # Architecture
 
 Definitive reference for how the system fits together. Skim
-[CLAUDE.md](../../CLAUDE.md) first for the summary.
+[AGENTS.md](../../AGENTS.md) first for the summary.
 
 ---
 
@@ -131,7 +131,13 @@ Effects:
   separation); loudness/HF/onset drive `depth`. Degrades to centre/no-depth if
   `librosa` is missing.
 - **`looping.py`**: cross-correlation loop-point search + equal-power crossfade
-  so every clip loops seamlessly (infinite playback).
+  so every clip loops seamlessly (infinite playback). `pad_for_looping` adds
+  `LOOP_PAD_S` of each end past the loop points before the API stores a loop
+  clip, so the browser's resampler never starves at the seam.
+- **`events.py`**: one-shots. `trim_to_envelope` cuts a clip to its audible
+  part; `place_events` sets each event `EVENT_OFFSET_DB` under the loudest loop
+  layer (or `EVENT_FALLBACK_ANCHOR_DB` with no loop layer), centred, at
+  `EVENT_DEPTH`.
 - **`quality.py`**: `inspect_clip(wav, sr, role, playback, looped)` checks a
   raw generated clip. All clips get silent peak and flat-top clipping. Loops
   also get a 50 ms frame-level burst over the median (bed 15 dB, texture
@@ -140,11 +146,19 @@ Effects:
   crossfade settles. It returns a list of `{check, value, limit}`, empty when
   clean. It reads only and never changes the clip. Not called by `analyze`.
 
-### `colab/` — reference generator
-Runs AudioGen (sound) and MusicGen (music) from Meta's AudioCraft, exposes
-`POST /generate` over ngrok. It is one implementation of the generator contract;
-the `api/` service treats any generator as a black box behind `GENERATOR_URL`
-(legacy alias `COLAB_URL`). See [SELF_HOSTING.md](../../SELF_HOSTING.md#the-generator-contract).
+### `generators/` — bring-your-own generator
+Runs AudioGen (sound), MusicGen (music) and, for styled requests,
+MusicGen-Style from Meta's AudioCraft behind `GET /` (readiness) and
+`POST /generate`. The logic is one package, `generators/core`
+(`halcyon_generator`: `engine.py` batches elements by `(type, seconds)`,
+`app.py` serves them, `cli.py` runs it). Four thin hosts install it from git:
+`local/` (own CUDA GPU), `colab/` (notebook over ngrok), `modal/` (`deploy.py`,
+per-second GPU that scales to zero, deployable from the API) and
+`huggingface/` (a paid Space). The `api/` service treats any generator as a
+black box behind the user's active `GeneratorProfile`, falling back to
+`GENERATOR_URL` (legacy alias `COLAB_URL`). See
+[`generators/README.md`](../../generators/README.md) and
+[SELF_HOSTING.md](../../SELF_HOSTING.md#the-generator-contract).
 
 ### Research
 Everything research-only lives under `experiments/`, one directory per

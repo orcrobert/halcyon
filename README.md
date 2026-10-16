@@ -71,15 +71,15 @@ Running your own instance? Start with **[SELF_HOSTING.md](SELF_HOSTING.md)**.
 | `frontend/` | React UI + browser audio engine |
 | `api/` | FastAPI service: auth, persistence, generation, audio serving |
 | `mixer/` | Auto-EQ / volume / spatial / looping DSP package |
-| `generators/` | GPU generator: shared server package + Colab, Hugging Face and Modal hosts |
-| `experiments/` | Thesis research: decomposition benchmark, learned spatial model |
+| `generators/` | GPU generator: shared server package + local, Colab, Hugging Face and Modal hosts |
+| `experiments/` | Research: decomposition benchmark, learned spatial model |
 | `scripts/` | Operational CLIs |
 
 ## Documentation
 
 - **[SELF_HOSTING.md](SELF_HOSTING.md)** — run your own instance (config, generator contract, containerization map)
 - **[MANUAL.md](MANUAL.md)** — set up and run the whole stack
-- **[CLAUDE.md](CLAUDE.md)** — guide for contributors and AI coding agents
+- **[AGENTS.md](AGENTS.md)** — rules for contributors and coding agents
 - **[.claude/docs/architecture.md](.claude/docs/architecture.md)** — system architecture and data flow
 
 ## Contributing

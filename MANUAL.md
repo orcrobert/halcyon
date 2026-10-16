@@ -1,7 +1,7 @@
 # Manual — Halcyon
 
 How to set up, run, and operate the whole stack locally. For architecture and
-contribution rules see [CLAUDE.md](CLAUDE.md) and [`.claude/docs/`](.claude/docs/).
+contribution rules see [AGENTS.md](AGENTS.md) and [`.claude/docs/`](.claude/docs/).
 
 ---
 
@@ -169,17 +169,20 @@ uvicorn api.app.main:app --port 8001
 
 - **Python**: `pytest` from the repo root runs both suites (`api/tests`,
   `mixer/tests`); narrow with `pytest api/tests` or `pytest mixer/tests`
-- **Frontend**: `cd frontend && npm run lint` and `npx tsc --noEmit`
+- **Generator**: `cd generators/core && pip install -e '.[dev]' && pytest`
+  (no AudioCraft or GPU needed)
+- **Lint**: `ruff check .` for Python
+- **Frontend**: `cd frontend && npm run lint`, `npx tsc --noEmit` and `npm test`
 - **Image**: `docker build -t halcyon .` — CI also boots it and checks `/health`
-- **DSP**: see the [`mixer`](.claude/skills/mixer/SKILL.md) skill before changing
-  anything under `mixer/mixer/`
+- **DSP**: read [`.claude/rules/mixer.md`](.claude/rules/mixer.md) before
+  changing anything under `mixer/`
 
-CI runs all three on every push and pull request
+CI runs all of these on every push to `main`
 (`.github/workflows/ci.yml`).
 
 ---
 
-## 8. Experiments (thesis)
+## 8. Experiments
 
 All research code lives under `experiments/`, one directory per experiment, with
 run instructions in [`experiments/README.md`](experiments/README.md).
