@@ -328,7 +328,7 @@ Three more variables are read by compose itself:
 | Variable | Default | Effect |
 |----------|---------|--------|
 | `HALCYON_TAG` | `latest` | which published image to run, see [Published images](#published-images) |
-| `HALCYON_PORT` | `8001` | the host port |
+| `HALCYON_PORT` | `8001` | the host port, published on `127.0.0.1` only; see [On a public server](#on-a-public-server) |
 | `HALCYON_TARGET` | `runtime` | the target built by [Building the image](#building-the-image) |
 
 `DATA_DIR`, `FRONTEND_DIST` and `GENERATORS_DIR` are fixed to the image's paths
@@ -438,11 +438,33 @@ The generator is deliberately not in the compose file: it wants a GPU, it is
 often on another host, and it is yours to run. See
 [The generator contract](#the-generator-contract).
 
+### On a public server
+
+The API speaks plain HTTP and sends a bearer token on every request, so it
+needs TLS in front of it. Keep the loopback binding and run a reverse proxy on
+the host. With Caddy, which fetches the certificate itself:
+
+```
+halcyon.example.com {
+    reverse_proxy 127.0.0.1:8001
+}
+```
+
+Do not publish the port on `0.0.0.0` instead: Docker writes its own firewall
+rules, so a published port is open even when `ufw` says it is not.
+
+Register your own account before the domain resolves, or over an SSH tunnel
+(`ssh -L 8001:127.0.0.1:8001 your-server`), because the first account becomes
+the administrator. Then set `ALLOW_REGISTRATION=false` and create the other
+accounts from the Users section; see [Managing users](#managing-users).
+
+The interactive API docs (`/docs`, `/redoc`, `/openapi.json`) are not served.
+
 ### Without compose
 
 ```bash
 docker run -d --name halcyon \
-  -p 8001:8001 \
+  -p 127.0.0.1:8001:8001 \
   -v halcyon-data:/data \
   --read-only --tmpfs /tmp \
   --add-host host.docker.internal:host-gateway \

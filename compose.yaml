@@ -3,7 +3,7 @@ services:
     image: ghcr.io/orcrobert/halcyon:${HALCYON_TAG:-latest}
     restart: unless-stopped
     ports:
-      - "${HALCYON_PORT:-8001}:8001"
+      - "127.0.0.1:${HALCYON_PORT:-8001}:8001"
     env_file:
       - path: .env
         required: false
