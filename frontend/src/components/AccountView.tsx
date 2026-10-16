@@ -6,6 +6,7 @@ import { Card, SwitchRow } from './AccountCard'
 import { DecomposerCard } from './DecomposerCard'
 import { GeneratorsCard } from './GeneratorsCard'
 import { PromptEditorModal } from './PromptEditorModal'
+import { UpdatesPanel } from './UpdatesPanel'
 import { UsersPanel } from './UsersPanel'
 import { AVATAR_STYLE, LABEL_CLASS, initials } from './accountStyles'
 import { ThemeCard } from './ThemeCard'
@@ -18,7 +19,7 @@ interface Props {
   initialSection?: SectionId
 }
 
-export type SectionId = 'model' | 'generator' | 'appearance' | 'account' | 'users'
+export type SectionId = 'model' | 'generator' | 'appearance' | 'account' | 'users' | 'updates'
 
 interface Section {
   id: SectionId
@@ -93,6 +94,19 @@ const SECTIONS: Section[] = [
         <circle cx="9" cy="7" r="4" />
         <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
         <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+      </>
+    ),
+  },
+  {
+    id: 'updates',
+    label: 'Updates',
+    caption: 'Version and upgrades',
+    title: 'Updates',
+    hint: 'Which release this server runs, and how it moves to the next one.',
+    icon: (
+      <>
+        <polyline points="23 4 23 10 17 10" />
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
       </>
     ),
   },
@@ -219,7 +233,7 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
   }
 
   const user = state.status === 'authed' ? state.user : null
-  const sections = SECTIONS.filter((s) => s.id !== 'users' || user?.is_admin)
+  const sections = SECTIONS.filter((s) => (s.id !== 'users' && s.id !== 'updates') || user?.is_admin)
   const active = sections.find((s) => s.id === section) ?? sections[0]
 
   return (
@@ -461,6 +475,12 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                 {user?.is_admin && (
                   <Panel id="users" active={active.id}>
                     <UsersPanel />
+                  </Panel>
+                )}
+
+                {user?.is_admin && active.id === 'updates' && (
+                  <Panel id="updates" active={active.id}>
+                    <UpdatesPanel />
                   </Panel>
                 )}
               </>

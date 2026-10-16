@@ -8,6 +8,7 @@ import { HistoryPanel } from './components/HistoryPanel'
 import { ReviewLayersModal } from './components/ReviewLayersModal'
 import { AccountView, type SectionId } from './components/AccountView'
 import { DeployToast } from './components/DeployToast'
+import { UpdateToast } from './components/UpdateToast'
 import { useAudioEngine, isCanonicalBand, type EQState } from './hooks/useAudioEngine'
 import { useDebouncedPatcher } from './hooks/useDebouncedPatcher'
 import type { StyleClip } from './hooks/styleClip'
@@ -582,6 +583,13 @@ function AuthedApp() {
         onOpenSettings={() => {
           if (view !== 'account') setAccountReturnView(view)
           setAccountSection((s) => ({ id: 'generator', key: s.key + 1 }))
+          setView('account')
+        }}
+      />
+      <UpdateToast
+        onOpenSettings={() => {
+          if (view !== 'account') setAccountReturnView(view)
+          setAccountSection((s) => ({ id: 'updates', key: s.key + 1 }))
           setView('account')
         }}
       />

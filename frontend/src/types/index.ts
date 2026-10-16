@@ -306,3 +306,21 @@ export type SettingsUpdate = Partial<{
   modal_token_id: string
   modal_token_secret: string
 }>
+
+export interface UpdateStatus {
+  current: string
+  latest: string | null
+  update_available: boolean
+  major: boolean
+  pinned: boolean
+  notes: string | null
+  release_url: string | null
+  published_at: string | null
+  checked_at: string | null
+  check_error: string | null
+  track: string
+  updater: 'ready' | 'missing'
+  updating: boolean
+  update_error: string | null
+  auto_update: boolean
+}
