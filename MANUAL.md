@@ -90,8 +90,11 @@ thing to how a self-hosted instance runs — see
 [SELF_HOSTING.md](SELF_HOSTING.md#running-it-with-docker):
 
 ```bash
-docker compose up -d      # http://localhost:8001
+docker compose up -d                                              # the published image
+docker compose -f compose.yaml -f compose.build.yaml up -d --build  # this checkout
 ```
+
+Both serve <http://localhost:8001>.
 
 The rest of this section is the from-source workflow you want for development,
 where the Vite dev server gives you HMR.

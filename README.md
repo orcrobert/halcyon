@@ -36,14 +36,52 @@ Twenty themes, too.
 
 ## Run it
 
-Halcyon is one container. It needs no configuration to start.
+Halcyon is one container and needs no configuration to start. Save this as
+`compose.yaml` on your server, or paste it into Dockge, Portainer or whatever
+manages your stacks:
+
+```yaml
+services:
+  halcyon:
+    image: ghcr.io/orcrobert/halcyon:${HALCYON_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${HALCYON_PORT:-8001}:8001"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      GENERATOR_URL: ${GENERATOR_URL:-http://host.docker.internal:9000}
+      DATA_DIR: /data
+      FRONTEND_DIST: /app/frontend/dist
+      GENERATORS_DIR: /app/generators
+    volumes:
+      - halcyon-data:/data
+    tmpfs:
+      - /tmp
+    read_only: true
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  halcyon-data:
+```
+
+Then start it:
 
 ```bash
-docker run -d --name halcyon \
-  -p 8001:8001 \
-  -v halcyon-data:/data \
-  --restart unless-stopped \
-  ghcr.io/orcrobert/halcyon:latest
+docker compose up -d
+```
+
+Or fetch the same file straight from the repo:
+
+```bash
+mkdir halcyon && cd halcyon
+curl -fsSLO https://raw.githubusercontent.com/orcrobert/halcyon/main/compose.yaml
+docker compose up -d
 ```
 
 Open <http://localhost:8001> and create an account. The first one is the
@@ -53,22 +91,28 @@ container can be removed and recreated freely.
 To update to the latest release:
 
 ```bash
-docker pull ghcr.io/orcrobert/halcyon:latest
-docker rm -f halcyon
+docker compose pull && docker compose up -d
 ```
 
-then run the same `docker run` command again.
+Server-wide settings, such as closing registration or pinning a version, go in
+a `.env` file next to `compose.yaml`. None are required; see
+[SELF_HOSTING.md](SELF_HOSTING.md#running-it-with-docker).
 
 <details>
-<summary>With Docker Compose instead</summary>
+<summary>With plain Docker instead</summary>
 
 ```bash
-git clone https://github.com/orcrobert/halcyon.git
-cd halcyon
-HALCYON_IMAGE=ghcr.io/orcrobert/halcyon:latest docker compose up -d
+docker run -d --name halcyon \
+  -p 8001:8001 \
+  -v halcyon-data:/data \
+  --read-only --tmpfs /tmp \
+  --add-host host.docker.internal:host-gateway \
+  --restart unless-stopped \
+  ghcr.io/orcrobert/halcyon:latest
 ```
 
-Leave out `HALCYON_IMAGE=…` to build the image from your checkout instead.
+To update, `docker pull ghcr.io/orcrobert/halcyon:latest`, then
+`docker rm -f halcyon` and run the same command again.
 </details>
 
 <details>
@@ -138,8 +182,7 @@ halcyon-generator serve --port 9000
 
 Add it in Halcyon as a **Local machine** generator at `http://localhost:9000`.
 If Halcyon runs in Docker on the same computer, use
-`http://host.docker.internal:9000` instead, and on Linux add
-`--add-host host.docker.internal:host-gateway` to the `docker run` command.
+`http://host.docker.internal:9000` instead.
 
 A **Hugging Face Space** on a paid GPU works too. Every option is covered in
 [generators/README.md](generators/README.md).
