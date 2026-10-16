@@ -12,14 +12,15 @@ Full detail in [MANUAL.md](../../../MANUAL.md). This is the operational checklis
 The quickest whole-stack run, and how the live instance is deployed:
 
 ```bash
-docker compose up -d
+docker compose -f compose.yaml -f compose.build.yaml up -d --build
 docker compose logs -f
 ```
 
-It serves the built UI and the API on <http://localhost:8001> and keeps its
+That builds this checkout. Plain `docker compose up -d` runs the published
+image instead (`HALCYON_TAG` picks the tag), which is what self-hosters do.
+Either serves the built UI and the API on <http://localhost:8001> and keeps its
 database and audio in the `/data` volume, not the repo's `data/`. Set the
 generator and decomposer in `.env` or in the account panel after signing in.
-`HALCYON_IMAGE` picks a published image instead of building locally.
 
 ## Local development: order of startup
 

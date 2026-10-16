@@ -1,0 +1,27 @@
+services:
+  halcyon:
+    image: ghcr.io/orcrobert/halcyon:${HALCYON_TAG:-latest}
+    restart: unless-stopped
+    ports:
+      - "${HALCYON_PORT:-8001}:8001"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      GENERATOR_URL: ${GENERATOR_URL:-http://host.docker.internal:9000}
+      DATA_DIR: /data
+      FRONTEND_DIST: /app/frontend/dist
+      GENERATORS_DIR: /app/generators
+    volumes:
+      - halcyon-data:/data
+    tmpfs:
+      - /tmp
+    read_only: true
+    init: true
+    security_opt:
+      - no-new-privileges:true
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  halcyon-data:
