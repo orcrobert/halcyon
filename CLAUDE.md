@@ -356,6 +356,13 @@ Full setup and run instructions are in [MANUAL.md](MANUAL.md). Short version:
   disconnects the chain after its fade-out. Layers share one reverb convolver
   per context through their wet sends, so do not go back to a convolver per
   track.
+- **Merges to `main` release themselves.** `.github/workflows/release.yml`
+  runs after CI succeeds on `main`, derives the next semver from commit types
+  since the last `v*` tag (`.github/scripts/next_version.py`), tags it, pushes
+  `ghcr.io/orcrobert/halcyon` (both targets, amd64 + arm64) and attaches the
+  `halcyon-mixer` wheel to a GitHub release. Versions live in tags only; never
+  bump `version` in a `pyproject.toml` by hand. Commit type is therefore
+  user-facing: `feat` → minor, `fix` → patch, `!`/`BREAKING CHANGE` → major.
 - **Known issues and cleanup targets** are catalogued in
   [`.claude/AUDIT.md`](.claude/AUDIT.md). Read it before large refactors.
 

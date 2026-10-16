@@ -46,6 +46,10 @@ cp .env.example .env            # fill in DECOMPOSER_* and GENERATOR_URL
 docker compose up -d
 ```
 
+Or skip the build and run a published release:
+`docker pull ghcr.io/orcrobert/halcyon:latest` (see
+[Published images](SELF_HOSTING.md#published-images)).
+
 From source:
 
 ```bash

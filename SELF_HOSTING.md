@@ -306,6 +306,49 @@ Open <http://localhost:8001>. `docker compose logs -f` follows the API,
 `docker compose down` stops it, and `docker compose up -d --build` rebuilds
 after a code change.
 
+### Published images
+
+Every release pushes the image to GitHub's container registry, for
+`linux/amd64` and `linux/arm64`, so you can skip the build:
+
+| Tag | Image |
+|-----|-------|
+| `ghcr.io/orcrobert/halcyon:latest` | newest release, standard target |
+| `ghcr.io/orcrobert/halcyon:0.4.1` | one exact release |
+| `ghcr.io/orcrobert/halcyon:0.4` | newest patch of a minor line |
+| `…:latest-cli`, `…:0.4.1-cli` | the `runtime-cli` target |
+
+With compose, set `HALCYON_IMAGE` in `.env` to one of those and pull instead of
+building:
+
+```bash
+docker compose pull
+docker compose up -d
+```
+
+Without it, `docker run` takes the same arguments as in
+[Without compose](#without-compose) with the registry name in place of
+`halcyon`. The mixer is published on the same release as a wheel; see
+[Releases](#releases).
+
+### Releases
+
+A merge to `main` releases itself once CI passes. The `Release` workflow reads
+the commit subjects since the last `v*` tag: any `feat!:` subject or
+`BREAKING CHANGE:` footer bumps the major version, any `feat:` the minor, any
+`fix:` the patch. A merge with only `chore`, `docs`, `refactor` or `test`
+commits releases nothing. The first release is `v0.1.0`.
+
+A release tags the merge commit, pushes both image targets, and creates a GitHub
+release with generated notes and the `halcyon-mixer` wheel and sdist attached:
+
+```bash
+pip install https://github.com/orcrobert/soundscape-generator/releases/download/v0.4.1/halcyon_mixer-0.4.1-py3-none-any.whl
+```
+
+Versions live only in tags. The `version` in each `pyproject.toml` is stamped at
+build time and is never bumped by hand.
+
 ### What you get
 
 One container. A Node stage builds `frontend/dist`, a Python stage installs the
