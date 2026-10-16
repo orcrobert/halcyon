@@ -107,7 +107,7 @@ def main() -> int:
 
     train, val, test = recording_stratified_split(df, test_size=0.15, val_size=0.15)
     print(f"split: train={len(train)} val={len(val)} test={len(test)}")
-    print(f"recording overlap (should all be 0):")
+    print("recording overlap (should all be 0):")
     print(f"  train∩test recordings: {len(set(train['recording_id']) & set(test['recording_id']))}")
     print(f"  train∩val recordings:  {len(set(train['recording_id']) & set(val['recording_id']))}")
 

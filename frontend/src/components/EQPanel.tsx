@@ -50,7 +50,6 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', flex: 1 }}>
-      {/* Value */}
       <span style={{
         fontSize: '13px',
         fontFamily: 'inherit',
@@ -63,9 +62,7 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
         {value === 0 ? '0' : `${value > 0 ? '+' : ''}${value.toFixed(1)}`}
       </span>
 
-      {/* Track + input */}
       <div style={{ position: 'relative', height: `${trackHeight}px`, width: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {/* Background track */}
         <div style={{
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
@@ -74,7 +71,6 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
           borderRadius: '4px',
         }} />
 
-        {/* Active fill */}
         <div style={{
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
@@ -86,7 +82,6 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
           transition: 'background 0.15s ease',
         }} />
 
-        {/* 0 dB tick */}
         <div style={{
           position: 'absolute',
           left: '50%', transform: 'translateX(-50%)',
@@ -95,7 +90,6 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
           top: `${trackHeight / 2}px`,
         }} />
 
-        {/* Range input rotated */}
         <input
           type="range"
           className="eq-slider"
@@ -113,7 +107,6 @@ function BandSlider({ label, freq, value, onChange }: BandSliderProps) {
         />
       </div>
 
-      {/* Label */}
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px' }}>
         <span style={{ fontSize: '12px', fontWeight: 700, color: isActive ? 'var(--color-accent)' : 'var(--color-ink-faint)', letterSpacing: '0.1em', fontFamily: 'inherit', transition: 'color 0.15s ease' }}>
           {label}
@@ -133,7 +126,7 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
   const [pos, setPos] = useState({ top: 0, left: 0 })
   const [arrowLeft, setArrowLeft] = useState('50%')
   const panelRef = useRef<HTMLDivElement>(null)
-  const PANEL_HEIGHT = 360 // approx, used for positioning
+  const PANEL_HEIGHT = 360
 
   function getPanelWidth() {
     return Math.min(340, window.innerWidth - 24)
@@ -172,7 +165,6 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
     }
   }, [open])
 
-  // Reposition on scroll or resize while open
   useEffect(() => {
     if (!open) return
     window.addEventListener('resize', reposition)
@@ -183,7 +175,6 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
     }
   }, [open])
 
-  // Close on outside click
   useEffect(() => {
     if (!open) return
     function handler(e: MouseEvent) {
@@ -227,7 +218,6 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
         pointerEvents: visible ? 'auto' : 'none',
       }}
     >
-      {/* Panel body */}
       <div data-frosted style={{
         background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
         backdropFilter: 'blur(40px) saturate(180%) brightness(1.1)',
@@ -238,7 +228,6 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
         boxShadow: '0 40px 100px color-mix(in srgb, var(--color-shade) 60%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 10%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 8%, transparent)',
       }}>
 
-        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
           <div>
             <p style={{ fontSize: '11px', color: 'var(--color-ink-ghost)', fontFamily: 'inherit', letterSpacing: '0.12em', textTransform: 'uppercase', margin: 0 }}>
@@ -273,11 +262,9 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
           </button>
         </div>
 
-        {/* Sliders */}
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'space-between' }}>
           <BandSlider label="LOW" freq="200 Hz" value={eq.low} onChange={v => handleChange('low', v)} />
 
-          {/* Divider */}
           <div style={{ width: '1px', background: 'color-mix(in srgb, var(--color-wash) 4%, transparent)', alignSelf: 'stretch', margin: '0 4px' }} />
 
           <BandSlider label="MID" freq="1 kHz" value={eq.mid} onChange={v => handleChange('mid', v)} />
@@ -287,7 +274,6 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
           <BandSlider label="HIGH" freq="8 kHz" value={eq.high} onChange={v => handleChange('high', v)} />
         </div>
 
-        {/* dB scale hint */}
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px', paddingTop: '12px', borderTop: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)' }}>
           <span style={{ fontSize: '9px', color: 'var(--color-ink-whisper)', fontFamily: 'inherit' }}>−8 dB</span>
           <span style={{ fontSize: '9px', color: 'var(--color-ink-whisper)', fontFamily: 'inherit' }}>0</span>
@@ -295,7 +281,6 @@ export function EQPanel({ label, initialBands, open, anchorRef, onEQChange, onCl
         </div>
       </div>
 
-      {/* Arrow pointing down toward anchor */}
       <div data-frosted style={{
         position: 'absolute',
         bottom: '-7px',

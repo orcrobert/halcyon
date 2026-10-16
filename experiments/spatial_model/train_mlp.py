@@ -109,6 +109,6 @@ print(f'Saved: {out_dir}/spatial_scaler.pkl')
 loaded_model = joblib.load(out_dir / 'spatial_model.pkl')
 loaded_scaler = joblib.load(out_dir / 'spatial_scaler.pkl')
 check = loaded_model.predict(loaded_scaler.transform(X_test_scaled[:5]))
-print(f'\nReload check:')
+print('\nReload check:')
 for i in range(5):
     print(f'  predicted={check[i]:+.3f}  actual={y_test[i]:+.3f}')

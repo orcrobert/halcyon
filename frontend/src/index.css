@@ -68,7 +68,6 @@ input[type="range"].fader:active::-webkit-slider-thumb {
   background: var(--color-accent-bright);
 }
 
-/* EQ band sliders (rotated horizontal range) */
 input[type="range"].eq-slider {
   -webkit-appearance: none;
   appearance: none;

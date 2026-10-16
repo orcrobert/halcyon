@@ -111,7 +111,7 @@ function AuthedApp() {
         applyReduceBlur(res.reduce_blur)
         storeReduceBlur(res.reduce_blur)
       })
-      .catch(() => { /* keep whatever the browser already had */ })
+      .catch(() => {})
     return () => { cancelled = true }
   }, [])
 

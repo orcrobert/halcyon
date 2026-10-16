@@ -1,8 +1,8 @@
 import { useRef, useCallback, useState } from 'react'
 
 interface Props {
-  value: number        // -1.0 to +1.0
-  defaultValue: number // model-suggested pan (reset target)
+  value: number
+  defaultValue: number
   onChange: (pan: number) => void
 }
 
@@ -55,8 +55,8 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
 
   const onPointerMove = useCallback((e: React.PointerEvent) => {
     if (!dragging.current) return
-    const dy = startY.current - e.clientY  // up = increase
-    const delta = dy / 120                  // 120px drag = full range
+    const dy = startY.current - e.clientY
+    const delta = dy / 120
     const next = Math.max(-1, Math.min(1, startValue.current + delta))
     onChange(Math.round(next * 100) / 100)
   }, [onChange])
@@ -90,7 +90,6 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
         onDoubleClick={onDoubleClick}
         style={{ touchAction: 'none', overflow: 'visible' }}
       >
-        {/* Track arc */}
         <path
           d={trackPath}
           fill="none"
@@ -99,7 +98,6 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
           style={{ stroke: hovered ? 'var(--color-line-active)' : 'var(--color-line)', transition: 'stroke 0.15s' }}
         />
 
-        {/* Fill arc (center → value) */}
         {Math.abs(value) > 0.01 && (
           <path
             d={fillPath}
@@ -110,7 +108,6 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
           />
         )}
 
-        {/* Center tick */}
         <line
           x1={CX} y1={CY - R + 4}
           x2={CX} y2={CY - R + 7}
@@ -118,7 +115,6 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
           style={{ stroke: 'var(--color-line-active)', transform: `rotate(${centerAngle - 0}deg)`, transformOrigin: `${CX}px ${CY}px` }}
         />
 
-        {/* Knob body */}
         <circle
           cx={CX} cy={CY} r="7"
           strokeWidth="1"
@@ -129,11 +125,9 @@ export function PanKnob({ value, defaultValue, onChange }: Props) {
           }}
         />
 
-        {/* Pointer dot on knob */}
         <circle cx={dotPos.x} cy={dotPos.y} r="1.5" style={{ fill: isDetuned ? 'var(--color-accent)' : 'var(--color-ink-faint)' }} />
       </svg>
 
-      {/* Pan label */}
       <span style={{
         fontSize: '9px',
         fontFamily: 'inherit',

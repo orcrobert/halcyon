@@ -24,7 +24,5 @@ export function setToken(token: string | null): void {
     } else {
       localStorage.removeItem(STORAGE_KEY)
     }
-  } catch {
-    /* private browsing: the in-memory copy still works for this session */
-  }
+  } catch {}
 }

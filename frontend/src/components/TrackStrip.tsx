@@ -105,7 +105,6 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
 
   return (
     <div style={{ position: 'relative' }}>
-      {/* Tooltip */}
       <div
         style={{
           position: 'absolute',
@@ -158,7 +157,6 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
         }} />
       </div>
 
-      {/* Strip card */}
       <div
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
@@ -265,7 +263,6 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
           }}
         >
 
-        {/* Volume % */}
         <span className={`text-[11px] font-mono tabular-nums ${muted ? 'text-ink-whisper' : 'text-ink-ghost'}`}>
           {muted ? '—' : `${Math.round(dispVolume * 100)}`}
         </span>
@@ -277,7 +274,6 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
           disabled={muted && volume > 0}
         />
 
-        {/* Spatial indicator button */}
         <button
           ref={spatialBtnRef}
           onClick={() => setSpatialOpen(v => !v)}
@@ -314,10 +310,8 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
           </svg>
         </button>
 
-        {/* Divider */}
         <div className={`w-full h-px ${muted ? 'bg-surface-raised' : 'bg-line'}`} />
 
-        {/* Type badge */}
         <span
           className={`text-[9px] font-bold uppercase tracking-widest rounded-full ${
             muted
@@ -334,7 +328,6 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
           {isEvent ? 'event' : isMusic ? 'music' : 'sound'}
         </span>
 
-        {/* Bottom buttons row */}
         <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
           <button
             onClick={handleMute}

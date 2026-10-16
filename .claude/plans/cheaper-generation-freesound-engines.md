@@ -1,7 +1,9 @@
 # Halcyon: cheaper generation, Freesound sources, pluggable engines
 
-Status: research + plan only. Nothing implemented, nothing committed.
-Repo: `/Users/robert/Documents/UBB/licenta/app`, branch `main`, HEAD `9ec6d57` at time of writing.
+Status: WP0 (timings), WP1 (layer roles) and WP2 (one-shot events) have shipped.
+WP3–WP7 (Freesound sourcing, manual Freesound search, the engine registry, Stable Audio
+Open / TangoFlux, the backend benchmark) are open. Written against `main` at `9ec6d57`;
+re-verify the codebase findings before starting an open WP.
 
 ## Context
 
@@ -21,7 +23,7 @@ decomposer or searched by hand from the dashboard), and decouple the self-hosted
 AudioCraft so other open models (Stable Audio Open, TangoFlux, AudioLDM 2) can run on the same
 hosts (Modal is the one in use).
 
-The thesis is already presented; this is continued development. Everything below is in scope.
+Everything below is in scope.
 The plan is split into independent work packages (WP0–WP7) so that each can be handed to an
 implementing agent on its own. Each WP states its preconditions, exact changes, tests, and
 acceptance criteria.
@@ -30,7 +32,7 @@ acceptance criteria.
 
 ## How to use this file (read first if you are implementing a WP)
 
-1. Read `CLAUDE.md` in the repo root. Non-negotiables: **no comments in code anywhere**, branch
+1. Read `AGENTS.md` in the repo root. Non-negotiables: **no comments in code anywhere**, branch
    from `main` (`<type>/<kebab>`), logical commits `<type>: <Imperative summary>`, PR to `main`,
    **no AI/Claude/co-author mentions in commits or PRs**, never commit `.env`, match surrounding
    code style, theme tokens only in `frontend/src` (no hex, no rgb, no Tailwind palette classes).
@@ -39,7 +41,7 @@ acceptance criteria.
 3. `api/app/models/schemas.py` and `frontend/src/types/index.ts` must change together.
    New DB columns must be nullable (`api/app/db.py` `_add_missing_columns` only adds nullable
    columns; nothing else migrates automatically).
-4. Before touching `mixer/mixer/`, read `.claude/skills/mixer/SKILL.md`. Pin existing outputs
+4. Before touching `mixer/mixer/`, read `.claude/rules/mixer.md`. Pin existing outputs
    with a test first, keep the librosa-absent fallback, keep the existing domain-citation
    comments, add no new comments.
 5. Verification commands for the whole repo:
