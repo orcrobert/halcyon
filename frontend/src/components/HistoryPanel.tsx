@@ -173,7 +173,6 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
           boxShadow: '0 30px 80px color-mix(in srgb, var(--color-shade) 60%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 4%, transparent)',
         }}
       >
-        {/* Header */}
         <header className="flex items-center justify-between gap-3" style={{ padding: '22px 22px 18px 22px' }}>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-xl flex items-center justify-center bg-accent/[0.08] border border-accent/20">
@@ -196,7 +195,6 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
           </button>
         </header>
 
-        {/* Search */}
         <div style={{ padding: '0 22px 18px 22px' }}>
           <div className="relative">
             <svg
@@ -217,7 +215,6 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
           </div>
         </div>
 
-        {/* List */}
         <div
           className="flex-1 overflow-y-auto"
           style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--color-line) transparent', padding: '4px 14px 14px 14px' }}
@@ -278,7 +275,6 @@ export function HistoryPanel({ open, onClose, onOpenAtmosphere }: Props) {
           ))}
         </div>
 
-        {/* Footer */}
         {!loading && items.length > 0 && (
           <footer
             className="border-t border-line-soft text-[11px] text-ink-ghost"

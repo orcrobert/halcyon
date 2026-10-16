@@ -97,9 +97,9 @@ function wetGainFor(depth: number): number {
 }
 
 export interface EQState {
-  low: number   // dB, low shelf at 200Hz
-  mid: number   // dB, peak at 1000Hz
-  high: number  // dB, high shelf at 8000Hz
+  low: number
+  mid: number
+  high: number
 }
 
 interface EventLane {

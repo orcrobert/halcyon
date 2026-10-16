@@ -311,7 +311,6 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
               <path d={pathH} strokeWidth="0.5" fill="none" strokeLinecap="round" opacity="0.3" style={{ stroke: 'color-mix(in srgb, var(--color-wash) 80%, transparent)' }} />
               <DiamondMarker x={apexX} y={38} glowColor={glowColor} filterId="tcm-apex" />
             </svg>
-            {/* subtle edge fades */}
             <div style={{ position: 'absolute', top: 0, left: 0, width: '18%', height: '100%', background: 'linear-gradient(to right, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
             <div style={{ position: 'absolute', top: 0, right: 0, width: '18%', height: '100%', background: 'linear-gradient(to left, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
           </div>
@@ -337,7 +336,6 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
     )
   }
 
-  // desktop
   const pathV = buildWavyLineV(apexY, trackH, phase, seed)
   const gradStopPct = ((apexY - TOP_PAD) / trackH * 100).toFixed(1)
   const svgH = TOP_PAD + trackH + 20
@@ -415,7 +413,6 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
 
             <DiamondMarker x={AXIS_X} y={apexY} glowColor={glowColor} filterId="tcd-apex" />
           </svg>
-          {/* subtle top/bottom fades using divs — no masks, no SVG filters */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to bottom, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
           <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '40px', background: 'linear-gradient(to top, color-mix(in srgb, var(--color-bg) 98%, transparent), transparent)', pointerEvents: 'none' }} />
         </div>

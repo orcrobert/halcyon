@@ -391,7 +391,5 @@ export function storedTheme(): string {
 export function storeTheme(id: string): void {
   try {
     localStorage.setItem(STORAGE_KEY, id)
-  } catch {
-    /* private browsing: the theme still applies for this session */
-  }
+  } catch {}
 }

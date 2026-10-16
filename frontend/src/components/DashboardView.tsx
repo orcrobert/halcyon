@@ -240,9 +240,7 @@ export function DashboardView({
         initialFreq={session.elements?.[0]?.tuning_hz ?? 440}
       />
 
-      {/* Top bar */}
       <header className="flex items-center justify-between border-b border-line-soft" style={{ padding: '18px 32px' }}>
-        {/* Live indicator */}
         <div className={`flex items-center gap-2 border rounded-xl px-4 py-2 transition-all duration-150 ${
           playing
             ? 'border-accent/30 bg-accent/5'
@@ -254,10 +252,8 @@ export function DashboardView({
           </span>
         </div>
 
-        {/* Actions */}
         <div className="flex items-center gap-2">
 
-          {/* Binaural beats button */}
           <button
             ref={binauralBtnRef}
             onClick={() => setBinauralOpen(o => !o)}
@@ -304,15 +300,12 @@ export function DashboardView({
         </div>
       </header>
 
-      {/* Main */}
       <main className="flex-1 flex flex-col items-center justify-center px-8 py-12 gap-14">
 
-        {/* Title + visualizer + play/pause */}
         <div className="flex flex-col items-center gap-6 text-center w-full" style={{ maxWidth: '640px' }}>
 
           <Visualizer getAnalyser={getAnalyser} playing={playing} />
 
-          {/* Title */}
           <div>
             <p className="text-[11px] uppercase tracking-[0.2em] text-ink-ghost mb-3">Now playing</p>
             <div className="flex items-center justify-center gap-3">
@@ -354,7 +347,6 @@ export function DashboardView({
             </div>
           </div>
 
-          {/* Play/Pause */}
           <button
             onClick={onPlayPause}
             className="flex items-center justify-center w-12 h-12 rounded-full border border-line bg-surface-raised hover:border-accent/40 hover:bg-accent/5 transition-all duration-200"
@@ -371,7 +363,6 @@ export function DashboardView({
             )}
           </button>
 
-          {/* Mute all + Animate */}
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               onClick={handleMuteAll}
@@ -404,7 +395,6 @@ export function DashboardView({
           </div>
         </div>
 
-        {/* Mixer */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: `repeat(auto-fit, minmax(100px, 100px))`,
@@ -479,7 +469,6 @@ export function DashboardView({
         </div>
       )}
 
-      {/* Footer */}
       <footer className="py-6 text-center">
         <p className="text-[11px] text-ink-whisper uppercase tracking-widest">
           Drag faders · Space to play/pause

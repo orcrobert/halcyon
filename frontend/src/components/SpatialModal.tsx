@@ -20,7 +20,6 @@ const DOT_R = 11
 const INSET = DOT_R + 6
 const GRID_STEP = 12
 const MODAL_W = 292
-// Organic wobbly path — multiple incommensurable frequencies so it never looks like a flower
 function wobblePath(cx: number, cy: number, r: number, amp: number, phase: number): string {
   const steps = 120
   const points: string[] = []
@@ -64,7 +63,6 @@ export function SpatialModal({
     : `R ${Math.round(pan * 100)}`
   const depthLabel = depth < 0.15 ? 'near' : depth < 0.45 ? 'mid' : depth < 0.75 ? 'far' : 'deep'
 
-  // Animate wave on hover or drag — decay when neither
   useEffect(() => {
     cancelAnimationFrame(rafRef.current)
     const active = dotHovered || dragging.current
@@ -80,10 +78,10 @@ export function SpatialModal({
       return () => cancelAnimationFrame(rafRef.current)
     }
     let amp = waveAmp
-    const TARGET_AMP = 1.4   // subtle — not a flower
+    const TARGET_AMP = 1.4
     function animate() {
       amp += (TARGET_AMP - amp) * 0.08
-      phaseRef.current += 0.022   // slow drift
+      phaseRef.current += 0.022
       setWaveAmp(amp)
       setWavePhase(phaseRef.current)
       rafRef.current = requestAnimationFrame(animate)
@@ -173,7 +171,6 @@ export function SpatialModal({
     onPanChange(defaultPan); onDepthChange(defaultDepth)
   }, [onPanChange, onDepthChange, defaultPan, defaultDepth])
 
-  // Static grid
   const gridLines: React.ReactNode[] = []
   for (let gx = 0; gx <= PAD; gx += GRID_STEP) {
     const isCenter = Math.abs(gx - HALF) < 1
@@ -222,7 +219,6 @@ export function SpatialModal({
         boxShadow: '0 40px 100px color-mix(in srgb, var(--color-shade) 70%, transparent), 0 0 0 1px color-mix(in srgb, var(--color-accent) 8%, transparent), inset 0 1px 0 color-mix(in srgb, var(--color-wash) 6%, transparent)',
       }}>
 
-        {/* Header — coords only, no label */}
         <div style={{
           padding: '12px 16px 9px',
           display: 'flex',
@@ -252,7 +248,6 @@ export function SpatialModal({
           </div>
         </div>
 
-        {/* Pad */}
         <svg
           ref={svgRef}
           width={PAD} height={PAD}
@@ -279,15 +274,12 @@ export function SpatialModal({
 
           <rect width={PAD} height={PAD} fill="transparent" />
 
-          {/* Grid */}
           {gridLines}
 
-          {/* Glow behind dot */}
           {isOffCenter && (
             <ellipse cx={dotX} cy={dotY} rx={55} ry={55} fill={`url(#${gradId})`} style={{ pointerEvents: 'none' }} />
           )}
 
-          {/* Straight line center → dot */}
           {isOffCenter && (
             <line
               x1={HALF} y1={HALF} x2={dotX} y2={dotY} strokeWidth="1"
@@ -295,10 +287,8 @@ export function SpatialModal({
             />
           )}
 
-          {/* Center pip */}
           <circle cx={HALF} cy={HALF} r="2" style={{ fill: 'color-mix(in srgb, var(--color-wash) 15%, transparent)', pointerEvents: 'none' }} />
 
-          {/* Outer wobbly ring — faint */}
           {(dotHovered || isDragging) && waveAmp > 0.1 && (
             <path
               d={dotPathBig}
@@ -308,13 +298,11 @@ export function SpatialModal({
             />
           )}
 
-          {/* Dot fill */}
           <circle
             cx={dotX} cy={dotY} r={DOT_R}
             style={{ fill: 'color-mix(in srgb, var(--color-bg) 88%, transparent)', pointerEvents: 'none' }}
           />
 
-          {/* Wobbly dot border */}
           <path
             d={dotPath}
             strokeWidth="1.5"
@@ -329,7 +317,6 @@ export function SpatialModal({
             onMouseLeave={() => setDotHovered(false)}
           />
 
-          {/* Inner pip */}
           <circle
             cx={dotX} cy={dotY} r="3"
             style={{
@@ -340,7 +327,6 @@ export function SpatialModal({
           />
         </svg>
 
-        {/* Footer */}
         <div style={{
           padding: '8px 16px',
           display: 'flex',

@@ -173,7 +173,6 @@ export function BinauralModal({
 
   return createPortal(
     <>
-      {/* Backdrop */}
       <div
         onClick={onClose}
         style={{
@@ -186,7 +185,6 @@ export function BinauralModal({
         }}
       />
 
-      {/* Modal */}
       <div style={{
         position: 'fixed', left: pos.x, top: pos.y,
         width: MODAL_W, height: MODAL_H, zIndex: 9999,
@@ -207,7 +205,6 @@ export function BinauralModal({
           display: 'flex', flexDirection: 'column',
         }}>
 
-          {/* Header */}
           <div style={{
             padding: '16px 22px',
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -267,10 +264,8 @@ export function BinauralModal({
             </div>
           </div>
 
-          {/* Body */}
           <div style={{ flex: 1, display: 'grid', gridTemplateColumns: '1fr 1.1fr 1fr', overflow: 'hidden' }}>
 
-            {/* Left ear */}
             <div style={{
               padding: '32px 28px',
               borderRight: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
@@ -284,7 +279,6 @@ export function BinauralModal({
               />
             </div>
 
-            {/* Presets */}
             <div style={{ padding: '20px 16px', display: 'flex', flexDirection: 'column', gap: 3, overflowY: 'auto' }}>
               <p style={{ fontSize: 9, color: 'var(--color-ink-trace)', letterSpacing: '0.12em', textTransform: 'uppercase', fontFamily: 'inherit', marginBottom: 6 }}>
                 Presets
@@ -334,7 +328,6 @@ export function BinauralModal({
               })}
             </div>
 
-            {/* Right ear */}
             <div style={{
               padding: '32px 28px',
               borderLeft: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
@@ -349,7 +342,6 @@ export function BinauralModal({
             </div>
           </div>
 
-          {/* Footer */}
           <div style={{
             padding: '10px 22px',
             borderTop: '1px solid color-mix(in srgb, var(--color-wash) 4%, transparent)',
