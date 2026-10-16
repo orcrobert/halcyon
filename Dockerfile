@@ -50,7 +50,10 @@ COPY --from=frontend /build/dist /app/frontend/dist
 COPY generators/core /app/generators/core
 COPY generators/modal/deploy.py /app/generators/modal/deploy.py
 
-RUN mkdir -p /data && chown halcyon:halcyon /data
+RUN mkdir -p /data /updater && chown halcyon:halcyon /data /updater
+
+ARG HALCYON_VERSION=dev
+ENV HALCYON_VERSION=$HALCYON_VERSION
 
 USER halcyon
 WORKDIR /app
