@@ -79,6 +79,13 @@ class UserSettings(SQLModel, table=True):
     user: User = Relationship(back_populates="preferences")
 
 
+class InstanceSettings(SQLModel, table=True):
+    __tablename__ = "instance_settings"
+
+    id: int | None = Field(default=None, primary_key=True)
+    auto_update: bool | None = None
+
+
 class GeneratorProfile(SQLModel, table=True):
     __tablename__ = "generator_profiles"
     __table_args__ = (UniqueConstraint("user_id", "name"),)

@@ -8,11 +8,12 @@ from fastapi.staticfiles import StaticFiles
 
 from api.app.config import settings
 from api.app.db import init_db
-from api.app.routers import admin, atmospheres, auth, elements, generators
+from api.app.routers import admin, atmospheres, auth, elements, generators, updates
 from api.app.routers import settings as settings_router
 from api.app.services.accounts import ensure_admin
 from api.app.services.modal_deploy import DeployRunner, reclaim_deploys
 from api.app.services.pipeline import regenerate_element, run_generation
+from api.app.services.updates import AutoUpdater, UpdateRunner, ensure_updater_token
 from api.app.worker import GenerationWorker, reclaim_interrupted
 
 logger = logging.getLogger(__name__)
@@ -39,8 +40,14 @@ async def lifespan(app: FastAPI):
     app.state.worker = worker
     app.state.deployer = DeployRunner()
 
+    ensure_updater_token()
+    app.state.updater = UpdateRunner()
+    auto_updater = AutoUpdater(app.state.updater)
+    auto_updater.start()
+
     yield
 
+    auto_updater.stop()
     worker.stop()
 
 
@@ -58,13 +65,14 @@ if settings.frontend_origin:
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    return {"status": "ok", "version": settings.halcyon_version}
 
 
 app.include_router(auth.router)
 app.include_router(settings_router.router, prefix="/api/settings")
 app.include_router(generators.router, prefix="/api/generators")
 app.include_router(admin.router)
+app.include_router(updates.router)
 app.include_router(
     settings_router.router, prefix=f"{admin.USER_PREFIX}/settings", tags=["admin"]
 )

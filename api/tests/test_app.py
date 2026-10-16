@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 
 
 def test_health_needs_no_auth(client):
-    assert client.get("/health").json() == {"status": "ok"}
+    assert client.get("/health").json() == {"status": "ok", "version": "dev"}
 
 
 def test_legacy_generate_endpoint_is_gone(client):
@@ -41,6 +41,8 @@ def test_the_api_surface_is_the_documented_one(client):
         "/api/admin/users/{user_id}/generators/{generator_id}/options",
         "/api/admin/users/{user_id}/generators/{generator_id}/deploy",
         "/api/admin/users/{user_id}/generators/modal",
+        "/api/admin/updates",
+        "/api/admin/updates/check",
         "/api/atmospheres",
         "/api/atmospheres/{atmosphere_id}",
         "/api/atmospheres/{atmosphere_id}/regenerate",

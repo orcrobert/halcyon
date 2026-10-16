@@ -411,3 +411,25 @@ class AtmosphereOut(BaseModel):
 
 class GenerateRequest(BaseModel):
     prompt: str
+
+
+class UpdateStatusOut(BaseModel):
+    current: str
+    latest: str | None
+    update_available: bool
+    major: bool
+    pinned: bool
+    notes: str | None
+    release_url: str | None
+    published_at: Timestamp | None
+    checked_at: Timestamp | None
+    check_error: str | None
+    track: str
+    updater: Literal["ready", "missing"]
+    updating: bool
+    update_error: str | None
+    auto_update: bool
+
+
+class UpdateSettingsUpdate(BaseModel):
+    auto_update: bool

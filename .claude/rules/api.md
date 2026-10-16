@@ -86,6 +86,17 @@ Applies to `api/` and `scripts/`. The cross-cutting rules in `AGENTS.md` still h
 - **Per-user API keys are encrypted at rest** and never returned: expose
   `decomposer_api_key_set: bool`, never the value.
 
+## Updates
+
+- **Self-updates go through the Watchtower sidecar, never the Docker socket.**
+  `services/updates.py` reads the latest GitHub release, compares it with
+  `settings.halcyon_version` inside the `HALCYON_TAG` line, and posts to
+  `UPDATER_URL/v1/update` with the token from `/updater/token`. The post runs on
+  its own thread and the route returns `202`, since the container is replaced
+  mid-request. Updates are refused (409) while anything is generating,
+  regenerating or deploying. Instance-wide switches live in the single-row
+  `InstanceSettings` table, not in `.env`.
+
 ## Layers and generation
 
 - **Soundscape length is per atmosphere.** `Atmosphere.duration_s` is chosen in

@@ -314,7 +314,8 @@ not picked their own.
 | Task | Command |
 |------|---------|
 | Follow the logs | `docker compose logs -f` |
-| Update to the newest release | `docker compose pull && docker compose up -d` |
+| Update to the newest release | `docker compose pull && docker compose up -d`, or see [Updates](#updates) |
+| Start the updater | `docker compose --profile updates up -d` |
 | Stop | `docker compose down` |
 
 ### Configuration
@@ -348,6 +349,33 @@ Every release pushes the image to GitHub's container registry, for
 Pin an exact version on a server you do not want to change under you, and
 move it forward deliberately. The mixer is published on the same release as a
 wheel; see [Releases](#releases).
+
+### Updates
+
+A running container stays on the image it started from until it is replaced.
+Every image knows its own version (`/health` reports it), and the administrator's
+**Settings → Updates** compares it with the newest GitHub release, shows the
+release notes, and raises a notice in the app when a newer one is out.
+
+To update from the app, start the optional updater once:
+
+```bash
+docker compose --profile updates up -d
+```
+
+It is a [Watchtower](https://github.com/nicholas-fedor/watchtower) container,
+the only one with the Docker socket. It never polls on its own and only touches
+the Halcyon container. Halcyon writes a random token into the shared
+`updater-token` volume on first boot and calls the updater with it, so there is
+nothing to configure. With it running, Settings → Updates gets an **Update**
+button and an **Install updates automatically** switch. Automatic updates check
+every six hours, wait while a soundscape is generating or a generator is
+deploying, and never cross a major version.
+
+Updates follow `HALCYON_TAG`: `latest` moves to any newer release, `0.4` only to
+newer `0.4.x` patches, and an exact tag such as `0.4.1` never moves. The app
+says so when a newer release exists outside your tag. Without the updater, the
+page shows the `docker compose pull && docker compose up -d` command instead.
 
 ### Building the image
 
@@ -387,6 +415,7 @@ reports readiness on `/health`, so `docker compose ps` tells you the truth.
 
 Everything that must survive a rebuild lives in the `halcyon-data` volume
 mounted at `/data`: the SQLite database, all generated audio, and `secret.key`.
+The small `updater-token` volume holds only the updater's token.
 
 Set `SECRET_KEY` explicitly if you want stored API keys to survive losing that
 volume — otherwise a new key is generated on first boot and the old encrypted

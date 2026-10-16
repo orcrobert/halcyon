@@ -44,3 +44,14 @@ paths:
 - **`/tmp` must be writable at runtime.** librosa's numba helpers need a cache
   (`NUMBA_CACHE_DIR=/tmp/numba-cache`); the CI image job proves it under
   `--read-only --tmpfs /tmp`.
+- **The image knows its version.** The `image` job passes
+  `HALCYON_VERSION=<version>` as a build arg; the runtime stage declares it last
+  so a release does not bust the earlier layers. Local builds report `dev`,
+  which never offers updates.
+- **The updater is an opt-in compose profile.** `compose.yaml`'s `updater`
+  service (`profiles: [updates]`) is Watchtower (`nickfedor/watchtower`, pinned
+  by digest; the containrrr image is archived) with the Docker socket, API-only
+  (`update,health` endpoints, so no polling), `WATCHTOWER_LABEL_ENABLE` and the
+  label on `halcyon` so it touches nothing else. It reads its token from the
+  `updater-token` volume that Halcyon fills. Halcyon itself never gets the
+  socket.
