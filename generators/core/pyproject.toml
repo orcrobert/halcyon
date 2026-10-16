@@ -13,6 +13,7 @@ dependencies = [
 halcyon-generator = "halcyon_generator.cli:main"
 
 [project.optional-dependencies]
+dev = ["pytest>=8.0", "httpx>=0.27"]
 audiocraft = [
     "torch==2.1.2",
     "torchvision==0.16.2",
