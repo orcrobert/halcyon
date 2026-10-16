@@ -112,8 +112,8 @@ login the server's CLI already has.
 user that runs the API (`claude`, then `/login`; or `codex login`), and set
 `DECOMPOSER_ALLOW_CLI=true`.
 
-**Running in Docker**: build the `runtime-cli` target, which adds Node, Claude
-Code and Codex to the image, and pass a login in:
+**Running in Docker**: run the `runtime-cli` image, which adds Node, Claude
+Code and Codex, and pass a login in:
 
 ```bash
 claude setup-token
@@ -121,14 +121,17 @@ claude setup-token
 
 ```bash
 # .env
-HALCYON_TARGET=runtime-cli
+HALCYON_TAG=latest-cli
 DECOMPOSER_ALLOW_CLI=true
 CLAUDE_CODE_OAUTH_TOKEN=<token from setup-token>
 ```
 
 ```bash
-docker compose up -d --build
+docker compose up -d
 ```
+
+Building it yourself instead takes `HALCYON_TARGET=runtime-cli` and
+[`compose.build.yaml`](#building-the-image).
 
 Codex has no token variable; copy an existing login onto the data volume
 instead, where the image points `CODEX_HOME`:
@@ -292,44 +295,68 @@ worker to remember.
 
 ## Running it with Docker
 
-The shortest path to a running instance. You still need a generator and a
-decomposer — the image contains neither.
+The shortest path to a running instance. [`compose.yaml`](compose.yaml) runs the
+published image and needs nothing else from the repo, so it can be copied onto
+any server or pasted into a stack manager such as Dockge or Portainer:
 
 ```bash
-cp .env.example .env
-# fill in DECOMPOSER_* and GENERATOR_URL
-
+mkdir halcyon && cd halcyon
+curl -fsSLO https://raw.githubusercontent.com/orcrobert/halcyon/main/compose.yaml
 docker compose up -d
 ```
 
-Open <http://localhost:8001>. `docker compose logs -f` follows the API,
-`docker compose down` stops it, and `docker compose up -d --build` rebuilds
-after a code change.
+Open <http://localhost:8001> and register; the first account is the
+administrator. No configuration is needed to boot. The decomposer and the
+generator are picked per user on the account page, and anything in
+[Configuration](#configuration) becomes the instance default for users who have
+not picked their own.
+
+| Task | Command |
+|------|---------|
+| Follow the logs | `docker compose logs -f` |
+| Update to the newest release | `docker compose pull && docker compose up -d` |
+| Stop | `docker compose down` |
+
+### Configuration
+
+Put any variable from [Configuration](#configuration) in a `.env` next to
+`compose.yaml` (in Dockge, the stack's env editor). The container reads it on
+the next `docker compose up -d`; without one it runs on the image defaults.
+Three more variables are read by compose itself:
+
+| Variable | Default | Effect |
+|----------|---------|--------|
+| `HALCYON_TAG` | `latest` | which published image to run, see [Published images](#published-images) |
+| `HALCYON_PORT` | `8001` | the host port |
+| `HALCYON_TARGET` | `runtime` | the target built by [Building the image](#building-the-image) |
+
+`DATA_DIR`, `FRONTEND_DIST` and `GENERATORS_DIR` are fixed to the image's paths
+in `compose.yaml`, so a `.env` copied from a source checkout cannot move them.
 
 ### Published images
 
 Every release pushes the image to GitHub's container registry, for
-`linux/amd64` and `linux/arm64`, so you can skip the build:
+`linux/amd64` and `linux/arm64`:
 
-| Tag | Image |
+| `HALCYON_TAG` | Image |
 |-----|-------|
-| `ghcr.io/orcrobert/halcyon:latest` | newest release, standard target |
-| `ghcr.io/orcrobert/halcyon:0.4.1` | one exact release |
-| `ghcr.io/orcrobert/halcyon:0.4` | newest patch of a minor line |
-| `…:latest-cli`, `…:0.4.1-cli` | the `runtime-cli` target |
+| `latest` | newest release, standard target |
+| `0.4.1` | one exact release |
+| `0.4` | newest patch of a minor line |
+| `latest-cli`, `0.4.1-cli` | the `runtime-cli` target |
 
-With compose, set `HALCYON_IMAGE` in `.env` to one of those and pull instead of
-building:
+Pin an exact version on a server you do not want to change under you, and
+move it forward deliberately. The mixer is published on the same release as a
+wheel; see [Releases](#releases).
+
+### Building the image
+
+From a checkout, [`compose.build.yaml`](compose.build.yaml) adds a local build
+on top of `compose.yaml`. Use it to run unreleased code:
 
 ```bash
-docker compose pull
-docker compose up -d
+docker compose -f compose.yaml -f compose.build.yaml up -d --build
 ```
-
-Without it, `docker run` takes the same arguments as in
-[Without compose](#without-compose) with the registry name in place of
-`halcyon`. The mixer is published on the same release as a wheel; see
-[Releases](#releases).
 
 ### Releases
 
@@ -356,17 +383,6 @@ workspace into a venv, and the runtime stage carries only that venv, the built
 UI, and `libsndfile1` — about 220 MB. It runs as an unprivileged user and
 reports readiness on `/health`, so `docker compose ps` tells you the truth.
 
-### Configuration
-
-Compose reads the repo-root `.env` and passes each variable through, so the
-table in [Configuration](#configuration) applies unchanged. Anything set in your
-shell wins over `.env`, and both win over the image defaults.
-
-Two variables are fixed by the image and should not be overridden:
-`DATA_DIR=/data` and `FRONTEND_DIST=/app/frontend/dist`.
-
-`HALCYON_PORT` (default `8001`) changes the host port only.
-
 ### State
 
 Everything that must survive a rebuild lives in the `halcyon-data` volume
@@ -378,15 +394,16 @@ keys become unreadable. Atmospheres are unaffected either way.
 
 ```bash
 docker compose exec halcyon ls /data          # inspect
-docker volume rm app_halcyon-data             # destroy, after `down`
+docker volume ls | grep halcyon-data          # the volume is named <project>_halcyon-data
 ```
 
 ### Reaching your generator
 
 `GENERATOR_URL` defaults to `http://host.docker.internal:9000`, which resolves
 to the host from inside the container — right for a generator running on the
-same machine. For a generator elsewhere (a Colab/ngrok URL, another box), set
-the URL and the value is used as-is.
+same machine, and the address to give a **Local machine** generator on the
+account page. For a generator elsewhere (a Colab/ngrok URL, another box), use
+its URL as-is.
 
 The generator is deliberately not in the compose file: it wants a GPU, it is
 often on another host, and it is yours to run. See
@@ -395,16 +412,16 @@ often on another host, and it is yours to run. See
 ### Without compose
 
 ```bash
-docker build -t halcyon .
 docker run -d --name halcyon \
   -p 8001:8001 \
   -v halcyon-data:/data \
   --read-only --tmpfs /tmp \
-  -e GENERATOR_URL=http://your-generator:9000 \
-  -e DECOMPOSER_PROVIDER=gemini \
-  -e DECOMPOSER_API_KEY=... \
-  halcyon
+  --add-host host.docker.internal:host-gateway \
+  --restart unless-stopped \
+  ghcr.io/orcrobert/halcyon:latest
 ```
+
+Pass instance defaults with `-e`, for example `-e ALLOW_REGISTRATION=false`.
 
 **`/tmp` must be writable.** The mixer's analysis goes through librosa, whose
 numba-compiled helpers refuse to run when they cannot write a cache — the image

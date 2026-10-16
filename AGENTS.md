@@ -69,8 +69,9 @@ The full policy is [`.claude/docs/git-workflow.md`](.claude/docs/git-workflow.md
 | `scripts/`      | Python CLIs               | Operational utilities for the shipped pipeline |
 | `audiocraft/`   | vendored (gitignored)     | Meta's AudioCraft, used by the generators, not our source |
 
-`Dockerfile` + `docker-compose.yml` build and run the whole stack as one
-container. Python is one workspace: the root `pyproject.toml` is the `api`
+The `Dockerfile` builds the whole stack as one container. `compose.yaml` runs
+the published image and is the file self-hosters copy, so it must never need
+the repo; `compose.build.yaml` layers a local build on top of it. Python is one workspace: the root `pyproject.toml` is the `api`
 distribution and takes `mixer/` as a path dependency. Nothing manipulates
 `sys.path`.
 
@@ -109,7 +110,7 @@ Install once from the repo root: `pip install -e ./mixer -e '.[dev]'` (or
 |------|---------|
 | API (dev) | `uvicorn api.app.main:app --reload --port 8001` from the repo root |
 | Frontend (dev) | `cd frontend && npm run dev` (proxies `/api` to 8001) |
-| Whole stack in Docker | `docker compose up -d` |
+| Whole stack in Docker | `docker compose -f compose.yaml -f compose.build.yaml up -d --build` |
 | API + mixer tests | `pytest` from the repo root |
 | Generator tests | `cd generators/core && pip install -e '.[dev]' && pytest` |
 | Python lint | `ruff check .` |

@@ -1,0 +1,6 @@
+services:
+  halcyon:
+    build:
+      context: .
+      target: ${HALCYON_TARGET:-runtime}
+    image: halcyon:${HALCYON_TARGET:-runtime}

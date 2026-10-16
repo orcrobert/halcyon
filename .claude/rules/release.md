@@ -2,7 +2,8 @@
 paths:
   - ".github/**"
   - "Dockerfile"
-  - "docker-compose.yml"
+  - "compose.yaml"
+  - "compose.build.yaml"
   - ".dockerignore"
   - "pyproject.toml"
   - "mixer/pyproject.toml"
@@ -35,6 +36,11 @@ paths:
 - **The image installs non-editable**, so `DATA_DIR`, `FRONTEND_DIST` and
   `GENERATORS_DIR` are absolute paths set in the Dockerfile. `.dockerignore` is
   an allowlist: a new top-level path the image needs must be added there.
+- **`compose.yaml` is what self-hosters copy.** It runs
+  `ghcr.io/orcrobert/halcyon:${HALCYON_TAG}`, reads an optional `.env`, and
+  must work as the only file in an empty folder: no `build:`, no paths into the
+  repo. It pins `DATA_DIR`, `FRONTEND_DIST` and `GENERATORS_DIR` over the
+  `.env`. Local builds go in `compose.build.yaml`, layered on top with `-f`.
 - **`/tmp` must be writable at runtime.** librosa's numba helpers need a cache
   (`NUMBA_CACHE_DIR=/tmp/numba-cache`); the CI image job proves it under
   `--read-only --tmpfs /tmp`.
