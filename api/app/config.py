@@ -53,6 +53,11 @@ class Settings(BaseSettings):
     frontend_origin: str = ""
     frontend_dist: str = "frontend/dist"
 
+    halcyon_version: str = "dev"
+    halcyon_tag: str = "latest"
+    updater_url: str = "http://updater:8080"
+    updater_token_file: str | None = "/updater/token"
+
     model_config = {
         "env_file": str(REPO_ROOT / ".env"),
         "populate_by_name": True,
