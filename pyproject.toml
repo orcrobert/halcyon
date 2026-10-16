@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-dev = ["pytest>=8.0", "httpx>=0.27"]
+dev = ["pytest>=8.0", "httpx>=0.27", "ruff>=0.6"]
 
 [tool.setuptools.packages.find]
 include = ["api*"]
@@ -41,3 +41,10 @@ halcyon-mixer = { workspace = true }
 
 [tool.pytest.ini_options]
 testpaths = ["api/tests", "mixer/tests"]
+
+[tool.ruff]
+target-version = "py311"
+extend-exclude = ["audiocraft", "data", "frontend"]
+
+[tool.ruff.lint]
+select = ["E9", "F"]

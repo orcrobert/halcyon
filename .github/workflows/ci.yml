@@ -18,6 +18,7 @@ jobs:
           python-version: "3.11"
           cache: pip
       - run: pip install -e ./mixer -e ".[dev]"
+      - run: ruff check .
       - run: pytest
 
   generator:
