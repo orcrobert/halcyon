@@ -81,8 +81,8 @@ the type honestly — it is what users see as a version number. See
 
 ### 3. Push and open the PR when done and verified
 
-Only after the work is complete and you've run the relevant checks
-(`npm run lint`, `pytest`).
+Only after the work is complete and you've run the checks for what you touched
+(the commands table in [`AGENTS.md`](../../AGENTS.md#commands)).
 
 ```bash
 git push -u origin <branch>
@@ -113,5 +113,6 @@ mentions, no tooling attribution.**
   intend to ship.
 - ✅ Delete the branch after merge.
 - ❌ Never `git push --force` to `main` or shared branches.
+- ❌ Never skip hooks with `--no-verify`.
 - ❌ Never commit `.env`, keys, `output/`, build artifacts, or `audiocraft/`.
 - ❌ Never bypass this flow "just this once".

@@ -1,47 +1,40 @@
 ---
 name: feature-workflow
-description: Standard branch → logical commits → push → PR flow for this repo. Use whenever the user asks for a feature, fix, or chore. Enforces the no-attribution commit/PR policy.
+description: Take a requested change from a clean main to an open pull request (branch, logical commits, checks, push, PR). Use for any feature, fix, chore, refactor, docs or test change in this repo.
 ---
 
 # Feature workflow
 
-Use this for any change the user requests (feature, bug fix, chore, refactor,
-docs, test). It encodes the mandatory Git policy in
-[`.claude/docs/git-workflow.md`](../../docs/git-workflow.md).
+The policy is [`.claude/docs/git-workflow.md`](../../docs/git-workflow.md). Read
+it if anything below is unclear; this is only the procedure.
 
-## Steps
-
-1. **Start from a clean `main`:**
+1. **Branch from a fresh `main`.**
    ```bash
-   git checkout main
-   git pull --ff-only
+   git checkout main && git pull --ff-only
    git checkout -b <type>/<short-kebab-description>
    ```
-   `<type>` ∈ `feat | fix | chore | refactor | docs | test`.
    Leave unrelated working-tree changes unstaged.
 
-2. **Implement the change.** Follow
-   [`.claude/docs/conventions.md`](../../docs/conventions.md) — most importantly:
-   **no comments in code.**
+2. **Implement.** Read the `.claude/rules/` file for each area you touch. No
+   comments in code; the `no_comments` hook rejects them.
 
-3. **Commit logically.** One coherent change per commit, subject in the form
-   `<type>: <imperative summary>`, no body noise. Types are the same set as the
-   branch prefixes and are chosen per commit — a `feat/` branch that also fixes
-   a bug it uncovered uses `fix:` on that commit. **No author flag, no
-   `Co-Authored-By`, no mention of Claude / AI / Anthropic / "generated with".**
+3. **Commit logically**, one coherent change per commit, staging only the
+   intended paths:
    ```bash
-   git add <intended paths only>
-   git commit -m "feat: <imperative summary>"
+   git add <paths>
+   git commit -m "<type>: <Imperative summary>"
    ```
+   Pick the type per commit; `feat` and `fix` cut a release. No attribution.
 
-4. **Verify before pushing.** Run the checks relevant to what you touched:
-   - frontend: `cd frontend && npm run lint`
-   - python (api + mixer): `pytest` from the repo root
+4. **Run the checks for what you touched** (the commands table in `AGENTS.md`):
+   `pytest`, `ruff check .`, `cd generators/core && pytest`,
+   `cd frontend && npm run lint && npx tsc --noEmit && npm test`. Report any
+   failure instead of pushing past it.
 
-5. **Push and open the PR:**
+5. **Push and open the PR** with a What / Why / Notes body:
    ```bash
    git push -u origin <branch>
-   gh pr create --base main --title "<type>: <what the branch delivers>" --body "$(cat <<'EOF'
+   gh pr create --base main --title "<type>: <what the branch delivers>" --body "$(cat <<'BODY'
    ## What
    <what changed>
 
@@ -49,15 +42,7 @@ docs, test). It encodes the mandatory Git policy in
    <why it was needed>
 
    ## Notes
-   <how it was verified / risks / follow-ups>
-   EOF
+   <how it was verified, risks, follow-ups>
+   BODY
    )"
    ```
-   Reviewer-facing prose only. **No AI attribution anywhere in the PR.**
-
-## Guardrails
-
-- Never commit to `main`.
-- Never `git push --force` to shared branches.
-- Never stage `.env`, keys, `output/`, `audiocraft/`, or build artifacts.
-- If `main` moved, rebase/pull before opening the PR.

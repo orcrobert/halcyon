@@ -1,19 +1,35 @@
 ---
 name: run-stack
-description: Bring up the Halcyon stack locally (FastAPI API, Vite dev server, your own generator). Use when asked to run, start, or smoke-test the app end to end.
+description: Bring up the Halcyon stack, in Docker or as a local dev setup (FastAPI API, Vite dev server, your own generator). Use when asked to run, start, or smoke-test the app end to end.
 ---
 
 # Run the stack
 
 Full detail in [MANUAL.md](../../../MANUAL.md). This is the operational checklist.
 
-## Order of startup
+## In Docker
+
+The quickest whole-stack run, and how the live instance is deployed:
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+It serves the built UI and the API on <http://localhost:8001> and keeps its
+database and audio in the `/data` volume, not the repo's `data/`. Set the
+generator and decomposer in `.env` or in the account panel after signing in.
+`HALCYON_IMAGE` picks a published image instead of building locally.
+
+## Local development: order of startup
 
 Bring services up bottom-up so a submitted prompt has everything it needs.
 
 1. **Generator** — start your own (see [SELF_HOSTING.md](../../../SELF_HOSTING.md#the-generator-contract))
-   or run all cells in `colab/soundscape_generator.ipynb`, then put its URL in
-   `GENERATOR_URL` (legacy alias `COLAB_URL`) in the repo-root `.env`.
+   or use one of the hosts under `generators/` (`modal/`, `colab/halcyon_generator.ipynb`,
+   `local/`, `huggingface/`), then put its URL in `GENERATOR_URL` (legacy alias
+   `COLAB_URL`) in the repo-root `.env`, or add it as a generator in the account
+   panel.
 
 2. **API** (reads the repo-root `.env`; creates its database on first boot):
    ```bash
