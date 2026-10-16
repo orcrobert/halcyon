@@ -1,7 +1,9 @@
 # Halcyon: cheaper generation, Freesound sources, pluggable engines
 
-Status: research + plan only. Nothing implemented, nothing committed.
-Repo: `/Users/robert/Documents/UBB/licenta/app`, branch `main`, HEAD `9ec6d57` at time of writing.
+Status: WP0 (timings), WP1 (layer roles) and WP2 (one-shot events) have shipped.
+WP3–WP7 (Freesound sourcing, manual Freesound search, the engine registry, Stable Audio
+Open / TangoFlux, the backend benchmark) are open. Written against `main` at `9ec6d57`;
+re-verify the codebase findings before starting an open WP.
 
 ## Context
 
