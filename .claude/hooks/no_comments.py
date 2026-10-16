@@ -162,7 +162,7 @@ def main() -> int:
         return 0
     listing = "\n".join(f"  line {number}: {text[:120]}" for number, text in added[:10])
     sys.stderr.write(
-        f"{path.name} gained comments, and this repo forbids them (CLAUDE.md golden rule 1).\n"
+        f"{path.name} gained comments, and this repo forbids them (AGENTS.md golden rule 1).\n"
         f"{listing}\n"
         "Remove them; put the explanation in the PR description or .claude/docs/ instead.\n"
     )
