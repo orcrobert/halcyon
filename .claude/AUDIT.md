@@ -68,14 +68,6 @@ Last reviewed against `main` at `822c5ed` (October 2026).
   animate loop, and offline export in one hook. *Risky but high value: extract
   cohesive units (binaural, event lanes, animate, export) behind the same
   public surface, one at a time, with listening checks between.*
-- 🟡 **About 100 comments in `frontend/src` break the no-comments rule.** Most
-  are JSX section labels (`{/* ... */}`) in `EQPanel`, `SpatialModal`,
-  `SpatialPad`, `DashboardView`, `PanKnob`, `BinauralModal`, `TrackStrip`,
-  `HistoryPanel` and `TuningControl`, plus three in `useAudioEngine.ts` and one
-  in `index.css`. Three sit in otherwise-empty `catch` blocks (`App.tsx:114`,
-  `api/token.ts:28`, `themes.ts:395`), where ESLint's `no-empty` needs the body
-  to be non-empty, so those need a real statement or a named no-op instead of
-  just being deleted. *Safe: strip them in one `refactor:` commit and run lint.*
 
 ---
 
@@ -128,6 +120,9 @@ Kept as a record of what the earlier audits called for.
   heuristic.
 
 **Hygiene**
+- ✅ The 98 comments left in `frontend/src` (JSX section labels, trailing
+  notes, three in empty `catch` blocks) are gone; `no-empty` already allows an
+  empty `catch`, and the `no_comments` hook keeps new ones out.
 - ✅ The untracked `backend/` leftover of the Laravel app and the macOS
   "keep both" duplicates in `frontend/public/` are gone.
 - ✅ `exportMix` and live playback build each track through one
