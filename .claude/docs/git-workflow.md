@@ -72,6 +72,13 @@ not the branch.
 
 Scopes (`feat(mixer): …`) are not used. The subject says what changed.
 
+Commit types set the version. After a merge to `main` passes CI, the `Release`
+workflow bumps the minor for any `feat:`, the patch for any `fix:`, and the
+major for `feat!:` or a `BREAKING CHANGE:` footer, then tags and publishes. A
+merge carrying only `chore`/`docs`/`refactor`/`test` does not release. Choose
+the type honestly — it is what users see as a version number. See
+[SELF_HOSTING.md](../../SELF_HOSTING.md#releases).
+
 ### 3. Push and open the PR when done and verified
 
 Only after the work is complete and you've run the relevant checks
