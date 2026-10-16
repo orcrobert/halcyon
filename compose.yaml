@@ -13,6 +13,7 @@ services:
       FRONTEND_DIST: /app/frontend/dist
       GENERATORS_DIR: /app/generators
       HALCYON_TAG: ${HALCYON_TAG:-latest}
+      DECOMPOSER_ALLOW_CLI: ${DECOMPOSER_ALLOW_CLI:-false}
     labels:
       com.centurylinklabs.watchtower.enable: "true"
     volumes:
