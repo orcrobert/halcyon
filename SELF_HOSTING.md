@@ -343,7 +343,7 @@ A release tags the merge commit, pushes both image targets, and creates a GitHub
 release with generated notes and the `halcyon-mixer` wheel and sdist attached:
 
 ```bash
-pip install https://github.com/orcrobert/soundscape-generator/releases/download/v0.4.1/halcyon_mixer-0.4.1-py3-none-any.whl
+pip install https://github.com/orcrobert/halcyon/releases/download/v0.4.1/halcyon_mixer-0.4.1-py3-none-any.whl
 ```
 
 Versions live only in tags. The `version` in each `pyproject.toml` is stamped at
