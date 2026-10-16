@@ -14,9 +14,9 @@ paths:
   superseded runs: ruff + pytest, the generator core tests, frontend lint /
   typecheck / vitest / build, and an image job that boots the container
   read-only and runs `.github/scripts/mix_smoke.py` inside it.
-- **CodeQL** (`.github/workflows/codeql.yml`) scans Python, TypeScript and the
-  workflows on pushes to `main` and weekly. It is the advanced setup, so leave
-  GitHub's CodeQL default setup off: the two conflict.
+- **CodeQL** runs as GitHub's default setup (repository settings), scanning
+  Python, TypeScript and the workflows. Do not add a `codeql.yml` workflow: an
+  advanced setup conflicts with the default one.
 - **Release** (`.github/workflows/release.yml`) runs after CI succeeds on
   `main`. `.github/scripts/next_version.py` derives the next semver from commit
   subjects since the last `v*` tag: `feat!:` or `BREAKING CHANGE:` → major,
