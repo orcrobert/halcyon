@@ -3,7 +3,7 @@ services:
     build:
       context: .
       target: ${HALCYON_TARGET:-runtime}
-    image: halcyon:latest
+    image: ${HALCYON_IMAGE:-halcyon:latest}
     restart: unless-stopped
     ports:
       - "${HALCYON_PORT:-8001}:8001"
