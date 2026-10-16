@@ -1,0 +1,123 @@
+name: Release
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  version:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.next.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - id: next
+        run: echo "version=$(python .github/scripts/next_version.py)" >> "$GITHUB_OUTPUT"
+      - run: 'echo "Next version: ${{ steps.next.outputs.version || ''none, no feat or fix since the last tag'' }}"'
+
+  mixer:
+    needs: version
+    if: needs.version.outputs.version != ''
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: sed -i 's/^version = ".*"/version = "${{ needs.version.outputs.version }}"/' mixer/pyproject.toml
+      - run: pip install build && python -m build mixer --outdir dist
+      - uses: actions/upload-artifact@v4
+        with:
+          name: mixer-dist
+          path: dist/
+
+  image:
+    needs: version
+    if: needs.version.outputs.version != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - target: runtime
+            suffix: ""
+          - target: runtime-cli
+            suffix: "-cli"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/halcyon
+          flavor: |
+            latest=true
+            suffix=${{ matrix.suffix }},onlatest=true
+          tags: |
+            type=semver,pattern={{version}},value=v${{ needs.version.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=v${{ needs.version.outputs.version }}
+          labels: |
+            org.opencontainers.image.title=Halcyon
+            org.opencontainers.image.description=Prompt-driven ambient soundscape generation and mixing
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          target: ${{ matrix.target }}
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=release-${{ matrix.target }}
+          cache-to: type=gha,mode=max,scope=release-${{ matrix.target }}
+
+  release:
+    needs: [version, mixer, image]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: mixer-dist
+          path: dist
+      - env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.version.outputs.version }}
+          IMAGE: ghcr.io/${{ github.repository_owner }}/halcyon
+        run: |
+          gh release create "v$VERSION" dist/* \
+            --repo "$GITHUB_REPOSITORY" \
+            --target "${{ github.event.workflow_run.head_sha }}" \
+            --title "v$VERSION" \
+            --generate-notes \
+            --notes "$(printf '```\ndocker pull %s:%s\npip install %s\n```' \
+              "$IMAGE" "$VERSION" \
+              "https://github.com/$GITHUB_REPOSITORY/releases/download/v$VERSION/halcyon_mixer-$VERSION-py3-none-any.whl")"
