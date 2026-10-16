@@ -65,8 +65,17 @@ Definitive reference for how the system fits together. Skim
   `quality_json` holds the issues the quality check found in the clip and
   `quality_dismissed` whether the user chose to keep it. `original_*` columns on `Element` store the mixer's computed
   defaults so the UI can reset. `UserSettings` holds per-user provider config.
+- **Updates** (`routers/updates.py`, `services/updates.py`): the image carries
+  its release in `HALCYON_VERSION` (a build arg the release sets). `/api/admin/updates`
+  compares it with GitHub's latest release (cached six hours) inside the line
+  `HALCYON_TAG` allows, and starts an update by posting to the optional
+  Watchtower sidecar at `UPDATER_URL` with the token Halcyon writes to
+  `/updater/token` on boot. The post runs on its own thread because Watchtower
+  replaces this container mid-request. `AutoUpdater` is a daemon thread that
+  does the same every six hours when `InstanceSettings.auto_update` is on,
+  skipping majors and waiting out generations and deploys.
 - **Routers**: `auth.py`, `admin.py`, `settings.py`, `generators.py`,
-  `atmospheres.py`, `elements.py`. Every
+  `updates.py`, `atmospheres.py`, `elements.py`. Every
   query is scoped to the current user; a foreign id returns 404, not 403.
 - **Generation**: `AtmosphereController`-equivalent `store` creates the row and
   hands the id to `worker.GenerationWorker`, a single daemon thread consuming a
