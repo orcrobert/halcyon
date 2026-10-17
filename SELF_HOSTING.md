@@ -315,7 +315,7 @@ not picked their own.
 |------|---------|
 | Follow the logs | `docker compose logs -f` |
 | Update to the newest release | `docker compose pull && docker compose up -d`, or see [Updates](#updates) |
-| Start the updater | `docker compose --profile updates up -d` |
+| Start the updater | `COMPOSE_PROFILES=updates` in `.env`, then `docker compose up -d` |
 | Stop | `docker compose down` |
 
 ### Configuration
@@ -357,11 +357,20 @@ Every image knows its own version (`/health` reports it), and the administrator'
 **Settings → Updates** compares it with the newest GitHub release, shows the
 release notes, and raises a notice in the app when a newer one is out.
 
-To update from the app, start the optional updater once:
+To update from the app, turn on the optional updater in the `.env` next to
+`compose.yaml` (in Dockge, the stack's env editor) and bring the stack up again:
 
 ```bash
-docker compose --profile updates up -d
+# .env
+COMPOSE_PROFILES=updates
 ```
+
+```bash
+docker compose up -d
+```
+
+`docker compose pull` only refreshes images, never the compose file itself. A
+server set up before the updater existed needs the current `compose.yaml` first.
 
 It is a [Watchtower](https://github.com/nicholas-fedor/watchtower) container,
 the only one with the Docker socket. It never polls on its own and only touches

@@ -46,7 +46,7 @@ services:
     image: ghcr.io/orcrobert/halcyon:${HALCYON_TAG:-latest}
     restart: unless-stopped
     ports:
-      - "${HALCYON_PORT:-8001}:8001"
+      - "127.0.0.1:${HALCYON_PORT:-8001}:8001"
     env_file:
       - path: .env
         required: false
@@ -55,8 +55,13 @@ services:
       DATA_DIR: /data
       FRONTEND_DIST: /app/frontend/dist
       GENERATORS_DIR: /app/generators
+      HALCYON_TAG: ${HALCYON_TAG:-latest}
+      DECOMPOSER_ALLOW_CLI: ${DECOMPOSER_ALLOW_CLI:-false}
+    labels:
+      com.centurylinklabs.watchtower.enable: "true"
     volumes:
       - halcyon-data:/data
+      - updater-token:/updater
     tmpfs:
       - /tmp
     read_only: true
@@ -66,8 +71,25 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
+  updater:
+    image: nickfedor/watchtower:1.23.1@sha256:3175c006eb20112f3a70f7002f82dbf4a4078c97e7033735a4d153668fc3dfb1
+    profiles: [updates]
+    restart: unless-stopped
+    environment:
+      WATCHTOWER_HTTP_API_ENDPOINTS: update,health
+      WATCHTOWER_HTTP_API_TOKEN: /updater/token
+      WATCHTOWER_LABEL_ENABLE: "true"
+      WATCHTOWER_CLEANUP: "true"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - updater-token:/updater:ro
+    depends_on:
+      halcyon:
+        condition: service_healthy
+
 volumes:
   halcyon-data:
+  updater-token:
 ```
 
 Then start it:
