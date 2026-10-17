@@ -80,7 +80,7 @@ export function DeployToast({ onOpenSettings }: Props) {
     setError(null)
     try {
       setGenerators(await deployGenerator(generator.id))
-      setNow(Date.now())
+      setNow(() => Date.now())
     } catch (e) {
       setError(extractErrors(e).message)
     } finally {
