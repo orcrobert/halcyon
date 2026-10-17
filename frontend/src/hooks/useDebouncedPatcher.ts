@@ -11,39 +11,41 @@ interface PendingEntry {
   inFlight: boolean
 }
 
-export function useDebouncedPatcher() {
-  const queueRef = useRef<Map<number, PendingEntry>>(new Map())
+type Queue = Map<number, PendingEntry>
 
-  const flush = useCallback(async (id: number) => {
-    const entry = queueRef.current.get(id)
-    if (!entry || entry.inFlight) return
+async function flush(queue: Queue, id: number) {
+  const entry = queue.get(id)
+  if (!entry || entry.inFlight) return
 
-    const patch = entry.patch
-    if (Object.keys(patch).length === 0) return
+  const patch = entry.patch
+  if (Object.keys(patch).length === 0) return
 
-    entry.inFlight = true
-    entry.patch = {}
-    entry.timer = null
+  entry.inFlight = true
+  entry.patch = {}
+  entry.timer = null
 
-    try {
-      await updateElement(id, patch)
-    } catch (err) {
-      console.error(`PATCH /elements/${id} failed`, err)
-    } finally {
-      entry.inFlight = false
-      const stillPending = queueRef.current.get(id)
-      if (stillPending && Object.keys(stillPending.patch).length > 0) {
-        scheduleFlush(id)
-      }
+  try {
+    await updateElement(id, patch)
+  } catch (err) {
+    console.error(`PATCH /elements/${id} failed`, err)
+  } finally {
+    entry.inFlight = false
+    const stillPending = queue.get(id)
+    if (stillPending && Object.keys(stillPending.patch).length > 0) {
+      scheduleFlush(queue, id)
     }
-  }, [])
+  }
+}
 
-  const scheduleFlush = useCallback((id: number) => {
-    const entry = queueRef.current.get(id)
-    if (!entry) return
-    if (entry.timer) clearTimeout(entry.timer)
-    entry.timer = setTimeout(() => flush(id), DEBOUNCE_MS)
-  }, [flush])
+function scheduleFlush(queue: Queue, id: number) {
+  const entry = queue.get(id)
+  if (!entry) return
+  if (entry.timer) clearTimeout(entry.timer)
+  entry.timer = setTimeout(() => flush(queue, id), DEBOUNCE_MS)
+}
+
+export function useDebouncedPatcher() {
+  const queueRef = useRef<Queue>(new Map())
 
   const enqueue = useCallback((id: number, patch: ElementMixUpdate) => {
     let entry = queueRef.current.get(id)
@@ -52,8 +54,8 @@ export function useDebouncedPatcher() {
       queueRef.current.set(id, entry)
     }
     Object.assign(entry.patch, patch)
-    scheduleFlush(id)
-  }, [scheduleFlush])
+    scheduleFlush(queueRef.current, id)
+  }, [])
 
   const flushAll = useCallback(async () => {
     const ids = Array.from(queueRef.current.keys())
@@ -64,10 +66,10 @@ export function useDebouncedPatcher() {
           clearTimeout(entry.timer)
           entry.timer = null
         }
-        await flush(id)
+        await flush(queueRef.current, id)
       }),
     )
-  }, [flush])
+  }, [])
 
   const flushAllSync = useCallback(() => {
     queueRef.current.forEach((entry, id) => {
