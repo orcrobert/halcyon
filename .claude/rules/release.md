@@ -19,12 +19,15 @@ paths:
   Python, TypeScript and the workflows. Do not add a `codeql.yml` workflow: an
   advanced setup conflicts with the default one.
 - **Release** (`.github/workflows/release.yml`) runs after CI succeeds on
-  `main`. `.github/scripts/next_version.py` derives the next semver from commit
-  subjects since the last `v*` tag: `feat!:` or `BREAKING CHANGE:` → major,
-  `feat:` → minor, `fix:` → patch, anything else → no release. It then tags the
-  commit, pushes `ghcr.io/orcrobert/halcyon` for both Docker targets (`runtime`,
-  and `runtime-cli` with a `-cli` suffix) for amd64 + arm64, and attaches the
-  `halcyon-mixer` wheel and sdist to a GitHub release.
+  `main`. `.github/scripts/next_version.py` derives the next semver from the full
+  commit messages since the last `v*` tag (a matching line in a body counts): `feat!:` or `BREAKING CHANGE:` → major,
+  `feat:` → minor, `fix:` → patch, anything else → no release. Any `<type>!:`
+  counts as breaking; scoped subjects (`feat(x):`) match nothing. It then
+  pushes `ghcr.io/orcrobert/halcyon` for both Docker targets for amd64 + arm64
+  under `X.Y.Z`, `X.Y` and `latest` (the `runtime-cli` target with a `-cli`
+  suffix on each), and creates the `vX.Y.Z` tag and GitHub release with the
+  `halcyon-mixer` wheel and sdist. No major-only or `main` image tag exists. The
+  tag table users see is in `SELF_HOSTING.md#image-tags`; change both together.
 - **Versions live in tags only.** The release stamps `version` into
   `mixer/pyproject.toml` at build time. Never bump it by hand.
 - **Actions are pinned to full commit SHAs** and base images to digests.

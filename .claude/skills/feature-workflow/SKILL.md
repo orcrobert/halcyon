@@ -16,7 +16,9 @@ it if anything below is unclear; this is only the procedure.
    Leave unrelated working-tree changes unstaged.
 
 2. **Implement.** Read the `.claude/rules/` file for each area you touch. No
-   comments in code; the `no_comments` hook rejects them.
+   comments in code; the `no_comments` hook rejects them. If the change alters
+   behaviour, configuration, a command or a contract, update the document that
+   owns it (the table at the end of `AGENTS.md`).
 
 3. **Commit logically**, one coherent change per commit, staging only the
    intended paths:
@@ -24,7 +26,8 @@ it if anything below is unclear; this is only the procedure.
    git add <paths>
    git commit -m "<type>: <Imperative summary>"
    ```
-   Pick the type per commit; `feat` and `fix` cut a release. No attribution.
+   Pick the type per commit; `feat` and `fix` cut a release, `<type>!:` a
+   major one. Never create `v*` tags.
 
 4. **Run the checks for what you touched** (the commands table in `AGENTS.md`):
    `pytest`, `ruff check .`, `cd generators/core && pytest`,

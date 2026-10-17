@@ -6,7 +6,7 @@ behaviour — the audio path is verified by ear and has no browser tests).
 
 Nothing here blocks the app. These are quality, correctness, and hygiene items.
 
-Last reviewed against `main` at `822c5ed` (October 2026).
+Last reviewed against `main` at `0895eff` (October 2026).
 
 ---
 
@@ -40,6 +40,14 @@ Last reviewed against `main` at `822c5ed` (October 2026).
   (measured: 6 frames in 10 s), each an audible tick. *Risky: fixing it means
   forking the worklet to hold back a one-quantum cushion before extracting, and
   dropping the copy script.*
+
+- 🟡 **`scripts/generate_cli.py` no longer runs.** It calls
+  `generate(decomposed, config)` without the `duration_s` argument the pipeline
+  added, then reads `e["file"]`, but `generate` now returns audio bytes under
+  `audio` and the pipeline writes the files itself. Nothing imports it and the
+  docs no longer point to it. *Safe: either rebuild it on
+  `run_generation`'s decompose → generate → write → `mix_to_file` steps, or
+  delete it and drop the `mix_to_file` caller note in `.claude/rules/mixer.md`.*
 
 ## Test coverage
 

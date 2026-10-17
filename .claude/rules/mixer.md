@@ -16,8 +16,10 @@ generated atmosphere, so treat them as high-stakes. Full map in
 - `analyze(elements) -> (valid, wavs, srs)` annotates each element dict in place
   with `eq_json`, `volume`, `pan` and `depth`. Called by
   `api/app/services/pipeline.py`.
-- `mix_to_file(elements, path) -> path` renders one mixed WAV. Called by
-  `scripts/generate_cli.py`.
+- `mix_to_file(elements, path) -> path` renders one mixed WAV. Its only caller,
+  `scripts/generate_cli.py`, is currently broken (see `.claude/AUDIT.md`), so
+  nothing exercises it; CI's `.github/scripts/mix_smoke.py` covers `analyze`
+  inside the image.
 
 `mixer/mixer/effects/quality.py` `inspect_clip` (used by `api/app/services/quality.py`
 and `scripts/check_clips.py`) and `mixer/mixer/effects/looping.py` `pad_for_looping`

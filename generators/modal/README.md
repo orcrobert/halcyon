@@ -30,8 +30,8 @@ modal setup
 modal deploy generators/modal/deploy.py
 ```
 
-Modal prints the URL on success. Paste it into the account page under
-**Generators → Add → Modal**, or set it in `.env`:
+Modal prints the URL on success. Add it as a **Modal** generator under
+**Account → Audio generator**, or set it in `.env`:
 
 ```
 GENERATOR_URL=https://<workspace>--halcyon-generator-generator-web.modal.run
@@ -71,7 +71,12 @@ The model settings are baked into the image instead:
 | `STYLE_PRELOAD` | `1` | load the style model in `@modal.enter()` so its weights land in the cached volume; `0` loads it on the first styled request instead |
 | `GENERATION_DURATION` | `10` | seconds per element |
 | `GENERATION_LOUDNESS_LUFS` | `-20` | loudness each clip is normalised to |
+| `STYLE_EVAL_Q`, `STYLE_CFG_BETA` | `3`, `5` | defaults for style closeness and prompt weight; the account page sends both per request, so no redeploy is needed to change them |
 | `HALCYON_MODAL_SCALEDOWN` | `300` | seconds an idle container waits before scaling to zero |
+
+`HALCYON_MODAL_GPU` and `HALCYON_MODAL_SCALEDOWN` are read by `deploy.py` itself;
+the rest become environment variables inside the container. Deploying from the
+account page passes the same names, taken from the generator's options.
 
 ```bash
 HALCYON_MODAL_GPU=T4 MUSICGEN_MODEL=facebook/musicgen-medium \

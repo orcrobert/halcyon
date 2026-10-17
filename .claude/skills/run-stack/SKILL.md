@@ -37,7 +37,7 @@ Bring services up bottom-up so a submitted prompt has everything it needs.
    source .venv/bin/activate
    uvicorn api.app.main:app --reload --port 8001
    ```
-   Sanity check: `curl localhost:8001/health` → `{"status":"ok"}`.
+   Sanity check: `curl localhost:8001/health` → `{"status":"ok","version":"dev"}`.
 
    Generation runs on a worker thread inside this process. There is no second
    process to start.
@@ -63,10 +63,12 @@ Bring services up bottom-up so a submitted prompt has everything it needs.
 | Symptom | Check |
 |---------|-------|
 | Fails immediately with a key error | Is a key set for the chosen provider, in `.env` or the account panel? |
-| Fails after minutes | Is `GENERATOR_URL` current and the generator alive? |
+| Stuck at *waking*, then fails | Is the active generator's URL current and the generator alive? **Test** it on the account page |
 | Failed with "interrupted by a server restart" | The API restarted mid-run; generate again |
 | 401 on everything | Token cleared or revoked — sign in again |
 | Blank page on :8001 | No `frontend/dist` build |
 | No audio | Interact with page (autoplay); is `public/soundtouch-processor.js` present? |
 
-See MANUAL.md §6 for the full troubleshooting table.
+See MANUAL.md §7 for the full troubleshooting table, and
+[SELF_HOSTING.md](../../../SELF_HOSTING.md#language-models-through-a-cli) when
+the language model is Claude Code or Codex.

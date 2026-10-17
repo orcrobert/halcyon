@@ -16,8 +16,9 @@ one.
 4. **Runtime → Run all.** Model loading takes a few minutes.
 5. Copy the `GENERATOR_URL=…` line the last cell prints.
 
-In Halcyon, go to **Account → Generators → Add**, pick **Google Colab**, and
-paste it.
+In Halcyon, go to **Account → Audio generator**, add a **Google Colab**
+generator, and paste it. Leave `GITHUB_TOKEN` in the first cell empty; it is
+only for installing from a private fork.
 
 ## When the URL changes
 
@@ -37,6 +38,9 @@ The config cell sets the same environment variables every other host uses:
 | `STYLE_MODEL` | `facebook/musicgen-style` |
 | `GENERATION_DURATION` | `10` |
 | `GENERATION_LOUDNESS_LUFS` | `-20` |
+
+The rest of the variables in [../README.md](../README.md#configuration) work
+too; set them in the same cell.
 
 On a free T4, `musicgen-large` is tight. If loading runs out of VRAM, drop to
 `facebook/musicgen-medium`.
