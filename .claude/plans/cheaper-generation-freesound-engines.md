@@ -3,7 +3,8 @@
 Status: WP0 (timings), WP1 (layer roles) and WP2 (one-shot events) have shipped.
 WP3–WP7 (Freesound sourcing, manual Freesound search, the engine registry, Stable Audio
 Open / TangoFlux, the backend benchmark) are open. Written against `main` at `9ec6d57`;
-re-verify the codebase findings before starting an open WP.
+re-verify the codebase findings before starting an open WP: the "Codebase findings" section
+describes `main` before WP0–WP2 shipped, so its line numbers and gaps are historical.
 
 ## Context
 
@@ -34,7 +35,7 @@ acceptance criteria.
 
 1. Read `AGENTS.md` in the repo root. Non-negotiables: **no comments in code anywhere**, branch
    from `main` (`<type>/<kebab>`), logical commits `<type>: <Imperative summary>`, PR to `main`,
-   **no AI/Claude/co-author mentions in commits or PRs**, never commit `.env`, match surrounding
+   never commit `.env`, match surrounding
    code style, theme tokens only in `frontend/src` (no hex, no rgb, no Tailwind palette classes).
 2. Pick exactly one WP. Check its "Depends on" line. Do not start a WP whose dependency is not
    merged.
@@ -48,11 +49,12 @@ acceptance criteria.
    ```
    pytest                       # api/tests + mixer/tests (from repo root, venv active)
    cd generators/core && pytest # generator server, no GPU needed
-   cd frontend && npm run lint && npm run build
+   cd frontend && npm run lint && npx tsc --noEmit && npm test && npm run build
    ```
-6. Documentation to update when a WP changes a contract: `SELF_HOSTING.md` (generator
-   contract section, lines ~95–153), `.claude/docs/architecture.md`, and the parameter table
-   there. Keep prose terse, no filler.
+6. Documentation to update when a WP changes a contract: `SELF_HOSTING.md` (the generator
+   contract section, and the configuration table for any new variable), `.env.example`,
+   `.claude/docs/architecture.md` and its parameter and endpoint tables. Keep prose terse, no
+   filler.
 
 ### Dependency graph
 

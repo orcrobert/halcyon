@@ -10,5 +10,5 @@
   what they report instead of working around them.
 - Skills: `feature-workflow` for branch → commits → PR, `run-stack` to bring the
   stack up locally or in Docker.
-- `.claude/settings.json` scopes permissions and turns off commit and PR
-  attribution. Do not re-add it by hand.
+- `.claude/settings.json` holds the shared permissions and registers the hooks.
+  Machine-specific overrides go in `.claude/settings.local.json` (gitignored).

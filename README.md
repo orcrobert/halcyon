@@ -116,16 +116,37 @@ To update to the latest release:
 docker compose pull && docker compose up -d
 ```
 
-Server-wide settings, such as closing registration or pinning a version, go in
-a `.env` file next to `compose.yaml`. None are required; see
-[SELF_HOSTING.md](SELF_HOSTING.md#running-it-with-docker).
+Or add `COMPOSE_PROFILES=updates` to a `.env` next to `compose.yaml`, run
+`docker compose up -d` once, and update from **Account → Updates** in the app,
+by hand or automatically.
+
+Server-wide settings, such as closing registration, go in that same `.env`. None
+are required; every variable is listed in
+[SELF_HOSTING.md](SELF_HOSTING.md#configuration).
+
+### Choosing a version
+
+`HALCYON_TAG` in `.env` picks the image. Release `vX.Y.Z` publishes these tags:
+
+| Tag | Follows |
+|-----|---------|
+| `latest` | every release |
+| `X.Y` | patches of one minor line only |
+| `X.Y.Z` | one exact release, never moves |
+| `latest-cli`, `X.Y-cli`, `X.Y.Z-cli` | the same, plus Claude Code and Codex for [CLI language models](SELF_HOSTING.md#language-models-through-a-cli) |
+
+Releases and their notes are on the
+[releases page](https://github.com/orcrobert/halcyon/releases). Rolling back is
+the same as moving forward: set the older tag and
+`docker compose pull && docker compose up -d`. Details in
+[SELF_HOSTING.md](SELF_HOSTING.md#versions-tags-and-releases).
 
 <details>
 <summary>With plain Docker instead</summary>
 
 ```bash
 docker run -d --name halcyon \
-  -p 8001:8001 \
+  -p 127.0.0.1:8001:8001 \
   -v halcyon-data:/data \
   --read-only --tmpfs /tmp \
   --add-host host.docker.internal:host-gateway \
@@ -140,7 +161,7 @@ To update, `docker pull ghcr.io/orcrobert/halcyon:latest`, then
 <details>
 <summary>From source, without Docker</summary>
 
-Needs Python 3.11 and Node 22 or newer.
+Needs Python 3.11 and Node.js 22.12 or newer.
 
 ```bash
 git clone https://github.com/orcrobert/halcyon.git
@@ -148,11 +169,13 @@ cd halcyon
 python3.11 -m venv .venv
 source .venv/bin/activate
 pip install -e ./mixer -e '.[dev]'
-cd frontend && npm install && npm run build && cd ..
+cd frontend && npm ci && npm run build && cd ..
 uvicorn api.app.main:app --port 8001
 ```
 
-Then open <http://localhost:8001>.
+Then open <http://localhost:8001>. Add `git checkout vX.Y.Z` after cloning,
+with a tag from `git tag -l 'v*'`, to run a release instead of `main`. Developing it, with hot reload, is covered in
+[MANUAL.md](MANUAL.md).
 </details>
 
 ## Set it up
@@ -169,10 +192,11 @@ Open **Account → Language model** and pick one:
 |---|---|
 | **Google Gemini** | A free API key from [Google AI Studio](https://aistudio.google.com/apikey). The easiest start. |
 | **Ollama** | [Ollama](https://ollama.com) running somewhere Halcyon can reach, with a model pulled (`ollama pull mistral`). No key. |
-| **OpenAI-compatible API** | A base URL and key for OpenAI or any service that speaks its API. |
+| **OpenAI-compatible API** | A base URL and key for OpenAI or any service that speaks its API (Groq, OpenRouter, DeepSeek, LM Studio, vLLM, …). |
+| **Claude Code or Codex CLI** | The CLI on the server, under your subscription login. Personal instances only: run a `-cli` image tag and set `DECOMPOSER_ALLOW_CLI=true`. Setup in [SELF_HOSTING.md](SELF_HOSTING.md#language-models-through-a-cli). |
 
-Keys are encrypted before they are stored and are never sent back to the
-browser.
+Keys and tokens are encrypted before they are stored and are never sent back to
+the browser.
 
 ### 2. An audio generator
 
@@ -194,7 +218,8 @@ config cell and choose **Runtime → Run all**. Copy the URL it prints and add i
 in Halcyon as a **Google Colab** generator. The URL lasts as long as the Colab
 session.
 
-**Your own machine.** If you have an NVIDIA GPU with CUDA:
+**Your own machine.** If you have an NVIDIA GPU with CUDA, in a Python 3.10 or
+3.11 environment:
 
 ```bash
 pip install "halcyon-generator[audiocraft] @ git+https://github.com/orcrobert/halcyon@main#subdirectory=generators/core"
@@ -214,13 +239,14 @@ A **Hugging Face Space** on a paid GPU works too. Every option is covered in
 Go back to the main screen, describe a scene, pick how long the loop should be,
 and press generate. You can watch each step as it happens.
 
-## More
+## Documentation
 
-- **[SELF_HOSTING.md](SELF_HOSTING.md)**: server-wide defaults, user
-  management, published images and the contract any generator must follow.
-- **[MANUAL.md](MANUAL.md)**: running and developing every part of the stack.
-- **[AGENTS.md](AGENTS.md)**: how the code is organised and the rules for
-  contributing.
+| Read | For |
+|------|-----|
+| [SELF_HOSTING.md](SELF_HOSTING.md) | every setting, Docker, image tags, updates, backups, CLI language models, the generator contract |
+| [generators/README.md](generators/README.md) | running a generator on Modal, Colab, your own GPU or Hugging Face |
+| [MANUAL.md](MANUAL.md) | developing from source, using every control, troubleshooting, tests |
+| [AGENTS.md](AGENTS.md) | how the code is organised and the rules for contributing, by hand or with a coding agent |
 
 ## License
 

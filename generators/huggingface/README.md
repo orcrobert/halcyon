@@ -30,7 +30,9 @@ between requests.
 
 ## Wiring it up
 
-Set `GENERATOR_URL` in Halcyon's `.env` to the Space's direct URL:
+Add the Space's direct URL as a **Hugging Face** generator under
+**Account → Audio generator**, or set it as the instance fallback in Halcyon's
+`.env`:
 
 ```
 GENERATOR_URL=https://<user>-<space>.hf.space
@@ -53,18 +55,16 @@ Keep the Space public, or put it behind your own proxy.
 Set them as Space variables. Models load at startup, so the first boot after a
 change is slow.
 
-## Private repository
+## Building from a private fork
 
-The image installs `halcyon-generator` from GitHub, so while `orcrobert/halcyon`
-is private the build cannot clone it and fails with `exit code: 128`.
-
-Add a [fine-grained token](https://github.com/settings/tokens) with read access
-to the repository as a **build-time secret** named `GH_TOKEN` — Settings →
-Variables and secrets → New secret, and tick *Use as build secret*.
-
-It is mounted with `--mount=type=secret`, so it is never written into an image
-layer. If the repository is public, leave the secret unset and the build works
-unchanged.
+The image installs `halcyon-generator` from `github.com/orcrobert/halcyon`
+(public) at `main`; the `HALCYON_REPO` and `HALCYON_REF` build args change that.
+A private fork cannot be cloned without credentials and fails with
+`exit code: 128`: add a [fine-grained token](https://github.com/settings/tokens)
+with read access as a **build-time secret** named `GH_TOKEN` (Settings →
+Variables and secrets → New secret, tick *Use as build secret*). It is mounted
+with `--mount=type=secret`, so it is never written into an image layer. For
+this repository, leave it unset.
 
 ## Deploying
 

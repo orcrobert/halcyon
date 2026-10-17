@@ -71,5 +71,5 @@ file you are editing.** These are the defaults when there is no local precedent.
 ## Commit & PR conventions
 
 See [git-workflow.md](git-workflow.md). In short: branch per change, logical
-commits, imperative subjects, **no author name / no AI attribution / no
-co-author trailer**, PR body describes what and why for a reviewer.
+commits, `<type>: <Imperative summary>` subjects whose type decides the release,
+and a PR body that describes what and why for a reviewer.

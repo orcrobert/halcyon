@@ -9,12 +9,16 @@ Definitive reference for how the system fits together. Skim
 
 ### `frontend/` — React + Web Audio
 - **Views** (`components/`): `AuthView`, `PromptView`, `GeneratingView`,
-  `DashboardView`, `HistoryPanel`, plus mixing controls (`TrackStrip`, `Fader`,
-  `EQPanel`, `PanKnob`, `SpatialPad`/`SpatialModal`, `TuningControl`,
-  `BinauralModal`, `Visualizer`).
-- **State machine**: `App.tsx` drives three views — `prompt → generating →
-  dashboard` — plus history and binaural state. It owns polling and the
-  atmosphere object.
+  `DashboardView`, `AccountView`, `HistoryPanel`; mixing controls
+  (`TrackStrip`, `LayerMenu`, `Fader`, `EQPanel`, `PanKnob`,
+  `SpatialPad`/`SpatialModal`, `DensityModal`, `TuningControl`,
+  `BinauralModal`, `Visualizer`); flows (`StyleClipModal`, `ReviewLayersModal`,
+  `RegenerateModal`, `QualityModal`, `PromptEditorModal`); account cards
+  (`DecomposerCard`, `GeneratorsCard`, `GeneratorOptionsPanel`, `ThemeCard`,
+  `UsersPanel`, `UpdatesPanel`); toasts (`DeployToast`, `UpdateToast`).
+- **State machine**: `App.tsx` drives four views (`prompt → generating →
+  dashboard`, plus `account`), history and binaural state. It owns polling and
+  the atmosphere object.
 - **Audio engine**: `hooks/useAudioEngine.ts` is the heart of playback. It
   decodes element WAVs, builds one Web Audio graph per track
   (`source (loops the padded interior) → SoundTouch pitch → rumble HPF →
@@ -30,10 +34,13 @@ Definitive reference for how the system fits together. Skim
   rendering for the life of the page.
 - **Persistence of edits**: `hooks/useDebouncedPatcher.ts` batches mix edits and
   `PATCH`es them to the API (250 ms debounce, flush on unload).
+- **Other hooks**: `eventScheduler.ts` (pure one-shot scheduling, seeded for
+  export), `styleClip.ts` (style-clip crop maths), `generatorStore.ts` (the one
+  copy of the generator list).
 - **API layer** (`api/`): `client.ts` (axios + bearer token injection, 401
   handling), `token.ts` (localStorage), `errors.ts` (FastAPI error shapes),
-  `atmospheres.ts` (create/get/poll/delete), `elements.ts`, `auth.ts`,
-  `settings.ts`.
+  `atmospheres.ts` (create/get/poll/delete/review), `elements.ts`, `auth.ts`,
+  `settings.ts`, `generators.ts`, `admin.ts`, `updates.ts`.
 - **Contract**: `types/index.ts` mirrors `api/app/models/schemas.py`. Treat it as
   the single source of truth for the client-side API shape.
 
@@ -77,14 +84,19 @@ Definitive reference for how the system fits together. Skim
 - **Routers**: `auth.py`, `admin.py`, `settings.py`, `generators.py`,
   `updates.py`, `atmospheres.py`, `elements.py`. Every
   query is scoped to the current user; a foreign id returns 404, not 403.
-- **Generation**: `AtmosphereController`-equivalent `store` creates the row and
-  hands the id to `worker.GenerationWorker`, a single daemon thread consuming a
+- **Generation**: `POST /api/atmospheres` (`routers/atmospheres.py` `store`)
+  creates the row and hands the id to `worker.GenerationWorker`, a single daemon thread consuming a
   `queue.Queue`. `services/pipeline.py` is the job body — `run_generation` for a
   whole atmosphere, `regenerate_element` for one layer, both serialized on that
   one thread.
 - **Providers** (`services/providers.py`): a registry of LLM backends — `gemini`
-  (native), `ollama` (native), `openai` (any OpenAI-compatible endpoint). Adding
-  an entry surfaces it in the account panel with no frontend change.
+  (native), `ollama` (native), `openai` (any OpenAI-compatible endpoint), and
+  the `local_cli` providers `claude_cli` and `codex_cli`, which run the CLI as a
+  subprocess (240 s timeout) in an empty temporary directory and are hidden
+  unless `DECOMPOSER_ALLOW_CLI` is set. A provider's `key_env` names the
+  variable a stored key is passed in (`CLAUDE_CODE_OAUTH_TOKEN`,
+  `CODEX_API_KEY`). Adding an entry surfaces it in the account panel with no
+  frontend change.
 - **Config resolution** (`services/runconfig.py`): merges a user's `UserSettings`
   over the instance `.env` defaults into a frozen `RunConfig`. Switching provider
   drops inherited credentials so one provider's key is never sent to another.
@@ -115,7 +127,10 @@ Definitive reference for how the system fits together. Skim
 - **Secrets** (`security.py`): per-user API keys encrypted with Fernet, keyed off
   `SECRET_KEY` or an auto-generated `DATA_DIR/secret.key`.
 - **Config**: `config.py` (pydantic-settings) reads the repo-root `.env` and
-  migrates legacy `DECOMPOSER_MODEL` provider names.
+  migrates legacy `DECOMPOSER_MODEL` provider names. It does not export the file
+  to `os.environ`, so child processes (the CLIs, `modal deploy`) see only real
+  environment variables plus what the code passes them. Every variable is listed
+  in [SELF_HOSTING.md](../../SELF_HOSTING.md#configuration).
 
 ### `mixer/` — the DSP core (standalone package)
 Public API in `mixer/mixer/core.py`:
@@ -220,12 +235,51 @@ Frontend                    API                          LLM      Generator
 | Scheduler | 100 ms tick, 0.25 s lookahead (2 s hidden), 2 voices | `eventScheduler.ts` |
 | Export    | 30 / 60 / 120 / 300 s, seeded per element | `useAudioEngine` |
 | Poll      | 1.5 s interval, 20 s stuck-pending guard, 10 min timeout | `atmospheres.ts` |
-| Generator | 300 s request timeout | `services/generator.py` |
-| Progress  | 10 / 30 / 70 / 90 / 100 per stage | `services/pipeline.py` |
+| Generator | 300 s request timeout; readiness polled every 3 s for up to 120 s; probe 10 s | `services/generator.py` |
+| CLI LLM   | 240 s per call | `services/providers.py` |
+| Progress  | decomposing 10, reviewing 15, waking 20, generating 30, mixing 70, persisting 90, ready 100 | `services/stages.py` |
+| Updates   | release check every 6 h; auto-update first runs 10 min after boot | `services/updates.py` |
 
 There are **two mixing implementations** (Python at generation time, browser for
 live/export). They must stay conceptually aligned. Divergence between them is a
 known correctness risk (see AUDIT).
+
+---
+
+## HTTP endpoints
+
+JSON routes return the `Envelope` / `Page` wrappers from `models/schemas.py`.
+Every route needs a bearer token unless noted. Interactive docs are disabled.
+
+| Method and path | Purpose |
+|-----------------|---------|
+| `GET /health` | no auth; `{"status": "ok", "version": …}` |
+| `GET /api/auth/options` | no auth; whether registration is open |
+| `POST /api/auth/register`, `POST /api/auth/login` | no auth; return a token |
+| `POST /api/auth/logout`, `GET /api/auth/me` | end the session, current user |
+| `GET /api/settings`, `PUT /api/settings` | the caller's decomposer, prompt, theme and workflow settings |
+| `GET /api/generators`, `POST /api/generators` | list and add generators |
+| `PATCH /api/generators/{id}`, `DELETE /api/generators/{id}` | edit, remove |
+| `POST /api/generators/{id}/activate`, `POST /api/generators/{id}/test` | make active, probe `GET /` |
+| `POST /api/generators/modal` | create a Modal generator and deploy it (202) |
+| `PUT /api/generators/{id}/options`, `POST /api/generators/{id}/deploy` | change options, redeploy (202) |
+| `GET /api/atmospheres`, `POST /api/atmospheres` | history page, start a generation (202) |
+| `GET /api/atmospheres/{id}`, `DELETE /api/atmospheres/{id}` | poll or open one, delete it with its audio |
+| `POST /api/atmospheres/{id}/regenerate` | a new take as a new atmosphere (202) |
+| `PUT /api/atmospheres/{id}/decomposition` | confirm reviewed layers and queue generation (202) |
+| `POST /api/atmospheres/{id}/decomposition/revise` | ask the LLM to revise the layers under review |
+| `POST /api/atmospheres/{id}/quality/dismiss` | keep flagged clips |
+| `PATCH /api/elements/{id}`, `POST /api/elements/{id}/reset` | live mix edits, restore the mixer's values |
+| `POST /api/elements/{id}/regenerate`, `DELETE /api/elements/{id}` | re-render one layer (202), delete it |
+| `GET /api/elements/{id}/audio` | the layer's WAV |
+| `GET /api/admin/users`, `POST /api/admin/users` | admin: list, create accounts |
+| `GET`, `PATCH`, `DELETE /api/admin/users/{id}` | admin: show, edit, delete one |
+| `/api/admin/users/{id}/settings`, `/api/admin/users/{id}/generators/…` | admin: the settings and generator routes above, for that account |
+| `GET /api/admin/updates`, `POST /api/admin/updates/check` | admin: update status, force a release check |
+| `POST /api/admin/updates`, `PATCH /api/admin/updates` | admin: start an update (202, 409 while busy), toggle automatic updates |
+
+The SPA catch-all serves `frontend/dist` for every other path when the build
+exists.
 
 ---
 
@@ -238,3 +292,10 @@ known correctness risk (see AUDIT).
 - API ↔ generator: `GENERATOR_URL` only (no auth by default — run it on a
   private network or add your own).
 - Never expose the generator publicly without protection.
+- API ↔ CLI LLMs: a subprocess on the server, under the server's login or the
+  user's pasted token, with tools, settings and MCP disabled (Claude Code) or a
+  read-only sandbox (Codex). Off unless `DECOMPOSER_ALLOW_CLI` is set.
+- API ↔ updater: the Watchtower sidecar holds the Docker socket; the API holds
+  only the random token it wrote to the shared `updater-token` volume.
+- API ↔ Modal: `modal deploy` runs with the user's or the instance's Modal
+  token, passed as environment to that subprocess only.
