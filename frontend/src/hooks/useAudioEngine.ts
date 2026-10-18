@@ -173,6 +173,7 @@ function startLoop(src: AudioBufferSourceNode, buffer: AudioBuffer, declared: nu
 }
 
 export function isCanonicalBand(band: EQBand): boolean {
+  if (band.source) return false
   return (
     (band.type === 'lowshelf' && band.freq === EQ_LOW_FREQ_HZ) ||
     (band.type === 'peaking' && band.freq === EQ_MID_FREQ_HZ) ||
