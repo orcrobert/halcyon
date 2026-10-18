@@ -49,3 +49,16 @@ def test_refuses_atmospheres_of_non_admin_accounts(tmp_path, client, register, s
     with pytest.raises(SystemExit):
         publish_demo.main(["--out", str(tmp_path / "demo"), "add", str(created)])
     assert not (tmp_path / "demo" / "catalog.json").exists()
+
+
+def test_ready_lists_admin_atmospheres_and_marks_published_ones(
+    tmp_path, ready_atmosphere, capsys
+):
+    out = tmp_path / "demo"
+    publish_demo.main(["--out", str(out), "ready"])
+    assert f" {ready_atmosphere}  " in capsys.readouterr().out
+
+    publish_demo.main(["--out", str(out), "add", str(ready_atmosphere)])
+    capsys.readouterr()
+    publish_demo.main(["--out", str(out), "ready"])
+    assert capsys.readouterr().out.lstrip().startswith("*")

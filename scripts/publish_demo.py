@@ -4,11 +4,11 @@ import shutil
 import sys
 from pathlib import Path
 
-from sqlmodel import Session
+from sqlmodel import Session, select
 
 from api.app.config import settings
 from api.app.db import get_engine
-from api.app.models.tables import Atmosphere
+from api.app.models.tables import Atmosphere, User
 from api.app.routers.atmospheres import serialize_atmosphere
 from api.app.services import storage
 
@@ -103,15 +103,31 @@ def show(out: Path) -> None:
         print(f"{entry['id']:>6}  {entry['title'] or entry['prompt']}")
 
 
+def ready(out: Path) -> None:
+    published = {entry["id"] for entry in load_catalog(out)}
+    with Session(get_engine()) as session:
+        rows = session.exec(
+            select(Atmosphere)
+            .join(User)
+            .where(User.is_admin.is_(True), Atmosphere.status == "ready")
+            .order_by(Atmosphere.id.desc())
+        ).all()
+        for atmosphere in rows:
+            mark = "*" if atmosphere.id in published else " "
+            print(f"{mark}{atmosphere.id:>6}  {atmosphere.title or atmosphere.prompt}")
+
+
 def main(argv: list[str]) -> None:
     parser = argparse.ArgumentParser(prog="publish_demo")
     parser.add_argument("--out", type=Path, default=settings.data_path / "demo")
-    parser.add_argument("action", choices=["add", "remove", "list"])
+    parser.add_argument("action", choices=["add", "remove", "list", "ready"])
     parser.add_argument("ids", nargs="*", type=int)
     args = parser.parse_args(argv)
 
     if args.action == "list":
         show(args.out)
+    elif args.action == "ready":
+        ready(args.out)
     elif not args.ids:
         parser.error(f"{args.action} needs at least one atmosphere id")
     elif args.action == "add":
