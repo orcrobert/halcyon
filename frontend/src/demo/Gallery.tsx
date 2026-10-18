@@ -1,6 +1,6 @@
 import type { Atmosphere, Element } from '../types'
-import { Logo } from '../components/Logo'
-import { auraOf, loopLabel } from './catalog'
+import { Mark } from '../components/Logo'
+import { auraOf, barsOf, loopLabel } from './catalog'
 
 interface Props {
   soundscapes: Atmosphere[] | null
@@ -10,10 +10,74 @@ interface Props {
   onOpenTheme: () => void
 }
 
-function chipClass(el: Element): string {
-  if (el.playback === 'oneshot') return 'bg-tag-event/10 text-tag-event'
-  if (el.type === 'music') return 'bg-tag-music/10 text-tag-music'
-  return 'bg-tag-sound/10 text-tag-sound'
+const CONTAINER: React.CSSProperties = { maxWidth: 1120, margin: '0 auto', paddingLeft: 24, paddingRight: 24 }
+
+const STEPS: { title: string; body: string }[] = [
+  { title: 'Describe a place', body: 'One sentence, the way you would say it out loud.' },
+  { title: 'It becomes layers', body: 'A language model splits the scene into sounds and music, each generated on its own.' },
+  { title: 'Mixed from the audio', body: 'EQ, level and placement come from analysing every clip, so the layers sit together.' },
+]
+
+function dotColor(el: Element): string {
+  if (el.playback === 'oneshot') return 'var(--color-tag-event)'
+  if (el.type === 'music') return 'var(--color-tag-music)'
+  return 'var(--color-tag-sound)'
+}
+
+function Artwork({ atmosphere, opening }: { atmosphere: Atmosphere; opening: boolean }) {
+  const bars = barsOf(atmosphere.prompt, 36)
+  const layers = (atmosphere.elements ?? []).length
+
+  return (
+    <div className="relative overflow-hidden" style={{ height: 156, background: 'var(--color-surface-sunken)' }}>
+      <div aria-hidden className="absolute inset-0" style={{ background: auraOf(atmosphere.prompt) }} />
+      <svg
+        aria-hidden
+        className="absolute opacity-60 group-hover:opacity-90 transition-opacity duration-500"
+        viewBox={`0 0 ${bars.length * 6} 60`}
+        preserveAspectRatio="none"
+        style={{ left: 20, bottom: 20, height: 52, width: 'calc(100% - 96px)' }}
+      >
+        {bars.map((h, i) => (
+          <rect key={i} x={i * 6 + 1} y={60 - h * 60} width={3} height={h * 60} rx={1.5} style={{ fill: 'var(--color-accent-soft)' }} />
+        ))}
+      </svg>
+      <div
+        aria-hidden
+        className="absolute inset-x-0 bottom-0"
+        style={{ height: 48, background: 'linear-gradient(to top, var(--color-surface), transparent)' }}
+      />
+
+      <span
+        className="absolute text-[11px] text-ink-soft rounded-full"
+        style={{
+          top: 14, left: 14, padding: '4px 10px',
+          background: 'color-mix(in srgb, var(--color-bg) 55%, transparent)',
+          border: '1px solid color-mix(in srgb, var(--color-wash) 8%, transparent)',
+        }}
+      >
+        {layers} layers · {loopLabel(atmosphere.duration_s)}
+      </span>
+
+      <span
+        className="absolute flex items-center justify-center rounded-full transition-transform duration-300 group-hover:scale-105"
+        style={{
+          right: 16, bottom: 16, width: 44, height: 44,
+          background: 'var(--color-accent)',
+          color: 'var(--color-bg)',
+          boxShadow: '0 10px 24px color-mix(in srgb, var(--color-accent) 35%, transparent)',
+        }}
+      >
+        {opening ? (
+          <span className="w-4 h-4 rounded-full border-2 border-current animate-spin" style={{ borderTopColor: 'transparent' }} />
+        ) : (
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 2 }}>
+            <polygon points="6,4 20,12 6,20" />
+          </svg>
+        )}
+      </span>
+    </div>
+  )
 }
 
 function Card({ atmosphere, opening, disabled, onOpen }: {
@@ -23,118 +87,143 @@ function Card({ atmosphere, opening, disabled, onOpen }: {
   onOpen: () => void
 }) {
   const elements = atmosphere.elements ?? []
-  const shown = elements.slice(0, 5)
-  const more = elements.length - shown.length
 
   return (
     <button
       type="button"
       onClick={onOpen}
       disabled={disabled}
-      className="group relative flex flex-col text-left rounded-2xl border border-line-soft hover:border-accent/40 bg-surface overflow-hidden transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-wait"
+      aria-label={`Play ${atmosphere.title ?? atmosphere.prompt}`}
+      className="group flex flex-col text-left rounded-2xl border border-line-soft hover:border-accent/40 bg-surface overflow-hidden transition-all duration-300 hover:-translate-y-0.5 disabled:cursor-wait"
       style={{
         fontFamily: 'inherit',
-        boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 30%, transparent)',
+        boxShadow: '0 12px 28px color-mix(in srgb, var(--color-shade) 18%, transparent)',
       }}
     >
-      <div
-        aria-hidden
-        className="absolute inset-0 opacity-70 group-hover:opacity-100 transition-opacity duration-500"
-        style={{ background: auraOf(atmosphere.prompt) }}
-      />
+      <Artwork atmosphere={atmosphere} opening={opening} />
 
-      <div className="relative flex flex-col gap-4 flex-1" style={{ padding: '22px' }}>
-        <div className="flex items-start justify-between gap-3">
-          <h2 className="text-[17px] font-semibold text-ink-bright leading-snug" style={{ letterSpacing: '-0.01em' }}>
-            {atmosphere.title ?? atmosphere.prompt}
-          </h2>
-          <span
-            className="shrink-0 flex items-center justify-center rounded-full border border-accent/30 bg-accent/10 text-accent-bright group-hover:bg-accent/20 transition-colors"
-            style={{ width: 34, height: 34 }}
-          >
-            {opening ? (
-              <span className="w-3 h-3 rounded-full border-2 border-accent-bright border-t-transparent animate-spin" />
-            ) : (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style={{ marginLeft: 2 }}>
-                <polygon points="5,3 19,12 5,21" />
-              </svg>
-            )}
-          </span>
-        </div>
-
-        <p className="text-[13px] text-ink-dim leading-relaxed line-clamp-3 italic">
-          “{atmosphere.prompt}”
-        </p>
-
-        <div className="flex flex-wrap gap-1.5 mt-auto">
-          {shown.map((el) => (
-            <span key={el.id} className={`text-[10.5px] rounded-md ${chipClass(el)}`} style={{ padding: '2px 8px' }}>
+      <div className="flex flex-col flex-1" style={{ padding: '16px 20px 20px', gap: 10 }}>
+        <h3 className="text-[16px] font-semibold text-ink-bright leading-snug line-clamp-2" style={{ letterSpacing: '-0.01em' }}>
+          {atmosphere.title ?? atmosphere.prompt}
+        </h3>
+        {atmosphere.title && (
+          <p className="text-[12.5px] text-ink-faint leading-relaxed line-clamp-2">
+            “{atmosphere.prompt}”
+          </p>
+        )}
+        <ul className="flex flex-wrap text-[11.5px] text-ink-dim" style={{ gap: '6px 14px', marginTop: 'auto', paddingTop: 4 }}>
+          {elements.map((el) => (
+            <li key={el.id} className="flex items-center" style={{ gap: 6 }}>
+              <span aria-hidden className="rounded-full" style={{ width: 6, height: 6, background: dotColor(el) }} />
               {el.label}
-            </span>
+            </li>
           ))}
-          {more > 0 && (
-            <span className="text-[10.5px] rounded-md bg-wash/[0.04] text-ink-faint" style={{ padding: '2px 8px' }}>+{more}</span>
-          )}
-        </div>
-
-        <div className="flex items-center gap-2 text-[10.5px] uppercase tracking-[0.14em] text-ink-ghost">
-          <span>{elements.length} layers</span>
-          <span aria-hidden>·</span>
-          <span>{loopLabel(atmosphere.duration_s)}</span>
-        </div>
+        </ul>
       </div>
     </button>
   )
 }
 
 export function Gallery({ soundscapes, error, openingId, onOpen, onOpenTheme }: Props) {
+  const count = soundscapes?.length ?? 0
+
   return (
     <div className="min-h-screen flex flex-col bg-bg">
-      <header className="flex items-center justify-between" style={{ padding: '18px 32px' }}>
-        <span className="text-[10.5px] uppercase tracking-[0.18em] text-ink-faint border border-line rounded-full" style={{ padding: '5px 12px' }}>
-          Demo
-        </span>
-        <button
-          onClick={onOpenTheme}
-          className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl transition-all duration-150"
-          style={{ fontFamily: 'inherit', padding: '8px 14px' }}
-        >
-          <ThemeIcon />
-          <span className="hidden sm:block">Theme</span>
-        </button>
+      <header style={{ ...CONTAINER, width: '100%', paddingTop: 20, paddingBottom: 20 }}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center" style={{ gap: 10 }}>
+            <Mark size={20} />
+            <span
+              className="text-wash/90"
+              style={{
+                fontFamily: 'var(--font-display)',
+                fontSize: 16,
+                fontWeight: 'var(--font-weight-brand)',
+                letterSpacing: 'var(--tracking-brand)',
+                textTransform: 'uppercase',
+              }}
+            >
+              Halcyon
+            </span>
+            <span
+              className="text-[10px] uppercase tracking-[0.16em] text-accent-soft rounded-full"
+              style={{
+                padding: '3px 9px',
+                marginLeft: 4,
+                background: 'color-mix(in srgb, var(--color-accent) 10%, transparent)',
+                border: '1px solid color-mix(in srgb, var(--color-accent) 25%, transparent)',
+              }}
+            >
+              Demo
+            </span>
+          </div>
+          <button
+            onClick={onOpenTheme}
+            className="flex items-center text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl transition-all duration-150"
+            style={{ fontFamily: 'inherit', padding: '8px 14px', gap: 8 }}
+          >
+            <ThemeIcon />
+            <span className="hidden sm:block">Theme</span>
+          </button>
+        </div>
       </header>
 
-      <main className="flex-1 w-full mx-auto flex flex-col gap-12" style={{ maxWidth: '1080px', padding: '32px 24px 64px' }}>
-        <div className="flex flex-col items-center gap-5 text-center">
-          <Logo size={30} tagline="Describe a place in a sentence and Halcyon builds it as a living, layered soundscape that loops forever." />
-          <p className="text-[12.5px] text-ink-faint leading-relaxed" style={{ maxWidth: '460px' }}>
-            Each one below came from the prompt on its card and was mixed automatically.
-            Open one to listen and remix it: faders, EQ, space, tuning. Nothing you change is saved.
+      <main className="flex-1 w-full" style={{ ...CONTAINER, paddingTop: 48, paddingBottom: 72 }}>
+        <section className="flex flex-col" style={{ gap: 18, maxWidth: 640 }}>
+          <span className="text-[11px] uppercase tracking-[0.2em] text-ink-ghost">Listening room</span>
+          <h1
+            className="font-semibold text-ink-bright"
+            style={{ fontSize: 'clamp(32px, 5vw, 48px)', lineHeight: 1.05, letterSpacing: '-0.03em', textWrap: 'balance' }}
+          >
+            Ambient worlds, written in one sentence.
+          </h1>
+          <p className="text-[15px] text-ink-dim leading-relaxed" style={{ maxWidth: 520 }}>
+            Every soundscape here started as the prompt on its card. Open one to listen and remix it with faders,
+            EQ, space and tuning. Generation is off in the demo, and nothing you change is saved.
           </p>
+        </section>
+
+        <ol
+          className="border-t border-b border-line-faint"
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+            gap: 24,
+            marginTop: 40,
+            padding: '22px 0',
+          }}
+        >
+          {STEPS.map((step, i) => (
+            <li key={step.title} className="flex" style={{ gap: 14 }}>
+              <span className="text-[11px] text-accent-soft" style={{ fontFamily: 'var(--font-mono)', paddingTop: 2 }}>
+                0{i + 1}
+              </span>
+              <span className="flex flex-col" style={{ gap: 4 }}>
+                <span className="text-[13px] font-medium text-ink">{step.title}</span>
+                <span className="text-[12px] text-ink-faint leading-relaxed">{step.body}</span>
+              </span>
+            </li>
+          ))}
+        </ol>
+
+        <div className="flex items-baseline justify-between" style={{ marginTop: 48, marginBottom: 18 }}>
+          <h2 className="text-[13px] font-semibold text-ink tracking-tight">Soundscapes</h2>
+          {count > 0 && <span className="text-[11px] text-ink-ghost">{count} to explore</span>}
         </div>
 
-        {error && (
-          <p className="text-center text-[13px] text-danger-soft">{error}</p>
-        )}
+        {error && <p className="text-[13px] text-danger-soft">{error}</p>}
 
         {soundscapes === null && !error && (
-          <p className="text-center text-[13px] text-ink-ghost">Loading soundscapes…</p>
+          <p className="text-[13px] text-ink-ghost">Loading soundscapes…</p>
         )}
 
-        {soundscapes !== null && soundscapes.length === 0 && (
-          <p className="text-center text-[13px] text-ink-ghost">No soundscapes have been published yet.</p>
+        {soundscapes !== null && count === 0 && (
+          <p className="text-[13px] text-ink-ghost">No soundscapes have been published yet.</p>
         )}
 
-        {soundscapes !== null && soundscapes.length > 0 && (
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 340px))',
-              justifyContent: 'center',
-              gap: '18px',
-            }}
-          >
-            {soundscapes.map((a) => (
+        {count > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 20 }}>
+            {soundscapes!.map((a) => (
               <Card
                 key={a.id}
                 atmosphere={a}
@@ -147,10 +236,14 @@ export function Gallery({ soundscapes, error, openingId, onOpen, onOpenTheme }: 
         )}
       </main>
 
-      <footer className="py-6 text-center">
-        <p className="text-[11px] text-ink-whisper uppercase tracking-widest">
-          Generation is turned off in the demo · Headphones recommended
-        </p>
+      <footer className="border-t border-line-faint">
+        <div
+          className="flex flex-wrap items-center justify-between text-[11px] text-ink-ghost"
+          style={{ ...CONTAINER, paddingTop: 18, paddingBottom: 18, gap: 8 }}
+        >
+          <span>Halcyon demo · generation is turned off</span>
+          <span>Best with headphones</span>
+        </div>
       </footer>
     </div>
   )

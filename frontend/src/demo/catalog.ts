@@ -31,6 +31,21 @@ export function auraOf(seed: string): string {
   ].join(', ')
 }
 
+export function barsOf(seed: string, count: number): number[] {
+  let state = hashOf(seed) || 1
+  const bars: number[] = []
+  let level = 0.5
+  for (let i = 0; i < count; i++) {
+    state ^= state << 13
+    state ^= state >>> 17
+    state ^= state << 5
+    const step = ((state >>> 0) % 1000) / 1000 - 0.5
+    level = Math.min(0.95, Math.max(0.12, level + step * 0.35))
+    bars.push(level)
+  }
+  return bars
+}
+
 export function loopLabel(seconds: number): string {
   return seconds >= 60 ? `${Math.round(seconds / 60)} min loop` : `${seconds} s loop`
 }
