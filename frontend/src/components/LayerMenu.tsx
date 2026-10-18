@@ -5,8 +5,8 @@ interface Props {
   open: boolean
   anchorRef: React.RefObject<HTMLButtonElement | null>
   deletable: boolean
-  onRegenerate: () => void
-  onDelete: () => void
+  onRegenerate?: () => void
+  onDelete?: () => void
   onFrequency?: () => void
   onClose: () => void
 }
@@ -118,18 +118,20 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
         </div>
 
         <div style={{ padding: 6, display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <button
-            onClick={() => { onClose(); onRegenerate() }}
-            style={{ ...rowStyle, color: 'var(--color-ink-soft)' }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-accent) 12%, transparent)' }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
-          >
-            <svg className="stroke-accent-bright" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            Regenerate
-          </button>
+          {onRegenerate && (
+            <button
+              onClick={() => { onClose(); onRegenerate() }}
+              style={{ ...rowStyle, color: 'var(--color-ink-soft)' }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-accent) 12%, transparent)' }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <svg className="stroke-accent-bright" width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+              Regenerate
+            </button>
+          )}
 
           {onFrequency && (
             <button
@@ -146,34 +148,36 @@ export function LayerMenu({ open, anchorRef, deletable, onRegenerate, onDelete, 
             </button>
           )}
 
-          <button
-            onClick={() => {
-              if (!confirming) { setConfirming(true); return }
-              onClose()
-              onDelete()
-            }}
-            disabled={!deletable}
-            title={deletable ? undefined : 'An atmosphere needs at least one layer'}
-            style={{
-              ...rowStyle,
-              color: confirming ? 'var(--color-danger-soft)' : 'var(--color-ink-dim)',
-              background: confirming ? 'color-mix(in srgb, var(--color-danger) 12%, transparent)' : 'transparent',
-              opacity: deletable ? 1 : 0.35,
-              cursor: deletable ? 'pointer' : 'not-allowed',
-            }}
-            onMouseEnter={(e) => {
-              if (deletable && !confirming) e.currentTarget.style.background = 'color-mix(in srgb, var(--color-danger) 10%, transparent)'
-            }}
-            onMouseLeave={(e) => {
-              if (!confirming) e.currentTarget.style.background = 'transparent'
-            }}
-          >
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: confirming ? 'var(--color-danger-bright)' : 'var(--color-ink-muted)', flexShrink: 0 }}>
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
-            {confirming ? 'Delete for good?' : 'Delete'}
-          </button>
+          {onDelete && (
+            <button
+              onClick={() => {
+                if (!confirming) { setConfirming(true); return }
+                onClose()
+                onDelete()
+              }}
+              disabled={!deletable}
+              title={deletable ? undefined : 'An atmosphere needs at least one layer'}
+              style={{
+                ...rowStyle,
+                color: confirming ? 'var(--color-danger-soft)' : 'var(--color-ink-dim)',
+                background: confirming ? 'color-mix(in srgb, var(--color-danger) 12%, transparent)' : 'transparent',
+                opacity: deletable ? 1 : 0.35,
+                cursor: deletable ? 'pointer' : 'not-allowed',
+              }}
+              onMouseEnter={(e) => {
+                if (deletable && !confirming) e.currentTarget.style.background = 'color-mix(in srgb, var(--color-danger) 10%, transparent)'
+              }}
+              onMouseLeave={(e) => {
+                if (!confirming) e.currentTarget.style.background = 'transparent'
+              }}
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ stroke: confirming ? 'var(--color-danger-bright)' : 'var(--color-ink-muted)', flexShrink: 0 }}>
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+              </svg>
+              {confirming ? 'Delete for good?' : 'Delete'}
+            </button>
+          )}
         </div>
 
         <div style={{

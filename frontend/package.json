@@ -7,6 +7,7 @@
     "copy-worklets": "node -e \"require('fs').copyFileSync('node_modules/@soundtouchjs/audio-worklet/dist/soundtouch-processor.js', 'public/soundtouch-processor.js')\"",
     "dev": "npm run copy-worklets && vite",
     "build": "npm run copy-worklets && tsc -b && vite build",
+    "build:demo": "npm run copy-worklets && tsc -b && VITE_DEMO=true vite build --outDir dist-demo",
     "lint": "eslint .",
     "test": "vitest run",
     "preview": "vite preview"

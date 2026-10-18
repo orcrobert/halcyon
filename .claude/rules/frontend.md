@@ -78,3 +78,13 @@ Pure scheduling and maths helpers (`hooks/eventScheduler.ts`,
   failed, polls only while one runs, and sets `--deploy-toast-offset` so the
   page and the dashboard's error bar clear it.
 - `src/types/index.ts` mirrors `api/app/models/schemas.py`. Change both together.
+
+## Demo build
+
+`npm run build:demo` builds `dist-demo/` with `VITE_DEMO=true`: `src/demo/`
+replaces login and the prompt view with a gallery read from a static
+`/catalog/catalog.json` (written by `scripts/publish_demo.py`) and opens each
+entry in the real `DashboardView`, with no API calls and nothing saved. The
+dashboard's regenerate, delete, new-take and quality handlers are optional, and
+a missing one hides its control. `main.tsx` imports `src/demo/` only behind the
+flag, so the normal build carries none of it; keep it that way.
