@@ -53,15 +53,47 @@ def public_entry(atmosphere: Atmosphere, files: dict[int, str]) -> dict:
     return entry
 
 
-def publishable(session: Session, atmosphere_id: int) -> Atmosphere:
-    atmosphere = session.get(Atmosphere, atmosphere_id)
-    if atmosphere is None or not atmosphere.user.is_admin:
-        raise SystemExit(f"{atmosphere_id}: no such atmosphere on an admin account")
-    if atmosphere.status != "ready" or not atmosphere.elements:
-        raise SystemExit(f"{atmosphere_id}: not ready ({atmosphere.status})")
-    if any(element.status != "ready" for element in atmosphere.elements):
-        raise SystemExit(f"{atmosphere_id}: a layer is still regenerating or failed")
-    return atmosphere
+def name_of(item: Atmosphere | dict) -> str:
+    if isinstance(item, dict):
+        return item.get("title") or item["prompt"]
+    return item.title or item.prompt
+
+
+def when(atmosphere: Atmosphere) -> str:
+    return (atmosphere.generated_at or atmosphere.created_at).strftime("%Y-%m-%d %H:%M")
+
+
+def publishable(session: Session) -> list[Atmosphere]:
+    rows = session.exec(
+        select(Atmosphere)
+        .join(User)
+        .where(User.is_admin.is_(True), Atmosphere.status == "ready")
+        .order_by(Atmosphere.created_at.desc(), Atmosphere.id.desc())
+    ).all()
+    return [
+        atmosphere
+        for atmosphere in rows
+        if atmosphere.elements
+        and all(element.status == "ready" for element in atmosphere.elements)
+    ]
+
+
+def find(name: str, items: list) -> list:
+    wanted = name.strip().casefold()
+    exact = [item for item in items if name_of(item).casefold() == wanted]
+    if exact:
+        return exact
+    partial = [item for item in items if wanted in name_of(item).casefold()]
+    if not partial:
+        raise SystemExit(f'No soundscape called "{name}". Run "ready" to see the names.')
+    names = sorted({name_of(item) for item in partial})
+    if len(names) > 1:
+        raise SystemExit(
+            f'"{name}" matches several soundscapes: '
+            + ", ".join(f'"{n}"' for n in names)
+            + ". Use the full title."
+        )
+    return partial
 
 
 def copy_audio(atmosphere: Atmosphere, out: Path) -> dict[int, str]:
@@ -78,62 +110,78 @@ def copy_audio(atmosphere: Atmosphere, out: Path) -> dict[int, str]:
     return files
 
 
-def add(out: Path, ids: list[int]) -> None:
+def add(out: Path, names: list[str]) -> None:
     published = []
     with Session(get_engine()) as session:
-        atmospheres = [publishable(session, atmosphere_id) for atmosphere_id in ids]
-        for atmosphere in atmospheres:
+        candidates = publishable(session)
+        chosen = []
+        for name in names:
+            matches = find(name, candidates)
+            if len(matches) > 1:
+                print(
+                    f'{len(matches)} soundscapes are called "{name_of(matches[0])}"; '
+                    f"publishing the newest, from {when(matches[0])}"
+                )
+            chosen.append(matches[0])
+        for atmosphere in chosen:
             entry = public_entry(atmosphere, copy_audio(atmosphere, out))
             published.append(entry)
-            print(f"published {atmosphere.id}: {entry['title'] or entry['prompt']}")
-    kept = [s for s in load_catalog(out) if s["id"] not in ids]
+            print(f"published: {name_of(atmosphere)}")
+    replaced = {name_of(entry).casefold() for entry in published}
+    ids = {entry["id"] for entry in published}
+    kept = []
+    for entry in load_catalog(out):
+        if entry["id"] in ids:
+            continue
+        if name_of(entry).casefold() in replaced:
+            shutil.rmtree(out / str(entry["id"]), ignore_errors=True)
+            continue
+        kept.append(entry)
     save_catalog(out, published + kept)
 
 
-def remove(out: Path, ids: list[int]) -> None:
+def remove(out: Path, names: list[str]) -> None:
     soundscapes = load_catalog(out)
-    for atmosphere_id in ids:
-        shutil.rmtree(out / str(atmosphere_id), ignore_errors=True)
-        print(f"removed {atmosphere_id}")
-    save_catalog(out, [s for s in soundscapes if s["id"] not in ids])
+    gone = set()
+    for name in names:
+        for entry in find(name, soundscapes):
+            gone.add(entry["id"])
+            shutil.rmtree(out / str(entry["id"]), ignore_errors=True)
+            print(f"removed: {name_of(entry)}")
+    save_catalog(out, [s for s in soundscapes if s["id"] not in gone])
 
 
 def show(out: Path) -> None:
     for entry in load_catalog(out):
-        print(f"{entry['id']:>6}  {entry['title'] or entry['prompt']}")
+        print(name_of(entry))
 
 
 def ready(out: Path) -> None:
     published = {entry["id"] for entry in load_catalog(out)}
     with Session(get_engine()) as session:
-        rows = session.exec(
-            select(Atmosphere)
-            .join(User)
-            .where(User.is_admin.is_(True), Atmosphere.status == "ready")
-            .order_by(Atmosphere.id.desc())
-        ).all()
-        for atmosphere in rows:
+        for atmosphere in publishable(session):
             mark = "*" if atmosphere.id in published else " "
-            print(f"{mark}{atmosphere.id:>6}  {atmosphere.title or atmosphere.prompt}")
+            layers = len(atmosphere.elements)
+            print(f"{mark} {when(atmosphere)}  {layers} layers  {name_of(atmosphere)}")
 
 
 def main(argv: list[str]) -> None:
     parser = argparse.ArgumentParser(prog="publish_demo")
     parser.add_argument("--out", type=Path, default=settings.data_path / "demo")
     parser.add_argument("action", choices=["add", "remove", "list", "ready"])
-    parser.add_argument("ids", nargs="*", type=int)
+    parser.add_argument("titles", nargs="*")
     args = parser.parse_args(argv)
 
     if args.action == "list":
         show(args.out)
     elif args.action == "ready":
         ready(args.out)
-    elif not args.ids:
-        parser.error(f"{args.action} needs at least one atmosphere id")
+    elif not args.titles:
+        parser.error(f"{args.action} needs at least one soundscape title")
     elif args.action == "add":
-        add(args.out, args.ids)
+        add(args.out, args.titles)
     else:
-        remove(args.out, args.ids)
+        remove(args.out, args.titles)
 
 
 if __name__ == "__main__":

@@ -9,9 +9,39 @@ def _catalog(out):
     return json.loads((out / "catalog.json").read_text())["soundscapes"]
 
 
-def test_add_writes_a_public_catalog_and_copies_the_audio(tmp_path, ready_atmosphere):
+def _name(client, auth, atmosphere_id):
+    data = client.get(f"/api/atmospheres/{atmosphere_id}", headers=auth).json()["data"]
+    return data["title"] or data["prompt"]
+
+
+def _generate(client, headers, prompt):
+    from api.app.services.pipeline import run_generation
+
+    created = client.post(
+        "/api/atmospheres", headers=headers, json={"prompt": prompt}
+    ).json()["data"]["id"]
+    run_generation(created)
+    return created
+
+
+def _retitle(atmosphere_id, title):
+    from sqlmodel import Session
+
+    from api.app.db import get_engine
+    from api.app.models.tables import Atmosphere
+
+    with Session(get_engine()) as session:
+        atmosphere = session.get(Atmosphere, atmosphere_id)
+        atmosphere.title = title
+        session.add(atmosphere)
+        session.commit()
+
+
+def test_add_by_title_writes_a_public_catalog_and_copies_the_audio(
+    tmp_path, client, auth, ready_atmosphere
+):
     out = tmp_path / "demo"
-    publish_demo.main(["--out", str(out), "add", str(ready_atmosphere)])
+    publish_demo.main(["--out", str(out), "add", _name(client, auth, ready_atmosphere)])
 
     [entry] = _catalog(out)
     assert entry["id"] == ready_atmosphere
@@ -25,40 +55,66 @@ def test_add_writes_a_public_catalog_and_copies_the_audio(tmp_path, ready_atmosp
         assert (out / str(ready_atmosphere) / name).is_file()
 
 
-def test_republishing_replaces_the_entry_and_remove_deletes_it(tmp_path, ready_atmosphere):
+def test_titles_match_case_insensitively_and_by_unique_part(
+    tmp_path, client, auth, ready_atmosphere
+):
+    _retitle(ready_atmosphere, "Rainy Library")
     out = tmp_path / "demo"
-    publish_demo.main(["--out", str(out), "add", str(ready_atmosphere)])
-    publish_demo.main(["--out", str(out), "add", str(ready_atmosphere)])
-    assert len(_catalog(out)) == 1
+    publish_demo.main(["--out", str(out), "add", "rainy library"])
+    publish_demo.main(["--out", str(out), "add", "LIBRARY"])
+    assert [entry["id"] for entry in _catalog(out)] == [ready_atmosphere]
 
-    publish_demo.main(["--out", str(out), "remove", str(ready_atmosphere)])
+    publish_demo.main(["--out", str(out), "remove", "rainy"])
     assert _catalog(out) == []
     assert not (out / str(ready_atmosphere)).exists()
 
 
-def test_refuses_atmospheres_of_non_admin_accounts(tmp_path, client, register, stub_pipeline):
-    from api.app.services.pipeline import run_generation
+def test_a_shared_title_publishes_the_newest_take_and_replaces_the_older(
+    tmp_path, client, auth, ready_atmosphere
+):
+    _retitle(ready_atmosphere, "Harbour Night")
+    out = tmp_path / "demo"
+    publish_demo.main(["--out", str(out), "add", "Harbour Night"])
 
+    newer = _generate(client, auth, "a quiet harbour at night")
+    _retitle(newer, "Harbour Night")
+    publish_demo.main(["--out", str(out), "add", "Harbour Night"])
+
+    assert [entry["id"] for entry in _catalog(out)] == [newer]
+    assert not (out / str(ready_atmosphere)).exists()
+
+
+def test_an_ambiguous_part_of_a_title_is_refused(tmp_path, client, auth, ready_atmosphere):
+    _retitle(ready_atmosphere, "Night Harbour")
+    _retitle(_generate(client, auth, "a forest at night"), "Night Forest")
+
+    with pytest.raises(SystemExit, match="several"):
+        publish_demo.main(["--out", str(tmp_path / "demo"), "add", "night"])
+
+
+def test_soundscapes_of_non_admin_accounts_cannot_be_found(
+    tmp_path, client, register, stub_pipeline
+):
     register(email="owner@halcyon.test")
     guest = {"Authorization": f"Bearer {register(email='guest@halcyon.test')}"}
-    created = client.post(
-        "/api/atmospheres", headers=guest, json={"prompt": "a quiet harbour"}
-    ).json()["data"]["id"]
-    run_generation(created)
+    created = _generate(client, guest, "a quiet harbour")
+    _retitle(created, "Guest Harbour")
 
-    with pytest.raises(SystemExit):
-        publish_demo.main(["--out", str(tmp_path / "demo"), "add", str(created)])
+    with pytest.raises(SystemExit, match="No soundscape"):
+        publish_demo.main(["--out", str(tmp_path / "demo"), "add", "Guest Harbour"])
     assert not (tmp_path / "demo" / "catalog.json").exists()
 
 
-def test_ready_lists_admin_atmospheres_and_marks_published_ones(
-    tmp_path, ready_atmosphere, capsys
+def test_ready_lists_titles_and_marks_published_ones(
+    tmp_path, client, auth, ready_atmosphere, capsys
 ):
+    _retitle(ready_atmosphere, "Rainy Library")
     out = tmp_path / "demo"
     publish_demo.main(["--out", str(out), "ready"])
-    assert f" {ready_atmosphere}  " in capsys.readouterr().out
+    line = capsys.readouterr().out.strip()
+    assert line.endswith("Rainy Library") and not line.startswith("*")
 
-    publish_demo.main(["--out", str(out), "add", str(ready_atmosphere)])
+    publish_demo.main(["--out", str(out), "add", "Rainy Library"])
     capsys.readouterr()
     publish_demo.main(["--out", str(out), "ready"])
-    assert capsys.readouterr().out.lstrip().startswith("*")
+    assert capsys.readouterr().out.startswith("*")
