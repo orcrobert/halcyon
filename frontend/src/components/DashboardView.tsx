@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback, type ReactNode } from 'react'
 import type { Atmosphere, Element } from '../types'
 import type { EQState } from '../hooks/useAudioEngine'
 import { TrackStrip } from './TrackStrip'
@@ -108,10 +108,12 @@ interface Props {
   onTuningChange: (freqHz: number) => void
   onExport: (seconds: number) => Promise<void>
   onReset: () => void
-  onRegenerateElement: (element: Element, feedback: string) => Promise<void>
-  onDeleteElement: (element: Element) => Promise<void>
-  onRegenerateScene: () => Promise<void>
-  onQualityChoice: (rerender: Element[]) => Promise<void>
+  resetLabel?: string
+  headerActions?: ReactNode
+  onRegenerateElement?: (element: Element, feedback: string) => Promise<void>
+  onDeleteElement?: (element: Element) => Promise<void>
+  onRegenerateScene?: () => Promise<void>
+  onQualityChoice?: (rerender: Element[]) => Promise<void>
   actionError: string | null
   onDismissActionError: () => void
   onStartAnimate: (cb: (values: Map<string, AnimatedValues>) => void) => void
@@ -130,7 +132,7 @@ interface Props {
 export function DashboardView({
   session, playing, getAnalyser, onPlayPause,
   onVolumeChange, onEQChange, onPanChange, onDepthChange, onIntervalChange, onTuningChange,
-  onExport, onReset, onRegenerateElement, onDeleteElement, onRegenerateScene, onQualityChoice,
+  onExport, onReset, resetLabel = 'New atmosphere', headerActions, onRegenerateElement, onDeleteElement, onRegenerateScene, onQualityChoice,
   actionError, onDismissActionError,
   onStartAnimate, onStopAnimate, onSetAnimateMuted,
   onBinauralToggle, onBinauralPreset, onBinauralLeftHz, onBinauralRightHz,
@@ -185,7 +187,7 @@ export function DashboardView({
   }
 
   const handleRegenerateSubmit = useCallback(async (feedback: string) => {
-    if (!regenerating) return
+    if (!regenerating || !onRegenerateElement) return
     setSubmittingRegen(true)
     try {
       await onRegenerateElement(regenerating, feedback)
@@ -196,6 +198,7 @@ export function DashboardView({
   }, [regenerating, onRegenerateElement])
 
   const handleRegenerateScene = useCallback(async () => {
+    if (!onRegenerateScene) return
     setSceneRegenerating(true)
     try {
       await onRegenerateScene()
@@ -205,9 +208,10 @@ export function DashboardView({
   }, [onRegenerateScene])
 
   const flagged = flaggedLayers(session.elements)
-  const qualityOpen = flagged.length > 0 && !anyBusy(session.elements) && regenerating === null
+  const qualityOpen = onQualityChoice !== undefined && flagged.length > 0 && !anyBusy(session.elements) && regenerating === null
 
   const handleQualityChoice = useCallback(async (rerender: Element[]) => {
+    if (!onQualityChoice) return
     setQualitySubmitting(true)
     try {
       await onQualityChoice(rerender)
@@ -271,21 +275,25 @@ export function DashboardView({
             β
           </button>
 
+          {headerActions}
+
           <ExportMenu onExport={onExport} />
 
-          <button
-            onClick={handleRegenerateScene}
-            disabled={sceneRegenerating}
-            title="Generate this scene again as a new atmosphere"
-            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ fontFamily: 'inherit' }}
-          >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
-              <polyline points="23 4 23 10 17 10" />
-              <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
-            </svg>
-            <span className="hidden sm:block">Take another</span>
-          </button>
+          {onRegenerateScene && (
+            <button
+              onClick={handleRegenerateScene}
+              disabled={sceneRegenerating}
+              title="Generate this scene again as a new atmosphere"
+              className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+              style={{ fontFamily: 'inherit' }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
+                <polyline points="23 4 23 10 17 10" />
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
+              </svg>
+              <span className="hidden sm:block">Take another</span>
+            </button>
+          )}
 
           <button
             onClick={onReset}
@@ -295,7 +303,7 @@ export function DashboardView({
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            <span className="hidden sm:block">New atmosphere</span>
+            <span className="hidden sm:block">{resetLabel}</span>
           </button>
         </div>
       </header>
@@ -411,7 +419,7 @@ export function DashboardView({
                 element={el}
                 deletable={(session.elements ?? []).length > 1}
                 styleName={session.style?.name ?? null}
-                onRegenerate={setRegenerating}
+                onRegenerate={onRegenerateElement && setRegenerating}
                 onDelete={onDeleteElement}
                 muted={mutedTracks.has(el.label)}
                 animatedVolume={anim?.vol}
