@@ -35,7 +35,10 @@ together with every caller.
    bands for all layers: tonal shaping plus masking cuts on ERB bands where
    layers are co-active, judged at those draft volumes. Only the less important
    layer of a colliding pair is cut, by role and loudness, and an event never
-   causes a cut. `apply_eq` applies the bands before level analysis.
+   causes a cut. An event fires at random times, so it is compared with the
+   whole loop rather than frame by frame. A masking cut next to a tonal band
+   never takes the two below `_MERGE_FLOOR_DB`. `apply_eq` applies the bands
+   before level analysis.
 3. `assign_volumes` (perceptual weighting minus an overlap penalty) and
    `assign_spatial` (spectral reach → pan, loudness / high-frequency share /
    onsets → depth) run over the **loop layers only**. A

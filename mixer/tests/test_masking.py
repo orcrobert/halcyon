@@ -7,6 +7,8 @@ from mixer.effects.auto_eq import (
     _MASKING_BUDGET_DB,
     _MASKING_CAP_DB,
     _MASKING_Q_RANGE,
+    _MERGE_FLOOR_DB,
+    _merge_bands,
     _role,
     auto_eq,
 )
@@ -75,6 +77,37 @@ def test_an_event_never_causes_a_cut_on_a_loop_layer():
     event, bed = _scene("event", "bed", pad_playback="oneshot")
     assert not _masking(bed)
     assert _masking(event)
+
+
+def test_an_event_is_measured_against_the_whole_loop_not_its_opening():
+    pad = _pad()
+    pad[: SR * 2] = 0.0
+    rng = np.random.default_rng(1)
+    burst = 0.25 * _band_noise(rng, 350, 700)[: SR // 2]
+    _, event = auto_eq(
+        [pad[np.newaxis, :], burst[np.newaxis, :]],
+        [SR, SR],
+        [_layer("music", "texture"), _layer("sound", "event", "oneshot")],
+        [1.0, 1.0],
+    )
+    assert _masking(event)
+
+
+def test_an_event_that_outranks_the_loop_is_left_alone():
+    event, bed = _scene("event", "bed", gains=(60.0, 1.0), pad_playback="oneshot")
+    assert not _masking(event)
+    assert not _masking(bed)
+
+
+def test_a_masking_cut_beside_a_shelf_keeps_the_merge_floor():
+    shelf = {"type": "lowshelf", "freq": 80, "gain": -6.0, "q": 0.7, "source": "tone"}
+    cut = {"type": "peaking", "freq": 90, "gain": -4.5, "q": 1.2, "source": "masking"}
+    merged = _merge_bands([shelf], [cut])
+    assert sum(b["gain"] for b in merged) >= _MERGE_FLOOR_DB - 1e-9
+    assert [b["type"] for b in merged] == ["lowshelf", "peaking"]
+
+    floored = _merge_bands([{**shelf, "gain": _MERGE_FLOOR_DB}], [cut])
+    assert floored == [{**shelf, "gain": _MERGE_FLOOR_DB}]
 
 
 def test_a_missing_role_falls_back_by_playback():

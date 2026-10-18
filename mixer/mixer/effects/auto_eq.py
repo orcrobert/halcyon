@@ -208,16 +208,23 @@ def _priority(level_db: float, element: dict) -> float:
     return level_db + bonus
 
 
+def _active(frames: np.ndarray) -> np.ndarray:
+    return frames.max(axis=0) > frames.max() * _NOISE_FLOOR_RATIO
+
+
 def _coactive(
-    target: np.ndarray, masker: np.ndarray
+    target: np.ndarray, masker: np.ndarray, aligned: bool
 ) -> tuple[np.ndarray, np.ndarray] | None:
+    if not aligned:
+        target = target[:, _active(target)]
+        masker = masker[:, _active(masker)]
+        if min(target.shape[1], masker.shape[1]) < _MIN_COACTIVE_FRAMES:
+            return None
+        return target, masker
     n_frames = min(target.shape[1], masker.shape[1])
     target = target[:, :n_frames]
     masker = masker[:, :n_frames]
-    active = (
-        (target.max(axis=0) > target.max() * _NOISE_FLOOR_RATIO)
-        & (masker.max(axis=0) > masker.max() * _NOISE_FLOOR_RATIO)
-    )
+    active = _active(target) & _active(masker)
     if active.sum() < _MIN_COACTIVE_FRAMES:
         return None
     return target[:, active], masker[:, active]
@@ -301,9 +308,9 @@ def _masking_cuts(
         for m in range(n):
             if m == t:
                 continue
-            if roles[m] != "event" and priorities[m] >= priorities[t]:
+            if priorities[m] >= priorities[t]:
                 continue
-            pair = _coactive(band_frames[t], band_frames[m])
+            pair = _coactive(band_frames[t], band_frames[m], roles[m] != "event")
             if pair is None:
                 continue
             usable = _BAND_HZ < _BAND_NYQUIST_RATIO * min(nyquists[t], nyquists[m])
@@ -323,16 +330,17 @@ def _nearby(fa: float, fb: float) -> bool:
 def _merge_bands(tonal: list[dict], masking: list[dict]) -> list[dict]:
     merged = [dict(b) for b in tonal]
     for b in masking:
-        for existing in merged:
-            if existing["type"] == b["type"] and _nearby(
-                float(existing["freq"]), float(b["freq"])
-            ):
-                combined = existing["gain"] + b["gain"]
-                existing["gain"] = round(max(combined, _MERGE_FLOOR_DB), 1)
-                existing["source"] = "both"
-                break
-        else:
-            merged.append(b)
+        near = [e for e in merged if _nearby(float(e["freq"]), float(b["freq"]))]
+        same = next((e for e in near if e["type"] == b["type"]), None)
+        if same is not None:
+            combined = same["gain"] + b["gain"]
+            same["gain"] = round(max(combined, _MERGE_FLOOR_DB), 1)
+            same["source"] = "both"
+            continue
+        deepest = min((e["gain"] for e in near), default=0.0)
+        gain = max(b["gain"], _MERGE_FLOOR_DB - min(deepest, 0.0))
+        if -gain >= _MIN_CUT_DB:
+            merged.append({**b, "gain": round(gain, 1)})
     return merged
 
 
