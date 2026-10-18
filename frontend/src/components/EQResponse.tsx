@@ -73,7 +73,7 @@ export function EQResponse({ mixerBands, eq }: Props) {
           <line
             key={db}
             x1={0} x2={WIDTH} y1={yFor(db)} y2={yFor(db)}
-            stroke="color-mix(in srgb, var(--color-wash) 5%, transparent)"
+            style={{ stroke: 'color-mix(in srgb, var(--color-wash) 5%, transparent)' }}
             strokeDasharray="2 4"
           />
         ))}
@@ -81,29 +81,27 @@ export function EQResponse({ mixerBands, eq }: Props) {
           <line
             key={hz}
             x1={xFor(hz)} x2={xFor(hz)} y1={0} y2={HEIGHT}
-            stroke="color-mix(in srgb, var(--color-wash) 5%, transparent)"
+            style={{ stroke: 'color-mix(in srgb, var(--color-wash) 5%, transparent)' }}
           />
         ))}
         <line
           x1={0} x2={WIDTH} y1={zero} y2={zero}
-          stroke="color-mix(in srgb, var(--color-wash) 12%, transparent)"
+          style={{ stroke: 'color-mix(in srgb, var(--color-wash) 12%, transparent)' }}
         />
         <path
           d={`${mixerPath} L${WIDTH},${zero} L0,${zero} Z`}
-          fill="color-mix(in srgb, var(--color-ink-muted) 14%, transparent)"
+          style={{ fill: 'color-mix(in srgb, var(--color-ink-muted) 14%, transparent)' }}
         />
         <path
           d={mixerPath}
-          fill="none"
-          stroke="var(--color-ink-muted)"
+          style={{ fill: 'none', stroke: 'var(--color-ink-muted)' }}
           strokeWidth={1.25}
           strokeDasharray="3 3"
           vectorEffect="non-scaling-stroke"
         />
         <path
           d={pathFor(total)}
-          fill="none"
-          stroke="var(--color-accent)"
+          style={{ fill: 'none', stroke: 'var(--color-accent)' }}
           strokeWidth={1.75}
           vectorEffect="non-scaling-stroke"
         />
