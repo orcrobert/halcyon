@@ -31,9 +31,14 @@ together with every caller.
 1. Read each clip and remove subsonics. Events are trimmed to their envelope
    and dropped below `EVENT_MIN_S`; loop layers go through `make_loopable`
    unless already marked `looped`. Every clip is peak-limited.
-2. `auto_eq` computes corrective bands for all layers (tonal shaping plus
-   masking cuts on ERB bands where layers are co-active), and `apply_eq`
-   applies them before level analysis.
+2. Draft volumes are computed without EQ. `auto_eq` then computes corrective
+   bands for all layers: tonal shaping plus masking cuts on ERB bands where
+   layers are co-active, judged at those draft volumes. Only the less important
+   layer of a colliding pair is cut, by role and loudness, and an event never
+   causes a cut. An event fires at random times, so it is compared with the
+   whole loop rather than frame by frame. A masking cut next to a tonal band
+   never takes the two below `_MERGE_FLOOR_DB`. `apply_eq` applies the bands
+   before level analysis.
 3. `assign_volumes` (perceptual weighting minus an overlap penalty) and
    `assign_spatial` (spectral reach → pan, loudness / high-frequency share /
    onsets → depth) run over the **loop layers only**. A
@@ -60,6 +65,9 @@ together with every caller.
 - **Loop padding.** `pad_for_looping` writes `LOOP_PAD_S` of each end past the
   loop points; the stored `duration_s` is the unpadded length. One-shots are
   never padded.
+- **Every element passed to `analyze` carries a `role`**, including stored
+  layers during a regeneration; masking cuts depend on it. Each band in
+  `eq_json` keeps its `source` (`tone` or `masking`).
 - **Quality checks only read.** `inspect_clip` returns `{check, value, limit}`
   issues and never changes a clip. `analyze` does not call it.
 

@@ -40,30 +40,30 @@ _NYQUIST_HEADROOM = 0.75
 _LOW_CENTROID_MIN = 1500.0
 _HI_MID_CENTROID_MIN = 3000.0
 
-# Masking window. Three zones for the maskee:
-#   ratio <= 1     → already below threshold, leave it alone
-#   1 < excess<=6  → audible but barely; trim it
-#   excess > 6 dB  → it's actually doing something, don't touch
-# Cap and scale keep cumulative damage in check across many pairs.
-_MASKING_LOWER_RATIO = 1.0
-_MASKING_UPPER_DB = 6.0
-_MASKING_CAP_DB = 3.5
-_MASKING_SCALE = 0.5
+_FFT_S = 2048 / 48000
+_HOP_DIVISOR = 4
 
-# Need real co-presence before claiming one element masks another.
-# 8 frames at 512-hop ≈ 80 ms at 48 kHz, ~180 ms at 22 kHz — both fine.
 _MIN_COACTIVE_FRAMES = 8
 _NOISE_FLOOR_RATIO = 1e-4
 
-# When tonal and masking stages both target nearby frequencies,
-# merge instead of stacking. 1/3 octave is roughly "same target band"
-# to the ear. Floor prevents two cuts from compounding into a hole.
+_ROLE_PRIORITY_DB = {"texture": 6.0, "bed": 0.0, "event": -6.0}
+_MUSIC_PRIORITY_DB = 2.0
+_DEFAULT_ROLE = "texture"
+
+_MASKER_PERCENTILE = 75
+_TARGET_PERCENTILE = 50
+_MASKER_INDEX_DB = -6.0
+_SALIENT_DB = 20.0
+_UNMASK_MARGIN_DB = 4.0
+_MAX_DEFICIT_DB = 12.0
+_MASKING_CAP_DB = 4.5
+_MASKING_BUDGET_DB = 1.5
+_MIN_CUT_DB = 0.5
+_MASKING_Q_RANGE = (0.8, 2.5)
+_BAND_NYQUIST_RATIO = 0.9
+
 _MERGE_OCTAVE_RATIO = 1.26
 _MERGE_FLOOR_DB = -9.0
-
-# Music usually carries the melodic foreground, so it wins ties when
-# deciding masker vs maskee. Small bump — not a license to dominate.
-_MUSIC_WEIGHT_BONUS = 1.3
 
 _SHELF_Q = 0.7
 
@@ -92,15 +92,18 @@ _dz = _ERB_CENTERS[None, :] - _ERB_CENTERS[:, None]
 _x = _dz + _SPREAD_OFFSET
 _SF_DB = 15.81 + 7.5 * _x - 17.5 * np.sqrt(1.0 + _x ** 2)
 _SPREAD_GAIN = 10.0 ** (_SF_DB / 10.0)
+_MASKER_INDEX = 10.0 ** (_MASKER_INDEX_DB / 10.0)
 
 
 def _stft_power(mono: np.ndarray, sr: int) -> tuple[np.ndarray, np.ndarray]:
-    if _LIBROSA:
-        S = np.abs(librosa.stft(mono, n_fft=2048, hop_length=512, window="hann")) ** 2
-        freqs = librosa.fft_frequencies(sr=sr, n_fft=2048)
+    n_fft = int(round(_FFT_S * sr))
+    if _LIBROSA and len(mono) >= n_fft:
+        hop = n_fft // _HOP_DIVISOR
+        S = np.abs(librosa.stft(mono, n_fft=n_fft, hop_length=hop, window="hann")) ** 2
+        freqs = librosa.fft_frequencies(sr=sr, n_fft=n_fft)
     else:
-        n_fft = min(2048, len(mono))
-        hop = n_fft // 4
+        n_fft = min(n_fft, len(mono))
+        hop = max(1, n_fft // _HOP_DIVISOR)
         win = np.hanning(n_fft)
         n_frames = max(1, (len(mono) - n_fft) // hop + 1)
         frames = np.stack(
@@ -108,7 +111,7 @@ def _stft_power(mono: np.ndarray, sr: int) -> tuple[np.ndarray, np.ndarray]:
         )
         S = np.abs(np.fft.rfft(frames, n=n_fft, axis=0)) ** 2
         freqs = np.fft.rfftfreq(n_fft, d=1.0 / sr)
-    return S, freqs
+    return S / float(n_fft) ** 2, freqs
 
 
 def _band_power_frames(S: np.ndarray, freqs: np.ndarray) -> np.ndarray:
@@ -134,6 +137,16 @@ def _a_weighted_rms(S: np.ndarray, freqs: np.ndarray) -> float:
     Ra = num / (den + 1e-30)
     weighted = (S * Ra[:, None]).sum(axis=0)
     return float(np.sqrt(np.mean(weighted) + 1e-30))
+
+
+def _band(kind: str, freq: float, gain_db: float, q: float, source: str) -> dict:
+    return {
+        "type": kind,
+        "freq": freq,
+        "gain": round(float(gain_db), 1),
+        "q": round(float(q), 2),
+        "source": source,
+    }
 
 
 def _tonal_shape(S: np.ndarray, freqs: np.ndarray, element_type: str) -> list[dict]:
@@ -164,105 +177,149 @@ def _tonal_shape(S: np.ndarray, freqs: np.ndarray, element_type: str) -> list[di
 
     if sub_e > sub_thresh:
         db = -min(6.0, (sub_e - sub_thresh) * 30.0)
-        bands.append(
-            {"type": "lowshelf", "freq": 80, "gain": round(db, 1), "q": _SHELF_Q}
-        )
+        bands.append(_band("lowshelf", 80, db, _SHELF_Q, "tone"))
 
     if air_e > air_thresh:
         db = -min(6.0, (air_e - air_thresh) * 25.0)
-        bands.append({
-            "type": "highshelf",
-            "freq": round(air_shelf),
-            "gain": round(db, 1),
-            "q": _SHELF_Q,
-        })
+        bands.append(_band("highshelf", round(air_shelf), db, _SHELF_Q, "tone"))
 
     if low_e > _LOW_THRESH and centroid > _LOW_CENTROID_MIN:
         db = -min(4.0, (low_e - _LOW_THRESH) * 15.0)
-        bands.append(
-            {"type": "lowshelf", "freq": 200, "gain": round(db, 1), "q": _SHELF_Q}
-        )
+        bands.append(_band("lowshelf", 200, db, _SHELF_Q, "tone"))
 
     if hi_mid_e > _HI_MID_THRESH and centroid > _HI_MID_CENTROID_MIN:
         db = -min(4.0, (hi_mid_e - _HI_MID_THRESH) * 12.0)
-        bands.append({"type": "peaking", "freq": 5000, "gain": round(db, 1), "q": 0.8})
+        bands.append(_band("peaking", 5000, db, 0.8, "tone"))
 
+    return bands
+
+
+def _role(element: dict) -> str:
+    role = str(element.get("role") or "").strip().lower()
+    if role in _ROLE_PRIORITY_DB:
+        return role
+    return "event" if element.get("playback") == "oneshot" else _DEFAULT_ROLE
+
+
+def _priority(level_db: float, element: dict) -> float:
+    bonus = _ROLE_PRIORITY_DB[_role(element)]
+    if element.get("type") == "music":
+        bonus += _MUSIC_PRIORITY_DB
+    return level_db + bonus
+
+
+def _active(frames: np.ndarray) -> np.ndarray:
+    return frames.max(axis=0) > frames.max() * _NOISE_FLOOR_RATIO
+
+
+def _coactive(
+    target: np.ndarray, masker: np.ndarray, aligned: bool
+) -> tuple[np.ndarray, np.ndarray] | None:
+    if not aligned:
+        target = target[:, _active(target)]
+        masker = masker[:, _active(masker)]
+        if min(target.shape[1], masker.shape[1]) < _MIN_COACTIVE_FRAMES:
+            return None
+        return target, masker
+    n_frames = min(target.shape[1], masker.shape[1])
+    target = target[:, :n_frames]
+    masker = masker[:, :n_frames]
+    active = _active(target) & _active(masker)
+    if active.sum() < _MIN_COACTIVE_FRAMES:
+        return None
+    return target[:, active], masker[:, active]
+
+
+def _required_cuts(
+    target: np.ndarray, masker: np.ndarray, usable: np.ndarray
+) -> np.ndarray:
+    target_p = np.percentile(target, _TARGET_PERCENTILE, axis=1)
+    masker_p = np.percentile(masker, _MASKER_PERCENTILE, axis=1)
+    contribution = masker_p[:, None] * _SPREAD_GAIN * _MASKER_INDEX
+    threshold = contribution.sum(axis=0)
+    salient = target_p > target_p.max() * 10.0 ** (-_SALIENT_DB / 10.0)
+
+    cuts = np.zeros(_N_BANDS)
+    for b in np.flatnonzero(salient & usable):
+        deficit = (
+            10.0 * np.log10((threshold[b] + 1e-30) / (target_p[b] + 1e-30))
+            + _UNMASK_MARGIN_DB
+        )
+        if deficit <= 0.0 or deficit > _MAX_DEFICIT_DB:
+            continue
+        source = int(np.argmax(contribution[:, b]))
+        if usable[source]:
+            cuts[source] = max(cuts[source], min(_MASKING_CAP_DB, deficit))
+    return cuts
+
+
+def _energy_loss_db(cuts: np.ndarray, power: np.ndarray) -> float:
+    share = power / (power.sum() + 1e-30)
+    kept = float((share * 10.0 ** (-cuts / 10.0)).sum())
+    return -10.0 * np.log10(max(kept, 1e-30))
+
+
+def _within_budget(cuts: np.ndarray, power: np.ndarray) -> np.ndarray:
+    if _energy_loss_db(cuts, power) <= _MASKING_BUDGET_DB:
+        return cuts
+    low, high = 0.0, 1.0
+    for _ in range(24):
+        mid = (low + high) / 2.0
+        if _energy_loss_db(cuts * mid, power) > _MASKING_BUDGET_DB:
+            high = mid
+        else:
+            low = mid
+    return cuts * low
+
+
+def _cut_bands(cuts: np.ndarray) -> list[dict]:
+    bands = []
+    start = 0
+    while start < _N_BANDS:
+        if cuts[start] < _MIN_CUT_DB:
+            start += 1
+            continue
+        end = start
+        while end + 1 < _N_BANDS and cuts[end + 1] >= _MIN_CUT_DB:
+            end += 1
+        run = cuts[start:end + 1]
+        freq = _erb_to_hz(float(np.average(_ERB_CENTERS[start:end + 1], weights=run)))
+        width = _BAND_EDGES_HZ[end + 1] - _BAND_EDGES_HZ[start]
+        q = float(np.clip(freq / width, *_MASKING_Q_RANGE))
+        bands.append(_band("peaking", int(round(freq)), -float(run.max()), q, "masking"))
+        start = end + 1
     return bands
 
 
 def _masking_cuts(
     band_frames: list[np.ndarray],
-    weights: list[float],
+    levels_db: list[float],
+    nyquists: list[float],
+    elements: list[dict],
 ) -> list[list[dict]]:
     n = len(band_frames)
-    cuts: list[dict[int, float]] = [{} for _ in range(n)]
+    priorities = [_priority(level, el) for level, el in zip(levels_db, elements)]
+    roles = [_role(el) for el in elements]
+    cuts = [np.zeros(_N_BANDS) for _ in range(n)]
 
-    for i in range(n):
-        for j in range(i + 1, n):
-            noise_floor_i = band_frames[i].max() * _NOISE_FLOOR_RATIO
-            noise_floor_j = band_frames[j].max() * _NOISE_FLOOR_RATIO
-            n_frames = min(band_frames[i].shape[1], band_frames[j].shape[1])
-            active_i  = band_frames[i][:, :n_frames].max(axis=0) > noise_floor_i
-            active_j  = band_frames[j][:, :n_frames].max(axis=0) > noise_floor_j
-            co_active = active_i & active_j
-
-            if co_active.sum() < _MIN_COACTIVE_FRAMES:
+    for t in range(n):
+        if roles[t] == "event":
+            continue
+        for m in range(n):
+            if m == t:
                 continue
-
-            fi_co = band_frames[i][:, :n_frames][:, co_active]
-            fj_co = band_frames[j][:, :n_frames][:, co_active]
-            pi = np.percentile(fi_co, 75, axis=1)
-            pj = np.percentile(fj_co, 75, axis=1)
-
-            masker_idx = i if weights[i] >= weights[j] else j
-            maskee_idx = j if masker_idx == i else i
-            masker_p   = pi if masker_idx == i else pj
-            maskee_p   = pj if masker_idx == i else pi
-
-            thresholds        = masker_p[:, None] * _SPREAD_GAIN
-            combined_threshold = thresholds.max(axis=0)
-
-            for b in range(_N_BANDS):
-                if combined_threshold[b] < 1e-30:
-                    continue
-                ratio = maskee_p[b] / (combined_threshold[b] + 1e-30)
-                if ratio <= _MASKING_LOWER_RATIO:
-                    continue
-                excess_db = 10.0 * np.log10(ratio)
-                if excess_db > _MASKING_UPPER_DB:
-                    continue
-
-                db = -min(_MASKING_CAP_DB, excess_db * _MASKING_SCALE)
-                fc_key = int(round(float(_BAND_HZ[b])))
-                if fc_key not in cuts[maskee_idx] or cuts[maskee_idx][fc_key] > db:
-                    cuts[maskee_idx][fc_key] = db
-
-    result = []
-    for i in range(n):
-        bands = []
-        for fc_key, db in cuts[i].items():
-            if abs(db) < 0.5:
+            if priorities[m] >= priorities[t]:
                 continue
-            fc = float(fc_key)
-            if fc < 300:
-                bands.append({
-                    "type": "lowshelf",
-                    "freq": fc_key,
-                    "gain": round(db, 1),
-                    "q": _SHELF_Q,
-                })
-            elif fc > 6000:
-                bands.append({
-                    "type": "highshelf",
-                    "freq": fc_key,
-                    "gain": round(db, 1),
-                    "q": _SHELF_Q,
-                })
-            else:
-                bands.append({"type": "peaking", "freq": fc_key, "gain": round(db, 1), "q": 1.2})
-        result.append(bands)
+            pair = _coactive(band_frames[t], band_frames[m], roles[m] != "event")
+            if pair is None:
+                continue
+            usable = _BAND_HZ < _BAND_NYQUIST_RATIO * min(nyquists[t], nyquists[m])
+            cuts[m] = np.maximum(cuts[m], _required_cuts(*pair, usable))
 
-    return result
+    return [
+        _cut_bands(_within_budget(c, frames.mean(axis=1)))
+        for c, frames in zip(cuts, band_frames)
+    ]
 
 
 def _nearby(fa: float, fb: float) -> bool:
@@ -271,37 +328,47 @@ def _nearby(fa: float, fb: float) -> bool:
 
 
 def _merge_bands(tonal: list[dict], masking: list[dict]) -> list[dict]:
-    merged = list(tonal)
+    merged = [dict(b) for b in tonal]
     for b in masking:
-        matched = False
-        for existing in merged:
-            if _nearby(float(existing["freq"]), float(b["freq"])):
-                combined = existing["gain"] + b["gain"]
-                existing["gain"] = round(max(combined, _MERGE_FLOOR_DB), 1)
-                matched = True
-                break
-        if not matched:
-            merged.append(b)
+        near = [e for e in merged if _nearby(float(e["freq"]), float(b["freq"]))]
+        same = next((e for e in near if e["type"] == b["type"]), None)
+        if same is not None:
+            combined = same["gain"] + b["gain"]
+            same["gain"] = round(max(combined, _MERGE_FLOOR_DB), 1)
+            same["source"] = "both"
+            continue
+        deepest = min((e["gain"] for e in near), default=0.0)
+        gain = max(b["gain"], _MERGE_FLOOR_DB - min(deepest, 0.0))
+        if -gain >= _MIN_CUT_DB:
+            merged.append({**b, "gain": round(gain, 1)})
     return merged
 
 
-def auto_eq(wavs: list[np.ndarray], srs: list[int], elements: list[dict]) -> list[list[dict]]:
+def auto_eq(
+    wavs: list[np.ndarray],
+    srs: list[int],
+    elements: list[dict],
+    gains: list[float] | None = None,
+) -> list[list[dict]]:
     monos = [
         w.mean(axis=0).astype(np.float32) if w.ndim == 2 else w.astype(np.float32)
         for w in wavs
     ]
     element_types = [el.get("type", "sound") for el in elements]
+    gains = list(gains) if gains is not None else [1.0] * len(wavs)
 
-    stfts       = [_stft_power(m, sr) for m, sr in zip(monos, srs)]
-    band_frames = [_band_power_frames(S, freqs) for S, freqs in stfts]
-
-    weights = [_a_weighted_rms(S, freqs) for S, freqs in stfts]
-    weights = [
-        w * _MUSIC_WEIGHT_BONUS if t == "music" else w
-        for w, t in zip(weights, element_types)
+    stfts = [_stft_power(m, sr) for m, sr in zip(monos, srs)]
+    band_frames = [
+        _band_power_frames(S, freqs) * g ** 2 for (S, freqs), g in zip(stfts, gains)
+    ]
+    levels_db = [
+        20.0 * np.log10(max(_a_weighted_rms(S, freqs) * g, 1e-12))
+        for (S, freqs), g in zip(stfts, gains)
     ]
 
-    tonal_bands   = [_tonal_shape(S, freqs, t) for (S, freqs), t in zip(stfts, element_types)]
-    masking_bands = _masking_cuts(band_frames, weights)
+    tonal_bands = [_tonal_shape(S, freqs, t) for (S, freqs), t in zip(stfts, element_types)]
+    masking_bands = _masking_cuts(
+        band_frames, levels_db, [sr / 2.0 for sr in srs], elements
+    )
 
     return [_merge_bands(t, m) for t, m in zip(tonal_bands, masking_bands)]
