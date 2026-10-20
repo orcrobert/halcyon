@@ -94,6 +94,14 @@ function applySnap(fFloat: number): number {
   return fFloat
 }
 
+function labelAnchor(p: number): 'start' | 'middle' | 'end' {
+  const below = PRESETS.some(q => q < p && p - q < 20)
+  const above = PRESETS.some(q => q > p && q - p < 20)
+  if (below && !above) return 'start'
+  if (above && !below) return 'end'
+  return 'middle'
+}
+
 function DiamondMarker({ x, y, glowColor, filterId }: { x: number; y: number; glowColor: string; filterId: string }) {
   const s = 7
   const d = `M ${x} ${y - s} L ${x + s * 0.55} ${y} L ${x} ${y + s} L ${x - s * 0.55} ${y} Z`
@@ -248,15 +256,16 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
             position: 'fixed', bottom: open ? '220px' : '0px',
             left: '50%', transform: 'translateX(-50%)',
             zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            width: '80px', height: '28px',
-            background: open ? 'color-mix(in srgb, var(--color-accent) 10%, transparent)' : 'color-mix(in srgb, var(--color-wash) 2%, transparent)',
-            border: `1px solid ${open ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'color-mix(in srgb, var(--color-wash) 5%, transparent)'}`,
+            width: '96px', height: '32px',
+            background: `color-mix(in srgb, var(--color-accent) ${open ? 18 : 10}%, var(--color-surface-raised))`,
+            border: `1px solid color-mix(in srgb, var(--color-accent) ${open ? 50 : 35}%, transparent)`,
+            boxShadow: '0 -6px 20px color-mix(in srgb, var(--color-shade) 40%, transparent)',
             borderBottom: 'none', borderRadius: '8px 8px 0 0', cursor: 'pointer',
             transition: 'bottom 0.35s cubic-bezier(0.4,0,0.2,1), background 0.2s', padding: 0,
           }}
         >
           <svg width="20" height="10" viewBox="0 0 20 10" fill="none">
-            <path d="M1 8 Q10 1 19 8" strokeWidth="1.5" strokeLinecap="round" fill="none" style={{ stroke: open ? 'var(--color-accent-bright)' : 'var(--color-line-active)' }} />
+            <path d="M1 8 Q10 1 19 8" strokeWidth="1.75" strokeLinecap="round" fill="none" style={{ stroke: open ? 'var(--color-accent-pale)' : 'var(--color-accent-bright)' }} />
           </svg>
           {isDetuned && !open && <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: 'var(--color-accent)', boxShadow: '0 0 8px var(--color-accent)' }} />}
         </button>
@@ -301,7 +310,7 @@ export function TuningControl({ onTuningChange, initialFreq = 440 }: Props) {
                 return (
                   <g key={p}>
                     <line x1={px} y1={33} x2={px} y2={43} strokeWidth={active ? 1.5 : 1} style={{ stroke: active ? 'var(--color-accent-bright)' : 'color-mix(in srgb, var(--color-wash) 15%, transparent)' }} />
-                    <text x={px} y={28} fontSize="9" textAnchor="middle" fontFamily="inherit" style={{ fill: active ? 'var(--color-accent-bright)' : 'var(--color-line-active)' }}>{p}</text>
+                    <text x={px} y={28} fontSize="9" textAnchor={labelAnchor(p)} fontFamily="inherit" style={{ fill: active ? 'var(--color-accent-bright)' : 'var(--color-line-active)' }}>{p}</text>
                   </g>
                 )
               })}
