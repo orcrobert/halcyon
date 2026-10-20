@@ -51,10 +51,6 @@ Last reviewed against `main` at `0895eff` (October 2026).
 
 ## Test coverage
 
-- 🟡 **`volume` has no direct tests.** Masking cuts are covered by
-  `mixer/tests/test_masking.py`, but perceptual level assignment is only
-  exercised through `analyze`, which asserts shape, not behaviour. *Safe and
-  high value: pin its output for synthetic inputs before touching it.*
 - 🟡 **API tests read the developer's `.env`.** `Settings` loads the repo-root
   `.env`, and `api/tests/conftest.py` does not isolate it, so a local
   `DECOMPOSER_ALLOW_CLI=true` fails `test_settings.py` (CLI providers appear,
@@ -101,6 +97,12 @@ Kept as a record of what the earlier audits called for.
   any working directory.
 
 **Correctness**
+- ✅ Volume assignment now uses fixed score-to-dB scaling and a smoothly
+  weighted loudness anchor, with symmetric overlap handling at equal levels.
+  Direct tests cover near-identical tones, level perturbations, layer order,
+  dense scenes, and both librosa and NumPy feature extraction.
+- ✅ New and regenerated layer durations retain sample precision instead of
+  rounding to milliseconds, with WAV/database/API round-trip regression tests.
 - ✅ Re-running `run_generation` on an atmosphere that already had elements hit
   the `(atmosphere_id, position)` unique constraint and failed into the error
   field — after the new WAVs had already been written over the old ones, leaving

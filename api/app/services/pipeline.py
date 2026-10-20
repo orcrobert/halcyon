@@ -156,7 +156,7 @@ def _persist(
                 type=element.get("type", "sound"),
                 prompt=element.get("prompt", ""),
                 audio_path=audio_path,
-                duration_s=round(wav.shape[-1] / sr, 3),
+                duration_s=wav.shape[-1] / sr,
                 playback=element.get("playback"),
                 clip_s=element.get("clip_s"),
                 interval_min_s=element.get("interval_min_s"),
@@ -368,7 +368,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                         row.audio_path = storage.write_element_audio(
                             atmosphere.id, row.position, row.label, audio
                         )
-                        row.duration_s = round(wav.shape[-1] / sr, 3)
+                        row.duration_s = wav.shape[-1] / sr
                         row.version = (row.version or 1) + 1
                         row.status = "ready"
                         row.error = None

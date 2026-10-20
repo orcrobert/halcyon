@@ -159,8 +159,18 @@ Effects:
   (`tone`, `masking`, `both`), which the EQ panel shows. The before/after
   benchmark is `experiments/masking_eq/`.
 - **`volume.py`**: perceptual weighting (mid energy, onset density, bandwidth,
-  type) → target dB per element relative to the loudest-weighted anchor, minus a
-  spectral-overlap penalty, clamped to a gain range.
+  type) → offsets at 6 dB per score unit, capped at 18 dB below the highest
+  score. The loudness anchor is mean signal power weighted by those offsets,
+  so nearly equal scores cannot switch the anchor abruptly. Spectral overlap
+  adds up to 3 dB attenuation per pair, shared equally at equal levels and
+  shifted smoothly toward the louder source over a 6 dB level difference.
+  Total overlap attenuation is capped at 6 dB per layer. Gains remain
+  0.15–1.0; a single layer keeps unity gain. Energy bands transition smoothly
+  over two octaves around 300 Hz and 3 kHz. Onset density contributes only
+  when the 50 ms RMS envelope has sufficient variation (3–9 dB between its
+  5th and 95th percentiles), avoiding onset priority for steady tones.
+  Existing saved mixes retain their
+  settings until generation or regeneration recomputes them.
 - **`spatial.py`**: per-element spectral features → a `reach` score drives pan
   placement (alternating sides, spectral-similarity clustering, minimum
   separation); loudness/HF/onset drive `depth`. Degrades to centre/no-depth if
@@ -168,7 +178,11 @@ Effects:
 - **`looping.py`**: cross-correlation loop-point search + equal-power crossfade
   so every clip loops seamlessly (infinite playback). `pad_for_looping` adds
   `LOOP_PAD_S` of each end past the loop points before the API stores a loop
-  clip, so the browser's resampler never starves at the seam.
+  clip, so the browser's resampler never starves at the seam. Generation and
+  regeneration store the unpadded frame count divided by sample rate in
+  `Element.duration_s` without rounding. The browser uses this duration to
+  derive the padded interior for playback and export. Previously rounded
+  durations remain unchanged until their layer is regenerated.
 - **`events.py`**: one-shots. `trim_to_envelope` cuts a clip to its audible
   part; `place_events` sets each event `EVENT_OFFSET_DB` under the loudest loop
   layer (or `EVENT_FALLBACK_ANCHOR_DB` with no loop layer), centred, at
