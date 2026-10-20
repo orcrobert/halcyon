@@ -488,9 +488,9 @@ export function DashboardView({
         </div>
       )}
 
-      <footer className="py-6 text-center">
+      <footer className="py-6 text-center" style={isMobile ? { padding: '0 16px 56px' } : undefined}>
         <p className="text-[11px] text-ink-whisper uppercase tracking-widest">
-          Drag faders · Space to play/pause
+          {isMobile ? 'Drag faders · Tap play to pause' : 'Drag faders · Space to play/pause'}
         </p>
       </footer>
 
