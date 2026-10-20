@@ -3,6 +3,7 @@ import { Logo } from './Logo'
 import { Toggle } from './Toggle'
 import { StyleClipModal } from './StyleClipModal'
 import { MAX_STYLE_FILE_BYTES, type Selection, type StyleClip } from '../hooks/styleClip'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export const DEFAULT_DURATION_S = 10
 
@@ -452,6 +453,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
   const [crop, setCrop] = useState<{ file: File; initial: Selection | null } | null>(null)
   const [styleError, setStyleError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const isMobile = useIsMobile()
 
   function submit() {
     if (prompt.trim() && !loading) onSubmit(prompt.trim(), durationS, useEvents, style)
@@ -489,7 +491,7 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
   }
 
   return (
-    <div className="relative flex flex-col items-center justify-center h-full min-h-screen px-6 py-16">
+    <div className="relative flex flex-col items-center justify-center h-full min-h-screen" style={isMobile ? { padding: '72px 16px 48px' } : undefined}>
 
       {onOpenHistory && (
         <button
@@ -536,10 +538,10 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
               placeholder="A place, a mood, a moment in time…"
               rows={5}
               className="w-full bg-transparent text-ink resize-none border-none outline-none placeholder:text-ink-faint text-[15px] leading-relaxed"
-              style={{ padding: '24px 28px 12px 28px', fontFamily: 'inherit', boxSizing: 'border-box' }}
+              style={{ padding: isMobile ? '18px 18px 10px' : '24px 28px 12px 28px', fontFamily: 'inherit', boxSizing: 'border-box' }}
             />
-            <div className="flex items-center justify-between gap-4" style={{ padding: '0 28px 20px 28px' }}>
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex flex-wrap items-center justify-between" style={{ padding: isMobile ? '0 14px 14px' : '0 28px 20px 28px', gap: isMobile ? '10px 12px' : '16px' }}>
+              <div className="flex items-center gap-3 min-w-0" style={{ flex: '1 1 auto' }}>
                 <OptionsMenu
                   durationS={durationS}
                   useEvents={useEvents}
@@ -564,9 +566,10 @@ export function PromptView({ onSubmit, loading, error, onOpenAccount, onOpenHist
               <button
                 onClick={submit}
                 disabled={loading || !prompt.trim()}
-                className="flex items-center gap-2 text-wash text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
+                className="flex items-center justify-center gap-2 text-wash text-sm font-semibold rounded-xl transition-colors disabled:cursor-not-allowed"
                 style={{
-                  padding: '12px 24px',
+                  padding: isMobile ? '12px 20px' : '12px 24px',
+                  flex: isMobile && style ? '1 1 100%' : '0 0 auto',
                   background: loading || !prompt.trim() ? 'color-mix(in srgb, var(--color-accent) 25%, transparent)' : 'var(--color-accent)',
                   fontFamily: 'inherit',
                 }}

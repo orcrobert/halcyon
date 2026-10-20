@@ -20,6 +20,16 @@ Pure scheduling and maths helpers (`hooks/eventScheduler.ts`,
   (`bg-surface`, `text-ink-dim`, `var(--color-accent)`) or the `alpha()` helper
   in `src/theme.ts`. SVG attributes and canvas contexts cannot resolve `var()`:
   see [design-tokens.md](../docs/design-tokens.md).
+- **Phones get their own layout below 640 px.** `hooks/useIsMobile.ts` is the
+  one breakpoint: layer strips become full-width rows with a horizontal fader,
+  and the EQ panel switches to horizontal sliders (also on short landscape
+  screens). Anchored popovers place themselves through
+  `hooks/popoverPlacement.ts`, which flips them below the anchor, caps their
+  height to the viewport and leaves the rest to scroll. Never rely on hover
+  alone: anything a tooltip shows needs a tap path too.
+- **The global reset in `index.css` beats Tailwind spacing.** `* { margin: 0;
+  padding: 0 }` is unlayered, so `px-*`, `py-*` and `m*-auto` do nothing. Set
+  spacing inline.
 - **Themes are presets over the token ramps.** `src/themes.ts` holds twenty
   specs; `themeVariables()` expands each into the primitive layer in OKLab. Add
   a spec, never a hand-written ramp. The choice lives on `UserSettings.theme`

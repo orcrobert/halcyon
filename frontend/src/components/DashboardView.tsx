@@ -9,6 +9,15 @@ import { PromptModal } from './PromptModal'
 import { RegenerateModal } from './RegenerateModal'
 import { QualityModal } from './QualityModal'
 import { anyBusy, flaggedLayers } from '../quality'
+import { useIsMobile } from '../hooks/useIsMobile'
+
+const HEADER_BUTTON = 'flex items-center justify-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed'
+
+function headerButtonStyle(isMobile: boolean) {
+  return isMobile
+    ? { fontFamily: 'inherit', width: 40, height: 40, padding: 0, borderRadius: '50%', flexShrink: 0 }
+    : { fontFamily: 'inherit', height: 36, padding: '0 14px', borderRadius: 12 }
+}
 
 export interface AnimatedValues { vol: number; pan: number; depth: number }
 
@@ -19,7 +28,7 @@ const EXPORT_CHOICES: { seconds: number; label: string }[] = [
   { seconds: 300, label: '5 minutes' },
 ]
 
-function ExportMenu({ onExport }: { onExport: (seconds: number) => Promise<void> }) {
+function ExportMenu({ onExport, isMobile }: { onExport: (seconds: number) => Promise<void>; isMobile: boolean }) {
   const [open, setOpen] = useState(false)
   const [busy, setBusy] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -57,22 +66,23 @@ function ExportMenu({ onExport }: { onExport: (seconds: number) => Promise<void>
         disabled={busy}
         aria-haspopup="listbox"
         aria-expanded={open}
-        className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-        style={{ fontFamily: 'inherit' }}
+        aria-label="Export"
+        className={HEADER_BUTTON}
+        style={headerButtonStyle(isMobile)}
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
           <polyline points="7 10 12 15 17 10" />
           <line x1="12" y1="15" x2="12" y2="3" />
         </svg>
-        <span className="hidden sm:block">{busy ? 'Rendering…' : 'Export'}</span>
+        {!isMobile && <span>{busy ? 'Rendering…' : 'Export'}</span>}
       </button>
 
       {open && (
         <div
           role="listbox"
-          className="absolute right-0 top-full mt-2 rounded-xl border border-line-hover bg-surface-high z-30"
-          style={{ width: 196, padding: 6, boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)' }}
+          className="absolute right-0 top-full rounded-xl border border-line-hover bg-surface-high z-30"
+          style={{ width: 196, padding: 6, marginTop: 8, boxShadow: '0 18px 40px color-mix(in srgb, var(--color-shade) 55%, transparent)' }}
         >
           <p className="text-[10px] uppercase tracking-wider text-ink-faint" style={{ padding: '6px 10px 8px 10px' }}>
             Export length
@@ -137,6 +147,7 @@ export function DashboardView({
   binauralActive, binauralBeatHz, binauralLeftHz, binauralRightHz,
 }: Props) {
   const [binauralOpen, setBinauralOpen] = useState(false)
+  const isMobile = useIsMobile()
   const binauralBtnRef = useRef<HTMLButtonElement>(null)
   const [promptOpen, setPromptOpen] = useState(false)
   const [regenerating, setRegenerating] = useState<Element | null>(null)
@@ -240,25 +251,30 @@ export function DashboardView({
         initialFreq={session.elements?.[0]?.tuning_hz ?? 440}
       />
 
-      <header className="flex items-center justify-between border-b border-line-soft" style={{ padding: '18px 32px' }}>
-        <div className={`flex items-center gap-2 border rounded-xl px-4 py-2 transition-all duration-150 ${
+      <header className="flex items-center justify-between border-b border-line-soft" style={{ padding: isMobile ? '12px 16px' : '18px 32px', gap: 12 }}>
+        <div
+          className={`flex items-center gap-2 border transition-all duration-150 ${
           playing
             ? 'border-accent/30 bg-accent/5'
             : 'border-line'
-        }`}>
+          }`}
+          style={{ height: isMobile ? 40 : 36, padding: '0 14px', borderRadius: isMobile ? 20 : 12, flexShrink: 0 }}
+        >
           <span className={`w-2 h-2 rounded-full flex-shrink-0 ${playing ? 'bg-accent animate-pulse' : 'bg-ink-ghost'}`} />
-          <span className={`text-[12px] font-medium uppercase tracking-[0.12em] hidden sm:block ${playing ? 'text-accent-bright' : 'text-ink-faint'}`}>
+          <span className={`text-[12px] font-medium uppercase tracking-[0.12em] ${playing ? 'text-accent-bright' : 'text-ink-faint'}`}>
             {playing ? 'Live' : 'Paused'}
           </span>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center" style={{ gap: isMobile ? 8 : 10 }}>
 
           <button
             ref={binauralBtnRef}
+            title="Binaural beats"
+            aria-label="Binaural beats"
             onClick={() => setBinauralOpen(o => !o)}
             style={{
-              width: 36, height: 36, borderRadius: '50%', cursor: 'pointer',
+              width: isMobile ? 40 : 36, height: isMobile ? 40 : 36, borderRadius: '50%', cursor: 'pointer', flexShrink: 0,
               border: binauralActive ? '1px solid color-mix(in srgb, var(--color-accent) 50%, transparent)' : '1px solid color-mix(in srgb, var(--color-accent) 20%, transparent)',
               background: binauralActive ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'color-mix(in srgb, var(--color-accent) 4%, transparent)',
               color: binauralActive ? 'var(--color-accent-bright)' : 'color-mix(in srgb, var(--color-accent) 40%, transparent)',
@@ -271,36 +287,39 @@ export function DashboardView({
             β
           </button>
 
-          <ExportMenu onExport={onExport} />
+          <ExportMenu onExport={onExport} isMobile={isMobile} />
 
           <button
             onClick={handleRegenerateScene}
             disabled={sceneRegenerating}
             title="Generate this scene again as a new atmosphere"
-            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
-            style={{ fontFamily: 'inherit' }}
+            aria-label="Take another"
+            className={HEADER_BUTTON}
+            style={headerButtonStyle(isMobile)}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
             </svg>
-            <span className="hidden sm:block">Take another</span>
+            {!isMobile && <span>Take another</span>}
           </button>
 
           <button
             onClick={onReset}
-            className="flex items-center gap-2 text-[12px] font-medium text-ink-dim hover:text-ink border border-line hover:border-line-active rounded-xl px-4 py-2 transition-all duration-150"
-            style={{ fontFamily: 'inherit' }}
+            title="New atmosphere"
+            aria-label="New atmosphere"
+            className={HEADER_BUTTON}
+            style={headerButtonStyle(isMobile)}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0">
               <polyline points="15 18 9 12 15 6" />
             </svg>
-            <span className="hidden sm:block">New atmosphere</span>
+            {!isMobile && <span>New atmosphere</span>}
           </button>
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-8 py-12 gap-14">
+      <main className="flex-1 flex flex-col items-center justify-center px-8 py-12 gap-14" style={isMobile ? { padding: '24px 16px 96px' } : undefined}>
 
         <div className="flex flex-col items-center gap-6 text-center w-full" style={{ maxWidth: '640px' }}>
 
@@ -397,8 +416,8 @@ export function DashboardView({
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(auto-fit, minmax(100px, 100px))`,
-          gap: '16px',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(100px, 100px))',
+          gap: isMobile ? '10px' : '16px',
           justifyContent: 'center',
           width: '100%',
           maxWidth: '900px',
