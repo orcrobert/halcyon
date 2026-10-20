@@ -1,6 +1,7 @@
 import { useRef, useCallback, useEffect, useId, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { alpha } from '../theme'
+import { placePopover } from '../hooks/popoverPlacement'
 
 interface Props {
   pan: number
@@ -20,6 +21,8 @@ const DOT_R = 11
 const INSET = DOT_R + 6
 const GRID_STEP = 12
 const MODAL_W = 292
+const CHROME_H = 80
+const MIN_W = 200
 function wobblePath(cx: number, cy: number, r: number, amp: number, phase: number): string {
   const steps = 120
   const points: string[] = []
@@ -51,7 +54,7 @@ export function SpatialModal({
   const [isDragging, setIsDragging] = useState(false)
   const [waveAmp, setWaveAmp] = useState(0)
   const [wavePhase, setWavePhase] = useState(0)
-  const [pos, setPos] = useState({ x: 0, y: 0 })
+  const [pos, setPos] = useState({ x: 0, y: 0, w: MODAL_W })
   const [visible, setVisible] = useState(false)
 
   const dotX = INSET + ((pan + 1) / 2) * (PAD - INSET * 2)
@@ -96,15 +99,11 @@ export function SpatialModal({
   function reposition() {
     if (!anchorRef.current) return
     const rect = anchorRef.current.getBoundingClientRect()
-    const MODAL_H = PAD + 80
     const vw = window.innerWidth
     const vh = window.innerHeight
-    let x = rect.left + rect.width / 2 - MODAL_W / 2
-    let y = rect.top - MODAL_H - 14
-    if (y < 8) y = rect.bottom + 14
-    x = Math.max(8, Math.min(vw - MODAL_W - 8, x))
-    y = Math.max(8, Math.min(vh - MODAL_H - 8, y))
-    setPos({ x, y })
+    const w = Math.max(MIN_W, Math.min(MODAL_W, vw - 16, vh - 16 - CHROME_H))
+    const p = placePopover(rect, { width: w, height: w + CHROME_H }, { width: vw, height: vh })
+    setPos({ x: p.left, y: p.top, w: p.width })
   }
 
   useEffect(() => {
@@ -202,7 +201,7 @@ export function SpatialModal({
       position: 'fixed',
       left: pos.x,
       top: pos.y,
-      width: MODAL_W,
+      width: pos.w,
       zIndex: 9999,
       opacity: visible ? 1 : 0,
       transform: visible ? 'translateY(0) scale(1)' : 'translateY(8px) scale(0.96)',

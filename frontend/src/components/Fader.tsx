@@ -7,6 +7,7 @@ interface Props {
   onChange: (val: number) => void
   disabled?: boolean
   displayValue?: number
+  orientation?: 'vertical' | 'horizontal'
 }
 
 const TRACK_HEIGHT = 180
@@ -22,7 +23,8 @@ const SCALE_HOVER = 1.4
 const SCALE_STIFFNESS = 400
 const SCALE_DAMPING = 25
 
-export function Fader({ value, onChange, disabled, displayValue }: Props) {
+export function Fader({ value, onChange, disabled, displayValue, orientation = 'vertical' }: Props) {
+  const horizontal = orientation === 'horizontal'
   const trackRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const rafRef = useRef<number>(0)
@@ -97,33 +99,39 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
 
     draw()
     return () => cancelAnimationFrame(rafRef.current)
-  }, [disabled, dragging])
+  }, [disabled, dragging, horizontal])
 
-  const getValueFromY = useCallback((clientY: number) => {
+  const getValue = useCallback((e: React.PointerEvent) => {
     const track = trackRef.current
     if (!track) return value
     const rect = track.getBoundingClientRect()
-    const y = Math.max(0, Math.min(TRACK_HEIGHT, clientY - rect.top))
+    if (horizontal) {
+      const span = rect.width - THUMB_R * 2
+      return span > 0 ? (e.clientX - rect.left - THUMB_R) / span : value
+    }
+    const y = Math.max(0, Math.min(TRACK_HEIGHT, e.clientY - rect.top))
     return 1 - y / TRACK_HEIGHT
-  }, [value])
+  }, [value, horizontal])
 
   function handlePointerDown(e: React.PointerEvent) {
     if (disabled) return
     e.currentTarget.setPointerCapture(e.pointerId)
     setDragging(true)
-    onChange(Math.max(0, Math.min(1, getValueFromY(e.clientY))))
+    onChange(Math.max(0, Math.min(1, getValue(e))))
   }
 
   function handlePointerMove(e: React.PointerEvent) {
     if (dragging) {
-      onChange(Math.max(0, Math.min(1, getValueFromY(e.clientY))))
+      onChange(Math.max(0, Math.min(1, getValue(e))))
     }
 
     const track = trackRef.current
     if (!track) return
     const rect = track.getBoundingClientRect()
-    const thumbCenterX = rect.left + rect.width / 2
-    const thumbCenterY = rect.top + thumbY + THUMB_R
+    const thumbCenterX = horizontal
+      ? rect.left + THUMB_R + display * (rect.width - THUMB_R * 2)
+      : rect.left + rect.width / 2
+    const thumbCenterY = horizontal ? rect.top + rect.height / 2 : rect.top + thumbY + THUMB_R
     const dx = e.clientX - thumbCenterX
     const dy = e.clientY - thumbCenterY
     const dist = Math.sqrt(dx * dx + dy * dy)
@@ -151,6 +159,75 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
     animate(pullStrength, 0, { duration: JELLY_RELEASE_DURATION })
     animate(pullX, 0, { duration: JELLY_RELEASE_DURATION })
     animate(pullY, 0, { duration: JELLY_RELEASE_DURATION })
+  }
+
+  const canvas = (
+    <canvas
+      ref={canvasRef}
+      width={CANVAS_SIZE}
+      height={CANVAS_SIZE}
+      style={horizontal ? {
+        position: 'absolute',
+        top: '50%',
+        left: `calc(${display} * (100% - ${THUMB_R * 2}px) + ${THUMB_R - CANVAS_SIZE / 2}px)`,
+        transform: 'translateY(-50%)',
+        pointerEvents: 'none',
+        background: 'transparent',
+      } : {
+        position: 'absolute',
+        left: '50%',
+        top: thumbY + THUMB_R - CANVAS_SIZE / 2,
+        transform: 'translateX(-50%)',
+        pointerEvents: 'none',
+        background: 'transparent',
+      }}
+    />
+  )
+
+  if (horizontal) {
+    return (
+      <div
+        ref={trackRef}
+        style={{ width: '100%', height: `${CANVAS_SIZE}px`, position: 'relative', cursor: disabled ? 'not-allowed' : 'pointer', touchAction: 'pan-y' }}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={handlePointerUp}
+        onPointerCancel={handlePointerUp}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      >
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: 0,
+          transform: 'translateY(-50%)',
+          height: '4px',
+          width: '100%',
+          background: 'linear-gradient(to right, var(--color-surface-high) 0%, var(--color-line) 50%, var(--color-surface-high) 100%)',
+          borderRadius: '2px',
+          boxShadow: `inset 0 0 0 1px ${alpha('var(--color-wash)', 2)}`,
+        }} />
+
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: 0,
+          transform: 'translateY(-50%)',
+          height: '4px',
+          width: `${display * 100}%`,
+          background: disabled
+            ? 'var(--color-line-active)'
+            : `linear-gradient(to right, ${alpha('var(--color-accent)', 15)} 0%, ${alpha('var(--color-accent)', 55)} 60%, ${alpha('var(--color-accent-bright)', 85)} 100%)`,
+          borderRadius: '2px',
+          boxShadow: disabled
+            ? 'none'
+            : `0 0 8px ${alpha('var(--color-accent)', 35)}, inset 0 0 0 1px ${alpha('var(--color-accent-bright)', 15)}`,
+          transition: 'box-shadow 0.25s ease',
+        }} />
+
+        {canvas}
+      </div>
+    )
   }
 
   return (
@@ -192,19 +269,7 @@ export function Fader({ value, onChange, disabled, displayValue }: Props) {
         transition: 'box-shadow 0.25s ease',
       }} />
 
-      <canvas
-        ref={canvasRef}
-        width={CANVAS_SIZE}
-        height={CANVAS_SIZE}
-        style={{
-          position: 'absolute',
-          left: '50%',
-          top: thumbY + THUMB_R - CANVAS_SIZE / 2,
-          transform: 'translateX(-50%)',
-          pointerEvents: 'none',
-          background: 'transparent',
-        }}
-      />
+      {canvas}
     </div>
   )
 }

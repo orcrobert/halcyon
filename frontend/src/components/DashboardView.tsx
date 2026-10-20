@@ -9,6 +9,7 @@ import { PromptModal } from './PromptModal'
 import { RegenerateModal } from './RegenerateModal'
 import { QualityModal } from './QualityModal'
 import { anyBusy, flaggedLayers } from '../quality'
+import { useIsMobile } from '../hooks/useIsMobile'
 
 export interface AnimatedValues { vol: number; pan: number; depth: number }
 
@@ -137,6 +138,7 @@ export function DashboardView({
   binauralActive, binauralBeatHz, binauralLeftHz, binauralRightHz,
 }: Props) {
   const [binauralOpen, setBinauralOpen] = useState(false)
+  const isMobile = useIsMobile()
   const binauralBtnRef = useRef<HTMLButtonElement>(null)
   const [promptOpen, setPromptOpen] = useState(false)
   const [regenerating, setRegenerating] = useState<Element | null>(null)
@@ -300,7 +302,7 @@ export function DashboardView({
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center px-8 py-12 gap-14">
+      <main className="flex-1 flex flex-col items-center justify-center px-8 py-12 gap-14" style={isMobile ? { padding: '24px 16px 96px' } : undefined}>
 
         <div className="flex flex-col items-center gap-6 text-center w-full" style={{ maxWidth: '640px' }}>
 
@@ -397,8 +399,8 @@ export function DashboardView({
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: `repeat(auto-fit, minmax(100px, 100px))`,
-          gap: '16px',
+          gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fit, minmax(100px, 100px))',
+          gap: isMobile ? '10px' : '16px',
           justifyContent: 'center',
           width: '100%',
           maxWidth: '900px',
