@@ -7,6 +7,21 @@ except ImportError:
     _LIBROSA = False
 
 
+PERCEPTUAL_DB_PER_UNIT = 6.0
+MAX_PERCEPTUAL_OFFSET_DB = 18.0
+OVERLAP_THRESHOLD = 0.2
+OVERLAP_PAIR_DB = 3.0
+OVERLAP_SHARE_SPAN_DB = 6.0
+MAX_OVERLAP_PENALTY_DB = 6.0
+MIN_GAIN = 0.15
+LOW_MID_BOUNDARY_HZ = 300.0
+MID_HIGH_BOUNDARY_HZ = 3000.0
+BAND_TRANSITION_OCTAVES = 2.0
+ENVELOPE_FRAME_S = 0.05
+ONSET_MIN_RANGE_DB = 3.0
+ONSET_FULL_RANGE_DB = 9.0
+
+
 def _loudness_db(wav: np.ndarray) -> float:
     mono = wav.mean(axis=0) if wav.ndim == 2 else wav
     rms = np.sqrt(np.mean(mono.astype(np.float64) ** 2))
@@ -26,6 +41,17 @@ def _extract_features(wav: np.ndarray, sr: int) -> dict:
         bandwidth = float(np.mean(librosa.feature.spectral_bandwidth(y=mono_f32, sr=sr)))
         onset_frames = librosa.onset.onset_detect(y=mono_f32, sr=sr)
         onset_density = float(len(onset_frames) / max(len(mono) / sr, 1e-3))
+        frame = max(1, int(ENVELOPE_FRAME_S * sr))
+        count = len(mono) // frame
+        if count:
+            rms = np.sqrt(np.mean(mono[:count * frame].reshape(count, frame) ** 2, axis=1))
+            levels = 20.0 * np.log10(np.maximum(rms, 1e-9))
+            dynamic_range = float(np.percentile(levels, 95) - np.percentile(levels, 5))
+            onset_density *= float(np.clip(
+                (dynamic_range - ONSET_MIN_RANGE_DB)
+                / (ONSET_FULL_RANGE_DB - ONSET_MIN_RANGE_DB),
+                0.0, 1.0,
+            ))
     else:
         n_fft = min(2048, len(mono))
         hop = n_fft // 4
@@ -43,9 +69,17 @@ def _extract_features(wav: np.ndarray, sr: int) -> dict:
 
     spec = S.mean(axis=1)
     total = np.sum(spec) + 1e-9
-    low_energy  = float(np.sum(spec[freqs < 300])  / total)
-    mid_energy  = float(np.sum(spec[(freqs >= 300) & (freqs < 3000)]) / total)
-    high_energy = float(np.sum(spec[freqs >= 3000]) / total)
+    low_share = np.clip(
+        0.5 - np.log2(np.maximum(freqs, 1.0) / LOW_MID_BOUNDARY_HZ)
+        / BAND_TRANSITION_OCTAVES, 0.0, 1.0,
+    )
+    high_share = np.clip(
+        0.5 + np.log2(np.maximum(freqs, 1.0) / MID_HIGH_BOUNDARY_HZ)
+        / BAND_TRANSITION_OCTAVES, 0.0, 1.0,
+    )
+    low_energy = float(np.sum(spec * low_share) / total)
+    mid_energy = float(np.sum(spec * (1.0 - low_share - high_share)) / total)
+    high_energy = float(np.sum(spec * high_share) / total)
 
     return {
         "loudness_db": loudness_db,
@@ -88,37 +122,38 @@ def assign_volumes(elements: list[dict], wavs: list[np.ndarray], srs: list[int] 
 
     weights = np.array([_perceptual_weight(f, t) for f, t in zip(features, types)])
 
-    w_min, w_max = weights.min(), weights.max()
-    if w_max - w_min < 1e-6:
-        weights_norm = np.full(len(weights), 0.5)
-    else:
-        weights_norm = (weights - w_min) / (w_max - w_min)
-
     raw_db = np.array([f["loudness_db"] for f in features])
-
-    anchor_idx = int(np.argmax(weights))
-    anchor_raw_db = raw_db[anchor_idx]
-
-    DB_RANGE = 18.0
-    desired_offset_db = (weights_norm - 1.0) * DB_RANGE
+    desired_offset_db = np.maximum(
+        (weights - weights.max()) * PERCEPTUAL_DB_PER_UNIT,
+        -MAX_PERCEPTUAL_OFFSET_DB,
+    )
+    importance = np.power(10.0, desired_offset_db / 10.0)
+    anchor_raw_db = 10.0 * np.log10(
+        np.average(np.power(10.0, raw_db / 10.0), weights=importance)
+    )
     desired_db = anchor_raw_db + desired_offset_db
 
     penalty_db = np.zeros(len(elements))
     for i in range(len(elements)):
         for j in range(i + 1, len(elements)):
             overlap = _spectral_overlap(features[i], features[j])
-            if overlap <= 0.2:
+            if overlap <= OVERLAP_THRESHOLD:
                 continue
-            db_penalty = overlap * 3.0
-            if raw_db[i] >= raw_db[j]:
-                penalty_db[i] += db_penalty
-            else:
-                penalty_db[j] += db_penalty
+            db_penalty = (
+                (overlap - OVERLAP_THRESHOLD) / (1.0 - OVERLAP_THRESHOLD)
+                * OVERLAP_PAIR_DB
+            )
+            share = float(np.clip(
+                0.5 + (raw_db[i] - raw_db[j]) / (2.0 * OVERLAP_SHARE_SPAN_DB),
+                0.0, 1.0,
+            ))
+            penalty_db[i] += db_penalty * share
+            penalty_db[j] += db_penalty * (1.0 - share)
 
-    desired_db -= penalty_db
+    desired_db -= np.minimum(penalty_db, MAX_OVERLAP_PENALTY_DB)
 
     gain_db = np.minimum(desired_db - raw_db, 0.0)
     gains = np.power(10.0, gain_db / 20.0)
-    gains = np.clip(gains, 0.15, 1.0)
+    gains = np.clip(gains, MIN_GAIN, 1.0)
 
     return [round(float(g), 3) for g in gains]
