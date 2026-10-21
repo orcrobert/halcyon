@@ -72,6 +72,7 @@ class UserSettings(SQLModel, table=True):
     decomposer_prompt: str | None = None
     theme: str | None = None
     review_decomposition: bool | None = None
+    texture_takes: int | None = None
     reduce_blur: bool | None = None
     modal_token_id: str | None = None
     modal_token_secret_enc: str | None = None
@@ -191,6 +192,9 @@ class Element(SQLModel, table=True):
         default=None, sa_column=Column(JSON, nullable=True)
     )
     quality_dismissed: bool | None = None
+    takes_json: list[dict[str, Any]] | None = Field(
+        default=None, sa_column=Column(JSON, nullable=True)
+    )
 
     volume: float = 0.8
     pan: float = 0.0

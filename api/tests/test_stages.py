@@ -40,9 +40,28 @@ def test_generating_counts_layers_by_type():
         {"type": "sound"},
         {"type": "music"},
     ]
-    detail = generating_detail(_config(generator_kind="modal"), elements)
+    detail = generating_detail(
+        _config(generator_kind="modal", texture_takes=1), elements
+    )
 
     assert detail == "Rendering 3 layers on Modal: 2 sounds, 1 music"
+
+
+def test_generating_names_the_takes_of_evolving_layers():
+    from api.app.services.stages import generating_detail
+
+    elements = [
+        {"type": "sound", "role": "bed"},
+        {"type": "sound", "role": "event", "playback": "oneshot"},
+        {"type": "music", "role": "texture"},
+    ]
+    detail = generating_detail(
+        _config(generator_kind="modal", texture_takes=3), elements
+    )
+
+    assert detail == (
+        "Rendering 3 layers on Modal: 2 sounds, 1 music, 1 evolving in 3 takes each"
+    )
 
 
 def test_a_named_profile_wins_over_the_host_label():

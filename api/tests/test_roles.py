@@ -6,7 +6,7 @@ import pytest
 from api.tests.conftest import FakeResponse, wav_bytes
 
 
-def _config():
+def _config(**overrides):
     from api.app.services.runconfig import RunConfig
 
     return RunConfig(
@@ -16,6 +16,7 @@ def _config():
         decomposer_base_url=None,
         decomposer_api_key=None,
         decomposer_prompt="",
+        **overrides,
     )
 
 
@@ -96,7 +97,7 @@ def test_each_element_carries_its_own_duration(monkeypatch):
     monkeypatch.setattr(generator_module.requests, "post", fake_post)
 
     elements = _specs()
-    generator_module.generate({"elements": elements}, _config(), 30)
+    generator_module.generate({"elements": elements}, _config(texture_takes=1), 30)
 
     assert sent["duration"] == 30
     assert [e["duration"] for e in sent["elements"]] == [BED_CLIP_S, 30]

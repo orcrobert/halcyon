@@ -1,7 +1,7 @@
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
-from api.app.config import settings
+from api.app.config import DEFAULT_TEXTURE_TAKES, settings
 from api.app.models.tables import GeneratorProfile, UserSettings
 from api.app.security import decrypt_secret
 from api.app.services.generator_options import request_options
@@ -19,6 +19,7 @@ class RunConfig:
     generator_kind: str = "custom"
     generator_name: str | None = None
     generator_options: dict = field(default_factory=dict)
+    texture_takes: int = DEFAULT_TEXTURE_TAKES
 
 
 def default_config() -> RunConfig:
@@ -32,6 +33,10 @@ def default_config() -> RunConfig:
         decomposer_api_key=settings.decomposer_api_key,
         decomposer_prompt=default_decomposer_prompt(),
     )
+
+
+def texture_takes(preferences: UserSettings | None) -> int:
+    return getattr(preferences, "texture_takes", None) or DEFAULT_TEXTURE_TAKES
 
 
 def active_generator(
@@ -102,4 +107,5 @@ def resolve_config(
         decomposer_api_key=decrypt_secret(preferences.decomposer_api_key_enc)
         or (None if switched_provider else defaults.decomposer_api_key),
         decomposer_prompt=preferences.decomposer_prompt or defaults.decomposer_prompt,
+        texture_takes=texture_takes(preferences),
     )
