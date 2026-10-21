@@ -112,6 +112,19 @@ Applies to `api/` and `scripts/`. The cross-cutting rules in `AGENTS.md` still h
   it as a per-element `duration`; the result is stored on `Element.clip_s`.
   Tuning constants live in code, never in the user-editable prompt. A missing or
   unknown role falls back to `texture`.
+- **Evolving layers come in takes.** `UserSettings.texture_takes` (1–3,
+  default `DEFAULT_TEXTURE_TAKES` = 2, resolved into `RunConfig.texture_takes`)
+  is how many independent clips a looping `texture` layer gets. Beds and events
+  always get one (`generator.py` `take_count`). `generate` appends the extra
+  takes to the same request with their own `index` and folds the replies back
+  into `takes_audio` on their layer. `check_results` ranks every take of a
+  layer by `quality_score`: the cleanest becomes the layer's clip, the others
+  survive only if nothing flagged them. Spare takes skip `analyze`: the persist
+  step runs them through the mixer's `match_take` against the analysed clip and
+  stores them as `{position}_{label}_take{n}.wav` on `Element.takes_json`
+  (`path`, `duration_s`), served at `GET /api/elements/{id}/audio?take={n}`.
+  The layer's EQ, volume and placement apply to every take. Regenerating a
+  layer replaces its takes and deleting it removes them.
 - **Event frequency comes from the LLM, timing from code.** An `event` element
   gets `playback: oneshot` and `interval_min_s`/`interval_max_s` from its
   `frequency` through `ROLE_INTERVALS`. The browser schedules it.

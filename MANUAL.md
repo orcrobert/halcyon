@@ -180,6 +180,11 @@ Details in
      random intervals.
    - **Style clip**: upload a song and crop 1.5–4.5 s; music layers follow its
      sound through MusicGen-Style.
+   - **Takes per evolving layer** (Account → Language model → Workflow, 1–3,
+     default 2): evolving layers and music are rendered that many times and
+     playback crossfades between the versions in random order, so the loop is
+     harder to hear. Beds and events are rendered once. More takes mean a longer
+     wait. A layer's details show it, for example "10s loop · 2 takes".
 4. **Review layers** (if turned on in Account → Language model → Workflow): before anything is
    generated, edit the proposed layers by hand or ask the model to revise them
    with a note. Closing the review discards the soundscape.
