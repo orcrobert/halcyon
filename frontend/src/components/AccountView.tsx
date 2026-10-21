@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { getSettings, updateSettings } from '../api/settings'
 import { extractErrors } from '../api/errors'
 import { useAuth } from '../auth/context'
-import { Card, SwitchRow } from './AccountCard'
+import { Card, ChoiceRow, SwitchRow } from './AccountCard'
 import { DecomposerCard } from './DecomposerCard'
 import { GeneratorsCard } from './GeneratorsCard'
 import { PromptEditorModal } from './PromptEditorModal'
@@ -112,6 +112,15 @@ const SECTIONS: Section[] = [
   },
 ]
 
+const TEXTURE_TAKE_CHOICES = [1, 2, 3]
+
+function takesDescription(takes: number): string {
+  if (takes <= 1) {
+    return 'Each evolving layer and music track is rendered once and loops on its own. Fastest, but you may notice the loop repeating.'
+  }
+  return `Each evolving layer and music track is rendered ${takes} times, and playback crossfades between the versions in random order so the loop is harder to hear. Beds and one-shot events are rendered once. More takes mean longer generation.`
+}
+
 export function AccountView({ onBack, initialSection = 'model' }: Props) {
   const { state, logout } = useAuth()
   const [settings, setSettings] = useState<Settings | null>(null)
@@ -192,6 +201,19 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
       setSettings(await updateSettings({ review_decomposition: next }))
     } catch (e) {
       setSettings((current) => (current ? { ...current, review_decomposition: !next } : current))
+      setError(extractErrors(e).message)
+    }
+  }
+
+  async function handleTakesChange(next: number) {
+    if (!settings || next === settings.texture_takes) return
+    const previous = settings.texture_takes
+    setSettings({ ...settings, texture_takes: next })
+    setError(null)
+    try {
+      setSettings(await updateSettings({ texture_takes: next }))
+    } catch (e) {
+      setSettings((current) => (current ? { ...current, texture_takes: previous } : current))
       setError(extractErrors(e).message)
     }
   }
@@ -414,6 +436,13 @@ export function AccountView({ onBack, initialSection = 'model' }: Props) {
                       onToggle={handleReviewToggle}
                       label="Review layers before generating"
                       description="Pause after the language model splits the scene, so you can edit the layers by hand or ask it for changes before any audio is rendered."
+                    />
+                    <ChoiceRow
+                      value={settings.texture_takes}
+                      options={TEXTURE_TAKE_CHOICES}
+                      onChange={handleTakesChange}
+                      label="Takes per evolving layer"
+                      description={takesDescription(settings.texture_takes)}
                     />
                   </Card>
                 </Panel>

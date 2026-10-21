@@ -56,6 +56,11 @@ export interface ElementQuality {
   dismissed: boolean
 }
 
+export interface ElementTake {
+  audio_url: string
+  duration_s: number | null
+}
+
 export interface Element {
   id: number
   label: string
@@ -85,6 +90,7 @@ export interface Element {
     eq_json: EQBand[] | null
   }
   audio_url: string | null
+  takes: ElementTake[]
 }
 
 export type AtmosphereStatus = 'pending' | 'generating' | 'awaiting_review' | 'ready' | 'failed'
@@ -188,6 +194,7 @@ export interface Settings {
   decomposer_prompt: string | null
   theme: string | null
   review_decomposition: boolean
+  texture_takes: number
   reduce_blur: boolean
   modal_token_id: string | null
   modal_token_set: boolean
@@ -303,6 +310,7 @@ export type SettingsUpdate = Partial<{
   decomposer_prompt: string
   theme: string
   review_decomposition: boolean
+  texture_takes: number
   reduce_blur: boolean
   modal_token_id: string
   modal_token_secret: string

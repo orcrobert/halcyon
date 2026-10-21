@@ -119,7 +119,7 @@ export const TrackStrip = memo(function TrackStrip({ element, muted, animatedVol
     <>
       {element.clip_s != null && (
         <p style={{ fontSize: '10px', color: 'var(--color-ink-faint)', lineHeight: '1.5', margin: '6px 0 0 0', fontFamily: 'inherit' }}>
-          {element.clip_s}s loop
+          {element.clip_s}s loop{element.takes.length > 0 && ` · ${element.takes.length + 1} takes`}
         </p>
       )}
       {isMusic && styleName && (
