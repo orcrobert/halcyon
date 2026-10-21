@@ -6,6 +6,7 @@ from collections.abc import Callable
 import requests
 
 from api.app.config import BED_CLIP_S, EVENT_CLIP_S
+from api.app.services.decomposer import DEFAULT_ROLE
 from api.app.services.runconfig import RunConfig
 
 GENERATOR_TIMEOUT_S = 300
@@ -85,26 +86,42 @@ def clip_length(element: dict, duration_s: int) -> int:
     return ROLE_CLIP_S.get(element.get("role"), duration_s)
 
 
+def take_count(element: dict, takes: int) -> int:
+    if element.get("playback") == "oneshot":
+        return 1
+    if (element.get("role") or DEFAULT_ROLE) != "texture":
+        return 1
+    return max(1, takes)
+
+
 def _match_audio(replies: list, elements: list[dict]) -> dict[int, bytes]:
-    positions: dict[str, int] = {}
+    positions: dict[str, list[int]] = {}
     for position, element in enumerate(elements):
-        positions.setdefault(element.get("label"), position)
+        positions.setdefault(element.get("label"), []).append(position)
+
+    usable = [
+        (position, reply)
+        for position, reply in enumerate(replies)
+        if isinstance(reply, dict) and reply.get("audio_b64")
+    ]
+    indexed = [item for item in usable if isinstance(item[1].get("index"), int)]
+    unindexed = [item for item in usable if not isinstance(item[1].get("index"), int)]
 
     matched: dict[int, bytes] = {}
-    for position, reply in enumerate(replies):
-        if not isinstance(reply, dict):
-            continue
-        encoded = reply.get("audio_b64")
-        if not encoded:
-            continue
-
+    for position, reply in indexed + unindexed:
         index = reply.get("index")
-        if not isinstance(index, int):
-            index = positions.get(reply.get("label"), position)
+        label = reply.get("label")
+        if not isinstance(index, int) and label in positions:
+            index = next(
+                (candidate for candidate in positions[label] if candidate not in matched),
+                None,
+            )
+        elif not isinstance(index, int):
+            index = position
 
-        if index in matched or not 0 <= index < len(elements):
+        if index is None or index in matched or not 0 <= index < len(elements):
             continue
-        matched[index] = base64.b64decode(encoded)
+        matched[index] = base64.b64decode(reply["audio_b64"])
 
     return matched
 
@@ -118,6 +135,7 @@ def generate(
     elements = decomposed["elements"]
     style_b64 = base64.b64encode(style).decode() if style else None
     payload = []
+    owners: list[int] = []
     for index, element in enumerate(elements):
         element["clip_s"] = clip_length(element, duration_s)
         entry = {
@@ -130,6 +148,12 @@ def generate(
         if style_b64 and entry["type"] == "music":
             entry["style_b64"] = style_b64
         payload.append(entry)
+        owners.append(index)
+
+    for index, element in enumerate(elements):
+        for _ in range(take_count(element, config.texture_takes) - 1):
+            payload.append({**payload[index], "index": len(payload)})
+            owners.append(index)
 
     body: dict = {"elements": payload, "duration": duration_s}
     if config.generator_options:
@@ -142,16 +166,21 @@ def generate(
     )
     response.raise_for_status()
 
-    audio = _match_audio(response.json()["elements"], elements)
+    audio = _match_audio(response.json()["elements"], payload)
+
+    clips: dict[int, list[bytes]] = {}
+    for index in sorted(audio):
+        clips.setdefault(owners[index], []).append(audio[index])
 
     results = []
     for index, element in enumerate(elements):
-        if index not in audio:
+        if index not in clips:
             logger.warning(
                 "Generator returned no audio for %r", element.get("label", index)
             )
             continue
-        results.append({**element, "audio": audio[index]})
+        first, *takes = clips[index]
+        results.append({**element, "audio": first, "takes_audio": takes})
 
     if not results:
         raise ValueError("Generator returned no audio")

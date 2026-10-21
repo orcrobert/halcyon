@@ -22,9 +22,11 @@ generated atmosphere, so treat them as high-stakes. Full map in
   inside the image.
 
 `mixer/mixer/effects/quality.py` `inspect_clip` (used by `api/app/services/quality.py`
-and `scripts/check_clips.py`) and `mixer/mixer/effects/looping.py` `pad_for_looping`
-(used by the pipeline's persist step) are public too. Change a signature only
-together with every caller.
+and `scripts/check_clips.py`), `mixer/mixer/effects/looping.py` `pad_for_looping`
+and `mixer/mixer/effects/takes.py` `match_take` (both used by the pipeline's
+persist step) are public too. `match_take` makes a spare take loopable and
+matches its RMS to the layer's analysed clip, within `TAKE_MATCH_MAX_DB`.
+Change a signature only together with every caller.
 
 ## What `analyze` does, in order
 

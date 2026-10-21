@@ -13,10 +13,13 @@ def atmosphere_dir(atmosphere_id: int) -> Path:
     return settings.audio_path / str(atmosphere_id)
 
 
-def write_element_audio(atmosphere_id: int, position: int, label: str, audio: bytes) -> str:
+def write_element_audio(
+    atmosphere_id: int, position: int, label: str, audio: bytes, take: int = 0
+) -> str:
     directory = atmosphere_dir(atmosphere_id)
     directory.mkdir(parents=True, exist_ok=True)
-    filename = f"{position:02d}_{sanitize_label(label)}.wav"
+    suffix = f"_take{take + 1}" if take else ""
+    filename = f"{position:02d}_{sanitize_label(label)}{suffix}.wav"
     (directory / filename).write_bytes(audio)
     return f"{atmosphere_id}/{filename}"
 
@@ -34,6 +37,13 @@ def delete_element_audio(relative_path: str) -> None:
     except ValueError:
         return
     path.unlink(missing_ok=True)
+
+
+def delete_take_audio(takes: list[dict] | None, keep: set[str] | None = None) -> None:
+    for take in takes or []:
+        path = take.get("path")
+        if path and path not in (keep or set()):
+            delete_element_audio(path)
 
 
 def delete_atmosphere_audio(atmosphere_id: int) -> None:

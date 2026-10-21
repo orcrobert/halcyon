@@ -19,6 +19,13 @@ import {
   planTriggers,
   type TriggerShape,
 } from './eventScheduler'
+import {
+  TAKE_LOOKAHEAD_S,
+  equalPowerCurve,
+  nextTake,
+  planTakes,
+  takeCrossfade,
+} from './takeScheduler'
 import type { Element, EQBand } from '../types'
 
 function audioBufferToWav(buffer: AudioBuffer): ArrayBuffer {
@@ -111,6 +118,22 @@ interface EventLane {
   maxS: number
 }
 
+interface TakeClip {
+  buffer: AudioBuffer
+  offset: number
+  duration: number
+}
+
+interface TakeLane {
+  clips: TakeClip[]
+  rng: () => number
+  voices: Set<AudioBufferSourceNode>
+  current: number
+  nextAt: number
+  crossfade: number
+  input: AudioNode
+}
+
 interface TrackNode {
   input: AudioNode
   masterGain: GainNode
@@ -121,6 +144,7 @@ interface TrackNode {
   pitchNode: SoundTouchNode | null
   filters: [BiquadFilterNode, BiquadFilterNode, BiquadFilterNode]
   lane: EventLane | null
+  takes: TakeLane | null
   basePan: number
 }
 
@@ -144,6 +168,7 @@ interface TrackChain {
 interface DecodedElement {
   el: Element
   buffer: AudioBuffer
+  takes: AudioBuffer[]
 }
 
 interface BinauralNodes {
@@ -170,6 +195,61 @@ function startLoop(src: AudioBufferSourceNode, buffer: AudioBuffer, declared: nu
   src.loopStart = pad
   src.loopEnd = pad + declared!
   src.start(0, pad)
+}
+
+function takeClip(buffer: AudioBuffer, declared: number | null | undefined): TakeClip {
+  const pad = loopRegion(buffer, declared)
+  if (pad === null) return { buffer, offset: 0, duration: buffer.duration }
+  return { buffer, offset: pad, duration: declared! }
+}
+
+function clipsFor({ el, buffer, takes }: DecodedElement): TakeClip[] {
+  return [
+    takeClip(buffer, el.duration_s),
+    ...takes.map((take, i) => takeClip(take, el.takes[i]?.duration_s)),
+  ]
+}
+
+function playTake(
+  ctx: BaseAudioContext,
+  input: AudioNode,
+  clip: TakeClip,
+  when: number,
+  crossfade: number,
+  fadeIn: boolean,
+  voices: Set<AudioBufferSourceNode> | null,
+): void {
+  const src = ctx.createBufferSource()
+  src.buffer = clip.buffer
+
+  const gain = ctx.createGain()
+  if (crossfade > 0) {
+    if (fadeIn) gain.gain.setValueCurveAtTime(equalPowerCurve(true), when, crossfade)
+    gain.gain.setValueCurveAtTime(equalPowerCurve(false), when + clip.duration - crossfade, crossfade)
+  }
+  src.connect(gain)
+  gain.connect(input)
+
+  if (voices) {
+    voices.add(src)
+    src.onended = () => {
+      voices.delete(src)
+      try { gain.disconnect() } catch {}
+    }
+  }
+
+  src.start(when, clip.offset, clip.duration)
+}
+
+function scheduleTakes(ctx: BaseAudioContext, takes: TakeLane, now: number, horizon: number): void {
+  if (takes.nextAt < now) takes.nextAt = now + EVENT_BACKLOG_RESET_S
+  while (takes.nextAt < horizon) {
+    const take = nextTake(takes.rng, takes.clips.length, takes.current)
+    const clip = takes.clips[take]
+    playTake(ctx, takes.input, clip, takes.nextAt, takes.crossfade, true, takes.voices)
+    takes.current = take
+    takes.nextAt += Math.max(clip.duration - takes.crossfade, takes.crossfade)
+  }
 }
 
 export function isCanonicalBand(band: EQBand): boolean {
@@ -276,11 +356,13 @@ function createMasterLimiter(ctx: BaseAudioContext): DynamicsCompressorNode {
 }
 
 function stopVoices(track: TrackNode, at: number) {
-  if (!track.lane) return
-  track.lane.voices.forEach((voice) => {
-    try { voice.stop(at) } catch {}
-  })
-  track.lane.voices.clear()
+  for (const voices of [track.lane?.voices, track.takes?.voices]) {
+    if (!voices) continue
+    voices.forEach((voice) => {
+      try { voice.stop(at) } catch {}
+    })
+    voices.clear()
+  }
 }
 
 function disconnectTrack(track: TrackNode) {
@@ -460,6 +542,11 @@ export function useAudioEngine() {
     const horizon = now + lookaheadRef.current
 
     tracksRef.current.forEach((track) => {
+      if (track.takes) {
+        scheduleTakes(ctx, track.takes, now, horizon + TAKE_LOOKAHEAD_S)
+        return
+      }
+
       const lane = track.lane
       if (!lane) return
       if (lane.nextAt < now) lane.nextAt = now + EVENT_BACKLOG_RESET_S
@@ -491,7 +578,7 @@ export function useAudioEngine() {
   const syncScheduler = useCallback(() => {
     let hasLane = false
     tracksRef.current.forEach((track) => {
-      if (track.lane) hasLane = true
+      if (track.lane || track.takes) hasLane = true
     })
 
     if (!hasLane) {
@@ -509,7 +596,8 @@ export function useAudioEngine() {
     tracksRef.current.forEach((track) => releaseTrack(ctx, track))
     tracksRef.current.clear()
 
-    for (const { el, buffer } of decoded) {
+    for (const item of decoded) {
+      const { el, buffer } = item
       const eq = eqStateRef.current.get(el.label) ?? buildEQState(el.eq_json ?? undefined)
       const vol = volumeStateRef.current.has(el.label)
         ? volumeStateRef.current.get(el.label)!
@@ -537,6 +625,7 @@ export function useAudioEngine() {
           source: null,
           pitchNode: null,
           basePan: pan,
+          takes: null,
           lane: {
             buffer,
             rng: Math.random,
@@ -553,6 +642,31 @@ export function useAudioEngine() {
       pitchNode.pitch!.value = pitchRef.current
       pitchNode.connect(chain.input)
 
+      const clips = clipsFor(item)
+      if (clips.length > 1) {
+        const crossfade = takeCrossfade(clips.map((clip) => clip.duration))
+        const voices = new Set<AudioBufferSourceNode>()
+        const now = ctx.currentTime
+        playTake(ctx, pitchNode, clips[0], now, crossfade, false, voices)
+        tracksRef.current.set(el.label, {
+          ...chain,
+          source: null,
+          pitchNode,
+          basePan: pan,
+          lane: null,
+          takes: {
+            clips,
+            rng: Math.random,
+            voices,
+            current: 0,
+            nextAt: now + Math.max(clips[0].duration - crossfade, crossfade),
+            crossfade,
+            input: pitchNode,
+          },
+        })
+        continue
+      }
+
       const src = ctx.createBufferSource()
       src.buffer = buffer
       src.connect(pitchNode)
@@ -564,6 +678,7 @@ export function useAudioEngine() {
         pitchNode,
         basePan: pan,
         lane: null,
+        takes: null,
       })
     }
 
@@ -573,24 +688,32 @@ export function useAudioEngine() {
   async function decodeElements(elements: Element[]): Promise<DecodedElement[]> {
     const ctx = getContext()
     const cache = bufferCacheRef.current
+    const fetchBuffer = async (url: string, label: string): Promise<AudioBuffer> => {
+      const cached = cache.get(url)
+      if (cached) return cached
+      const res = await fetch(apiUrl(url), { headers: authHeaders() })
+      if (!res.ok) {
+        throw new Error(`Failed to load audio for ${label}: ${res.status}`)
+      }
+      return ctx.decodeAudioData(await res.arrayBuffer())
+    }
     const decoded = await Promise.all(
       elements.map(async (el) => {
         if (!el.audio_url) {
           throw new Error(`Element ${el.label} has no audio_url`)
         }
-        const cached = cache.get(el.audio_url)
-        if (cached) return { el, buffer: cached }
-        const res = await fetch(apiUrl(el.audio_url), { headers: authHeaders() })
-        if (!res.ok) {
-          throw new Error(`Failed to load audio for ${el.label}: ${res.status}`)
-        }
-        const arrayBuffer = await res.arrayBuffer()
-        const buffer = await ctx.decodeAudioData(arrayBuffer)
-        return { el, buffer }
+        const [buffer, ...takes] = await Promise.all([
+          fetchBuffer(el.audio_url, el.label),
+          ...(el.takes ?? []).map((take) => fetchBuffer(take.audio_url, el.label)),
+        ])
+        return { el, buffer, takes }
       })
     )
     cache.clear()
-    for (const { el, buffer } of decoded) cache.set(el.audio_url!, buffer)
+    for (const { el, buffer, takes } of decoded) {
+      cache.set(el.audio_url!, buffer)
+      for (const [i, take] of (el.takes ?? []).entries()) cache.set(take.audio_url, takes[i])
+    }
     return decoded
   }
 
@@ -825,9 +948,7 @@ export function useAudioEngine() {
     stopBinaural()
     tracksRef.current.forEach((track) => {
       if (track.source) { try { track.source.stop() } catch {} }
-      track.lane?.voices.forEach((voice) => {
-        try { voice.stop() } catch {}
-      })
+      stopVoices(track, 0)
     })
     tracksRef.current.clear()
     decodedRef.current = []
@@ -881,7 +1002,8 @@ export function useAudioEngine() {
     limiter.connect(offline.destination)
     const reverb = createReverbBus(offline, limiter, mulberry32(EXPORT_SEED >>> 0))
 
-    for (const { el, buffer } of decodedRef.current) {
+    for (const item of decodedRef.current) {
+      const { el, buffer } = item
       const liveTrack = tracksRef.current.get(el.label)
       const eq: EQState = liveTrack ? {
         low: liveTrack.filters[0].gain.value,
@@ -914,6 +1036,16 @@ export function useAudioEngine() {
       const offlinePitchNode = new SoundTouchNode(offline)
       offlinePitchNode.pitch!.value = pitchRef.current
       offlinePitchNode.connect(chain.input)
+
+      const clips = clipsFor(item)
+      if (clips.length > 1) {
+        const crossfade = takeCrossfade(clips.map((clip) => clip.duration))
+        const plan = planTakes(rng, seconds, clips.map((clip) => clip.duration), crossfade)
+        plan.forEach((segment, i) => {
+          playTake(offline, offlinePitchNode, clips[segment.take], segment.at, crossfade, i > 0, null)
+        })
+        continue
+      }
 
       const src = offline.createBufferSource()
       src.buffer = buffer

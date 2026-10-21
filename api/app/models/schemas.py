@@ -16,8 +16,10 @@ from api.app.config import (
     MAX_INTERVAL_S,
     MAX_REVIEW_LAYERS,
     MAX_STYLE_BYTES,
+    MAX_TEXTURE_TAKES,
     MIN_DURATION_S,
     MIN_INTERVAL_S,
+    MIN_TEXTURE_TAKES,
 )
 
 T = TypeVar("T")
@@ -117,6 +119,9 @@ class SettingsUpdate(BaseModel):
     decomposer_prompt: str | None = Field(default=None, max_length=40000)
     theme: str | None = Field(default=None, max_length=64)
     review_decomposition: bool | None = None
+    texture_takes: int | None = Field(
+        default=None, ge=MIN_TEXTURE_TAKES, le=MAX_TEXTURE_TAKES
+    )
     reduce_blur: bool | None = None
     modal_token_id: str | None = Field(default=None, max_length=255)
     modal_token_secret: str | None = Field(default=None, max_length=255)
@@ -144,6 +149,7 @@ class SettingsOut(BaseModel):
     decomposer_prompt: str | None
     theme: str | None
     review_decomposition: bool
+    texture_takes: int
     reduce_blur: bool
     modal_token_id: str | None
     modal_token_set: bool
@@ -273,6 +279,11 @@ class ElementQuality(BaseModel):
     dismissed: bool
 
 
+class ElementTake(BaseModel):
+    audio_url: str
+    duration_s: float | None
+
+
 class ElementOut(BaseModel):
     id: int
     label: str
@@ -297,6 +308,7 @@ class ElementOut(BaseModel):
     eq_json: list[dict[str, Any]] | None
     original: ElementOriginal
     audio_url: str | None
+    takes: list[ElementTake] = []
 
 
 class ElementMixUpdate(BaseModel):

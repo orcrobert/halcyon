@@ -31,6 +31,7 @@ function layer(
     eq_json: null,
     original: { volume: 0.8, pan: 0, depth: 0, eq_json: null },
     audio_url: null,
+    takes: [],
   }
 }
 

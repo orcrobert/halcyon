@@ -89,3 +89,51 @@ export function SwitchRow({
     </button>
   )
 }
+
+export function ChoiceRow({
+  value,
+  options,
+  onChange,
+  label,
+  description,
+}: {
+  value: number
+  options: number[]
+  onChange: (value: number) => void
+  label: string
+  description: string
+}) {
+  return (
+    <div
+      className="w-full flex flex-wrap items-center justify-between gap-3 rounded-xl bg-surface-sunken border border-line"
+      style={{ padding: '12px 14px' }}
+    >
+      <span className="flex flex-col gap-1 min-w-0" style={{ flex: '1 1 220px' }}>
+        <span className="text-[13px] text-ink-soft">{label}</span>
+        <span className="text-[11px] text-ink-faint leading-snug">{description}</span>
+      </span>
+      <span role="radiogroup" aria-label={label} className="flex gap-1 shrink-0">
+        {options.map((option) => {
+          const selected = option === value
+          return (
+            <button
+              key={option}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(option)}
+              className={`rounded-lg border text-[12.5px] tabular-nums transition-colors ${
+                selected
+                  ? 'border-accent/45 bg-accent/15 text-ink-bright'
+                  : 'border-line text-ink-faint hover:border-line-hover hover:text-ink-soft'
+              }`}
+              style={{ minWidth: '38px', padding: '7px 10px', fontFamily: 'inherit' }}
+            >
+              {option}
+            </button>
+          )
+        })}
+      </span>
+    </div>
+  )
+}

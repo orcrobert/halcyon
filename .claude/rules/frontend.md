@@ -62,6 +62,15 @@ Pure scheduling and maths helpers (`hooks/eventScheduler.ts`,
   `Element.duration_s` stays the unpadded length, so derive the loop region as
   `(buffer.duration - duration_s) / 2` and play the interior. A file with no
   padding falls back to looping the whole buffer. One-shots are never padded.
+- **A layer with takes plays as a take lane, not a looping source.** When
+  `Element.takes` is non-empty, `useAudioEngine` plays the clip and its takes
+  one after another in random order (never the same take twice in a row),
+  overlapping each pair by an equal-power crossfade of `takeCrossfade` (2 s,
+  at most a quarter of the shortest take). Each take plays its own unpadded
+  region. The pure maths lives in `hooks/takeScheduler.ts`; the lane is fed by
+  the same scheduler tick as events, `TAKE_LOOKAHEAD_S` ahead, and export plans
+  it with `planTakes` from the seeded PRNG. All takes go through the layer's
+  one SoundTouch node and filter chain.
 - **Events are scheduled in the browser, never baked into a WAV.** An `event`
   element is one short clip with `playback: oneshot` and
   `interval_min_s`/`interval_max_s`. `hooks/eventScheduler.ts` is pure and

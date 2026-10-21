@@ -715,6 +715,10 @@ cold host as unreachable; warm it and test again.
 - `prompt` is the text to generate from.
 - `index` is the element's position in the request. Echo it back and the API
   matches your reply to the right layer no matter what order you answer in.
+- An evolving layer can appear more than once, with the same label and prompt
+  but its own `index`. Those are extra takes of one layer, which the browser
+  crossfades between, so generate each one independently (sampled, never from a
+  fixed seed) and echo each `index`. How many is a per-user setting.
 - The per-element `duration` is the seconds to generate for that element. Beds,
   stationary noise-like material the browser loops, ask for 4 s; one-shot events
   ask for 2 s; evolving layers and music ask for the length the user chose next

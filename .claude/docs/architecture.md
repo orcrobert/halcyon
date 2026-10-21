@@ -70,7 +70,9 @@ Definitive reference for how the system fits together. Skim
   `Element.playback`/`clip_s`/`interval_min_s`/`interval_max_s` describe how a
   layer repeats, and `source`/`source_json` where its audio came from.
   `quality_json` holds the issues the quality check found in the clip and
-  `quality_dismissed` whether the user chose to keep it. `original_*` columns on `Element` store the mixer's computed
+  `quality_dismissed` whether the user chose to keep it. `takes_json` lists a
+  looping texture layer's spare takes (`path`, `duration_s`), which the browser
+  crossfades between; `UserSettings.texture_takes` sets how many. `original_*` columns on `Element` store the mixer's computed
   defaults so the UI can reset. `UserSettings` holds per-user provider config.
 - **Updates** (`routers/updates.py`, `services/updates.py`): the image carries
   its release in `HALCYON_VERSION` (a build arg the release sets). `/api/admin/updates`
@@ -119,11 +121,12 @@ Definitive reference for how the system fits together. Skim
 - **Quality check** (`services/quality.py`): `check_results` sits between
   `generate` and `analyze` in both `run_generation` and `regenerate_element`.
   It decodes each reply, runs `inspect_clip`, drops silent or unreadable clips
-  and tags the rest with their issues. It never re-renders anything itself.
+  and tags the rest with their issues. A layer that came back in several takes
+  keeps its cleanest take as the clip and only unflagged ones as spares. It never re-renders anything itself.
   The browser asks first, and a re-render is an ordinary element regeneration.
 - **Storage** (`services/storage.py`): audio at
-  `DATA_DIR/audio/{atmosphere_id}/{position}_{label}.wav`, with path-escape
-  checks on read.
+  `DATA_DIR/audio/{atmosphere_id}/{position}_{label}.wav`, spare takes at
+  `{position}_{label}_take{n}.wav`, with path-escape checks on read.
 - **Secrets** (`security.py`): per-user API keys encrypted with Fernet, keyed off
   `SECRET_KEY` or an auto-generated `DATA_DIR/secret.key`.
 - **Config**: `config.py` (pydantic-settings) reads the repo-root `.env` and
@@ -296,7 +299,7 @@ Every route needs a bearer token unless noted. Interactive docs are disabled.
 | `POST /api/atmospheres/{id}/quality/dismiss` | keep flagged clips |
 | `PATCH /api/elements/{id}`, `POST /api/elements/{id}/reset` | live mix edits, restore the mixer's values |
 | `POST /api/elements/{id}/regenerate`, `DELETE /api/elements/{id}` | re-render one layer (202), delete it |
-| `GET /api/elements/{id}/audio` | the layer's WAV |
+| `GET /api/elements/{id}/audio` | the layer's WAV; `?take={n}` for its spare takes |
 | `GET /api/admin/users`, `POST /api/admin/users` | admin: list, create accounts |
 | `GET`, `PATCH`, `DELETE /api/admin/users/{id}` | admin: show, edit, delete one |
 | `/api/admin/users/{id}/settings`, `/api/admin/users/{id}/generators/…` | admin: the settings and generator routes above, for that account |

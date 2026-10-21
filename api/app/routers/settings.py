@@ -11,7 +11,7 @@ from api.app.services.providers import (
     available_providers,
     get_provider,
 )
-from api.app.services.runconfig import default_config
+from api.app.services.runconfig import default_config, texture_takes
 
 router = APIRouter(tags=["settings"])
 
@@ -50,6 +50,7 @@ def _serialize(preferences: UserSettings | None) -> SettingsOut:
         review_decomposition=bool(
             getattr(preferences, "review_decomposition", None)
         ),
+        texture_takes=texture_takes(preferences),
         reduce_blur=bool(getattr(preferences, "reduce_blur", None)),
         modal_token_id=getattr(preferences, "modal_token_id", None),
         modal_token_set=bool(getattr(preferences, "modal_token_secret_enc", None)),
@@ -106,6 +107,9 @@ def update(
 
     if "review_decomposition" in provided:
         preferences.review_decomposition = bool(provided["review_decomposition"])
+
+    if provided.get("texture_takes") is not None:
+        preferences.texture_takes = provided["texture_takes"]
 
     if "reduce_blur" in provided:
         preferences.reduce_blur = bool(provided["reduce_blur"])

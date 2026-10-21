@@ -1,5 +1,6 @@
 from urllib.parse import urlparse
 
+from api.app.services.generator import take_count
 from api.app.services.hosts import HOSTS
 from api.app.services.providers import PROVIDERS
 from api.app.services.runconfig import RunConfig
@@ -56,11 +57,18 @@ def generating_detail(
 ) -> str:
     music = sum(1 for element in elements if element.get("type") == "music")
     sounds = len(elements) - music
+    evolving = sum(
+        1 for element in elements if take_count(element, config.texture_takes) > 1
+    )
     parts = []
     if sounds:
         parts.append(f"{sounds} sound{'s' if sounds != 1 else ''}")
     if music:
         parts.append(f"{music} music{' in the style of your clip' if styled else ''}")
+    if evolving:
+        parts.append(
+            f"{evolving} evolving in {config.texture_takes} takes each"
+        )
     layers = f"{len(elements)} layer{'s' if len(elements) != 1 else ''}"
     return f"Rendering {layers} on {host_label(config)}: {', '.join(parts)}"
 

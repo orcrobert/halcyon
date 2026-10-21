@@ -9,6 +9,7 @@ from api.app.models.schemas import (
     ElementOut,
     ElementQuality,
     ElementRegenerate,
+    ElementTake,
     Envelope,
 )
 from api.app.models.tables import Element, User, utcnow
@@ -58,6 +59,16 @@ def serialize_element(element: Element) -> ElementOut:
             if element.audio_path
             else None
         ),
+        takes=[
+            ElementTake(
+                audio_url=(
+                    f"/api/elements/{element.id}/audio"
+                    f"?take={number}&v={element.version or 1}"
+                ),
+                duration_s=take.get("duration_s"),
+            )
+            for number, take in enumerate(element.takes_json or [], start=1)
+        ],
     )
 
 
@@ -156,22 +167,33 @@ def destroy(element_id: int, user: CurrentUser, session: SessionDep) -> Response
         )
 
     audio_path = element.audio_path
+    takes = element.takes_json
     session.delete(element)
     atmosphere.updated_at = utcnow()
     session.add(atmosphere)
     session.commit()
 
     storage.delete_element_audio(audio_path)
+    storage.delete_take_audio(takes)
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.get("/{element_id}/audio")
-def audio(element_id: int, user: CurrentUser, session: SessionDep) -> FileResponse:
+def audio(
+    element_id: int, user: CurrentUser, session: SessionDep, take: int = 0
+) -> FileResponse:
     element = owned_element(session, user, element_id)
+    takes = element.takes_json or []
+
+    if not 0 <= take <= len(takes):
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Take not found."
+        )
+    relative = takes[take - 1].get("path", "") if take else element.audio_path
 
     try:
-        path = storage.resolve_audio(element.audio_path)
+        path = storage.resolve_audio(relative)
     except ValueError:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Audio file not found."

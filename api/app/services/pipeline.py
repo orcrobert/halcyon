@@ -27,6 +27,7 @@ from api.app.services.stages import (
 )
 from mixer.core import analyze
 from mixer.effects.looping import pad_for_looping
+from mixer.effects.takes import match_take
 
 logger = logging.getLogger(__name__)
 
@@ -117,6 +118,34 @@ def _stored_audio(element: dict, wav, sr) -> bytes:
     return buffer.getvalue()
 
 
+def _write_takes(element: dict, scratch: Path, stem: str) -> None:
+    paths = []
+    for number, audio in enumerate(element.pop("takes_audio", None) or [], start=1):
+        path = scratch / f"{stem}_take{number}.wav"
+        path.write_bytes(audio)
+        paths.append(str(path))
+    element["takes"] = paths
+
+
+def _store_takes(
+    atmosphere_id: int, position: int, label: str, element: dict, wav, sr: int
+) -> list[dict] | None:
+    stored = []
+    for number, path in enumerate(element.get("takes") or [], start=1):
+        take, take_sr = sf.read(path, always_2d=True)
+        if take_sr != sr:
+            logger.warning("Skipping a take of %r at %s Hz", label, take_sr)
+            continue
+        matched = match_take(take.T, sr, wav)
+        stored.append({
+            "path": storage.write_element_audio(
+                atmosphere_id, position, label, _stored_audio(element, matched, sr), number
+            ),
+            "duration_s": matched.shape[-1] / sr,
+        })
+    return stored or None
+
+
 def _persist(
     session: Session,
     atmosphere: Atmosphere,
@@ -147,6 +176,9 @@ def _persist(
         pan = float(element.get("pan", 0.0))
         depth = float(element.get("depth", 0.0))
         eq_json = element.get("eq_json")
+        takes = _store_takes(
+            atmosphere.id, position, element["label"], element, wav, sr
+        )
 
         session.add(
             Element(
@@ -164,6 +196,7 @@ def _persist(
                 source=element.get("source"),
                 source_json=element.get("source_json"),
                 quality_json=element.get("quality"),
+                takes_json=takes,
                 volume=volume,
                 pan=pan,
                 depth=depth,
@@ -322,13 +355,21 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
             with tempfile.TemporaryDirectory(prefix="halcyon-") as scratch:
                 fresh = Path(scratch) / "fresh.wav"
                 fresh.write_bytes(generated[0].pop("audio"))
+                _write_takes(generated[0], Path(scratch), "fresh")
                 timings["audio_s"] = round(_clip_seconds(fresh), 3)
 
                 mark = time.perf_counter()
                 jobs: list[tuple[Element, dict]] = []
                 for row in atmosphere.elements:
                     if row.id == element.id:
-                        jobs.append((row, {**spec, "file": str(fresh)}))
+                        jobs.append((
+                            row,
+                            {
+                                **spec,
+                                "file": str(fresh),
+                                "takes": generated[0]["takes"],
+                            },
+                        ))
                         continue
                     payload = _stored_payload(row)
                     if payload is not None:
@@ -351,6 +392,7 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                     if regenerated:
                         audio = _stored_audio(payload, wav, sr)
                         previous_path = row.audio_path
+                        previous_takes = row.takes_json
 
                         row.label = _unique_label(
                             atmosphere, payload["label"], row.id
@@ -368,6 +410,9 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
                         row.audio_path = storage.write_element_audio(
                             atmosphere.id, row.position, row.label, audio
                         )
+                        row.takes_json = _store_takes(
+                            atmosphere.id, row.position, row.label, payload, wav, sr
+                        )
                         row.duration_s = wav.shape[-1] / sr
                         row.version = (row.version or 1) + 1
                         row.status = "ready"
@@ -375,6 +420,10 @@ def regenerate_element(element_id: int, feedback: str | None = None) -> None:
 
                         if previous_path != row.audio_path:
                             storage.delete_element_audio(previous_path)
+                        storage.delete_take_audio(
+                            previous_takes,
+                            {take["path"] for take in row.takes_json or []},
+                        )
 
                     _apply_mix(row, payload, regenerated)
                     session.add(row)
@@ -463,6 +512,7 @@ def run_generation(atmosphere_id: int) -> None:
                     path = Path(scratch) / f"{index:02d}.wav"
                     path.write_bytes(element.pop("audio"))
                     element["file"] = str(path)
+                    _write_takes(element, Path(scratch), f"{index:02d}")
                     audio_s += _clip_seconds(path)
 
                 valid, wavs, srs = analyze(elements)
@@ -479,7 +529,7 @@ def run_generation(atmosphere_id: int) -> None:
                         {
                             k: v
                             for k, v in element.items()
-                            if k not in ("file", "quality")
+                            if k not in ("file", "quality", "takes")
                         }
                         for element in valid
                     ],
