@@ -130,7 +130,9 @@ Applies to `api/` and `scripts/`. The cross-cutting rules in `AGENTS.md` still h
   `frequency` through `ROLE_INTERVALS`. The browser schedules it.
 - **Generator replies are matched by `index`, then `label`, then position.**
   The reference generator batches by `(type, seconds)` and so answers out of
-  order. Never zip the reply positionally.
+  order. Never zip the reply positionally. A label-only reply fills the next
+  unmatched request with that label, so the takes of a layer, which share its
+  label, each get their own clip; indexed replies claim their slots first.
 - **Every generated clip is checked, and re-rendering is the user's call.**
   `services/quality.py` `check_results` runs `mixer/mixer/effects/quality.py`
   `inspect_clip` over each reply before the mix. Silent or unreadable clips are

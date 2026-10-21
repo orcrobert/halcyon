@@ -94,6 +94,81 @@ def test_takes_come_back_grouped_under_their_layer(sent):
     assert results[2]["takes_audio"] == []
 
 
+def test_label_only_replies_fill_every_take(monkeypatch):
+    from api.app.services import generator as generator_module
+
+    def fake_post(url, **kwargs):
+        replies = [
+            {
+                "label": element["label"],
+                "audio_b64": base64.b64encode(
+                    f"{element['label']}-{element['index']}".encode()
+                ).decode(),
+            }
+            for element in kwargs["json"]["elements"]
+        ]
+        return FakeResponse({"elements": replies})
+
+    monkeypatch.setattr(generator_module.requests, "post", fake_post)
+
+    results = generator_module.generate(
+        {"elements": _specs()}, _config(texture_takes=3), 30
+    )
+
+    drone = next(result for result in results if result["label"] == "Drone")
+    assert drone["audio"] == b"Drone-1"
+    assert drone["takes_audio"] == [b"Drone-3", b"Drone-4"]
+
+
+def test_indexed_replies_keep_their_slot_beside_label_only_ones(monkeypatch):
+    from api.app.services import generator as generator_module
+
+    def fake_post(url, **kwargs):
+        elements = kwargs["json"]["elements"]
+        replies = []
+        for element in elements:
+            reply = {
+                "label": element["label"],
+                "audio_b64": base64.b64encode(
+                    f"{element['label']}-{element['index']}".encode()
+                ).decode(),
+            }
+            if element["index"] == 4:
+                reply["index"] = 4
+            replies.append(reply)
+        return FakeResponse({"elements": replies})
+
+    monkeypatch.setattr(generator_module.requests, "post", fake_post)
+
+    results = generator_module.generate(
+        {"elements": _specs()}, _config(texture_takes=3), 30
+    )
+
+    drone = next(result for result in results if result["label"] == "Drone")
+    assert drone["audio"] == b"Drone-1"
+    assert drone["takes_audio"] == [b"Drone-3", b"Drone-4"]
+
+
+def test_surplus_label_only_replies_are_dropped(monkeypatch):
+    from api.app.services import generator as generator_module
+
+    def fake_post(url, **kwargs):
+        replies = [
+            {"label": "Drone", "audio_b64": base64.b64encode(b"extra").decode()}
+            for _ in range(5)
+        ]
+        return FakeResponse({"elements": replies})
+
+    monkeypatch.setattr(generator_module.requests, "post", fake_post)
+
+    results = generator_module.generate(
+        {"elements": _specs()}, _config(texture_takes=2), 30
+    )
+
+    assert [result["label"] for result in results] == ["Drone"]
+    assert len(results[0]["takes_audio"]) == 1
+
+
 def test_one_take_sends_each_layer_once(sent):
     from api.app.services import generator as generator_module
 

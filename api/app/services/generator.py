@@ -95,25 +95,33 @@ def take_count(element: dict, takes: int) -> int:
 
 
 def _match_audio(replies: list, elements: list[dict]) -> dict[int, bytes]:
-    positions: dict[str, int] = {}
+    positions: dict[str, list[int]] = {}
     for position, element in enumerate(elements):
-        positions.setdefault(element.get("label"), position)
+        positions.setdefault(element.get("label"), []).append(position)
+
+    usable = [
+        (position, reply)
+        for position, reply in enumerate(replies)
+        if isinstance(reply, dict) and reply.get("audio_b64")
+    ]
+    indexed = [item for item in usable if isinstance(item[1].get("index"), int)]
+    unindexed = [item for item in usable if not isinstance(item[1].get("index"), int)]
 
     matched: dict[int, bytes] = {}
-    for position, reply in enumerate(replies):
-        if not isinstance(reply, dict):
-            continue
-        encoded = reply.get("audio_b64")
-        if not encoded:
-            continue
-
+    for position, reply in indexed + unindexed:
         index = reply.get("index")
-        if not isinstance(index, int):
-            index = positions.get(reply.get("label"), position)
+        label = reply.get("label")
+        if not isinstance(index, int) and label in positions:
+            index = next(
+                (candidate for candidate in positions[label] if candidate not in matched),
+                None,
+            )
+        elif not isinstance(index, int):
+            index = position
 
-        if index in matched or not 0 <= index < len(elements):
+        if index is None or index in matched or not 0 <= index < len(elements):
             continue
-        matched[index] = base64.b64decode(encoded)
+        matched[index] = base64.b64decode(reply["audio_b64"])
 
     return matched
 
