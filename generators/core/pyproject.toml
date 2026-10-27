@@ -20,7 +20,7 @@ audiocraft = [
     "torchaudio==2.1.2",
     "xformers==0.0.23.post1",
     "numpy<2",
-    "transformers==4.40.2",
+    "transformers==5.10.1",
     "av==12.0.0",
     "encodec",
     "lameenc",
