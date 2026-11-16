@@ -12,7 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@soundtouchjs/audio-worklet": "^1.0.10",
+    "@soundtouchjs/audio-worklet": "^2.1.1",
     "@types/three": "^0.187.0",
     "axios": "^1.21.0",
     "framer-motion": "^12.38.0",
