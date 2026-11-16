@@ -1,4 +1,4 @@
-FROM node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS frontend
+FROM node:24-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS frontend
 WORKDIR /build
 
 COPY frontend/package.json frontend/package-lock.json ./
@@ -8,7 +8,7 @@ COPY frontend/ ./
 RUN npm run build
 
 
-FROM python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce AS python-build
+FROM python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 AS python-build
 WORKDIR /build
 
 ENV PIP_DISABLE_PIP_VERSION_CHECK=1
@@ -24,11 +24,11 @@ COPY api/ ./api/
 RUN --mount=type=cache,target=/root/.cache/pip pip install .
 
 
-FROM node:24-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS cli
+FROM node:24-slim@sha256:dc26ae92c9fb15cf6b1d63e20f0944b2efe0f115b20e00be48fb23fceb061c54 AS cli
 RUN npm install -g --prefix /opt/cli @anthropic-ai/claude-code @openai/codex
 
 
-FROM python:3.11-slim@sha256:e88e9763f943ec1834f992a4b51e0f24500486803e8bc534e5767af9ea65f6ce AS runtime
+FROM python:3.11-slim@sha256:07d4824036af339fa1b6ef769cc99d9c10a141769538b52b3b597c84f7a7b535 AS runtime
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
